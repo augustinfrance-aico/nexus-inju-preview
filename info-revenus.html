@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexus — Comment on capte le $</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#05070A; --panel:#0F1520; --panel2:#161E2E; --ink:#E8ECF3; --muted:#8A94A6;
+  --line:rgba(255,255,255,.08); --line-strong:rgba(255,255,255,.16);
+  --blue:#1F6FFF; --violet:#7A3CFF; --cyan:#00E5FF; --lime:#1EFF8E; --gold:#FFC857; --pink:#FF4FBF;
+  --wa:#25D366;
+}
+html,body{background:var(--bg);color:var(--ink);font-family:'Inter',-apple-system,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;font-size:14.5px}
+body{background:
+  radial-gradient(ellipse 700px 400px at 10% 0%,rgba(31,111,255,.18),transparent 60%),
+  radial-gradient(ellipse 600px 400px at 90% 0%,rgba(122,60,255,.15),transparent 60%),
+  var(--bg) fixed}
+.mono{font-family:'JetBrains Mono','SF Mono',monospace}
+.wrap{max-width:1180px;margin:0 auto;padding:60px 28px 100px}
+
+/* HERO */
+.hero{padding:48px 44px;border-radius:24px;background:linear-gradient(135deg,rgba(31,111,255,.14),rgba(122,60,255,.1));border:1px solid var(--line);margin-bottom:48px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;top:-80px;right:-80px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(0,229,255,.3),transparent 70%)}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;padding:6px 14px;border-radius:999px;background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);color:var(--cyan);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;margin-bottom:20px;position:relative}
+.eyebrow .d{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+h1{font-size:clamp(28px,4vw,46px);font-weight:800;line-height:1.08;letter-spacing:-.025em;margin-bottom:16px;background:linear-gradient(120deg,#fff,#B8C7E0,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent;position:relative}
+.lead{color:#CBD5E1;font-size:17px;max-width:760px;position:relative}
+.lead b{color:#fff}
+
+/* QUESTION JUAN */
+.juan-q{margin-top:26px;padding:18px 22px;background:rgba(255,255,255,.04);border-left:3px solid var(--cyan);border-radius:12px;display:flex;gap:14px;align-items:center;position:relative}
+.juan-av{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#FF4FBF,#FFC857);display:flex;align-items:center;justify-content:center;color:#05070A;font-weight:800;font-size:14px;flex-shrink:0}
+.juan-q .q{font-size:15px;font-style:italic;color:var(--ink)}
+.juan-q .q small{display:block;font-style:normal;color:var(--muted);font-size:11.5px;margin-top:3px;font-family:'JetBrains Mono',monospace;letter-spacing:.05em}
+
+/* SECTION TITLE */
+.s-head{margin:60px 0 26px}
+.s-head .num{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;color:var(--cyan);margin-bottom:8px}
+.s-head h2{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.s-head h2 em{font-style:normal;background:linear-gradient(90deg,var(--cyan),var(--lime));-webkit-background-clip:text;background-clip:text;color:transparent}
+.s-head p{color:var(--muted);font-size:14.5px;margin-top:8px;max-width:760px}
+
+/* 4 MÉTHODES */
+.methods{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.m{padding:26px;border-radius:18px;background:var(--panel);border:1px solid var(--line);position:relative;overflow:hidden;transition:all .25s}
+.m:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.16)}
+.m::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px}
+.m1::before{background:linear-gradient(180deg,var(--blue),var(--cyan))}
+.m2::before{background:linear-gradient(180deg,var(--lime),var(--cyan))}
+.m3::before{background:linear-gradient(180deg,var(--gold),var(--pink))}
+.m4::before{background:linear-gradient(180deg,var(--violet),var(--pink))}
+.m-hd{display:flex;align-items:flex-start;gap:14px;margin-bottom:16px}
+.m-ic{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.m1 .m-ic{background:rgba(31,111,255,.15);border:1px solid rgba(31,111,255,.3)}
+.m2 .m-ic{background:rgba(30,255,142,.15);border:1px solid rgba(30,255,142,.3)}
+.m3 .m-ic{background:rgba(255,200,87,.15);border:1px solid rgba(255,200,87,.3)}
+.m4 .m-ic{background:rgba(122,60,255,.18);border:1px solid rgba(122,60,255,.35)}
+.m-hd .meta{flex:1}
+.m-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;color:var(--muted);font-weight:700;margin-bottom:4px}
+.m1 .m-tag{color:var(--cyan)}
+.m2 .m-tag{color:var(--lime)}
+.m3 .m-tag{color:var(--gold)}
+.m4 .m-tag{color:#B59EFF}
+.m h3{font-size:18px;font-weight:700;letter-spacing:-.01em}
+.m p.desc{color:#CBD5E1;font-size:13.5px;margin-bottom:18px}
+
+/* DEMO INSIDE METHOD */
+.demo{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px;font-size:13px}
+.demo-hd{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.demo-hd .led{width:6px;height:6px;border-radius:50%;background:var(--lime);box-shadow:0 0 6px var(--lime)}
+
+/* WHATSAPP CHAT */
+.chat{display:flex;flex-direction:column;gap:6px}
+.bub{padding:8px 12px;border-radius:14px;max-width:80%;font-size:12.5px;line-height:1.4}
+.bub.in{background:#202C39;border-bottom-left-radius:4px;align-self:flex-start;color:#E8ECF3}
+.bub.out{background:#005C4B;border-bottom-right-radius:4px;align-self:flex-end;color:#fff}
+.bub mark{background:rgba(0,229,255,.3);color:var(--cyan);padding:0 4px;border-radius:3px;font-weight:600}
+.bub .t{font-size:9.5px;opacity:.6;margin-top:3px;display:block;text-align:right;font-family:'JetBrains Mono',monospace}
+
+/* DETECT BAR */
+.detect{margin-top:10px;padding:10px 12px;background:rgba(0,229,255,.08);border:1px dashed rgba(0,229,255,.3);border-radius:10px;font-size:12px;color:var(--cyan);display:flex;align-items:center;gap:10px}
+.detect .b{color:#fff;font-weight:700}
+
+/* PUSH NOTIF MOCK */
+.push{display:flex;gap:12px;padding:12px;background:linear-gradient(135deg,#1F6FFF,#7A3CFF);border-radius:14px;color:#fff}
+.push-ic{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px}
+.push-b{flex:1;min-width:0}
+.push-app{font-size:10px;letter-spacing:.1em;opacity:.85;font-family:'JetBrains Mono',monospace;margin-bottom:2px}
+.push-tt{font-size:13.5px;font-weight:700;margin-bottom:3px}
+.push-tx{font-size:12px;opacity:.95;line-height:1.4}
+.push-act{display:flex;gap:6px;margin-top:10px}
+.push-act button{flex:1;padding:7px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;font-size:11.5px;font-weight:600;cursor:pointer}
+.push-act button.no{background:rgba(0,0,0,.2)}
+
+/* QUICK ADD FORM */
+.qadd{display:flex;flex-direction:column;gap:8px}
+.qadd .row{display:flex;gap:8px}
+.qadd input{flex:1;background:#202C39;border:1px solid var(--line);color:var(--ink);padding:9px 12px;border-radius:8px;font-size:12.5px;font-family:'Inter',sans-serif;outline:0}
+.qadd input:focus{border-color:var(--gold)}
+.qadd .save{padding:9px;background:linear-gradient(135deg,var(--gold),var(--pink));color:#05070A;border:0;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer}
+
+/* INTEGRATIONS */
+.inte{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.in-l{padding:14px 8px;background:#202C39;border:1px solid var(--line);border-radius:10px;text-align:center;font-size:11px;font-weight:600}
+.in-l .lo{font-size:24px;display:block;margin-bottom:5px}
+.in-l small{display:block;color:var(--muted);font-size:9.5px;margin-top:3px;font-family:'JetBrains Mono',monospace}
+
+/* RESULT CARD */
+.result{margin-top:50px;padding:36px;border-radius:20px;background:linear-gradient(135deg,rgba(30,255,142,.1),rgba(0,229,255,.06));border:1px solid rgba(30,255,142,.25);position:relative;overflow:hidden}
+.result::before{content:"";position:absolute;top:-50px;right:-50px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(30,255,142,.2),transparent 70%)}
+.result h2{font-size:24px;font-weight:700;margin-bottom:12px;letter-spacing:-.02em;position:relative}
+.result h2 em{font-style:normal;color:var(--lime)}
+.result p{color:#CBD5E1;font-size:14.5px;max-width:680px;margin-bottom:24px;position:relative}
+.result-card{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;position:relative}
+.rc{padding:18px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px}
+.rc .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-weight:600}
+.rc .val{font-size:24px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:-.02em}
+.rc.b .val{color:var(--lime)}
+.rc.c .val{color:var(--cyan)}
+.rc.g .val{color:var(--gold)}
+.rc .sub{font-size:11.5px;color:var(--muted);margin-top:3px}
+
+/* FAQ */
+.faq{margin-top:60px}
+.faq-item{padding:18px 22px;background:var(--panel);border:1px solid var(--line);border-radius:14px;margin-bottom:10px}
+.faq-item summary{cursor:pointer;font-weight:600;font-size:14.5px;display:flex;align-items:center;gap:10px;list-style:none}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::before{content:"+";display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;background:rgba(31,111,255,.15);color:var(--cyan);font-size:16px;flex-shrink:0;transition:all .2s}
+.faq-item[open] summary::before{content:"−";background:rgba(31,111,255,.3)}
+.faq-item p{color:var(--muted);font-size:13.5px;margin-top:12px;padding-left:34px;line-height:1.65}
+.faq-item p b{color:var(--ink)}
+
+/* CTA */
+.cta-back{margin-top:50px;text-align:center}
+.cta-back a{display:inline-flex;align-items:center;gap:8px;padding:13px 22px;background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;border-radius:12px;font-size:13.5px;font-weight:600;text-decoration:none;transition:all .2s}
+.cta-back a:hover{transform:translateY(-2px);box-shadow:0 12px 30px -10px var(--violet)}
+
+footer{margin-top:60px;text-align:center;color:var(--muted);font-size:11.5px;font-family:'JetBrains Mono',monospace;letter-spacing:.08em}
+
+@media(max-width:760px){
+  .wrap{padding:32px 18px 60px}
+  .hero{padding:32px 22px}
+  .methods{grid-template-columns:1fr}
+  .result-card{grid-template-columns:1fr}
+  .inte{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="eyebrow"><span class="d"></span> RÉPONSE À TA QUESTION · 13 AVRIL 2026</div>
+    <h1>Comment Nexus capte<br/>l'info <em style="font-style:normal;color:var(--lime)">$</em> sans rien casser ?</h1>
+    <p class="lead">Tu as raison Juan : le bot voit les <b>conversations</b>, pas les <b>paiements</b>. Voilà comment on remonte quand même la donnée revenus, en <b>4 mécanismes complémentaires</b> qui marchent dès le jour 1, sans demander au patron de changer ses habitudes.</p>
+    <div class="juan-q">
+      <div class="juan-av">JP</div>
+      <div class="q">"comment peut-on récolter l'info $ ?"<small>— Juan, WhatsApp · aujourd'hui 21:07</small></div>
+    </div>
+  </section>
+
+  <!-- METHODS -->
+  <div class="s-head">
+    <div class="num">— 4 MÉCANISMES</div>
+    <h2>De la <em>conversation</em> au <em>chiffre</em>, en douceur</h2>
+    <p>Aucun de ces mécanismes ne demande au patron de coller des factures à la main. Combinés, ils captent ~95 % du CA réel sans friction.</p>
+  </div>
+
+  <div class="methods">
+
+    <!-- MÉTHODE 1 -->
+    <div class="m m1">
+      <div class="m-hd">
+        <div class="m-ic">🤖</div>
+        <div class="meta">
+          <div class="m-tag">MÉCANISME 01 · AUTO</div>
+          <h3>Détection auto dans le chat</h3>
+        </div>
+      </div>
+      <p class="desc">L'IA repère les montants, les confirmations de commande et les transferts dans la conversation WhatsApp. Elle propose une vente à enregistrer, en 1 tap.</p>
+      <div class="demo">
+        <div class="demo-hd"><span class="led"></span> WHATSAPP · MARÍA GONZÁLEZ</div>
+        <div class="chat">
+          <div class="bub in">¿Tienes pan amasado para mañana? Necesito 3 kilos<span class="t">14:32</span></div>
+          <div class="bub out">¡Sí María! 3 kg de pan amasado — son <mark>$15.000</mark><span class="t">14:33</span></div>
+          <div class="bub in">Perfecto, hago la <mark>transferencia</mark> ahora mismo ✅<span class="t">14:35</span></div>
+        </div>
+        <div class="detect">
+          ⚡ <div><span class="b">Vente détectée</span> · 15 000 CLP · María González · à confirmer ?</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MÉTHODE 2 -->
+    <div class="m m2">
+      <div class="m-hd">
+        <div class="m-ic">📲</div>
+        <div class="meta">
+          <div class="m-tag">MÉCANISME 02 · 1 TAP</div>
+          <h3>Confirmation push 1-tap</h3>
+        </div>
+      </div>
+      <p class="desc">Quand l'IA détecte une vente, le patron reçoit une notif push. <b>Oui / Non / Modifier le montant</b> — en 2 secondes c'est dans le système.</p>
+      <div class="demo">
+        <div class="demo-hd"><span class="led"></span> NOTIFICATION · IPHONE</div>
+        <div class="push">
+          <div class="push-ic">💰</div>
+          <div class="push-b">
+            <div class="push-app">NEXUS · IL Y A 1 MIN</div>
+            <div class="push-tt">Vente confirmée avec María ?</div>
+            <div class="push-tx">3 kg pan amasado · 15 000 CLP · transfert annoncé</div>
+            <div class="push-act">
+              <button>✅ Oui</button>
+              <button>✏️ Modifier</button>
+              <button class="no">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MÉTHODE 3 -->
+    <div class="m m3">
+      <div class="m-hd">
+        <div class="m-ic">⚡</div>
+        <div class="meta">
+          <div class="m-tag">MÉCANISME 03 · MANUEL EXPRESS</div>
+          <h3>Saisie manuelle 5 secondes</h3>
+        </div>
+      </div>
+      <p class="desc">Pour les ventes au comptoir / appel / ami du quartier qui passe : un bouton <b>+</b> sur le dashboard. 3 champs, terminé. Le patron le fait pendant qu'il rend la monnaie.</p>
+      <div class="demo">
+        <div class="demo-hd"><span class="led"></span> DASHBOARD · BOUTON [+] AJOUTER UNE VENTE</div>
+        <div class="qadd">
+          <div class="row">
+            <input placeholder="Cliente" value="Pablo Herrera"/>
+            <input placeholder="Monto CLP" value="8.500" style="max-width:120px"/>
+          </div>
+          <input placeholder="Producto / note" value="2 marraquetas + 1 leche"/>
+          <button class="save">✓ Enregistrer la vente</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MÉTHODE 4 -->
+    <div class="m m4">
+      <div class="m-hd">
+        <div class="m-ic">🔌</div>
+        <div class="meta">
+          <div class="m-tag">MÉCANISME 04 · INTÉGRATIONS</div>
+          <h3>Branchements externes</h3>
+        </div>
+      </div>
+      <p class="desc">Quand le patron veut zéro saisie : on branche les outils qu'il utilise déjà au Chili. Les ventes remontent toutes seules, en temps réel.</p>
+      <div class="demo">
+        <div class="demo-hd"><span class="led"></span> INTÉGRATIONS DISPONIBLES PHASE 1+</div>
+        <div class="inte">
+          <div class="in-l"><span class="lo">💳</span>Stripe<small>déjà scope</small></div>
+          <div class="in-l"><span class="lo">🟦</span>Mercado Pago<small>LATAM #1</small></div>
+          <div class="in-l"><span class="lo">🏦</span>Transfer.<small>OCR reçu</small></div>
+          <div class="in-l"><span class="lo">📷</span>Photo facture<small>OCR auto</small></div>
+          <div class="in-l"><span class="lo">📊</span>Excel/CSV<small>import 1-clic</small></div>
+          <div class="in-l"><span class="lo">🛒</span>SII / boletas<small>Phase 2</small></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RÉSULTAT -->
+  <section class="result">
+    <h2>Résultat sur le dashboard : <em>2,84M CLP captés</em> en avril</h2>
+    <p>Combiner les 4 mécanismes = ~95 % du CA remonté sans effort. Le patron voit ses chiffres grandir en temps réel, même les ventes du comptoir et les transferts hors WhatsApp.</p>
+    <div class="result-card">
+      <div class="rc b">
+        <div class="lbl">Auto + Confirmation</div>
+        <div class="val">68 %</div>
+        <div class="sub">détecté dans le chat WhatsApp</div>
+      </div>
+      <div class="rc c">
+        <div class="lbl">Saisie express</div>
+        <div class="val">22 %</div>
+        <div class="sub">comptoir, appel, ami du quartier</div>
+      </div>
+      <div class="rc g">
+        <div class="lbl">Intégrations</div>
+        <div class="val">10 %</div>
+        <div class="sub">Stripe + Mercado Pago + photos</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <div class="s-head" style="margin-top:60px">
+    <div class="num">— FAQ ANTICIPÉE</div>
+    <h2>Les <em>vraies</em> questions qu'un patron PME va poser</h2>
+  </div>
+
+  <div class="faq">
+    <details class="faq-item" open>
+      <summary>Et si le patron oublie de confirmer une vente ?</summary>
+      <p>L'IA garde la vente en <b>"en attente"</b> dans une petite liste. Tous les soirs à 19h (heure Chile), une notif unique récapitule les ventes non-confirmées du jour. Il valide d'un coup avec un seul scroll. Si rien après 48h, on ne l'inclut pas dans le CA — pas de fausse donnée.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Comment l'IA distingue une vraie vente d'une simple discussion ?</summary>
+      <p>Trois signaux combinés : <b>(1)</b> mention d'un montant en CLP / lucas / pesos · <b>(2)</b> mots-clés de confirmation ("perfecto", "lo llevo", "transferencia hecha", "pago listo") · <b>(3)</b> contexte du fil (devis envoyé en amont, produit/service mentionné). En-dessous de 80 % de confiance, on demande confirmation au patron — jamais on n'invente.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Et les ventes sans WhatsApp (comptoir, appel, ami du quartier) ?</summary>
+      <p>C'est le mécanisme 03 : bouton <b>+</b> permanent sur le dashboard. 3 champs : qui, combien, quoi. Saisie en 5 secondes pendant que le patron rend la monnaie. Pour les patrons les plus pressés : ils peuvent juste dire à voix haute "<i>Nexus, vente Pablo 8 lucas pan</i>" → on traite avec Whisper (Phase 2).</p>
+    </details>
+    <details class="faq-item">
+      <summary>Le patron doit-il rentrer ses anciennes ventes ?</summary>
+      <p>Non. Nexus démarre à <b>jour 1</b> et apprend en avançant. On peut optionnellement importer un Excel / CSV historique au signup pour avoir une base de comparaison, mais c'est facultatif.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Et la TVA / boletas chiliennes (SII) ?</summary>
+      <p>Phase 2 — connecteur SII pour générer/synchroniser les boletas électroniques. Phase 1, on capte juste la donnée brute (vente + montant + client). Le patron garde son comptable existant ou son outil de facturation actuel.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Les chiffres affichés sur le dashboard sont-ils fiables ?</summary>
+      <p>Oui à 95 %. Sur chaque KPI on affiche la <b>source</b> (auto / confirmé / manuel / intégration) et un petit indicateur de confiance. Le patron sait toujours d'où vient le chiffre. Pas de boîte noire.</p>
+    </details>
+  </div>
+
+  <div class="cta-back">
+    <a href="index.html">← Revenir au dashboard preview</a>
+  </div>
+
+  <footer>NEXUS INJU · NOTE TECHNIQUE · CAPTATION DES REVENUS · BUILT FOR JUAN & IÑIGO</footer>
+</div>
+</body>
+</html>
