@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexus — Dashboard</title>
+<style>
+:root{
+  --bg:#F8FAFC; --panel:#FFFFFF; --ink:#0F172A; --ink2:#334155; --muted:#64748B;
+  --line:#E2E8F0; --line2:#F1F5F9;
+  --blue:#1A56DB; --blue-soft:#EFF4FE; --blue-ink:#1E40AF;
+  --green:#22C55E; --green-soft:#ECFDF5;
+  --amber:#F59E0B; --amber-soft:#FFFBEB;
+  --red:#EF4444;
+  --shadow:0 1px 2px rgba(15,23,42,.04), 0 4px 16px -8px rgba(15,23,42,.08);
+  --shadow-lg:0 8px 32px -12px rgba(15,23,42,.16);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;font-size:14px}
+.mono{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}
+
+/* LAYOUT */
+.app{display:grid;grid-template-columns:1fr 320px;min-height:100vh}
+.main{padding:0 0 48px}
+.side{background:var(--panel);border-left:1px solid var(--line);position:sticky;top:0;height:100vh;overflow-y:auto}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;gap:20px;padding:16px 32px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:32px;height:32px}
+.brand-name{font-size:16px;font-weight:700;letter-spacing:-.01em}
+.brand-name span{color:var(--blue)}
+.sep{width:1px;height:22px;background:var(--line)}
+.breadcrumb{font-size:13px;color:var(--muted)}
+.breadcrumb b{color:var(--ink);font-weight:600}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.search{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--line2);border:1px solid transparent;border-radius:8px;width:280px;transition:all .15s}
+.search:focus-within{background:#fff;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,.12)}
+.search input{border:0;background:transparent;outline:0;flex:1;font-size:13px;color:var(--ink)}
+.search .kbd{font-size:11px;padding:2px 6px;background:#fff;border:1px solid var(--line);border-radius:4px;color:var(--muted)}
+.icon-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:all .15s}
+.icon-btn:hover{border-color:var(--blue);color:var(--blue)}
+.badge-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid #fff}
+.avatar{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--blue-ink));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:13px}
+
+/* HEADER GREETING */
+.page-hd{padding:32px 32px 8px}
+.greet{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.greet h1{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.greet h1 em{color:var(--blue);font-style:normal}
+.greet .sub{color:var(--muted);font-size:14px;margin-top:6px}
+.date-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:var(--panel);border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--ink2)}
+.date-pill .dot{width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 0 3px var(--green-soft)}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:24px 32px 0}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;transition:all .2s;cursor:pointer}
+.stat:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.stat-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.stat-ic{width:36px;height:36px;border-radius:10px;background:var(--blue-soft);color:var(--blue);display:flex;align-items:center;justify-content:center}
+.stat-ic.g{background:var(--green-soft);color:var(--green)}
+.stat-ic.a{background:var(--amber-soft);color:var(--amber)}
+.stat-ic.p{background:#F3E8FF;color:#7A3CFF}
+.delta{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;display:inline-flex;align-items:center;gap:3px}
+.delta.up{background:var(--green-soft);color:var(--green)}
+.delta.dn{background:#FEF2F2;color:var(--red)}
+.stat-lbl{font-size:12px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;font-weight:500}
+.stat-val{font-size:24px;font-weight:700;letter-spacing:-.02em}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* 2-COL GRID */
+.grid2{display:grid;grid-template-columns:1.5fr 1fr;gap:14px;padding:14px 32px 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.card-hd{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 10px}
+.card-hd h3{font-size:14px;font-weight:600;letter-spacing:-.01em}
+.card-hd .actions{display:flex;gap:6px}
+.btn-ghost{padding:5px 10px;border-radius:6px;font-size:12px;color:var(--muted);border:1px solid var(--line);background:#fff;cursor:pointer;transition:all .15s}
+.btn-ghost:hover{color:var(--blue);border-color:var(--blue)}
+
+/* INBOX PREVIEW */
+.inbox-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 12px}
+.inbox-head h3{font-size:14px;font-weight:600}
+.inbox-head h3 .cnt{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 7px;background:var(--blue);color:#fff;border-radius:999px;font-size:11px;font-weight:700;margin-left:8px}
+.msg{display:flex;gap:12px;padding:14px 20px;border-top:1px solid var(--line2);transition:background .15s;cursor:pointer}
+.msg:hover{background:var(--line2)}
+.msg.unread{background:#FAFCFF}
+.msg.unread:hover{background:var(--blue-soft)}
+.msg-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:13px;flex-shrink:0}
+.msg-body{flex:1;min-width:0}
+.msg-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+.msg-name{font-size:13px;font-weight:600}
+.msg-unread-dot{width:7px;height:7px;background:var(--blue);border-radius:50%;flex-shrink:0;margin-left:8px}
+.msg-time{font-size:11px;color:var(--muted);margin-left:8px}
+.msg-txt{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg-tag{display:inline-block;margin-top:4px;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.02em}
+.msg-tag.new{background:var(--green-soft);color:var(--green)}
+.msg-tag.vip{background:#FEF3C7;color:#B45309}
+.msg-tag.rec{background:var(--blue-soft);color:var(--blue)}
+.ch{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--muted);margin-left:6px}
+
+/* PODIUM */
+.podium-body{padding:8px 20px 20px}
+.podium-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.podium-row:last-child{border:0}
+.rank{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.rank-1{background:linear-gradient(135deg,#FCD34D,#F59E0B);color:#78350F}
+.rank-2{background:linear-gradient(135deg,#E5E7EB,#9CA3AF);color:#1F2937}
+.rank-3{background:linear-gradient(135deg,#FDBA74,#C2410C);color:#7C2D12}
+.rank-n{background:var(--line2);color:var(--muted)}
+.p-info{flex:1;min-width:0}
+.p-name{font-size:13px;font-weight:600}
+.p-stat{font-size:11px;color:var(--muted)}
+.p-score{font-size:13px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--blue)}
+.p-bar{width:100%;height:4px;background:var(--line2);border-radius:999px;overflow:hidden;margin-top:6px}
+.p-bar span{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:999px}
+
+/* TIPS IA */
+.tips{margin:14px 32px 0;padding:22px 24px;border-radius:14px;background:linear-gradient(135deg,#EFF4FE 0%,#F0FDF4 100%);border:1px solid #DBE5FD;position:relative;overflow:hidden}
+.tips::before{content:"";position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(26,86,219,.12),transparent 70%);border-radius:50%}
+.tips-hd{display:flex;align-items:center;gap:10px;margin-bottom:12px;position:relative}
+.tips-ic{width:40px;height:40px;border-radius:12px;background:#fff;border:1px solid #DBE5FD;display:flex;align-items:center;justify-content:center;font-size:20px}
+.tips-hd .t{font-size:13px;font-weight:600;color:var(--blue-ink)}
+.tips-hd .t small{display:block;font-size:11px;color:var(--muted);font-weight:500;margin-top:1px}
+.tips-body{font-size:14px;color:var(--ink);line-height:1.55;position:relative;margin-bottom:14px}
+.tips-body b{color:var(--blue-ink)}
+.tips-actions{display:flex;gap:8px;position:relative}
+.btn{padding:9px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;border:0;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-p{background:var(--blue);color:#fff}
+.btn-p:hover{background:var(--blue-ink)}
+.btn-s{background:#fff;color:var(--ink2);border:1px solid var(--line)}
+.btn-s:hover{border-color:var(--blue);color:var(--blue)}
+
+/* CHART CARD */
+.chart-card{margin:14px 32px 0}
+.chart-wrap{padding:8px 20px 20px;position:relative}
+.chart-legend{display:flex;gap:18px;padding:0 20px 10px;font-size:11px;color:var(--muted)}
+.chart-legend .lg{display:inline-flex;align-items:center;gap:6px}
+.chart-legend .sw{width:10px;height:10px;border-radius:3px}
+
+/* SIDEBAR */
+.side-hd{padding:22px 20px 16px;border-bottom:1px solid var(--line2)}
+.side-hd .p-card{display:flex;align-items:center;gap:12px;padding:14px;background:linear-gradient(135deg,var(--blue),var(--blue-ink));border-radius:12px;color:#fff}
+.p-avatar{width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px}
+.p-who .n{font-size:14px;font-weight:600}
+.p-who .b{font-size:11px;opacity:.85;margin-top:2px}
+.side-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:18px 20px 8px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;cursor:pointer;transition:background .15s;border-left:3px solid transparent;position:relative}
+.nav-item:hover{background:var(--line2)}
+.nav-item.active{background:var(--blue-soft);border-left-color:var(--blue);color:var(--blue-ink)}
+.nav-ic{width:32px;height:32px;border-radius:8px;background:var(--line2);color:var(--ink2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.nav-item:hover .nav-ic{background:#fff}
+.nav-item.active .nav-ic{background:var(--blue);color:#fff}
+.nav-lbl{font-size:13px;font-weight:500;flex:1}
+.nav-meta{font-size:11px;color:var(--muted);padding:2px 7px;background:var(--line2);border-radius:999px}
+.nav-item.active .nav-meta{background:var(--blue);color:#fff}
+
+/* SIDEBAR FOOTER */
+.side-ft{margin-top:auto;padding:18px 20px;border-top:1px solid var(--line2);display:flex;align-items:center;gap:10px;font-size:11px;color:var(--muted)}
+.side-ft .dot-live{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* RESPONSIVE */
+@media(max-width:1100px){
+  .app{grid-template-columns:1fr}
+  .side{position:relative;height:auto;border-left:0;border-top:1px solid var(--line)}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .grid2{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .stats{grid-template-columns:1fr;padding:16px}
+  .grid2,.tips,.chart-card{margin:10px 16px 0;padding:14px 16px 0}
+  .page-hd{padding:20px 16px 4px}
+  .topbar{padding:12px 16px;gap:10px}
+  .search{display:none}
+  .greet h1{font-size:22px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===== MAIN ===== -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="brand">
+        <!-- Logo : Shield + N -->
+        <svg class="logo" viewBox="0 0 32 32" fill="none">
+          <path d="M16 2L4 7v10c0 7.5 5.4 12.5 12 13 6.6-.5 12-5.5 12-13V7L16 2z" fill="#1A56DB"/>
+          <path d="M11 22V10l4.5 7V10M21 10v12" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="brand-name">Ne<span>xus</span></div>
+      </div>
+      <div class="sep"></div>
+      <div class="breadcrumb">Tableau de bord · <b>Panadería Don Carlos</b></div>
+      <div class="topbar-right">
+        <div class="search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input placeholder="Rechercher un client, un message…"/>
+          <span class="kbd mono">⌘K</span>
+        </div>
+        <button class="icon-btn" title="Notifications">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a2 2 0 003.4 0"/></svg>
+          <span class="badge-dot"></span>
+        </button>
+        <button class="icon-btn" title="Paramètres">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 01-4 0v-.1a1.7 1.7 0 00-1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 010-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3h0a1.7 1.7 0 001-1.5V3a2 2 0 014 0v.1a1.7 1.7 0 001 1.5h0a1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8h0a1.7 1.7 0 001.5 1H21a2 2 0 010 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>
+        </button>
+        <div class="avatar" title="Carlos Muñoz">CM</div>
+      </div>
+    </div>
+
+    <!-- GREETING -->
+    <div class="page-hd">
+      <div class="greet">
+        <div>
+          <h1>Buenos días, <em>Carlos</em> ☀️</h1>
+          <div class="sub">Voici ce qui s'est passé pendant que tu dormais — 3 nouveaux clients, 1 opportunité en or.</div>
+        </div>
+        <div class="date-pill"><span class="dot"></span> Lundi 13 avril · Santiago</div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <section class="stats">
+      <div class="stat">
+        <div class="stat-top">
+          <div class="stat-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+          <span class="delta up">▲ 18%</span>
+        </div>
+        <div class="stat-lbl">Conversations aujourd'hui</div>
+        <div class="stat-val mono">47</div>
+        <div class="stat-sub">dont 12 automatisées par l'IA</div>
+      </div>
+      <div class="stat">
+        <div class="stat-top">
+          <div class="stat-ic g"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.9"/><path d="M16 3.1a4 4 0 010 7.8"/></svg></div>
+          <span class="delta up">▲ 6%</span>
+        </div>
+        <div class="stat-lbl">Clients actifs</div>
+        <div class="stat-val mono">342</div>
+        <div class="stat-sub">+21 ce mois-ci</div>
+      </div>
+      <div class="stat">
+        <div class="stat-top">
+          <div class="stat-ic a"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+          <span class="delta up">▲ 12%</span>
+        </div>
+        <div class="stat-lbl">CA estimé (avril)</div>
+        <div class="stat-val mono">2,84M <small style="font-size:12px;color:var(--muted)">CLP</small></div>
+        <div class="stat-sub">projection : 3,1M</div>
+      </div>
+      <div class="stat">
+        <div class="stat-top">
+          <div class="stat-ic p"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span class="delta up">▲ 0:42 min</span>
+        </div>
+        <div class="stat-lbl">Taux de réponse</div>
+        <div class="stat-val mono">94%</div>
+        <div class="stat-sub">temps moyen 2:18 min</div>
+      </div>
+    </section>
+
+    <!-- TIPS IA -->
+    <section class="tips">
+      <div class="tips-hd">
+        <div class="tips-ic">💡</div>
+        <div class="t">Le conseil de Nexus<small>Mis à jour il y a 3 minutes · ton agent IA a analysé tes données</small></div>
+      </div>
+      <div class="tips-body">
+        <b>3 clients fidèles</b> n'ont rien commandé depuis <b>45 jours</b> : María, Diego et Ana. Ils représentent en moyenne <b>28 000 CLP / mois</b>. Je te propose de leur envoyer un message personnalisé avec une remise de <b>-15 %</b> pour les faire revenir.
+      </div>
+      <div class="tips-actions">
+        <button class="btn btn-p">Envoyer la campagne →</button>
+        <button class="btn btn-s">Voir les 3 clients</button>
+        <button class="btn btn-s">Plus tard</button>
+      </div>
+    </section>
+
+    <!-- 2-COL : Inbox + Podium -->
+    <section class="grid2">
+      <!-- Inbox -->
+      <div class="card">
+        <div class="inbox-head">
+          <h3>Messages à répondre <span class="cnt">8</span></h3>
+          <div class="actions">
+            <button class="btn-ghost">Tout voir</button>
+          </div>
+        </div>
+        <div class="msg unread">
+          <div class="msg-av" style="background:#1A56DB">MG</div>
+          <div class="msg-body">
+            <div class="msg-row">
+              <div><span class="msg-name">María González</span><span class="ch">📱 WhatsApp</span></div>
+              <div style="display:flex;align-items:center"><span class="msg-time">il y a 4 min</span><span class="msg-unread-dot"></span></div>
+            </div>
+            <div class="msg-txt">Hola Carlos, ¿tienes pan amasado disponible para mañana? Necesito 3 kilos…</div>
+            <span class="msg-tag vip">VIP · Top 1</span>
+          </div>
+        </div>
+        <div class="msg unread">
+          <div class="msg-av" style="background:#22C55E">DR</div>
+          <div class="msg-body">
+            <div class="msg-row">
+              <div><span class="msg-name">Diego Ramírez</span><span class="ch">📱 WhatsApp</span></div>
+              <div style="display:flex;align-items:center"><span class="msg-time">il y a 18 min</span><span class="msg-unread-dot"></span></div>
+            </div>
+            <div class="msg-txt">Gracias por la factura. ¿Aceptan transferencia bancaria?</div>
+            <span class="msg-tag rec">Récurrent</span>
+          </div>
+        </div>
+        <div class="msg">
+          <div class="msg-av" style="background:#F59E0B">IT</div>
+          <div class="msg-body">
+            <div class="msg-row">
+              <div><span class="msg-name">Isabel Torres</span><span class="ch">📱 WhatsApp</span></div>
+              <span class="msg-time">il y a 1 h</span>
+            </div>
+            <div class="msg-txt">Buenos días, me podrías mandar los precios de las tortas de cumpleaños porfa</div>
+            <span class="msg-tag new">Nouveau client</span>
+          </div>
+        </div>
+        <div class="msg">
+          <div class="msg-av" style="background:#7A3CFF">AS</div>
+          <div class="msg-body">
+            <div class="msg-row">
+              <div><span class="msg-name">Ana Silva</span><span class="ch">📱 WhatsApp</span></div>
+              <span class="msg-time">il y a 2 h</span>
+            </div>
+            <div class="msg-txt">¿El delivery sigue gratis sobre 15 lucas?</div>
+            <span class="msg-tag rec">Récurrent</span>
+          </div>
+        </div>
+        <div class="msg">
+          <div class="msg-av" style="background:#EF4444">LM</div>
+          <div class="msg-body">
+            <div class="msg-row">
+              <div><span class="msg-name">Luis Martínez</span><span class="ch">✉️ Email</span></div>
+              <span class="msg-time">il y a 3 h</span>
+            </div>
+            <div class="msg-txt">Cotización para evento corporativo 80 personas el 25 de abril</div>
+            <span class="msg-tag new">Nouveau · Entreprise</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Podium -->
+      <div class="card">
+        <div class="card-hd">
+          <h3>🏆 Top clients du mois</h3>
+          <button class="btn-ghost">CRM complet</button>
+        </div>
+        <div class="podium-body">
+          <div class="podium-row">
+            <div class="rank rank-1">1</div>
+            <div class="p-info">
+              <div class="p-name">María González</div>
+              <div class="p-stat">12 commandes · 184 000 CLP</div>
+              <div class="p-bar"><span style="width:94%"></span></div>
+            </div>
+            <div class="p-score">94</div>
+          </div>
+          <div class="podium-row">
+            <div class="rank rank-2">2</div>
+            <div class="p-info">
+              <div class="p-name">Diego Ramírez</div>
+              <div class="p-stat">9 commandes · 142 000 CLP</div>
+              <div class="p-bar"><span style="width:87%"></span></div>
+            </div>
+            <div class="p-score">87</div>
+          </div>
+          <div class="podium-row">
+            <div class="rank rank-3">3</div>
+            <div class="p-info">
+              <div class="p-name">Ana Silva</div>
+              <div class="p-stat">7 commandes · 98 000 CLP</div>
+              <div class="p-bar"><span style="width:82%"></span></div>
+            </div>
+            <div class="p-score">82</div>
+          </div>
+          <div class="podium-row">
+            <div class="rank rank-n">4</div>
+            <div class="p-info">
+              <div class="p-name">Pablo Herrera</div>
+              <div class="p-stat">6 commandes · 78 000 CLP</div>
+              <div class="p-bar"><span style="width:75%"></span></div>
+            </div>
+            <div class="p-score">75</div>
+          </div>
+          <div class="podium-row">
+            <div class="rank rank-n">5</div>
+            <div class="p-info">
+              <div class="p-name">Valentina Rojas</div>
+              <div class="p-stat">5 commandes · 64 000 CLP</div>
+              <div class="p-bar"><span style="width:71%"></span></div>
+            </div>
+            <div class="p-score">71</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHART -->
+    <section class="card chart-card">
+      <div class="card-hd">
+        <h3>Activité des 7 derniers jours</h3>
+        <div class="actions">
+          <button class="btn-ghost">7 jours</button>
+          <button class="btn-ghost" style="color:var(--blue);border-color:var(--blue)">30 jours</button>
+        </div>
+      </div>
+      <div class="chart-legend">
+        <span class="lg"><span class="sw" style="background:var(--blue)"></span>Conversations</span>
+        <span class="lg"><span class="sw" style="background:var(--green)"></span>Nouveaux clients</span>
+        <span class="lg"><span class="sw" style="background:var(--amber)"></span>Commandes</span>
+      </div>
+      <div class="chart-wrap">
+        <svg viewBox="0 0 700 200" style="width:100%;height:200px">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#1A56DB" stop-opacity=".25"/>
+              <stop offset="100%" stop-color="#1A56DB" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <g stroke="#F1F5F9" stroke-width="1">
+            <line x1="0" y1="40" x2="700" y2="40"/>
+            <line x1="0" y1="90" x2="700" y2="90"/>
+            <line x1="0" y1="140" x2="700" y2="140"/>
+          </g>
+          <path d="M0,120 C80,100 120,130 180,90 C240,50 300,80 360,70 C420,60 480,90 540,55 C600,30 660,50 700,40 L700,200 L0,200 Z" fill="url(#g1)"/>
+          <path d="M0,120 C80,100 120,130 180,90 C240,50 300,80 360,70 C420,60 480,90 540,55 C600,30 660,50 700,40" fill="none" stroke="#1A56DB" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M0,160 C80,155 120,150 180,145 C240,130 300,140 360,125 C420,115 480,120 540,105 C600,95 660,100 700,90" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 4"/>
+          <path d="M0,170 C80,165 120,155 180,150 C240,155 300,145 360,155 C420,145 480,135 540,140 C600,125 660,130 700,115" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 3"/>
+          <g fill="#1A56DB">
+            <circle cx="180" cy="90" r="3.5"/><circle cx="360" cy="70" r="3.5"/><circle cx="540" cy="55" r="3.5"/><circle cx="700" cy="40" r="4"/>
+          </g>
+          <g font-family="JetBrains Mono,monospace" font-size="10" fill="#94A3B8">
+            <text x="5" y="195">L</text><text x="115" y="195">M</text><text x="220" y="195">Mer</text><text x="325" y="195">J</text><text x="435" y="195">V</text><text x="540" y="195">S</text><text x="650" y="195">D</text>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="side">
+    <div class="side-hd">
+      <div class="p-card">
+        <div class="p-avatar">🥖</div>
+        <div class="p-who">
+          <div class="n">Panadería Don Carlos</div>
+          <div class="b">Carlos Muñoz · Santiago</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-title">Navigation</div>
+
+    <div class="nav-item active">
+      <div class="nav-ic">🏠</div>
+      <div class="nav-lbl">Tableau de bord</div>
+    </div>
+    <div class="nav-item">
+      <div class="nav-ic">👤</div>
+      <div class="nav-lbl">Profil entreprise</div>
+      <div class="nav-meta">80%</div>
+    </div>
+    <div class="nav-item">
+      <div class="nav-ic">📬</div>
+      <div class="nav-lbl">Messagerie</div>
+      <div class="nav-meta">8</div>
+    </div>
+    <div class="nav-item">
+      <div class="nav-ic">👥</div>
+      <div class="nav-lbl">Clients & CRM</div>
+    </div>
+    <div class="nav-item">
+      <div class="nav-ic">📊</div>
+      <div class="nav-lbl">Statistiques</div>
+    </div>
+    <div class="nav-item">
+      <div class="nav-ic">📢</div>
+      <div class="nav-lbl">Campagnes</div>
+    </div>
+    <div class="nav-item">
+      <div class="nav-ic">💳</div>
+      <div class="nav-lbl">Paiement & Plan</div>
+    </div>
+    <div class="nav-item">
+      <div class="nav-ic">🎓</div>
+      <div class="nav-lbl">Tuto & aide</div>
+    </div>
+
+    <div class="side-title">L'agent aujourd'hui</div>
+    <div style="padding:4px 20px 18px">
+      <div style="background:var(--line2);border-radius:10px;padding:14px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Réponses auto envoyées</div>
+        <div style="font-size:20px;font-weight:700" class="mono">12 / 24</div>
+        <div style="height:6px;background:#fff;border-radius:999px;margin-top:10px;overflow:hidden"><span style="display:block;height:100%;width:50%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:999px"></span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px">Nexus a tenu 50 % de tes conversations aujourd'hui 🙌</div>
+      </div>
+    </div>
+
+    <div class="side-ft">
+      <span class="dot-live"></span> Tous les canaux connectés · Nexus InJu v0.1
+    </div>
+  </aside>
+
+</div>
+</body>
+</html>

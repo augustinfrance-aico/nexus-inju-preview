@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexus InJu — 3 directions de design</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#05070A; --panel:#0F1520; --ink:#E8ECF3; --muted:#8A94A6;
+  --line:rgba(255,255,255,.08);
+  --blue:#1F6FFF; --violet:#7A3CFF; --cyan:#00E5FF; --lime:#1EFF8E;
+}
+html,body{background:var(--bg);color:var(--ink);font-family:'Inter',-apple-system,sans-serif;line-height:1.5}
+.wrap{max-width:1280px;margin:0 auto;padding:60px 24px 100px}
+.hero{padding:44px;border-radius:20px;background:linear-gradient(135deg,rgba(31,111,255,.12),rgba(122,60,255,.08));border:1px solid var(--line);margin-bottom:40px;position:relative;overflow:hidden}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;color:var(--cyan);margin-bottom:16px;display:inline-flex;align-items:center;gap:10px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+h1{font-size:clamp(28px,4vw,44px);font-weight:800;letter-spacing:-.02em;line-height:1.1;margin-bottom:14px;background:linear-gradient(120deg,#fff,#B8C7E0,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--muted);font-size:16px;max-width:760px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:40px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:all .25s;display:flex;flex-direction:column}
+.card:hover{transform:translateY(-4px);border-color:rgba(31,111,255,.4);box-shadow:0 20px 50px -20px rgba(31,111,255,.3)}
+.card .preview{aspect-ratio:16/10;background:var(--bg);position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+.card iframe{position:absolute;inset:0;width:250%;height:250%;transform:scale(.4);transform-origin:top left;border:0;pointer-events:none}
+.card-body{padding:22px}
+.tag{display:inline-block;padding:4px 10px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;margin-bottom:10px}
+.t1 .tag{background:rgba(31,111,255,.15);color:var(--blue);border:1px solid rgba(31,111,255,.3)}
+.t2 .tag{background:rgba(122,60,255,.15);color:#B59EFF;border:1px solid rgba(122,60,255,.3)}
+.t3 .tag{background:rgba(30,255,142,.15);color:var(--lime);border:1px solid rgba(30,255,142,.3)}
+.card h3{font-size:20px;font-weight:700;letter-spacing:-.01em;margin-bottom:8px}
+.card p{color:var(--muted);font-size:13.5px;margin-bottom:16px}
+.card ul{list-style:none;padding:0;margin-bottom:20px}
+.card li{font-size:12.5px;color:var(--muted);padding:5px 0 5px 18px;position:relative}
+.card li::before{content:"◆";position:absolute;left:0;color:var(--cyan);font-size:10px;top:7px}
+.t2 li::before{color:#B59EFF}
+.t3 li::before{color:var(--lime)}
+.btns{display:flex;gap:8px;margin-top:auto}
+.btn{flex:1;padding:11px;text-align:center;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;cursor:pointer;border:0;transition:all .2s}
+.btn-p{background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 8px 20px -6px var(--violet)}
+.btn-s{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn-s:hover{border-color:var(--cyan);color:var(--cyan)}
+
+.note{margin-top:40px;padding:22px 26px;background:var(--panel);border:1px solid var(--line);border-radius:14px;display:flex;gap:16px;align-items:flex-start}
+.note .ic{width:36px;height:36px;border-radius:10px;background:rgba(255,200,87,.15);border:1px solid rgba(255,200,87,.3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.note h4{font-size:14px;margin-bottom:6px}
+.note p{color:var(--muted);font-size:13px;line-height:1.6}
+.note b{color:var(--ink)}
+
+footer{margin-top:60px;text-align:center;color:var(--muted);font-size:11.5px;font-family:'JetBrains Mono',monospace;letter-spacing:.08em}
+
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div class="eyebrow"><span class="dot"></span> NEXUS INJU · V0.1 · 13 AVRIL 2026</div>
+    <h1>Le tableau de bord Nexus — 3 directions à choisir</h1>
+    <p class="lead">Hola Juan, hola Iñigo. Voici le <b style="color:#fff">premier écran</b> de votre app, décliné en 3 ambiances. Même schéma fidèle à votre PDF "Agent 2.0 Nexus" (4 blocs + sidebar 7 sections), mais 3 personnalités très différentes. Choisissez celle qui vous ressemble — on part dessus pour la M1.</p>
+  </section>
+
+  <div class="grid">
+
+    <!-- V1 -->
+    <div class="card t1">
+      <div class="preview"><iframe src="v1-professional.html" loading="lazy"></iframe></div>
+      <div class="card-body">
+        <span class="tag">VERSION 01 · CALM</span>
+        <h3>Professional Calm</h3>
+        <p>Fintech premium, banquier de confiance. Pour le patron PME rassuré par du classique net.</p>
+        <ul>
+          <li>Palette bleu institutionnel + blanc aéré</li>
+          <li>Sidebar droite, colonne centrale large</li>
+          <li>Logo : Shield + N (sécurité)</li>
+          <li>Inspiration : Stripe, Linear</li>
+        </ul>
+        <div class="btns">
+          <a class="btn btn-p" href="v1-professional.html" target="_blank">Ouvrir →</a>
+          <a class="btn btn-s" href="v1-professional.html" target="_blank">Plein écran</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- V2 -->
+    <div class="card t2">
+      <div class="preview"><iframe src="v2-modular.html" loading="lazy"></iframe></div>
+      <div class="card-body">
+        <span class="tag">VERSION 02 · GRID</span>
+        <h3>Modular Grid</h3>
+        <p>Workspace moderne, dense, startup growth. Pour le patron qui veut piloter comme un pro tech.</p>
+        <ul>
+          <li>Dark mode + bleu électrique / violet</li>
+          <li>Sidebar gauche nav, grille 12 colonnes</li>
+          <li>Logo : Node réseau (interconnexion)</li>
+          <li>Inspiration : Tailwind UI, Shadcn, Notion</li>
+        </ul>
+        <div class="btns">
+          <a class="btn btn-p" href="v2-modular.html" target="_blank">Ouvrir →</a>
+          <a class="btn btn-s" href="v2-modular.html" target="_blank">Plein écran</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- V3 -->
+    <div class="card t3">
+      <div class="preview"><iframe src="v3-playful.html" loading="lazy"></iframe></div>
+      <div class="card-body">
+        <span class="tag">VERSION 03 · ALIVE</span>
+        <h3>Colorful & Alive</h3>
+        <p>L'agent IA vivant qui parle. Orbe pulsante, gradients néon, podium 3D. Pour différencier Nexus de tout ce qui existe.</p>
+        <ul>
+          <li>Gradients bleu → violet → cyan + lime / or</li>
+          <li>Orbe Nexus animée (breathing), satellites en orbite</li>
+          <li>Logo : N géométrique néon</li>
+          <li>Inspiration : Raycast, Arc Browser, Linear galaxy</li>
+        </ul>
+        <div class="btns">
+          <a class="btn btn-p" href="v3-playful.html" target="_blank">Ouvrir →</a>
+          <a class="btn btn-s" href="v3-playful.html" target="_blank">Plein écran</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="note">
+    <div class="ic">💡</div>
+    <div>
+      <h4>Comment choisir ?</h4>
+      <p>Si vos PME LATAM viennent du <b>retail / services classiques</b> (boulangerie, coiffeur, resto) → V1 rassure.<br/>
+      Si vous visez les <b>entrepreneurs growth</b> qui aiment piloter → V2 donne le sentiment de maîtrise.<br/>
+      Si vous voulez <b>marquer les esprits</b> dès la démo investisseurs et être mémorables → V3 est inoubliable.<br/>
+      <b>Rien ne vous empêche de combiner</b> — par ex. structure V2 + esprit V3, ou V1 avec 2-3 touches de V3. Dites-moi et on affine.</p>
+    </div>
+  </div>
+
+  <footer>NEXUS INJU · DASHBOARD V0.1 · 13 AVRIL 2026 · BUILT BY AUGUSTIN FOR JUAN & IÑIGO</footer>
+</div>
+</body>
+</html>
