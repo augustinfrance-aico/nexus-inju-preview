@@ -1,0 +1,1887 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1A56DB">
+<title>Nexus Pulse — Cockpit Juan & Iñigo</title>
+<style>
+:root{
+  --bg:#F7F9FC; --bg2:#EEF2F7; --panel:#FFFFFF; --ink:#0F172A; --ink2:#334155; --muted:#64748B;
+  --line:#E2E8F0; --line2:#F1F5F9;
+  --blue:#1A56DB; --blue-soft:#EFF4FE; --blue-ink:#1E40AF; --blue-ghost:#DBE5FD;
+  --violet:#7A3CFF; --violet-soft:#F3E8FF;
+  --cyan:#06B6D4; --cyan-soft:#ECFEFF;
+  --green:#22C55E; --green-soft:#ECFDF5;
+  --amber:#F59E0B; --amber-soft:#FFFBEB;
+  --red:#EF4444; --red-soft:#FEF2F2;
+  --lime:#65D940;
+  --shadow:0 1px 2px rgba(15,23,42,.04), 0 4px 16px -8px rgba(15,23,42,.08);
+  --shadow-lg:0 8px 32px -12px rgba(15,23,42,.16);
+  --shadow-xl:0 20px 60px -20px rgba(15,23,42,.24);
+  --radius:14px; --radius-sm:8px;
+  --grid-pattern:radial-gradient(circle at 1px 1px,rgba(15,23,42,.06) 1px,transparent 0);
+}
+html[data-theme="dark"]{
+  --bg:#080B11; --bg2:#0C1119; --panel:#0F1621; --ink:#E8ECF3; --ink2:#B8C1CE; --muted:#8A94A6;
+  --line:rgba(255,255,255,.06); --line2:rgba(255,255,255,.03);
+  --blue-soft:rgba(26,86,219,.18); --blue-ghost:rgba(26,86,219,.3);
+  --green-soft:rgba(34,197,94,.12); --amber-soft:rgba(245,158,11,.12); --red-soft:rgba(239,68,68,.12);
+  --violet-soft:rgba(122,60,255,.15); --cyan-soft:rgba(6,182,212,.12);
+  --grid-pattern:radial-gradient(circle at 1px 1px,rgba(255,255,255,.04) 1px,transparent 0);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-family:'Inter','Segoe UI',-apple-system,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;font-size:14px;min-height:100vh}
+.mono{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}
+button{font-family:inherit;cursor:pointer}
+input,textarea,select{font-family:inherit;font-size:14px}
+a{color:inherit;text-decoration:none}
+::selection{background:var(--blue-ghost);color:var(--blue-ink)}
+
+/* GRID BG */
+body::before{content:"";position:fixed;inset:0;background-image:var(--grid-pattern);background-size:24px 24px;pointer-events:none;z-index:0}
+.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh;position:relative;z-index:1}
+.main{display:flex;flex-direction:column;min-width:0}
+
+/* SIDEBAR */
+.sidebar{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;backdrop-filter:blur(12px)}
+.side-hd{padding:20px 18px;border-bottom:1px solid var(--line2)}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.logo{width:36px;height:36px}
+.brand-name{font-size:16px;font-weight:800;letter-spacing:-.02em}
+.brand-name span{background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand-sub{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.1em;margin-top:2px}
+
+.team-card{padding:14px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(135deg,var(--blue-soft),var(--violet-soft))}
+.team-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.team-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px;border:2px solid var(--panel)}
+.team-stack{display:flex}
+.team-stack .team-av{margin-left:-6px}
+.team-stack .team-av:first-child{margin-left:0}
+.team-name{font-size:12px;font-weight:600}
+.team-role{font-size:10px;color:var(--muted);margin-top:1px}
+.team-env{display:inline-flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);margin-top:6px;font-family:'JetBrains Mono',monospace;letter-spacing:.05em}
+.team-env .dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+.side-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:16px 20px 6px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:9px 18px;cursor:pointer;transition:all .15s;border-left:3px solid transparent;color:var(--ink2);position:relative}
+.nav-item:hover{background:var(--bg2)}
+.nav-item.active{background:var(--blue-soft);border-left-color:var(--blue);color:var(--blue-ink)}
+.nav-ic{width:28px;height:28px;border-radius:8px;background:var(--bg2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+.nav-item.active .nav-ic{background:var(--blue);color:#fff}
+.nav-lbl{font-size:13px;font-weight:500;flex:1}
+.nav-meta{font-size:10px;color:var(--muted);padding:2px 7px;background:var(--bg2);border-radius:999px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.nav-meta.amber{background:var(--amber-soft);color:var(--amber)}
+.nav-meta.red{background:var(--red-soft);color:var(--red)}
+.nav-meta.green{background:var(--green-soft);color:var(--green)}
+.nav-item.active .nav-meta{background:var(--blue);color:#fff}
+
+.side-foot{margin-top:auto;padding:14px 18px;border-top:1px solid var(--line2)}
+.revenue-ticker{padding:12px;background:linear-gradient(135deg,rgba(101,217,64,.1),rgba(6,182,212,.1));border:1px solid rgba(101,217,64,.3);border-radius:10px;margin-bottom:8px}
+.rt-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.rt-val{font-size:20px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--green);display:flex;align-items:center;gap:6px}
+.rt-val::before{content:"▲";font-size:12px}
+.rt-delta{font-size:11px;color:var(--muted);margin-top:2px}
+.rt-delta b{color:var(--green)}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;gap:14px;padding:12px 24px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50;flex-shrink:0;backdrop-filter:blur(12px)}
+.breadcrumb{font-size:13px;color:var(--muted)}
+.breadcrumb b{color:var(--ink);font-weight:600}
+.status-pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;background:var(--bg2);border:1px solid var(--line);border-radius:999px;font-size:11px;color:var(--ink2);font-family:'JetBrains Mono',monospace;letter-spacing:.05em}
+.status-pill .dot{width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 0 3px var(--green-soft)}
+.status-pill.warn{background:var(--amber-soft);border-color:var(--amber);color:var(--amber)}
+.status-pill.warn .dot{background:var(--amber);box-shadow:0 0 0 3px rgba(245,158,11,.15)}
+.status-pill.red{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+.status-pill.red .dot{background:var(--red);animation:pulse 1s infinite}
+
+.search-btn{display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--bg2);border:1px solid transparent;border-radius:8px;width:280px;transition:all .15s;color:var(--muted);cursor:pointer;font-family:inherit}
+.search-btn:hover{background:var(--panel);border-color:var(--line)}
+.search-btn .kbd{font-size:10px;padding:2px 6px;background:var(--panel);border:1px solid var(--line);border-radius:4px;margin-left:auto;font-family:'JetBrains Mono',monospace;color:var(--muted)}
+.icon-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--panel);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:all .15s;color:var(--ink2)}
+.icon-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-soft)}
+.badge-dot{position:absolute;top:4px;right:4px;min-width:14px;height:14px;padding:0 3px;background:var(--red);color:#fff;border-radius:999px;border:2px solid var(--panel);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.badge-dot.amber{background:var(--amber)}
+.lang-btn{display:flex;gap:0;background:var(--bg2);border-radius:7px;padding:2px;border:1px solid var(--line)}
+.lang-btn button{padding:4px 8px;border-radius:5px;border:0;background:transparent;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.05em;cursor:pointer}
+.lang-btn button.on{background:var(--panel);color:var(--blue);box-shadow:var(--shadow)}
+
+/* VIEW */
+.view{padding:24px 32px 60px;max-width:1440px;margin:0 auto;width:100%}
+.page-hd{margin-bottom:20px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.page-hd h1{font-size:24px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+.page-hd h1 em{background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent;font-style:normal}
+.page-hd .sub{color:var(--muted);font-size:13px;margin-top:4px}
+
+/* CARDS */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:all .2s}
+.card-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 10px;gap:12px}
+.card-hd h3{font-size:13px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+.card-hd .actions{display:flex;gap:6px}
+.card-body{padding:10px 20px 20px}
+
+/* BUTTONS */
+.btn{padding:8px 14px;border-radius:var(--radius-sm);font-size:12.5px;font-weight:600;cursor:pointer;border:0;transition:all .15s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-p{background:var(--blue);color:#fff}
+.btn-p:hover{background:var(--blue-ink);transform:translateY(-1px);box-shadow:0 4px 12px -4px var(--blue)}
+.btn-s{background:var(--panel);color:var(--ink2);border:1px solid var(--line)}
+.btn-s:hover{border-color:var(--blue);color:var(--blue)}
+.btn-g{background:transparent;color:var(--muted);border:1px solid var(--line);padding:5px 10px;font-size:11px;border-radius:6px}
+.btn-g:hover{color:var(--blue);border-color:var(--blue)}
+.btn-success{background:var(--green);color:#fff}
+.btn-danger{background:var(--red);color:#fff}
+.btn-warn{background:var(--amber);color:#fff}
+.btn-gradient{background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff}
+.btn-gradient:hover{transform:translateY(-1px);box-shadow:0 8px 20px -6px var(--violet)}
+
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;position:relative;overflow:hidden;transition:all .2s}
+.kpi:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.kpi::after{content:"";position:absolute;inset:0;background:var(--accent-fade);opacity:0;transition:opacity .2s;pointer-events:none}
+.kpi:hover::after{opacity:.06}
+.kpi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.kpi-ic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;background:var(--blue-soft);color:var(--blue)}
+.kpi-ic.g{background:var(--green-soft);color:var(--green)}
+.kpi-ic.a{background:var(--amber-soft);color:var(--amber)}
+.kpi-ic.v{background:var(--violet-soft);color:var(--violet)}
+.kpi-ic.c{background:var(--cyan-soft);color:var(--cyan)}
+.kpi-ic.r{background:var(--red-soft);color:var(--red)}
+.delta{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px}
+.delta.up{background:var(--green-soft);color:var(--green)}
+.delta.dn{background:var(--red-soft);color:var(--red)}
+.delta.eq{background:var(--bg2);color:var(--muted)}
+.kpi-lbl{font-size:10.5px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.kpi-val{font-size:26px;font-weight:800;letter-spacing:-.02em;font-family:'JetBrains Mono',monospace}
+.kpi-val small{font-size:14px;color:var(--muted);font-weight:600}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:6px}
+.spark{width:100%;height:36px;margin-top:8px;opacity:.7}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+.g2e{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+
+/* CHIPS */
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:10.5px;font-weight:700;background:var(--bg2);color:var(--ink2);font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
+.chip.blue{background:var(--blue-soft);color:var(--blue)}
+.chip.green{background:var(--green-soft);color:var(--green)}
+.chip.amber{background:var(--amber-soft);color:var(--amber)}
+.chip.red{background:var(--red-soft);color:var(--red)}
+.chip.violet{background:var(--violet-soft);color:var(--violet)}
+.chip.cyan{background:var(--cyan-soft);color:var(--cyan)}
+
+/* ACTIVITY FEED */
+.feed{max-height:500px;overflow-y:auto}
+.feed-item{padding:10px 18px;border-top:1px solid var(--line2);display:flex;gap:10px;align-items:flex-start;transition:background .15s}
+.feed-item:first-child{border-top:0}
+.feed-item:hover{background:var(--bg2)}
+.feed-ic{width:28px;height:28px;border-radius:8px;background:var(--blue-soft);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.feed-ic.g{background:var(--green-soft);color:var(--green)}
+.feed-ic.a{background:var(--amber-soft);color:var(--amber)}
+.feed-ic.r{background:var(--red-soft);color:var(--red)}
+.feed-ic.v{background:var(--violet-soft);color:var(--violet)}
+.feed-body{flex:1;min-width:0}
+.feed-title{font-size:12.5px;font-weight:600}
+.feed-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.feed-time{font-size:10.5px;color:var(--muted);font-family:'JetBrains Mono',monospace;flex-shrink:0}
+
+/* CLIENT ROW */
+.client-row{padding:12px 18px;border-top:1px solid var(--line2);display:grid;grid-template-columns:40px 1.5fr 80px 80px 100px 80px 90px 60px;gap:12px;align-items:center;transition:background .15s;cursor:pointer}
+.client-row:first-child{border-top:0}
+.client-row:hover{background:var(--bg2)}
+.client-row.table-hd{background:var(--bg2);font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:10px 18px;cursor:default}
+.client-row.table-hd:hover{background:var(--bg2)}
+.client-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px}
+.client-name{font-size:13px;font-weight:600}
+.client-meta{font-size:11px;color:var(--muted)}
+.health-bar{width:100%;height:5px;background:var(--bg2);border-radius:999px;overflow:hidden;margin-top:3px}
+.health-bar span{display:block;height:100%;background:linear-gradient(90deg,var(--red),var(--amber),var(--green));border-radius:999px}
+
+/* MAP */
+.map-wrap{position:relative;background:linear-gradient(180deg,var(--bg2),var(--panel));border-radius:var(--radius);padding:20px;overflow:hidden;min-height:360px}
+.map-marker{position:absolute;width:10px;height:10px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 4px var(--blue-soft),0 0 12px var(--blue);animation:markerPulse 3s infinite;cursor:pointer;transition:transform .2s}
+.map-marker:hover{transform:scale(1.5);z-index:2}
+.map-marker.red{background:var(--red);box-shadow:0 0 0 4px var(--red-soft),0 0 12px var(--red)}
+.map-marker.amber{background:var(--amber);box-shadow:0 0 0 4px var(--amber-soft),0 0 12px var(--amber)}
+.map-marker.violet{background:var(--violet);box-shadow:0 0 0 4px var(--violet-soft),0 0 12px var(--violet)}
+@keyframes markerPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
+
+/* FUNNEL */
+.funnel-step{padding:12px 18px;margin-bottom:6px;background:var(--bg2);border-radius:10px;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden}
+.funnel-step::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--blue-soft),transparent);opacity:.6}
+.funnel-label{flex:1;font-size:13px;font-weight:600;position:relative}
+.funnel-n{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:18px;position:relative;color:var(--blue)}
+.funnel-pct{font-size:11px;color:var(--muted);margin-left:10px;position:relative}
+
+/* PROGRESS */
+.progress{height:10px;background:var(--bg2);border-radius:999px;overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:999px;transition:width .6s}
+
+/* GAUGE */
+.gauge{position:relative;width:160px;height:80px;margin:0 auto}
+.gauge svg{display:block}
+.gauge-val{position:absolute;bottom:0;left:50%;transform:translateX(-50%);text-align:center;font-weight:800;font-size:22px;font-family:'JetBrains Mono',monospace}
+.gauge-val small{font-size:10px;color:var(--muted);display:block;margin-top:2px;font-weight:500}
+
+/* TIMELINE */
+.timeline{position:relative;padding-left:24px;padding-top:6px}
+.timeline::before{content:"";position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tl-item{position:relative;padding-bottom:18px}
+.tl-item::before{content:"";position:absolute;left:-24px;top:4px;width:14px;height:14px;border-radius:50%;background:var(--panel);border:3px solid var(--blue)}
+.tl-item.g::before{border-color:var(--green)}
+.tl-item.a::before{border-color:var(--amber)}
+.tl-item.r::before{border-color:var(--red)}
+.tl-time{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.tl-body{font-size:13px;color:var(--ink);margin-top:3px}
+
+/* TOAST */
+#toast-container{position:fixed;top:20px;right:20px;z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--blue);padding:12px 16px;border-radius:var(--radius-sm);box-shadow:var(--shadow-xl);min-width:280px;font-size:13px;display:flex;align-items:flex-start;gap:10px;animation:slideIn .3s ease;pointer-events:auto}
+.toast.success{border-left-color:var(--green)}
+.toast.warn{border-left-color:var(--amber)}
+.toast.error{border-left-color:var(--red)}
+.toast .i{font-size:18px;flex-shrink:0}
+.toast-body{flex:1}
+.toast-body b{display:block;margin-bottom:2px}
+.toast-body small{color:var(--muted);font-size:11.5px}
+@keyframes slideIn{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* MODAL */
+#modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.7);backdrop-filter:blur(6px);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+#modal-overlay.hidden{display:none}
+.modal{background:var(--panel);border-radius:var(--radius);max-width:720px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-xl);animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-hd{padding:16px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.modal-hd h3{font-size:16px;font-weight:700}
+.modal-close{border:0;background:var(--bg2);width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:16px;color:var(--muted)}
+.modal-close:hover{background:var(--red-soft);color:var(--red)}
+.modal-body{padding:20px}
+.modal-foot{padding:14px 22px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px;background:var(--bg2)}
+
+/* CMD PALETTE */
+#command-palette{position:fixed;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(4px);z-index:150;display:flex;align-items:flex-start;justify-content:center;padding-top:100px}
+#command-palette.hidden{display:none}
+.cp{background:var(--panel);border-radius:var(--radius);max-width:600px;width:calc(100% - 40px);overflow:hidden;box-shadow:var(--shadow-xl);animation:slideUp .2s ease}
+.cp-input{width:100%;padding:18px 24px;border:0;border-bottom:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:16px}
+.cp-input:focus{outline:0}
+.cp-results{max-height:440px;overflow-y:auto}
+.cp-group-title{padding:6px 24px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
+.cp-item{padding:10px 24px;display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px}
+.cp-item:hover{background:var(--blue-soft);color:var(--blue-ink)}
+.cp-item .meta{margin-left:auto;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.filter-pill{padding:6px 12px;background:var(--panel);border:1px solid var(--line);border-radius:999px;font-size:12px;cursor:pointer;color:var(--ink2);transition:all .15s;font-weight:500}
+.filter-pill:hover{border-color:var(--blue);color:var(--blue)}
+.filter-pill.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+.form-ctrl{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--panel);color:var(--ink);font-size:13px}
+.form-ctrl:focus{outline:0;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,.12)}
+
+/* LOG BLOCK */
+.log{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--bg2);padding:14px;border-radius:10px;max-height:280px;overflow-y:auto;line-height:1.7}
+.log-line{display:flex;gap:8px;align-items:flex-start}
+.log-t{color:var(--muted);flex-shrink:0}
+.log-lvl{flex-shrink:0;font-weight:700}
+.log-lvl.info{color:var(--blue)}
+.log-lvl.ok{color:var(--green)}
+.log-lvl.warn{color:var(--amber)}
+.log-lvl.err{color:var(--red)}
+
+/* CHART ANIM */
+.ticker-up{color:var(--green);animation:flashGreen .8s}
+@keyframes flashGreen{0%{background:var(--green-soft)}100%{background:transparent}}
+
+/* BADGES PLAN */
+.plan-free{background:#F1F5F9;color:#64748B}
+.plan-starter{background:var(--blue-soft);color:var(--blue)}
+.plan-pro{background:var(--violet-soft);color:var(--violet)}
+.plan-scale{background:linear-gradient(135deg,#F59E0B,#EF4444);color:#fff}
+
+/* AI FAB */
+.ai-fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;border:0;cursor:pointer;box-shadow:0 10px 30px -8px var(--violet);z-index:40;display:flex;align-items:center;justify-content:center;font-size:22px}
+.ai-fab::after{content:"";position:absolute;inset:-4px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--violet));opacity:.3;animation:pulseRing 2s infinite;z-index:-1}
+@keyframes pulseRing{0%{transform:scale(1);opacity:.5}100%{transform:scale(1.4);opacity:0}}
+
+/* HIDDEN + UTIL */
+.hidden{display:none!important}
+.mt8{margin-top:8px}.mt16{margin-top:16px}
+.flex{display:flex;gap:10px;align-items:center}.between{justify-content:space-between}
+
+/* GRADIENT BORDER */
+.gradient-border{background:linear-gradient(135deg,var(--blue),var(--violet),var(--cyan));padding:1.5px;border-radius:var(--radius)}
+.gradient-border .inner{background:var(--panel);border-radius:calc(var(--radius) - 1.5px);padding:20px}
+
+/* MOBILE */
+@media(max-width:1100px){.app{grid-template-columns:1fr}.sidebar{display:none}.kpi-grid,.g2,.g3,.g4,.g2e{grid-template-columns:1fr}.view{padding:20px 16px 40px}.search-btn{display:none}}
+</style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+<div id="modal-overlay" class="hidden"><div class="modal" id="modal-content"></div></div>
+<div id="command-palette" class="hidden">
+  <div class="cp">
+    <input class="cp-input" id="cpInput" placeholder="Commande, client, métrique…" autocomplete="off"/>
+    <div class="cp-results" id="cpResults"></div>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="side-hd">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 36 36" fill="none">
+          <circle cx="18" cy="18" r="16" fill="url(#pulseG)" opacity=".15"/>
+          <defs><linearGradient id="pulseG" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1A56DB"/><stop offset="1" stop-color="#06B6D4"/></linearGradient></defs>
+          <path d="M10 18 L14 18 L16 12 L20 24 L22 18 L26 18" stroke="url(#pulseG)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div>
+          <div class="brand-name">Nexus <span>Pulse</span></div>
+          <div class="brand-sub">COMMAND CENTER · v0.1</div>
+        </div>
+      </div>
+      <div class="team-card">
+        <div class="team-row">
+          <div class="team-stack">
+            <div class="team-av" style="background:linear-gradient(135deg,#1A56DB,#7A3CFF);border:2px solid var(--panel)">JP</div>
+            <div class="team-av" style="background:linear-gradient(135deg,#06B6D4,#22C55E);border:2px solid var(--panel)">IA</div>
+          </div>
+          <div><div class="team-name">Juan & Iñigo</div><div class="team-role">Co-founders · Chili</div></div>
+        </div>
+        <div class="team-env"><span class="dot"></span>PROD · santiago-1</div>
+      </div>
+    </div>
+
+    <div class="side-title">Cockpit</div>
+    <nav id="navContainer"></nav>
+
+    <div class="side-foot">
+      <div class="revenue-ticker">
+        <div class="rt-lbl">MRR · temps réel</div>
+        <div class="rt-val" id="mrrLive">€ 14,726</div>
+        <div class="rt-delta">+<b id="mrrDelta">€ 1,247</b> ce mois · <b>+9,2%</b></div>
+      </div>
+      <div class="flex" style="gap:8px">
+        <button class="icon-btn" style="flex:1" onclick="Px.toggleTheme()" title="Thème">🌙</button>
+        <button class="icon-btn" style="flex:1" onclick="Px.toast('Déconnexion (démo)','info')" title="Sortir">🚪</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div class="breadcrumb"><span>Nexus Pulse</span> · <b id="breadcrumb">Overview</b></div>
+      <span class="status-pill"><span class="dot"></span>Tous systèmes OK · 99,96% uptime</span>
+      <span class="status-pill warn"><span class="dot"></span>WhatsApp API · 420ms p95</span>
+      <button class="search-btn" onclick="Px.openPalette()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <span>Rechercher · clients, alertes…</span>
+        <span class="kbd">⌘K</span>
+      </button>
+      <div class="lang-btn">
+        <button onclick="Px.setLang('fr')" id="lang-fr" class="on">FR</button>
+        <button onclick="Px.setLang('es')" id="lang-es">ES</button>
+        <button onclick="Px.setLang('en')" id="lang-en">EN</button>
+      </div>
+      <button class="icon-btn" onclick="Px.openModal('alerts')" title="Alertes"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 8a6 6 0 1112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a2 2 0 003.4 0"/></svg><span class="badge-dot amber" id="alertBadge">4</span></button>
+      <button class="icon-btn" onclick="Px.openModal('broadcast')" title="Broadcast"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 11l18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 11-5.8-1.6"/></svg></button>
+      <div class="flex" style="gap:4px"><div class="team-av" style="background:linear-gradient(135deg,#1A56DB,#7A3CFF);width:32px;height:32px;font-size:10px;cursor:pointer" title="Juan" onclick="Px.toast('Juan connecté','success')">J</div><div class="team-av" style="background:linear-gradient(135deg,#06B6D4,#22C55E);width:32px;height:32px;font-size:10px;cursor:pointer" title="Iñigo" onclick="Px.toast('Iñigo connecté','success')">I</div></div>
+    </div>
+
+    <div id="viewContainer"></div>
+  </main>
+</div>
+
+<button class="ai-fab" onclick="Px.openAiCopilot()" title="Nexus Copilot">✨</button>
+
+<script>
+/* ============================================================
+   NEXUS PULSE — Command Center · Juan & Iñigo
+   ============================================================ */
+
+// ---------- I18N ----------
+const I18N = {
+  fr: {'nav.overview':'Vue d\'ensemble','nav.clients':'Clients PME','nav.revenue':'Revenus & MRR','nav.analytics':'Analytics','nav.agents':'Agents IA','nav.ops':'Ops · Infra','nav.support':'Support','nav.growth':'Growth','nav.campaigns':'Broadcasts','nav.alerts':'Alertes','nav.settings':'Paramètres'},
+  es: {'nav.overview':'Vista general','nav.clients':'Clientes PyMEs','nav.revenue':'Ingresos & MRR','nav.analytics':'Analítica','nav.agents':'Agentes IA','nav.ops':'Ops · Infra','nav.support':'Soporte','nav.growth':'Crecimiento','nav.campaigns':'Difusiones','nav.alerts':'Alertas','nav.settings':'Ajustes'},
+  en: {'nav.overview':'Overview','nav.clients':'SMB Clients','nav.revenue':'Revenue & MRR','nav.analytics':'Analytics','nav.agents':'AI Agents','nav.ops':'Ops · Infra','nav.support':'Support','nav.growth':'Growth','nav.campaigns':'Broadcasts','nav.alerts':'Alerts','nav.settings':'Settings'}
+};
+const t = (k) => (Px.state && I18N[Px.state.lang] && I18N[Px.state.lang][k]) || k;
+
+// ---------- MOCK DATA — 50 PME clients ----------
+const CITIES_CL = ['Santiago','Viña del Mar','Concepción','La Serena','Antofagasta','Valparaíso','Temuco','Rancagua','Iquique','Puerto Montt','Punta Arenas','Chillán','Arica','Osorno','Calama'];
+const INDUSTRIES = ['Panadería','Peluquería','Restaurante','Boutique','Clínica dental','Taller mecánico','Estudio yoga','Ferretería','Cafetería','Veterinaria','Dulcería','Abogacía','Contador','Gimnasio','Spa','Óptica','Librería','Floristería'];
+const PLANS = [
+  {id:'free',n:'Free',price:0,color:'free'},
+  {id:'starter',n:'Starter',price:15,color:'starter'},
+  {id:'pro',n:'Pro',price:29,color:'pro'},
+  {id:'scale',n:'Scale',price:69,color:'scale'}
+];
+
+function generateClients(){
+  const names = ['Don Carlos','Bella Vista','Casa del Pan','Peluquería María','Dr. Ramírez','Café Central','La Esquina','Don Tito','Flores Valentina','Panadería San Pedro','Taller Los Andes','Spa Zen','Clínica Smile','Yoga Aurora','Boutique Luna','Ferretería El Clavo','Contabilidad Gómez','Estudio Jurídico Soto','Gimnasio Power','Óptica Visión','Librería Cervantes','Dulcería Anita','Veterinaria Patitas','Mecánica Rápida','Restaurante El Parrón','Café La Nube','Panadería Araucana','Spa Termal','Peluquería Chic','Dental Care','Clínica Integral','Escuela de Música','Tienda Orgánica','Yoga Studio','Barbería Retro','Cervecería Artesanal','Heladería Italiana','Tattoo Studio','Pizzería Don Pepe','Floristería Rosa','Panadería Doña Rosa','Pastelería Dulce','Cafetería Montaña','Librería del Mar','Academia Baile','Óptica del Centro','Abogados Asociados','Papelería San José','Mueblería Norte','Panificadora Austral'];
+  return names.map((n,i) => {
+    const plan = i<6 ? PLANS[3] : i<22 ? PLANS[2] : i<38 ? PLANS[1] : PLANS[0];
+    const city = CITIES_CL[i % CITIES_CL.length];
+    const ind = INDUSTRIES[i % INDUSTRIES.length];
+    const health = Math.max(20, Math.min(100, 85 - (i % 13) * 4 + (i%3)*5));
+    const mrr = plan.price;
+    const days = Math.floor(Math.random()*180) + 5;
+    const conv = Math.floor(Math.random()*3000) + 200;
+    const lastSeen = (i%5===0) ? 'Jamais' : `Il y a ${Math.floor(Math.random()*12)+1}h`;
+    const churnRisk = health < 40 ? 'high' : health < 65 ? 'medium' : 'low';
+    const colors = ['#1A56DB','#22C55E','#7A3CFF','#F59E0B','#06B6D4','#EC4899','#EF4444','#8B5CF6'];
+    return {
+      id:i+1, name:n, initials: n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(),
+      color: colors[i%colors.length],
+      owner: ['Carlos','María','Diego','Ana','Pablo','Valentina','Sofía','Rodrigo','Carmen','Andrés'][i%10]+' '+['Muñoz','González','Ramírez','Silva','Herrera','Rojas','Pinto','Vega','López','Fuentes'][i%10],
+      city, industry:ind, plan, mrr, health, days, conv, lastSeen, churnRisk,
+      tenure: Math.floor(days/30), // months
+      nps: Math.floor(Math.random()*40) + 50,
+      features_used: Math.floor(Math.random()*7) + 3,
+      tickets: Math.floor(Math.random()*3)
+    };
+  });
+}
+
+const CLIENTS = generateClients();
+
+const MOCK_FEED = [
+  {t:'Il y a 4 sec',ic:'💰',k:'g',title:'Panadería Don Carlos → Pro 29€/mois',sub:'Upgrade depuis Starter · +14€ MRR'},
+  {t:'Il y a 18 sec',ic:'📬',k:'',title:'Spa Zen — 324 messages WhatsApp traités',sub:'API: 112 Claude tokens · 0.12€ coût'},
+  {t:'Il y a 1 min',ic:'🎯',k:'',title:'Dental Care lance campagne "Check-up avril"',sub:'187 destinataires · Taux d\'ouverture prédit 76%'},
+  {t:'Il y a 3 min',ic:'⚠️',k:'a',title:'Taller Los Andes → health score à 38%',sub:'Churn risk: HIGH · 0 conversations depuis 8j'},
+  {t:'Il y a 7 min',ic:'✨',k:'v',title:'Nouveau signup → Heladería Italiana',sub:'Antofagasta · Plan Starter · Via landing LATAM'},
+  {t:'Il y a 11 min',ic:'💬',k:'g',title:'Restaurante El Parrón — 5★ NPS',sub:'Feedback: "Nexus cambió nuestra operación"'},
+  {t:'Il y a 14 min',ic:'📊',k:'',title:'Rapport hebdo envoyé à 47 clients',sub:'Auto-généré · 0 erreur'},
+  {t:'Il y a 22 min',ic:'🔌',k:'',title:'Clínica Smile connecte Mercado Pago',sub:'Intégration Stripe → MP · 12 min setup'},
+  {t:'Il y a 34 min',ic:'🚨',k:'r',title:'Incident résolu: lag WhatsApp API 3 min',sub:'17 clients impactés · SLA respecté'},
+  {t:'Il y a 45 min',ic:'🎓',k:'v',title:'Iñigo a pushé v0.1.3 en prod',sub:'Feature: transcription vocale multilang'},
+  {t:'Il y a 1 h',ic:'💌',k:'',title:'Referral: Café Central → Boutique Luna',sub:'Credit 30€ appliqué'},
+];
+
+const MOCK_ALERTS = [
+  {id:1,lvl:'red',title:'Churn imminent — Taller Los Andes',body:'Health 38%, 0 message 8 jours, 2 tickets ouverts. Action recommandée: appel CEO.',age:'Il y a 12 min'},
+  {id:2,lvl:'amber',title:'Trial expire dans 48h — Floristería Rosa',body:'A utilisé 12 features sur 15, Pro recommended. Email automatisé envoyé.',age:'Il y a 1h'},
+  {id:3,lvl:'amber',title:'Paiement échoué — Spa Termal',body:'Visa expirée. 3 tentatives Stripe auto. Relance manuelle conseillée.',age:'Il y a 2h'},
+  {id:4,lvl:'blue',title:'Opportunity — 3 clients prêts pour Scale',body:'Dental Care, Abogados Asociados, Contabilidad Gómez dépassent 80% usage Pro.',age:'Il y a 5h'},
+];
+
+const INCIDENTS_LOG = [
+  {t:'14:23:04',lvl:'ok',msg:'All systems nominal · MRR ticker → 14,726 €'},
+  {t:'14:22:41',lvl:'info',msg:'n8n workflow "daily-summary" triggered for 47 tenants'},
+  {t:'14:21:18',lvl:'info',msg:'Claude API call · pool: 680k tokens consumed today (68%)'},
+  {t:'14:19:55',lvl:'warn',msg:'WhatsApp API p95 latency: 420ms (threshold 300ms)'},
+  {t:'14:18:02',lvl:'ok',msg:'Supabase connections: 142/500 pool'},
+  {t:'14:15:33',lvl:'info',msg:'Tenant "clinica-smile" webhook retried (attempt 2/3) — SUCCESS'},
+  {t:'14:14:01',lvl:'ok',msg:'Stripe payment success · 3 invoices · €87 collected'},
+  {t:'14:12:45',lvl:'info',msg:'Backup incremental DB → S3-santiago-1 complete (4.2 GB)'},
+  {t:'14:10:22',lvl:'warn',msg:'Tenant "taller-los-andes" — health score dropped 42→38'},
+  {t:'14:08:17',lvl:'ok',msg:'Deploy v0.1.3 → prod · zero downtime (rolling)'},
+  {t:'14:05:40',lvl:'err',msg:'WhatsApp tenant "spa-termal" — 3 msg failed (rate limit)'},
+  {t:'14:05:41',lvl:'info',msg:'  └─ auto-retry queue: reprocessing in 30s'},
+  {t:'14:06:11',lvl:'ok',msg:'  └─ all 3 messages delivered'},
+];
+
+// ---------- STATE ----------
+const DEFAULT_STATE = {
+  lang:'fr', theme:'light', view:'overview',
+  clients:CLIENTS,
+  mrrLive:14726,
+  mrrGoal:25000,
+  alerts:MOCK_ALERTS,
+  feed:MOCK_FEED,
+  incidents:INCIDENTS_LOG,
+  clientFilter:'all', clientSearch:'', clientSort:'mrr',
+  prefs:{desktopNotif:true,autoAlerts:true,weekendMode:false}
+};
+
+const STORAGE_KEY = 'nexus_pulse_state_v1';
+
+const Px = {
+  state:null,
+  init(){
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) try{ this.state = JSON.parse(saved); }catch{this.state = JSON.parse(JSON.stringify(DEFAULT_STATE));}
+    else this.state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+    this.renderNav();
+    this.applyTheme();
+    window.addEventListener('hashchange',()=>this.routeFromHash());
+    window.addEventListener('keydown',e=>{
+      if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();this.openPalette()}
+      if(e.key==='Escape'){this.closePalette();this.closeModal()}
+    });
+    this.routeFromHash();
+    this.startLive();
+    setTimeout(()=>this.toast('Cockpit Nexus Pulse ouvert','success','47 clients PyMEs · MRR 14,726 €'),800);
+  },
+  save(){ localStorage.setItem(STORAGE_KEY,JSON.stringify(this.state)); },
+  reset(){ localStorage.removeItem(STORAGE_KEY); location.reload(); },
+
+  startLive(){
+    // Live MRR ticker
+    setInterval(()=>{
+      if (Math.random() > 0.7) {
+        const inc = Math.floor(Math.random()*15)+3;
+        this.state.mrrLive += inc;
+        const el = document.getElementById('mrrLive');
+        if (el) {
+          el.textContent = '€ ' + this.state.mrrLive.toLocaleString('fr-FR');
+          el.classList.add('ticker-up');
+          setTimeout(()=>el.classList.remove('ticker-up'),800);
+        }
+      }
+    }, 5000);
+
+    // Live feed items
+    setInterval(()=>{
+      if (Math.random() > 0.6) {
+        const events = [
+          {ic:'💬',k:'',title:'Nouvelle conversation WhatsApp',sub:['Clínica Smile','Spa Zen','Café Central','Dulcería Anita'][Math.floor(Math.random()*4)]+' · API usage +0,08€'},
+          {ic:'✨',k:'v',title:'Tip IA accepté par un client',sub:['Don Carlos','María','Diego','Ana'][Math.floor(Math.random()*4)]+' a lancé la promo suggérée'},
+          {ic:'💰',k:'g',title:'Nouveau paiement Stripe',sub:'29€ · Pro · ' + ['Valentina','Carmen','Rodrigo'][Math.floor(Math.random()*3)]},
+          {ic:'📊',k:'',title:'Rapport mensuel généré',sub:'PDF envoyé à ' + (Math.floor(Math.random()*10)+5) + ' clients'}
+        ];
+        const e = events[Math.floor(Math.random()*events.length)];
+        this.state.feed.unshift({t:'À l\'instant',ic:e.ic,k:e.k,title:e.title,sub:e.sub});
+        if (this.state.feed.length > 15) this.state.feed.pop();
+        if (this.state.view === 'overview') this.renderView();
+      }
+    }, 8000);
+  },
+
+  navigate(v){ this.state.view = v; this.save(); location.hash = '#/'+v; },
+  routeFromHash(){
+    const h = location.hash.replace('#/','') || 'overview';
+    this.state.view = h;
+    this.renderView();
+    const map = {overview:'Vue d\'ensemble',clients:'Clients PME',revenue:'Revenus & MRR',analytics:'Analytics',agents:'Agents IA',ops:'Ops · Infra',support:'Support',growth:'Growth',broadcasts:'Broadcasts',alerts:'Alertes',settings:'Paramètres'};
+    document.getElementById('breadcrumb').textContent = map[h]||h;
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.view===h));
+  },
+
+  renderNav(){
+    const items = [
+      {v:'overview',ic:'🌐',l:'nav.overview'},
+      {v:'clients',ic:'🏢',l:'nav.clients',meta:'47',metaClass:'green'},
+      {v:'revenue',ic:'💰',l:'nav.revenue',meta:'€'},
+      {v:'analytics',ic:'📊',l:'nav.analytics'},
+      {v:'agents',ic:'🤖',l:'nav.agents'},
+      {v:'ops',ic:'⚡',l:'nav.ops',meta:'OK',metaClass:'green'},
+      {v:'support',ic:'🎧',l:'nav.support',meta:'3',metaClass:'amber'},
+      {v:'growth',ic:'🚀',l:'nav.growth'},
+      {v:'broadcasts',ic:'📢',l:'nav.campaigns'},
+      {v:'alerts',ic:'🔔',l:'nav.alerts',meta:'4',metaClass:'red'},
+      {v:'settings',ic:'⚙️',l:'nav.settings'},
+    ];
+    document.getElementById('navContainer').innerHTML = items.map(i=>`
+      <div class="nav-item" data-view="${i.v}" onclick="Px.navigate('${i.v}')">
+        <div class="nav-ic">${i.ic}</div>
+        <div class="nav-lbl">${t(i.l)}</div>
+        ${i.meta?`<span class="nav-meta ${i.metaClass||''}">${i.meta}</span>`:''}
+      </div>`).join('');
+  },
+
+  setLang(l){
+    this.state.lang = l;
+    document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.remove('on'));
+    document.getElementById('lang-'+l).classList.add('on');
+    this.renderNav();
+    this.save();
+    this.renderView();
+  },
+
+  toggleTheme(){
+    this.state.theme = this.state.theme === 'light' ? 'dark' : 'light';
+    this.applyTheme();
+    this.save();
+  },
+  applyTheme(){ document.documentElement.dataset.theme = this.state.theme; },
+
+  toast(msg,type='info',body=''){
+    const icons={success:'✅',info:'💡',warn:'⚠️',error:'❌'};
+    const d=document.createElement('div'); d.className='toast '+type;
+    d.innerHTML=`<span class="i">${icons[type]||'💡'}</span><div class="toast-body"><b>${msg}</b>${body?`<small>${body}</small>`:''}</div>`;
+    document.getElementById('toast-container').appendChild(d);
+    setTimeout(()=>{d.style.opacity='0';d.style.transform='translateX(20px)';setTimeout(()=>d.remove(),300)},4500);
+  },
+
+  openModal(type,data){
+    const ov=document.getElementById('modal-overlay'), mc=document.getElementById('modal-content');
+    ov.classList.remove('hidden');
+    let html='';
+    if (type==='alerts') {
+      html = `<div class="modal-hd"><h3>🔔 Alertes actives — ${this.state.alerts.length}</h3><button class="modal-close" onclick="Px.closeModal()">✕</button></div>
+      <div class="modal-body">
+        ${this.state.alerts.map(a=>`
+          <div style="padding:14px;border-radius:10px;margin-bottom:10px;background:var(--${a.lvl==='red'?'red-soft':a.lvl==='amber'?'amber-soft':'blue-soft'});border-left:4px solid var(--${a.lvl==='red'?'red':a.lvl==='amber'?'amber':'blue'})">
+            <div class="flex between" style="margin-bottom:6px"><b style="font-size:13px">${a.title}</b><span class="chip" style="font-size:10px">${a.age}</span></div>
+            <div style="font-size:12px;color:var(--ink2)">${a.body}</div>
+            <div class="mt8"><button class="btn btn-p" style="font-size:11px" onclick="Px.toast('Action déclenchée','success');Px.closeModal()">Agir maintenant</button> <button class="btn btn-s" style="font-size:11px" onclick="Px.toast('Marqué comme lu','info')">Marquer lu</button></div>
+          </div>`).join('')}
+      </div>`;
+    } else if (type==='broadcast') {
+      html = `<div class="modal-hd"><h3>📢 Broadcast à tous les clients PME</h3><button class="modal-close" onclick="Px.closeModal()">✕</button></div>
+      <div class="modal-body">
+        <div style="margin-bottom:12px"><label style="font-size:11px;color:var(--muted);font-weight:700">CIBLE</label>
+          <select class="form-ctrl" style="margin-top:4px">
+            <option>🏢 Tous les clients (47)</option>
+            <option>💎 Clients Pro+Scale (28)</option>
+            <option>🆕 Nouveaux inscrits (cette semaine)</option>
+            <option>⚠️ Health score &lt; 50 (7)</option>
+            <option>🌎 Par ville / région</option>
+          </select></div>
+        <div style="margin-bottom:12px"><label style="font-size:11px;color:var(--muted);font-weight:700">TYPE</label>
+          <select class="form-ctrl" style="margin-top:4px">
+            <option>📣 Announcement produit</option>
+            <option>🎯 Tip métier (IA)</option>
+            <option>📊 Rapport perso mensuel</option>
+            <option>🎁 Offre promo / discount</option>
+            <option>📝 Changelog</option>
+          </select></div>
+        <div style="margin-bottom:12px"><label style="font-size:11px;color:var(--muted);font-weight:700">MESSAGE (ES auto-traduit)</label>
+          <textarea class="form-ctrl" style="margin-top:4px" rows="4">🎉 Nueva versión v0.1.3 disponible. Novedades: transcripción de audios WhatsApp en FR/ES/EN, exportación PDF mensual automatizada, modo vacaciones optimizado.
+
+Abre tu Nexus para descubrir las novedades.</textarea></div>
+        <div class="flex" style="gap:6px"><span class="chip blue">47 destinataires</span><span class="chip green">Coût: 0,04€</span><span class="chip">Délai: instantané</span></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-s" onclick="Px.closeModal()">Annuler</button>
+        <button class="btn btn-s" onclick="Px.toast('Brouillon sauvé','success')">💾 Brouillon</button>
+        <button class="btn btn-p" onclick="Px.toast('Broadcast envoyé à 47 PyMEs','success','Taux d\\'ouverture prédit: 78%');Px.closeModal()">🚀 Envoyer</button>
+      </div>`;
+    } else if (type==='client'&&data) {
+      const c = data;
+      html = `<div class="modal-hd"><h3>🏢 ${c.name}</h3><button class="modal-close" onclick="Px.closeModal()">✕</button></div>
+      <div class="modal-body">
+        <div class="flex" style="gap:14px;margin-bottom:18px">
+          <div class="client-av" style="width:56px;height:56px;font-size:16px;background:${c.color}">${c.initials}</div>
+          <div style="flex:1"><div style="font-weight:700;font-size:16px">${c.name}</div><div style="font-size:12px;color:var(--muted)">${c.owner} · ${c.city}, Chile · ${c.industry}</div><div style="margin-top:4px"><span class="chip plan-${c.plan.color}">${c.plan.n} · €${c.plan.price}/mo</span> <span class="chip">${c.tenure} mois</span> <span class="chip">${c.conv} conv.</span></div></div>
+          <div style="text-align:right"><div style="font-size:26px;font-weight:800;color:var(--blue);font-family:'JetBrains Mono',monospace">${c.health}%</div><div style="font-size:10px;color:var(--muted)">HEALTH</div></div>
+        </div>
+        <div class="g3" style="margin-bottom:16px">
+          <div class="card" style="padding:12px;text-align:center"><div style="font-size:10px;color:var(--muted)">MRR</div><div style="font-size:18px;font-weight:800;font-family:'JetBrains Mono',monospace">€${c.mrr}</div></div>
+          <div class="card" style="padding:12px;text-align:center"><div style="font-size:10px;color:var(--muted)">NPS</div><div style="font-size:18px;font-weight:800;color:var(--green);font-family:'JetBrains Mono',monospace">${c.nps}</div></div>
+          <div class="card" style="padding:12px;text-align:center"><div style="font-size:10px;color:var(--muted)">FEATURES</div><div style="font-size:18px;font-weight:800;font-family:'JetBrains Mono',monospace">${c.features_used}/15</div></div>
+        </div>
+        <div style="margin-bottom:14px"><b style="font-size:12px">🎯 Prédictions IA</b>
+          <div style="padding:10px;background:var(--bg2);border-radius:8px;margin-top:6px;font-size:12px">
+            <div>Churn risk: <span class="chip ${c.churnRisk==='high'?'red':c.churnRisk==='medium'?'amber':'green'}">${c.churnRisk.toUpperCase()}</span></div>
+            <div style="margin-top:6px">LTV prédit: <b class="mono">€${(c.mrr * (c.churnRisk==='high'?8:c.churnRisk==='medium'?18:36))}</b></div>
+            <div style="margin-top:6px">Upsell opportunity: ${c.plan.price < 29 && c.features_used >= 7 ? '<span class="chip violet">Pro recommended</span>' : c.plan.price < 69 && c.features_used >= 12 ? '<span class="chip violet">Scale recommended</span>' : '—'}</div>
+          </div></div>
+        <div><b style="font-size:12px">📅 Timeline récente</b>
+          <div class="timeline" style="margin-top:10px">
+            <div class="tl-item g"><div class="tl-time">Aujourd'hui · 12:40</div><div class="tl-body">Campagne lancée · 184 destinataires</div></div>
+            <div class="tl-item"><div class="tl-time">Hier · 09:15</div><div class="tl-body">Rapport mensuel téléchargé</div></div>
+            <div class="tl-item a"><div class="tl-time">Il y a 3 jours</div><div class="tl-body">Tip IA refusé (client sceptique)</div></div>
+            <div class="tl-item"><div class="tl-time">Il y a 1 semaine</div><div class="tl-body">Invite collaborateur (co-gérant)</div></div>
+          </div></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-s" onclick="Px.toast('Message envoyé au client','success')">💬 Message direct</button>
+        <button class="btn btn-s" onclick="Px.toast('Call programmé (démo)','info')">📞 Planifier un call</button>
+        <button class="btn btn-p" onclick="window.open('app.html','_blank');Px.closeModal()">🔓 Voir son app Nexus →</button>
+      </div>`;
+    } else if (type==='ai-copilot') {
+      html = `<div class="modal-hd"><h3>✨ Nexus Copilot — Ops assistant</h3><button class="modal-close" onclick="Px.closeModal()">✕</button></div>
+      <div class="modal-body" style="padding:0">
+        <div id="copilotMsgs" style="padding:20px;max-height:420px;overflow-y:auto">
+          <div style="padding:12px 14px;background:var(--bg2);border-radius:10px;font-size:13px">Hola Juan & Iñigo 👋 Je suis votre copilote Pulse. Demande-moi : "quels clients à risque ?", "prédit le MRR", "génère un rapport investisseur"…</div>
+        </div>
+        <div style="padding:12px;border-top:1px solid var(--line);display:flex;gap:8px">
+          <input class="form-ctrl" id="copilotInput" placeholder="Demande-moi quelque chose…" onkeypress="if(event.key==='Enter')Px.askCopilot()"/>
+          <button class="btn btn-p" onclick="Px.askCopilot()">→</button>
+        </div>
+        <div style="padding:0 14px 14px;display:flex;gap:6px;flex-wrap:wrap">
+          ${['🔥 Clients à risque churn','📈 Prédit le MRR fin de mois','📊 Rapport investisseurs Q2','🎯 Top opportunités upsell','⚡ Ops à automatiser'].map(q=>`<button class="btn-g" onclick="Px.askCopilot('${q}')">${q}</button>`).join('')}
+        </div>
+      </div>`;
+    }
+    mc.innerHTML = html;
+  },
+
+  closeModal(){ document.getElementById('modal-overlay').classList.add('hidden'); },
+
+  openAiCopilot(){ this.openModal('ai-copilot'); },
+  askCopilot(preset){
+    const inp = document.getElementById('copilotInput');
+    const q = preset || inp.value.trim();
+    if (!q) return;
+    const msgs = document.getElementById('copilotMsgs');
+    msgs.innerHTML += `<div style="margin-top:12px;padding:12px 14px;background:linear-gradient(135deg,var(--blue-soft),var(--violet-soft));border-radius:10px;font-size:13px;text-align:right">${q}</div>`;
+    inp.value='';
+    msgs.scrollTop = msgs.scrollHeight;
+    setTimeout(()=>{
+      let answer = '';
+      const qL = q.toLowerCase();
+      if (qL.includes('risque') || qL.includes('churn')) {
+        answer = `🔥 <b>7 clients à haut risque de churn</b> :<br>• <b>Taller Los Andes</b> (38%) — 0 message 8j, 2 tickets ouverts<br>• <b>Gimnasio Power</b> (34%) — paiement échoué, Visa expirée<br>• <b>Floristería Rosa</b> (41%) — trial expire dans 48h<br>• <b>Panadería Araucana</b> (39%) — utilisation sous 10% features<br>→ Action recommandée : appel CEO sous 24h pour les 3 premiers.`;
+      } else if (qL.includes('mrr')||qL.includes('prédi')) {
+        answer = `📈 <b>Prédiction MRR 30 avril 2026</b> : <b>€ 17,420</b> (intervalle: 16,800 - 18,100).<br>• +3 upgrades Pro attendus (Dental Care, Abogados Asociados, Contabilidad Gómez)<br>• -1 churn probable (Taller Los Andes)<br>• +2 nouveaux signups estimés (pipeline landing)<br>Modèle: régression linéaire 90j + scoring santé (R² = 0.89)`;
+      } else if (qL.includes('rapport')||qL.includes('invest')) {
+        answer = `📊 <b>Q2 2026 — Rapport investisseurs auto-généré</b> :<br>• MRR : €14,726 (+9,2% MoM)<br>• ARR : €176,712<br>• Clients payants : 38/47 (81%)<br>• NRR : 108% (upgrades compensent churn)<br>• CAC : €47 · LTV : €820 · Ratio 17x<br>• Gross margin : 81%<br>→ Rapport PDF prêt, je te l'envoie par email ?`;
+      } else if (qL.includes('upsell')||qL.includes('opport')) {
+        answer = `🎯 <b>Top 5 upsells Pro → Scale (€69)</b> :<br>1. Dental Care — 13/15 features, NPS 92<br>2. Abogados Asociados — 12/15, 340 conv./mois<br>3. Contabilidad Gómez — 11/15, multi-équipe<br>4. Panadería Don Carlos — 10/15, champion<br>5. Clínica Smile — 10/15, multi-canal actif<br>Potentiel : +€200/mois (+1,4% MRR). Séquence email pré-écrite dispo.`;
+      } else if (qL.includes('ops')||qL.includes('automat')) {
+        answer = `⚡ <b>3 ops à automatiser</b> (ROI estimé) :<br>1. <b>Onboarding video perso</b> — économise 2h/nouveau client (HeyGen API)<br>2. <b>QBR PDF auto</b> mensuel pour Scale — économise 4h/mois<br>3. <b>Dunning Stripe smart</b> (actuel retry x3 basique) — récup. +€400/an<br>Total : ~25h/mois gagnées, ~€500/an récupérés.`;
+      } else {
+        answer = `🤖 Je peux vous aider sur : <b>churn analysis</b>, <b>prédictions MRR</b>, <b>rapports investisseurs</b>, <b>opportunités upsell</b>, <b>ops automation</b>, <b>segmentation clients</b>, <b>next best actions</b>. Demandez-moi précisément !`;
+      }
+      msgs.innerHTML += `<div style="margin-top:10px;padding:12px 14px;background:var(--bg2);border-radius:10px;font-size:13px;line-height:1.7">${answer}</div>`;
+      msgs.scrollTop = msgs.scrollHeight;
+    }, 500);
+  },
+
+  // ---------- COMMAND PALETTE ----------
+  openPalette(){
+    document.getElementById('command-palette').classList.remove('hidden');
+    document.getElementById('cpInput').value='';
+    this.renderPaletteResults('');
+    setTimeout(()=>document.getElementById('cpInput').focus(),40);
+    document.getElementById('cpInput').oninput = e=>this.renderPaletteResults(e.target.value);
+  },
+  closePalette(){ document.getElementById('command-palette').classList.add('hidden'); },
+  renderPaletteResults(q){
+    q = q.toLowerCase();
+    const groups = [
+      {g:'Navigation',items:[
+        {ic:'🌐',label:'Vue d\'ensemble',fn:()=>this.navigate('overview')},
+        {ic:'🏢',label:'Clients PME',fn:()=>this.navigate('clients')},
+        {ic:'💰',label:'Revenus & MRR',fn:()=>this.navigate('revenue')},
+        {ic:'📊',label:'Analytics',fn:()=>this.navigate('analytics')},
+        {ic:'🤖',label:'Agents IA',fn:()=>this.navigate('agents')},
+        {ic:'⚡',label:'Ops · Infra',fn:()=>this.navigate('ops')},
+        {ic:'🎧',label:'Support',fn:()=>this.navigate('support')},
+        {ic:'🚀',label:'Growth',fn:()=>this.navigate('growth')},
+      ]},
+      {g:'Actions',items:[
+        {ic:'📢',label:'Lancer broadcast',fn:()=>this.openModal('broadcast')},
+        {ic:'✨',label:'Nexus Copilot',fn:()=>this.openAiCopilot()},
+        {ic:'🔔',label:'Voir alertes',fn:()=>this.openModal('alerts')},
+        {ic:'📄',label:'Exporter rapport investisseurs',fn:()=>{this.toast('Rapport PDF en génération','info');setTimeout(()=>window.print(),800)}},
+        {ic:'🚨',label:'Mode incident',fn:()=>this.toast('🚨 Mode incident activé','warn','On-call notifié')},
+        {ic:'🎯',label:'Créer campagne cross-client',fn:()=>this.openModal('broadcast')},
+      ]},
+      {g:'Clients',items:this.state.clients.slice(0,10).map(c=>({ic:'🏢',label:c.name,meta:c.city,fn:()=>this.openModal('client',c)}))}
+    ];
+    let html='';
+    groups.forEach((grp,gi)=>{
+      const f = grp.items.filter(i=>!q||i.label.toLowerCase().includes(q));
+      if (f.length) {
+        html += `<div class="cp-group-title">${grp.g}</div>`;
+        f.forEach(it=>{
+          html += `<div class="cp-item" onclick='Px._cp(${gi},${grp.items.indexOf(it)})'><span style="font-size:15px">${it.ic}</span><span>${it.label}</span>${it.meta?`<span class="meta">${it.meta}</span>`:''}</div>`;
+        });
+      }
+    });
+    this._cpCache = groups;
+    document.getElementById('cpResults').innerHTML = html || '<div style="padding:30px;text-align:center;color:var(--muted);font-size:13px">Aucun résultat</div>';
+  },
+  _cp(gi,ii){ this._cpCache[gi].items[ii].fn(); this.closePalette(); },
+
+  // ---------- VIEW RENDERING ----------
+  renderView(){
+    const vc = document.getElementById('viewContainer');
+    const v = this.state.view;
+    if (v==='overview') vc.innerHTML = this.viewOverview();
+    else if (v==='clients') vc.innerHTML = this.viewClients();
+    else if (v==='revenue') vc.innerHTML = this.viewRevenue();
+    else if (v==='analytics') vc.innerHTML = this.viewAnalytics();
+    else if (v==='agents') vc.innerHTML = this.viewAgents();
+    else if (v==='ops') vc.innerHTML = this.viewOps();
+    else if (v==='support') vc.innerHTML = this.viewSupport();
+    else if (v==='growth') vc.innerHTML = this.viewGrowth();
+    else if (v==='broadcasts') vc.innerHTML = this.viewBroadcasts();
+    else if (v==='alerts') vc.innerHTML = this.viewAlerts();
+    else if (v==='settings') vc.innerHTML = this.viewSettings();
+    else vc.innerHTML = '<div class="view"><h1>Page inconnue</h1><a href="#/overview" style="color:var(--blue)">Retour Overview</a></div>';
+  },
+
+  // ---------- OVERVIEW ----------
+  viewOverview(){
+    const total = this.state.clients.length;
+    const payingC = this.state.clients.filter(c=>c.plan.price>0).length;
+    const avgHealth = Math.round(this.state.clients.reduce((a,c)=>a+c.health,0)/total);
+    const churnRisk = this.state.clients.filter(c=>c.churnRisk==='high').length;
+
+    return `
+      <div class="view">
+        <div class="page-hd">
+          <div><h1>🌐 <em>Bonjour Juan & Iñigo</em> · Chili, 14:23</h1><div class="sub">47 PyMEs actives · MRR live · 0 incidents critiques</div></div>
+          <div class="flex">
+            <button class="btn btn-s" onclick="Px.openModal('broadcast')">📢 Broadcast</button>
+            <button class="btn btn-s" onclick="window.print()">📄 Rapport PDF</button>
+            <button class="btn btn-gradient" onclick="Px.openAiCopilot()">✨ Copilot IA</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          ${this.kpi('💰','MRR',`€ ${this.state.mrrLive.toLocaleString('fr-FR')}`,9.2,'+€1,247 vs mois dernier','g',this.sparkSvg([10,11,9,14,12,18,16,22,24,27,31,34],'#22C55E'))}
+          ${this.kpi('🏢','Clients payants',`${payingC} / ${total}`,5.1,`+${Math.round(payingC*0.051)} ce mois`,'',this.sparkSvg([30,32,31,35,34,38,40,42,44,45,46,47]))}
+          ${this.kpi('❤️','Health moyen',`${avgHealth}%`,-2,`${churnRisk} clients à risque élevé`,'a',this.sparkSvg([78,80,79,76,75,73,74,72,71,72,70,avgHealth/100*100],'#F59E0B'))}
+          ${this.kpi('🤖','Msg IA traités','142,304',18,'cette semaine · 3,2% erreurs','v',this.sparkSvg([80,85,90,100,105,115,120,130,138,140,142,142],'#7A3CFF'))}
+        </div>
+
+        <div class="g2">
+          <div class="card">
+            <div class="card-hd"><h3>📊 MRR growth · 6 derniers mois</h3>
+              <div class="actions"><button class="btn-g">Annuel</button><button class="btn-g" style="color:var(--blue);border-color:var(--blue)">Mois</button></div></div>
+            <div class="card-body">
+              ${this.revenueChart()}
+              <div class="g3 mt16">
+                ${[
+                  {k:'ARR',v:'€176,712',sub:'+9,2% MoM'},
+                  {k:'NRR',v:'108%',sub:'Upgrades > churn'},
+                  {k:'Gross margin',v:'81%',sub:'Stack 0€ paye'}
+                ].map(x=>`<div style="padding:14px;background:var(--bg2);border-radius:10px;text-align:center">
+                  <div style="font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.08em;text-transform:uppercase">${x.k}</div>
+                  <div style="font-size:22px;font-weight:800;font-family:'JetBrains Mono',monospace;margin:4px 0">${x.v}</div>
+                  <div style="font-size:11px;color:var(--green)">${x.sub}</div></div>`).join('')}
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-hd"><h3>⚡ Activity live</h3><span class="chip green"><span style="width:6px;height:6px;background:currentColor;border-radius:50%;animation:pulse 1.5s infinite;display:inline-block"></span>LIVE</span></div>
+            <div class="feed">
+              ${this.state.feed.slice(0,12).map(f=>`
+                <div class="feed-item">
+                  <div class="feed-ic ${f.k}">${f.ic}</div>
+                  <div class="feed-body">
+                    <div class="feed-title">${f.title}</div>
+                    <div class="feed-sub">${f.sub}</div>
+                  </div>
+                  <div class="feed-time">${f.t}</div>
+                </div>`).join('')}
+            </div>
+          </div>
+        </div>
+
+        <div class="g2">
+          <div class="card">
+            <div class="card-hd"><h3>🗺️ Carte du Chili · 47 clients actifs</h3>
+              <div class="actions">
+                <button class="btn-g">Santiago (18)</button>
+                <button class="btn-g">Toutes régions</button>
+              </div></div>
+            <div class="card-body">
+              <div class="map-wrap">
+                ${this.chileMap()}
+                <div style="position:absolute;bottom:10px;right:12px;padding:8px 12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;font-size:11px;display:flex;gap:10px">
+                  <div class="flex" style="gap:4px"><span class="map-marker" style="position:relative;top:0;left:0"></span>Actif</div>
+                  <div class="flex" style="gap:4px"><span class="map-marker amber" style="position:relative;top:0;left:0"></span>Trial</div>
+                  <div class="flex" style="gap:4px"><span class="map-marker red" style="position:relative;top:0;left:0"></span>À risque</div>
+                  <div class="flex" style="gap:4px"><span class="map-marker violet" style="position:relative;top:0;left:0"></span>Scale</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-hd"><h3>🚨 Alertes prioritaires</h3><span class="chip red">${this.state.alerts.length}</span></div>
+            <div class="card-body" style="padding:0">
+              ${this.state.alerts.map(a=>`
+                <div style="padding:12px 18px;border-bottom:1px solid var(--line2);display:flex;gap:10px;align-items:flex-start;cursor:pointer" onclick="Px.openModal('alerts')">
+                  <div style="width:28px;height:28px;background:var(--${a.lvl==='red'?'red-soft':a.lvl==='amber'?'amber-soft':'blue-soft'});color:var(--${a.lvl==='red'?'red':a.lvl==='amber'?'amber':'blue'});border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">🔔</div>
+                  <div style="flex:1"><div style="font-size:12.5px;font-weight:600">${a.title}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${a.age}</div></div>
+                  <button class="btn-g" style="align-self:flex-start">→</button>
+                </div>`).join('')}
+            </div>
+          </div>
+        </div>
+
+        <div class="g3">
+          ${this.summaryCard('🎯','Objectif MRR mensuel','€14,726 / €25,000','59% atteint','violet',59)}
+          ${this.summaryCard('🏆','NPS moyen','68','Promoteurs > détracteurs x3','green',68)}
+          ${this.summaryCard('⚡','Uptime 30j','99,96%','SLA: 99,9%','green',99.96)}
+        </div>
+
+        <div class="card">
+          <div class="card-hd"><h3>🧬 Top 10 clients par impact business</h3></div>
+          <div style="padding:0 18px 18px">
+            <div class="client-row table-hd"><span>#</span><span>Client</span><span>Plan</span><span>MRR</span><span>Health</span><span>NPS</span><span>Dernier vu</span><span></span></div>
+            ${this.state.clients.sort((a,b)=>b.mrr*b.health-a.mrr*a.health).slice(0,10).map((c,i)=>this.clientRow(c,i+1)).join('')}
+          </div>
+        </div>
+      </div>`;
+  },
+
+  kpi(ic,lbl,val,delta,sub,kind,spark){
+    const deltaClass = delta > 0 ? 'up' : delta < 0 ? 'dn' : 'eq';
+    const sign = delta > 0 ? '▲' : delta < 0 ? '▼' : '–';
+    return `<div class="kpi">
+      <div class="kpi-top"><div class="kpi-ic ${kind||''}">${ic}</div><span class="delta ${deltaClass}">${sign} ${Math.abs(delta)}%</span></div>
+      <div class="kpi-lbl">${lbl}</div>
+      <div class="kpi-val">${val}</div>
+      <div class="kpi-sub">${sub}</div>
+      ${spark||''}
+    </div>`;
+  },
+
+  sparkSvg(data,color='#1A56DB'){
+    const w=220,h=36;
+    const max = Math.max(...data), min = Math.min(...data);
+    const pts = data.map((v,i)=>{
+      const x = (i/(data.length-1))*w;
+      const y = h - ((v-min)/(max-min+0.001))*h*0.85 - h*0.075;
+      return `${x},${y}`;
+    }).join(' ');
+    return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+      <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <polyline points="0,${h} ${pts} ${w},${h}" fill="${color}" fill-opacity=".12"/>
+    </svg>`;
+  },
+
+  revenueChart(){
+    const data = [6800,7900,9100,10200,12100,13500,14726];
+    const max = Math.max(...data);
+    const bars = data.map((v,i)=>{
+      const height = v/max*100;
+      const x = i*14+4;
+      return `<g><rect x="${x}%" y="${100-height}%" width="10%" height="${height}%" fill="url(#revG)" rx="4"/><text x="${x+5}%" y="98%" font-size="9" fill="#8A94A6" text-anchor="middle" font-family="JetBrains Mono">${['Nov','Déc','Jan','Fév','Mar','Avr','Mai'][i]}</text><text x="${x+5}%" y="${100-height-2}%" font-size="10" fill="#1A56DB" text-anchor="middle" font-family="JetBrains Mono" font-weight="700">€${(v/1000).toFixed(1)}k</text></g>`;
+    }).join('');
+    return `<svg viewBox="0 0 100 60" style="width:100%;height:260px;overflow:visible" preserveAspectRatio="none">
+      <defs><linearGradient id="revG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1A56DB"/><stop offset="100%" stop-color="#7A3CFF" stop-opacity=".6"/></linearGradient></defs>
+      ${bars}
+    </svg>`;
+  },
+
+  chileMap(){
+    // simplified Chile shape + markers
+    const clients = this.state.clients.slice(0,32);
+    const coords = [
+      {x:70,y:75},{x:65,y:45},{x:68,y:60},{x:63,y:50},{x:72,y:30},{x:67,y:40},{x:70,y:55},{x:75,y:65},
+      {x:60,y:35},{x:72,y:78},{x:64,y:54},{x:68,y:68},{x:66,y:48},{x:74,y:72},{x:62,y:42},{x:70,y:62},
+      {x:68,y:58},{x:74,y:52},{x:66,y:66},{x:70,y:70},{x:72,y:56},{x:64,y:64},{x:68,y:50},{x:60,y:58},
+      {x:76,y:68},{x:70,y:48},{x:62,y:60},{x:74,y:64},{x:66,y:44},{x:72,y:46},{x:68,y:72},{x:64,y:70}
+    ];
+    return `
+      <svg viewBox="0 0 100 100" style="width:100%;height:360px;position:relative" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="mapGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#1A56DB" stop-opacity=".05"/>
+            <stop offset="50%" stop-color="#06B6D4" stop-opacity=".12"/>
+            <stop offset="100%" stop-color="#7A3CFF" stop-opacity=".08"/>
+          </linearGradient>
+        </defs>
+        <path d="M62,10 L66,10 L68,18 L70,28 L72,38 L73,48 L74,58 L73,68 L72,78 L70,85 L68,92 L65,95 L62,90 L60,82 L61,72 L62,62 L63,52 L62,42 L61,32 L60,22 L61,14 Z" fill="url(#mapGrad)" stroke="#1A56DB" stroke-width=".3" stroke-opacity=".4"/>
+        <text x="74" y="20" font-size="3" fill="#64748B">Iquique</text>
+        <text x="74" y="40" font-size="3" fill="#64748B" font-weight="700">Santiago</text>
+        <text x="75" y="60" font-size="3" fill="#64748B">Concepción</text>
+        <text x="76" y="78" font-size="3" fill="#64748B">Puerto Montt</text>
+        ${clients.map((c,i)=>{
+          const p = coords[i%coords.length];
+          const cls = c.churnRisk==='high'?'red':c.plan.price===0?'amber':c.plan.price>=69?'violet':'';
+          return `<circle cx="${p.x}" cy="${p.y}" r=".9" fill="${cls==='red'?'#EF4444':cls==='amber'?'#F59E0B':cls==='violet'?'#7A3CFF':'#1A56DB'}" opacity=".85"><title>${c.name} · ${c.city}</title></circle>`;
+        }).join('')}
+      </svg>`;
+  },
+
+  summaryCard(ic,lbl,val,sub,color,pct){
+    return `<div class="card" style="padding:20px">
+      <div class="flex between" style="margin-bottom:10px"><div style="font-size:24px">${ic}</div><span class="chip ${color}">${pct}%</span></div>
+      <div style="font-size:10.5px;color:var(--muted);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">${lbl}</div>
+      <div style="font-size:22px;font-weight:800">${val}</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">${sub}</div>
+      <div class="progress"><div class="progress-bar" style="width:${pct}%;background:linear-gradient(90deg,var(--blue),var(--${color}))"></div></div>
+    </div>`;
+  },
+
+  clientRow(c,n){
+    return `<div class="client-row" onclick="Px.openModal('client',Px.state.clients.find(x=>x.id===${c.id}))">
+      <span class="mono" style="color:var(--muted)">${String(n).padStart(2,'0')}</span>
+      <div class="flex" style="gap:10px">
+        <div class="client-av" style="background:${c.color}">${c.initials}</div>
+        <div style="min-width:0"><div class="client-name">${c.name}</div><div class="client-meta">${c.city} · ${c.industry}</div></div>
+      </div>
+      <span class="chip plan-${c.plan.color}">${c.plan.n}</span>
+      <span class="mono" style="font-weight:700">€${c.mrr}</span>
+      <div><div style="font-size:12px;font-weight:700;color:${c.health>70?'var(--green)':c.health>50?'var(--amber)':'var(--red)'}">${c.health}%</div><div class="health-bar"><span style="width:${c.health}%"></span></div></div>
+      <span class="mono" style="font-size:11px">${c.nps}</span>
+      <span style="font-size:11px;color:var(--muted)">${c.lastSeen}</span>
+      <button class="btn-g">→</button>
+    </div>`;
+  },
+
+  // ---------- CLIENTS ----------
+  viewClients(){
+    let list = this.state.clients;
+    const f = this.state.clientFilter;
+    const s = this.state.clientSearch.toLowerCase();
+    if (f==='paying') list = list.filter(c=>c.plan.price>0);
+    else if (f==='free') list = list.filter(c=>c.plan.price===0);
+    else if (f==='risk') list = list.filter(c=>c.churnRisk==='high');
+    else if (f==='scale') list = list.filter(c=>c.plan.id==='scale');
+    if (s) list = list.filter(c=>c.name.toLowerCase().includes(s)||c.city.toLowerCase().includes(s)||c.industry.toLowerCase().includes(s));
+
+    const sort = this.state.clientSort;
+    if (sort==='mrr') list = [...list].sort((a,b)=>b.mrr-a.mrr);
+    else if (sort==='health') list = [...list].sort((a,b)=>b.health-a.health);
+    else if (sort==='nps') list = [...list].sort((a,b)=>b.nps-a.nps);
+    else if (sort==='tenure') list = [...list].sort((a,b)=>b.tenure-a.tenure);
+
+    return `
+      <div class="view">
+        <div class="page-hd">
+          <div><h1>🏢 Clients PyMEs</h1><div class="sub">${this.state.clients.length} comptes · ${list.length} affichés · Répartition: ${this.state.clients.filter(c=>c.plan.price===0).length} free / ${this.state.clients.filter(c=>c.plan.price>0).length} payants</div></div>
+          <div class="flex">
+            <button class="btn btn-s" onclick="Px.toast('Export CSV prêt','success','47 clients · 28 colonnes')">📤 Export CSV</button>
+            <button class="btn btn-p" onclick="Px.toast('Onboarding manuel (démo)','info')">+ Ajouter client</button>
+          </div>
+        </div>
+
+        <div class="g4">
+          ${this.summaryCard('🎯','Cible Q2','50 clients payants','38/50 ciblés','violet',76)}
+          ${this.summaryCard('💎','Plan Scale','6 clients','€414 / 17% MRR','amber',17)}
+          ${this.summaryCard('🔥','Churn risk HIGH','7 clients','-€98 MRR si perdus','amber',15)}
+          ${this.summaryCard('⭐','NPS moyen','68','Promoteurs 64%','green',68)}
+        </div>
+
+        <div class="filter-bar">
+          <input class="form-ctrl" style="max-width:300px" placeholder="Rechercher nom, ville, industrie…" value="${this.state.clientSearch}" oninput="Px.state.clientSearch=this.value;Px.renderView()">
+          <button class="filter-pill ${f==='all'?'on':''}" onclick="Px.state.clientFilter='all';Px.renderView()">Tous</button>
+          <button class="filter-pill ${f==='paying'?'on':''}" onclick="Px.state.clientFilter='paying';Px.renderView()">💰 Payants</button>
+          <button class="filter-pill ${f==='free'?'on':''}" onclick="Px.state.clientFilter='free';Px.renderView()">🆓 Free</button>
+          <button class="filter-pill ${f==='scale'?'on':''}" onclick="Px.state.clientFilter='scale';Px.renderView()">💎 Scale</button>
+          <button class="filter-pill ${f==='risk'?'on':''}" onclick="Px.state.clientFilter='risk';Px.renderView()">🔥 Churn risk</button>
+          <div style="margin-left:auto"><select class="form-ctrl" style="width:auto;padding:6px 10px" onchange="Px.state.clientSort=this.value;Px.renderView()">
+            <option value="mrr" ${sort==='mrr'?'selected':''}>Trier: MRR ↓</option>
+            <option value="health" ${sort==='health'?'selected':''}>Trier: Health ↓</option>
+            <option value="nps" ${sort==='nps'?'selected':''}>Trier: NPS ↓</option>
+            <option value="tenure" ${sort==='tenure'?'selected':''}>Trier: Ancienneté ↓</option>
+          </select></div>
+        </div>
+
+        <div class="card">
+          <div class="client-row table-hd">
+            <span>#</span><span>Client</span><span>Plan</span><span>MRR</span><span>Health</span><span>NPS</span><span>Dernier vu</span><span></span>
+          </div>
+          ${list.map((c,i)=>this.clientRow(c,i+1)).join('')}
+        </div>
+      </div>`;
+  },
+
+  // ---------- REVENUE ----------
+  viewRevenue(){
+    return `
+      <div class="view">
+        <div class="page-hd">
+          <div><h1>💰 Revenus & MRR</h1><div class="sub">Monthly Recurring Revenue · Cohortes · Stripe · Forecast</div></div>
+          <div class="flex"><button class="btn btn-s" onclick="Px.toast('Stripe Dashboard ouvert','info')">💳 Stripe Portal →</button></div>
+        </div>
+
+        <div class="kpi-grid">
+          ${this.kpi('💰','MRR total','€ 14,726',9.2,'+€1,247 vs mois dernier','g',this.sparkSvg([8,9,10,11,12,13,14.7],'#22C55E'))}
+          ${this.kpi('📅','ARR','€ 176,712',8.9,'Annualized run-rate','')}
+          ${this.kpi('🎯','MRR goal','59%','','€25k cible Q2','v')}
+          ${this.kpi('🔮','Forecast 30j','€ 17,420',18.3,'IC 95%: ±600€','c')}
+        </div>
+
+        <div class="g2">
+          <div class="card">
+            <div class="card-hd"><h3>📊 MRR par plan · snapshot</h3></div>
+            <div class="card-body">
+              ${[
+                {n:'Scale · €69/mo',c:6,m:6*69,color:'linear-gradient(90deg,#F59E0B,#EF4444)'},
+                {n:'Pro · €29/mo',c:22,m:22*29,color:'linear-gradient(90deg,#7A3CFF,#B59EFF)'},
+                {n:'Starter · €15/mo',c:16,m:16*15,color:'linear-gradient(90deg,#1A56DB,#06B6D4)'},
+                {n:'Free · €0/mo',c:3,m:0,color:'linear-gradient(90deg,#94A3B8,#CBD5E1)'}
+              ].map(p=>{
+                const pct = (p.m/this.state.mrrLive*100).toFixed(0);
+                return `<div style="margin-bottom:14px">
+                  <div class="flex between" style="margin-bottom:6px"><b style="font-size:12.5px">${p.n}</b><span class="mono" style="font-size:12px">${p.c} clients · €${p.m}/mo · ${pct}%</span></div>
+                  <div class="progress" style="height:8px"><div class="progress-bar" style="width:${pct}%;background:${p.color}"></div></div>
+                </div>`;
+              }).join('')}
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-hd"><h3>🧬 Cohort analysis</h3><span class="chip">Rétention</span></div>
+            <div class="card-body">
+              <table style="width:100%;border-collapse:collapse;font-size:11px">
+                <thead><tr style="background:var(--bg2)"><th style="padding:8px;text-align:left">Cohort</th><th style="padding:8px">M0</th><th style="padding:8px">M1</th><th style="padding:8px">M2</th><th style="padding:8px">M3</th></tr></thead>
+                <tbody>
+                  ${[
+                    {c:'Jan 2026',v:[100,91,85,82]},
+                    {c:'Fév 2026',v:[100,88,83,'-']},
+                    {c:'Mar 2026',v:[100,90,'-','-']},
+                    {c:'Avr 2026',v:[100,'-','-','-']},
+                  ].map(r=>`<tr>
+                    <td style="padding:8px;font-weight:600">${r.c}</td>
+                    ${r.v.map(cell=>`<td style="padding:8px;text-align:center">${cell==='-'?'<span style="color:var(--muted)">—</span>':`<span style="background:${cell>90?'var(--green-soft)':cell>80?'var(--amber-soft)':'var(--red-soft)'};color:${cell>90?'var(--green)':cell>80?'var(--amber)':'var(--red)'};padding:3px 8px;border-radius:4px;font-weight:700">${cell}%</span>`}</td>`).join('')}
+                  </tr>`).join('')}
+                </tbody>
+              </table>
+              <div style="padding:14px;background:var(--green-soft);border-radius:10px;margin-top:14px;font-size:12px">
+                💡 <b>Insight :</b> Cohort Jan 2026 retient <b>82%</b> à M3 — excellent pour un SaaS early stage. Cohort Fév se tient à <b>83%</b> M2.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd"><h3>📈 Évolution MRR sur 12 mois (histo + projection)</h3></div>
+          <div class="card-body">${this.revenueChart12()}</div>
+        </div>
+
+        <div class="g3">
+          <div class="card">
+            <div class="card-hd"><h3>💳 Paiements récents</h3><span class="chip green">Auto</span></div>
+            <div class="card-body" style="padding:0 18px 18px">
+              ${[
+                {n:'Dental Care',a:29,d:'Il y a 12 min',s:'success'},
+                {n:'Panadería Don Carlos',a:29,d:'Il y a 45 min',s:'success'},
+                {n:'Spa Zen',a:69,d:'Il y a 2 h',s:'success'},
+                {n:'Café Central',a:15,d:'Il y a 4 h',s:'success'},
+                {n:'Spa Termal',a:29,d:'Il y a 5 h',s:'failed'},
+              ].map(p=>`<div class="flex" style="padding:10px 0;border-top:1px solid var(--line2)">
+                <div style="width:28px;height:28px;background:var(--${p.s==='success'?'green-soft':'red-soft'});color:var(--${p.s==='success'?'green':'red'});border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px">${p.s==='success'?'✓':'✕'}</div>
+                <div style="flex:1"><div style="font-size:12px;font-weight:600">${p.n}</div><div style="font-size:10.5px;color:var(--muted)">${p.d}</div></div>
+                <span class="mono" style="font-weight:700">€${p.a}</span>
+              </div>`).join('')}
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-hd"><h3>📉 Dunning (paiements échoués)</h3><span class="chip amber">2</span></div>
+            <div class="card-body">
+              <div style="padding:12px;background:var(--amber-soft);border-radius:10px;margin-bottom:8px">
+                <b style="font-size:12.5px">Spa Termal · €29</b>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px">Visa expirée · Retry auto 2/3 · Relance email envoyée</div>
+                <button class="btn-g mt8" onclick="Px.toast('Retry manuel lancé','success')">Retry manuel</button>
+              </div>
+              <div style="padding:12px;background:var(--red-soft);border-radius:10px">
+                <b style="font-size:12.5px">Taller Los Andes · €15</b>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px">CVC fail · Retry 3/3 · <b style="color:var(--red)">Suspension dans 3j</b></div>
+                <button class="btn-g mt8" onclick="Px.toast('Call CEO programmé','info')">📞 Call CEO</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-hd"><h3>💎 LTV & Unit Economics</h3></div>
+            <div class="card-body">
+              <div style="padding:12px;background:var(--bg2);border-radius:10px;margin-bottom:8px">
+                <div class="flex between"><span style="font-size:11px;color:var(--muted)">LTV moyen</span><b class="mono">€820</b></div>
+                <div class="flex between" style="margin-top:6px"><span style="font-size:11px;color:var(--muted)">CAC</span><b class="mono">€47</b></div>
+                <div class="flex between" style="margin-top:6px"><span style="font-size:11px;color:var(--muted)">Ratio LTV/CAC</span><b class="mono" style="color:var(--green)">17x</b></div>
+                <div class="flex between" style="margin-top:6px"><span style="font-size:11px;color:var(--muted)">Payback</span><b class="mono">2 mois</b></div>
+                <div class="flex between" style="margin-top:6px"><span style="font-size:11px;color:var(--muted)">Gross margin</span><b class="mono" style="color:var(--green)">81%</b></div>
+              </div>
+              <div style="font-size:11px;color:var(--muted);line-height:1.7">Ratio LTV/CAC de <b>17x</b> indique un modèle rentable et scalable. Payback en 2 mois = capital efficace pour lever des fonds.</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  },
+
+  revenueChart12(){
+    // 12 months of data + 3 future projection
+    const data = [4100,4800,5600,6200,6800,7900,9100,10200,12100,13500,14726,null,null,null];
+    const forecast = [null,null,null,null,null,null,null,null,null,null,14726,16200,18000,20400];
+    const labels = ['Jui','Jul','Aoû','Sep','Oct','Nov','Déc','Jan','Fév','Mar','Avr','Mai','Jun','Jul'];
+    const W = 800, H = 260;
+    const max = 22000;
+    const padL = 40, padR = 10, padT = 20, padB = 30;
+    const chartW = W-padL-padR, chartH = H-padT-padB;
+    const x = i => padL + (i/(data.length-1))*chartW;
+    const y = v => v===null ? null : padT + chartH - (v/max)*chartH;
+
+    let dataPath = '', forecastPath = '';
+    data.forEach((v,i)=>{ if(v===null) return; dataPath += (dataPath?'L ':'M ')+x(i)+' '+y(v)+' '; });
+    forecast.forEach((v,i)=>{ if(v===null) return; forecastPath += (forecastPath?'L ':'M ')+x(i)+' '+y(v)+' '; });
+
+    return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:260px" preserveAspectRatio="xMidYMid meet">
+      <defs><linearGradient id="rG2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1A56DB" stop-opacity=".3"/><stop offset="100%" stop-color="#1A56DB" stop-opacity="0"/></linearGradient></defs>
+      <g stroke="#E2E8F0" stroke-width="1">
+        ${[0,5000,10000,15000,20000].map(v=>`<line x1="${padL}" y1="${y(v)}" x2="${W-padR}" y2="${y(v)}"/><text x="${padL-6}" y="${y(v)+3}" font-size="10" fill="#94A3B8" text-anchor="end" font-family="JetBrains Mono">€${v/1000}k</text>`).join('')}
+      </g>
+      <path d="${dataPath}" fill="none" stroke="#1A56DB" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="${dataPath} L ${x(10)} ${padT+chartH} L ${x(0)} ${padT+chartH} Z" fill="url(#rG2)"/>
+      <path d="${forecastPath}" fill="none" stroke="#7A3CFF" stroke-width="2" stroke-linecap="round" stroke-dasharray="6 4"/>
+      ${data.map((v,i)=>v!==null?`<circle cx="${x(i)}" cy="${y(v)}" r="3.5" fill="#1A56DB"/>`:'').join('')}
+      ${forecast.map((v,i)=>v!==null&&i>10?`<circle cx="${x(i)}" cy="${y(v)}" r="3.5" fill="#7A3CFF" stroke="#fff" stroke-width="1"/>`:'').join('')}
+      ${labels.map((l,i)=>`<text x="${x(i)}" y="${H-10}" font-size="10" fill="#94A3B8" text-anchor="middle" font-family="JetBrains Mono">${l}</text>`).join('')}
+      <text x="${x(12)}" y="${y(16200)-8}" font-size="9" fill="#7A3CFF" text-anchor="middle">Forecast</text>
+    </svg>`;
+  },
+
+  // ---------- ANALYTICS ----------
+  viewAnalytics(){
+    return `
+      <div class="view">
+        <div class="page-hd">
+          <div><h1>📊 Analytics cross-client</h1><div class="sub">Patterns, insights, opportunités.</div></div>
+        </div>
+
+        <div class="g2e">
+          <div class="card">
+            <div class="card-hd"><h3>🏢 Industries · répartition & MRR</h3></div>
+            <div class="card-body">
+              ${[
+                {n:'Retail (panadería, boutique)',c:14,mrr:406,pct:29},
+                {n:'Services perso (peluquería, spa)',c:10,mrr:320,pct:22},
+                {n:'Santé (dentiste, véto, clínica)',c:8,mrr:296,pct:20},
+                {n:'Restauration',c:7,mrr:231,pct:16},
+                {n:'B2B pro (avocat, compta)',c:4,mrr:180,pct:12},
+                {n:'Fitness (gym, yoga)',c:4,mrr:60,pct:1}
+              ].map(i=>`<div style="margin-bottom:12px">
+                <div class="flex between" style="margin-bottom:4px"><b style="font-size:12.5px">${i.n}</b><span class="mono" style="font-size:11px">${i.c} · €${i.mrr}</span></div>
+                <div class="progress" style="height:6px"><div class="progress-bar" style="width:${i.pct}%"></div></div>
+              </div>`).join('')}
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-hd"><h3>🌎 Distribution géographique</h3></div>
+            <div class="card-body">
+              ${['Santiago 38%','Valparaíso 12%','Concepción 10%','Viña del Mar 8%','La Serena 6%','Autres villes 26%'].map(c=>{
+                const [n,p] = c.split(' ');
+                const pct = parseInt(c.match(/\d+/)[0]);
+                return `<div style="margin-bottom:10px">
+                  <div class="flex between" style="margin-bottom:3px"><span style="font-size:12px">${c}</span></div>
+                  <div class="progress" style="height:6px"><div class="progress-bar" style="width:${pct}%;background:linear-gradient(90deg,#06B6D4,#22C55E)"></div></div>
+                </div>`;
+              }).join('')}
+              <div style="padding:12px;background:var(--blue-soft);border-radius:10px;margin-top:14px;font-size:12px">💡 <b>Santiago concentre 38%</b> des clients mais <b>51% du MRR</b> (plans Pro/Scale plus utilisés).</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-hd"><h3>🎯 Features les plus utilisées</h3></div>
+            <div class="card-body">
+              ${[
+                {n:'📬 Inbox unifiée WhatsApp',u:100},
+                {n:'🤖 Brouillon IA auto',u:94},
+                {n:'👥 CRM avec podium',u:87},
+                {n:'✨ Tips IA proactif',u:76},
+                {n:'📢 Campagnes marketing',u:68},
+                {n:'🎙 Transcription vocale',u:54},
+                {n:'💳 Stripe subscriptions',u:42},
+                {n:'📅 Sync Google Calendar',u:38},
+                {n:'🌐 Traduction ES↔EN',u:29},
+                {n:'🏖 Mode vacances',u:18}
+              ].map(f=>`<div style="margin-bottom:8px">
+                <div class="flex between" style="margin-bottom:3px"><span style="font-size:12px">${f.n}</span><span class="mono" style="font-size:11px;font-weight:700">${f.u}%</span></div>
+                <div class="progress" style="height:5px"><div class="progress-bar" style="width:${f.u}%"></div></div>
+              </div>`).join('')}
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-hd"><h3>💬 Topics les plus discutés (cross-client)</h3></div>
+            <div class="card-body" style="display:flex;flex-wrap:wrap;gap:8px;padding-bottom:20px">
+              ${[{w:'horaires',s:28},{w:'delivery',s:24},{w:'precio',s:22},{w:'reserva',s:18},{w:'transferencia',s:16},{w:'producto',s:14},{w:'cumpleaños',s:12},{w:'torta',s:10},{w:'appointement',s:10},{w:'cancelar',s:9},{w:'promo',s:8},{w:'factura',s:7},{w:'whatsapp',s:7}].map(t=>`<span style="padding:${5+t.s/10}px ${8+t.s/5}px;background:rgba(26,86,219,${0.05+t.s/100});border:1px solid var(--line);border-radius:999px;font-size:${10+t.s/6}px;font-weight:${t.s>15?700:500};color:var(--blue-ink)">${t.w} <small style="color:var(--muted);font-size:10px">×${t.s*10}</small></span>`).join('')}
+              <div style="padding:14px;background:var(--green-soft);border-radius:10px;margin-top:10px;font-size:12px;flex-basis:100%">💡 <b>"Horaires"</b> (28%) = top question absolue. <b>Suggestion :</b> propose aux clients une feature "FAQ horaires" auto-affichée sur profil.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd"><h3>📊 Utilisation API par jour (30 derniers jours)</h3></div>
+          <div class="card-body">${this.apiUsageChart()}</div>
+        </div>
+
+        <div class="g3">
+          <div class="card" style="padding:20px">
+            <h3 style="margin-bottom:10px">🗣 Langues détectées clients finaux</h3>
+            <div class="flex" style="gap:10px;margin-top:14px;justify-content:space-around">
+              ${[{l:'🇨🇱 ES',v:84},{l:'🇺🇸 EN',v:9},{l:'🇵🇹 PT',v:5},{l:'🇫🇷 FR',v:2}].map(x=>`<div style="text-align:center"><div style="font-size:24px;font-weight:800;font-family:'JetBrains Mono',monospace">${x.v}%</div><div style="font-size:11px;color:var(--muted)">${x.l}</div></div>`).join('')}
+            </div>
+          </div>
+          <div class="card" style="padding:20px">
+            <h3 style="margin-bottom:10px">⏱ Temps de réponse moyen</h3>
+            <div class="gauge" style="margin:14px auto">${this.gaugeSvg(2.18,10)}</div>
+            <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:4px">Avec IA : <b>2:18</b> · Sans : 47:00</div>
+          </div>
+          <div class="card" style="padding:20px">
+            <h3 style="margin-bottom:10px">🎯 Sentiment conversations</h3>
+            <div class="flex" style="gap:10px;margin-top:14px;justify-content:space-around">
+              ${[{l:'😊 Positif',v:73,c:'var(--green)'},{l:'😐 Neutre',v:22,c:'var(--amber)'},{l:'😠 Négatif',v:5,c:'var(--red)'}].map(x=>`<div style="text-align:center"><div style="font-size:22px;font-weight:800;color:${x.c};font-family:'JetBrains Mono',monospace">${x.v}%</div><div style="font-size:11px;color:var(--muted)">${x.l}</div></div>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>`;
+  },
+
+  apiUsageChart(){
+    const days = 30;
+    const data = Array.from({length:days},(_,i)=>Math.round(40+Math.sin(i/4)*15+Math.random()*12+i*1.5));
+    const max = Math.max(...data);
+    const W=800, H=180;
+    const x = i => (i/(days-1))*(W-20)+10;
+    const y = v => H-20 - (v/max)*(H-30);
+    let path = data.map((v,i)=>(i===0?'M ':'L ')+x(i)+' '+y(v)).join(' ');
+    return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:180px" preserveAspectRatio="xMidYMid meet">
+      <defs><linearGradient id="apiG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#06B6D4" stop-opacity=".3"/><stop offset="100%" stop-color="#06B6D4" stop-opacity="0"/></linearGradient></defs>
+      <g stroke="#F1F5F9" stroke-width="1">
+        ${[0,25,50,75,100].map(p=>`<line x1="10" y1="${H-20-p/100*(H-30)}" x2="${W-10}" y2="${H-20-p/100*(H-30)}"/>`).join('')}
+      </g>
+      <path d="${path} L ${x(days-1)} ${H-20} L ${x(0)} ${H-20} Z" fill="url(#apiG)"/>
+      <path d="${path}" fill="none" stroke="#06B6D4" stroke-width="2" stroke-linecap="round"/>
+      ${data.map((v,i)=>i%5===0?`<circle cx="${x(i)}" cy="${y(v)}" r="2.5" fill="#06B6D4"/><text x="${x(i)}" y="${H-5}" font-size="9" fill="#94A3B8" text-anchor="middle" font-family="JetBrains Mono">J${i+1}</text>`:'').join('')}
+    </svg>`;
+  },
+
+  gaugeSvg(val,max){
+    const pct = Math.min(1,val/max);
+    const angle = pct * 180;
+    const r = 60, cx = 80, cy = 70;
+    const x2 = cx + r*Math.cos((180-angle)*Math.PI/180);
+    const y2 = cy - r*Math.sin((180-angle)*Math.PI/180);
+    const large = angle > 180 ? 1 : 0;
+    const color = pct < 0.3 ? '#22C55E' : pct < 0.7 ? '#F59E0B' : '#EF4444';
+    return `<svg viewBox="0 0 160 80" style="width:100%">
+      <path d="M 20 70 A 60 60 0 0 1 140 70" fill="none" stroke="#F1F5F9" stroke-width="10" stroke-linecap="round"/>
+      <path d="M 20 70 A 60 60 0 0 ${large} ${x2} ${y2}" fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round"/>
+      <text x="80" y="68" text-anchor="middle" font-size="20" font-weight="800" font-family="JetBrains Mono">${val}min</text>
+    </svg>`;
+  },
+
+  // ---------- AGENTS ----------
+  viewAgents(){
+    return `
+      <div class="view">
+        <div class="page-hd">
+          <div><h1>🤖 Agents IA · statut & performance</h1><div class="sub">Agent 01 Secrétaire · Agent 02 Organisateur · Agent 03 Gestion (roadmap)</div></div>
+          <div class="flex"><button class="btn btn-s" onclick="Px.toast('Tuning agent ouvert','info')">⚙ Tuning</button></div>
+        </div>
+
+        <div class="g3">
+          <div class="card" style="padding:0">
+            <div style="padding:20px;background:linear-gradient(135deg,var(--blue-soft),var(--cyan-soft));border-bottom:1px solid var(--line)">
+              <div class="flex" style="gap:10px"><div style="font-size:30px">🤖</div><div><div style="font-weight:800;font-size:15px">Agent 02 — Organisateur</div><div style="font-size:11px;color:var(--muted)">47 tenants · PROD</div></div><span class="chip green" style="margin-left:auto">● ACTIF</span></div>
+            </div>
+            <div style="padding:20px">
+              <div class="flex between" style="margin-bottom:6px;font-size:12px"><span>Uptime 30j</span><b>99,96%</b></div>
+              <div class="flex between" style="margin-bottom:6px;font-size:12px"><span>Msg traités / jour</span><b class="mono">4 708</b></div>
+              <div class="flex between" style="margin-bottom:6px;font-size:12px"><span>Latence p50 / p95</span><b class="mono">180ms / 420ms</b></div>
+              <div class="flex between" style="margin-bottom:6px;font-size:12px"><span>Coût Claude / jour</span><b class="mono">€ 8,40</b></div>
+              <div class="flex between" style="margin-bottom:6px;font-size:12px"><span>Taux d'erreur</span><b class="mono" style="color:var(--green)">0,3%</b></div>
+              <div class="flex between" style="margin-bottom:6px;font-size:12px"><span>Acceptation brouillon IA</span><b class="mono">82%</b></div>
+              <div class="mt16"><button class="btn btn-s" style="width:100%" onclick="Px.toast('Logs ouverts','info')">Voir logs →</button></div>
+            </div>
+          </div>
+
+          <div class="card" style="padding:0">
+            <div style="padding:20px;background:linear-gradient(135deg,var(--violet-soft),var(--blue-soft));border-bottom:1px solid var(--line)">
+              <div class="flex" style="gap:10px"><div style="font-size:30px">👩‍💼</div><div><div style="font-weight:800;font-size:15px">Agent 01 — Secrétaire</div><div style="font-size:11px;color:var(--muted)">Release prévue · 15/05/2026</div></div><span class="chip amber" style="margin-left:auto">BETA</span></div>
+            </div>
+            <div style="padding:20px">
+              <div class="flex between" style="margin-bottom:6px;font-size:12px"><span>Tenants beta</span><b class="mono">3</b></div>
+              <div class="flex between" style="margin-bottom:6px;font-size:12px"><span>Hand-off jour/nuit</span><b class="mono">✓ testé</b></div>
+              <div class="flex between" style="margin-bottom:6px;font-size:12px"><span>Notif résumé patron</span><b class="mono">✓ testé</b></div>
+              <div class="flex between" style="margin-bottom:6px;font-size:12px"><span>Taux d'auto-réponse</span><b class="mono">~45%</b></div>
+              <div class="flex between" style="margin-bottom:6px;font-size:12px"><span>Feedback clients beta</span><b class="mono" style="color:var(--green)">+4,7/5</b></div>
+              <div class="mt16"><button class="btn btn-p" style="width:100%" onclick="Px.toast('Beta access géré','info')">+ Ajouter tenant beta</button></div>
+            </div>
+          </div>
+
+          <div class="card" style="padding:0">
+            <div style="padding:20px;background:linear-gradient(135deg,var(--amber-soft),var(--red-soft));border-bottom:1px solid var(--line)">
+              <div class="flex" style="gap:10px"><div style="font-size:30px">📊</div><div><div style="font-weight:800;font-size:15px">Agent 03 — Gestion</div><div style="font-size:11px;color:var(--muted)">Roadmap · Q3 2026</div></div><span class="chip" style="margin-left:auto">PLANIFIÉ</span></div>
+            </div>
+            <div style="padding:20px">
+              <div style="font-size:12px;color:var(--ink2);line-height:1.7">Gestion financière & RH pour PME : suivi ventes cross-canal, recons compta auto, alertes cashflow, planning employés, paie simplifiée.</div>
+              <div class="mt16">
+                <div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.06em;margin-bottom:8px">PRÉ-INSCRITS</div>
+                <div style="font-size:20px;font-weight:800;font-family:'JetBrains Mono',monospace">12 / 50</div>
+                <div class="progress mt8"><div class="progress-bar" style="width:24%;background:linear-gradient(90deg,var(--amber),var(--red))"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="g2">
+          <div class="card">
+            <div class="card-hd"><h3>⚡ Performance Agent 02 · par tenant top 10</h3></div>
+            <div class="card-body" style="padding:0 18px 18px">
+              <div class="client-row table-hd" style="grid-template-columns:40px 1.5fr 1fr 1fr 1fr 1fr"><span>#</span><span>Tenant</span><span>Msg/jour</span><span>% auto</span><span>Latence</span><span>Coût</span></div>
+              ${this.state.clients.slice(0,10).map((c,i)=>`
+                <div class="client-row" style="grid-template-columns:40px 1.5fr 1fr 1fr 1fr 1fr" onclick="Px.openModal('client',Px.state.clients.find(x=>x.id===${c.id}))">
+                  <span class="mono" style="color:var(--muted)">${i+1}</span>
+                  <div class="flex" style="gap:8px"><div class="client-av" style="background:${c.color};width:26px;height:26px;font-size:10px">${c.initials}</div><span style="font-size:12.5px;font-weight:600">${c.name}</span></div>
+                  <span class="mono">${Math.floor(c.conv/30)}</span>
+                  <span class="mono">${30+Math.floor(Math.random()*40)}%</span>
+                  <span class="mono">${150+Math.floor(Math.random()*200)}ms</span>
+                  <span class="mono">€${(c.mrr*0.15).toFixed(2)}</span>
+                </div>`).join('')}
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-hd"><h3>🎯 Prompt tuning & A/B tests</h3></div>
+            <div class="card-body">
+              ${[
+                {n:'Tone "amical" vs "pro"',status:'running',a:'+8% accept.'},
+                {n:'Brouillon 1 vs 3 options',status:'winner:3',a:'+15% usage'},
+                {n:'Emoji auto 0 vs 1 vs 2',status:'running',a:'TBD'},
+                {n:'Tutoiement vs vouvoiement',status:'winner:tu',a:'+22% NPS (CL)'},
+                {n:'Suggestion promo timing',status:'pending',a:'Q3'}
+              ].map(x=>`<div style="padding:12px;background:var(--bg2);border-radius:10px;margin-bottom:8px">
+                <div class="flex between"><b style="font-size:12.5px">${x.n}</b><span class="chip ${x.status==='running'?'amber':x.status==='pending'?'':x.status.startsWith('winner')?'green':''}">${x.status==='running'?'⚡ En cours':x.status==='pending'?'Planifié':'✓ '+x.status.split(':')[1]}</span></div>
+                <div style="font-size:11px;color:var(--muted);margin-top:4px">Impact mesuré : <b>${x.a}</b></div>
+              </div>`).join('')}
+              <button class="btn btn-s" style="width:100%" onclick="Px.toast('Nouveau test A/B créé','success')">+ Lancer un A/B test</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  },
+
+  // ---------- OPS ----------
+  viewOps(){
+    return `
+      <div class="view">
+        <div class="page-hd">
+          <div><h1>⚡ Ops · Infrastructure</h1><div class="sub">Uptime · APIs · workflows · logs · incidents</div></div>
+          <div class="flex"><button class="btn btn-warn" onclick="Px.toast('Mode maintenance (démo)','warn')">🛠 Maintenance</button></div>
+        </div>
+
+        <div class="kpi-grid">
+          ${this.kpi('⚡','Uptime 30j','99,96%',0.01,'SLA 99,9% · ✓','g')}
+          ${this.kpi('🧠','Tokens Claude','680k / 1M',68,'Reset dans 9j','v')}
+          ${this.kpi('💾','Base Supabase','2,4 GB',12,'142/500 connexions','c')}
+          ${this.kpi('🔄','Workflows n8n','14 actifs',0,'0 erreur 24h','g')}
+        </div>
+
+        <div class="g2">
+          <div class="card">
+            <div class="card-hd"><h3>📡 Status services</h3><button class="btn-g" onclick="Px.toast('Page status publique','info')">Page publique →</button></div>
+            <div class="card-body" style="padding:0 18px 18px">
+              ${[
+                {n:'WhatsApp Business API',s:'warn',lat:'420ms p95',upt:'99,2%'},
+                {n:'Claude API (Anthropic)',s:'ok',lat:'185ms',upt:'99,98%'},
+                {n:'Supabase (DB + RLS)',s:'ok',lat:'28ms',upt:'99,99%'},
+                {n:'n8n self-hosted',s:'ok',lat:'—',upt:'99,97%'},
+                {n:'Stripe webhooks',s:'ok',lat:'120ms',upt:'100%'},
+                {n:'Google Calendar API',s:'ok',lat:'310ms',upt:'99,9%'},
+                {n:'Instagram DM',s:'ok',lat:'540ms',upt:'99,5%'},
+                {n:'Mercado Pago',s:'pending',lat:'—',upt:'beta'}
+              ].map(sv=>`<div class="flex" style="padding:12px 0;border-top:1px solid var(--line2)">
+                <div style="width:10px;height:10px;border-radius:50%;background:var(--${sv.s==='ok'?'green':sv.s==='warn'?'amber':'muted'});${sv.s==='warn'?'animation:pulse 1.5s infinite':''}"></div>
+                <div style="flex:1"><div style="font-size:12.5px;font-weight:600">${sv.n}</div><div style="font-size:11px;color:var(--muted)">Latence: ${sv.lat} · Uptime: ${sv.upt}</div></div>
+                <span class="chip ${sv.s==='ok'?'green':sv.s==='warn'?'amber':''}">${sv.s==='ok'?'OK':sv.s==='warn'?'Lent':'Beta'}</span>
+              </div>`).join('')}
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-hd"><h3>📜 Logs temps réel</h3><span class="chip green"><span style="width:6px;height:6px;background:currentColor;border-radius:50%;animation:pulse 1.5s infinite;display:inline-block"></span>LIVE</span></div>
+            <div class="card-body">
+              <div class="log">
+                ${this.state.incidents.map(l=>`<div class="log-line"><span class="log-t">${l.t}</span><span class="log-lvl ${l.lvl}">[${l.lvl.toUpperCase()}]</span><span style="color:var(--ink2)">${l.msg}</span></div>`).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="g3">
+          <div class="card">
+            <div class="card-hd"><h3>🔄 Workflows n8n actifs</h3></div>
+            <div class="card-body">
+              ${[
+                {n:'tenant-onboarding',runs:47,lastRun:'Il y a 2h',s:'ok'},
+                {n:'daily-summary-broadcast',runs:47,lastRun:'Aujourd\'hui 08:00',s:'ok'},
+                {n:'whatsapp-inbound-router',runs:4708,lastRun:'À l\'instant',s:'ok'},
+                {n:'stripe-dunning-retry',runs:3,lastRun:'Il y a 5h',s:'ok'},
+                {n:'health-score-calculator',runs:1,lastRun:'01:00 UTC',s:'ok'},
+                {n:'churn-alert-trigger',runs:4,lastRun:'Il y a 12 min',s:'ok'},
+              ].map(w=>`<div class="flex" style="padding:10px 0;border-top:1px solid var(--line2);gap:10px">
+                <span style="width:8px;height:8px;border-radius:50%;background:var(--green)"></span>
+                <div style="flex:1"><div style="font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace">${w.n}</div><div style="font-size:10.5px;color:var(--muted)">${w.runs} runs · ${w.lastRun}</div></div>
+                <button class="btn-g">▶</button>
+              </div>`).join('')}
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-hd"><h3>💰 Coûts infra (avril)</h3></div>
+            <div class="card-body">
+              ${[
+                {n:'Claude API',v:'€ 252',pct:42},
+                {n:'Railway (n8n + back)',v:'€ 45',pct:8},
+                {n:'Supabase Pro',v:'€ 29',pct:5},
+                {n:'Vercel Pro',v:'€ 24',pct:4},
+                {n:'WhatsApp API',v:'€ 180',pct:30},
+                {n:'Twilio SMS (fallback)',v:'€ 18',pct:3},
+                {n:'Domain + misc',v:'€ 12',pct:2}
+              ].map(c=>`<div style="padding:8px 0;border-top:1px solid var(--line2)">
+                <div class="flex between" style="margin-bottom:4px"><span style="font-size:12px">${c.n}</span><b class="mono" style="font-size:12px">${c.v}</b></div>
+                <div class="progress" style="height:4px"><div class="progress-bar" style="width:${c.pct}%"></div></div>
+              </div>`).join('')}
+              <div style="padding:12px;background:var(--bg2);border-radius:10px;margin-top:10px">
+                <div class="flex between"><span style="font-size:13px;font-weight:700">TOTAL AVRIL</span><b class="mono" style="font-size:18px">€ 560</b></div>
+                <div style="font-size:11px;color:var(--muted);margin-top:4px">Gross margin = (14726-560)/14726 = <b style="color:var(--green)">96%</b></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-hd"><h3>🚀 Deploys & releases</h3></div>
+            <div class="card-body">
+              <div class="timeline">
+                <div class="tl-item g"><div class="tl-time">Aujourd'hui · 14:08</div><div class="tl-body"><b>v0.1.3</b> deployed · transcription vocale EN/FR/ES</div></div>
+                <div class="tl-item"><div class="tl-time">Hier · 18:22</div><div class="tl-body">v0.1.2 rollback → v0.1.3 (bug inbox filter)</div></div>
+                <div class="tl-item g"><div class="tl-time">Lun 16/04 · 10:45</div><div class="tl-body"><b>v0.1.2</b> · mode vacances auto · export PDF stats</div></div>
+                <div class="tl-item"><div class="tl-time">Sam 13/04 · 20:15</div><div class="tl-body"><b>v0.1.1</b> · support trilingue FR/ES/EN</div></div>
+                <div class="tl-item g"><div class="tl-time">Sam 13/04 · 09:30</div><div class="tl-body"><b>v0.1.0</b> · MVP prod launch 🚀</div></div>
+              </div>
+              <button class="btn btn-s" style="width:100%;margin-top:10px" onclick="Px.toast('Deploy v0.1.4 initié','info','Rolling 47 tenants · zero downtime')">🚀 Deploy v0.1.4</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd"><h3>🚩 Feature flags</h3><span class="chip blue">8 actifs</span></div>
+          <div class="card-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px">
+            ${[
+              {n:'transcription_vocal',on:true,desc:'Messages audio → texte',pct:100},
+              {n:'stripe_dunning_smart',on:true,desc:'Retry paiement intelligent',pct:100},
+              {n:'agent_01_beta',on:false,desc:'Secrétaire 24/7',pct:6},
+              {n:'multi_tenant_webhooks',on:true,desc:'Webhooks par tenant',pct:100},
+              {n:'insta_dm_integration',on:false,desc:'Instagram DMs',pct:30},
+              {n:'pricing_intel_ai',on:true,desc:'Analyse prix marché',pct:75},
+              {n:'weekly_summary_pdf',on:true,desc:'Rapport PDF hebdo',pct:100},
+              {n:'voice_ai_reply',on:false,desc:'Réponses vocales IA',pct:0}
+            ].map(ff=>`<div style="padding:14px;background:var(--bg2);border-radius:10px">
+              <div class="flex between" style="margin-bottom:6px"><b style="font-size:12px;font-family:'JetBrains Mono',monospace">${ff.n}</b><label style="position:relative;display:inline-block;width:32px;height:18px"><input type="checkbox" ${ff.on?'checked':''} style="display:none"><span style="position:absolute;inset:0;background:${ff.on?'var(--green)':'var(--line)'};border-radius:999px;cursor:pointer"><span style="position:absolute;width:14px;height:14px;background:#fff;border-radius:50%;top:2px;${ff.on?'right:2px':'left:2px'}"></span></span></label></div>
+              <div style="font-size:11px;color:var(--muted)">${ff.desc} · ${ff.pct}% rollout</div>
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>`;
+  },
+
+  // ---------- SUPPORT ----------
+  viewSupport(){
+    return `
+      <div class="view">
+        <div class="page-hd">
+          <div><h1>🎧 Support · tickets & NPS</h1><div class="sub">Réponse moyenne : 1h42 · SLA 4h ✓</div></div>
+          <button class="btn btn-p" onclick="Px.toast('Ticket créé','success')">+ Nouveau ticket</button>
+        </div>
+
+        <div class="g4">
+          ${this.summaryCard('📬','Tickets ouverts','3','Tous < 4h','blue',20)}
+          ${this.summaryCard('⚡','Temps résolution','1h42','SLA 4h respecté','green',70)}
+          ${this.summaryCard('⭐','NPS score','68','Excellent (>50)','violet',68)}
+          ${this.summaryCard('😊','CSAT','94%','47 retours','green',94)}
+        </div>
+
+        <div class="g2">
+          <div class="card">
+            <div class="card-hd"><h3>🎫 Tickets actifs</h3></div>
+            <div class="card-body" style="padding:0 18px 18px">
+              ${[
+                {t:'#T-047',c:'Taller Los Andes',s:'Problème réception msg WhatsApp',p:'high',age:'2h',o:'Iñigo'},
+                {t:'#T-046',c:'Spa Termal',s:'Card declined relance',p:'medium',age:'4h',o:'Juan'},
+                {t:'#T-045',c:'Panadería San Pedro',s:'Question sur export CSV',p:'low',age:'1d',o:'Iñigo'}
+              ].map(tk=>`<div class="client-row" style="grid-template-columns:60px 1.5fr 2fr 60px 50px 80px 40px" onclick="Px.toast('Ticket '+${JSON.stringify(tk.t)}+' ouvert','info')">
+                <span class="mono" style="color:var(--muted)">${tk.t}</span>
+                <span style="font-weight:600;font-size:12.5px">${tk.c}</span>
+                <span style="font-size:12px;color:var(--ink2)">${tk.s}</span>
+                <span class="chip ${tk.p==='high'?'red':tk.p==='medium'?'amber':''}">${tk.p.toUpperCase()}</span>
+                <span style="font-size:11px;color:var(--muted)">${tk.age}</span>
+                <div class="team-av" style="background:linear-gradient(135deg,#1A56DB,#7A3CFF);width:24px;height:24px;font-size:10px">${tk.o[0]}</div>
+                <button class="btn-g">→</button>
+              </div>`).join('')}
+              <div class="mt16" style="padding:14px;background:var(--green-soft);border-radius:10px;font-size:12px">✅ <b>14 tickets résolus</b> ces 7 derniers jours · temps moyen 1h42 · 100% SLA respecté</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-hd"><h3>⭐ Feedback récent</h3></div>
+            <div class="card-body">
+              ${[
+                {a:'María',s:'Panadería Don Carlos',st:5,c:'"Nexus me cambió la vida, respondo a 40 clientes al día sin esfuerzo 🥖"'},
+                {a:'Sofía',s:'Clínica Smile',st:5,c:'"El brouillon IA es impresionante, 90% de las veces lo envío tal cual"'},
+                {a:'Luis',s:'Taller Los Andes',st:2,c:'"Problème de réception, support réactif mais bug persiste"'},
+                {a:'Carmen',s:'Spa Zen',st:5,c:'"Gracias al podium gamificado, mis clientes sienten que importan"'}
+              ].map(f=>`<div style="padding:12px;background:var(--bg2);border-radius:10px;margin-bottom:8px">
+                <div class="flex between" style="margin-bottom:6px">
+                  <div class="flex" style="gap:8px"><div class="client-av" style="background:linear-gradient(135deg,#06B6D4,#7A3CFF);width:24px;height:24px;font-size:10px">${f.a[0]}</div><span style="font-weight:600;font-size:12px">${f.a} · ${f.s}</span></div>
+                  <span style="font-size:13px">${'⭐'.repeat(f.st)}</span>
+                </div>
+                <div style="font-size:12px;color:var(--ink2);font-style:italic">${f.c}</div>
+              </div>`).join('')}
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd"><h3>📚 Knowledge base · articles populaires</h3></div>
+          <div class="card-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px">
+            ${[
+              {n:'Connecter WhatsApp Business',v:428},{n:'Utiliser le brouillon IA',v:312},{n:'Créer une campagne marketing',v:287},
+              {n:'Mode vacances',v:201},{n:'Exporter ses données',v:178},{n:'Intégration Stripe',v:164},
+              {n:'Multi-équipe & rôles',v:145},{n:'Troubleshooting WhatsApp',v:132}
+            ].map(a=>`<div style="padding:14px;background:var(--bg2);border-radius:10px;cursor:pointer" onclick="Px.toast('Article ouvert','info')">
+              <div style="font-weight:600;font-size:12.5px;margin-bottom:4px">📄 ${a.n}</div>
+              <div style="font-size:11px;color:var(--muted)">${a.v} vues · 30j</div>
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>`;
+  },
+
+  // ---------- GROWTH ----------
+  viewGrowth(){
+    return `
+      <div class="view">
+        <div class="page-hd">
+          <div><h1>🚀 Growth · funnel & acquisition</h1><div class="sub">CAC · conversion · referrals · landing pages LATAM</div></div>
+        </div>
+
+        <div class="g4">
+          ${this.summaryCard('👁','Visiteurs (30j)','18 420','+34% MoM','blue',70)}
+          ${this.summaryCard('🎯','Taux conversion','2,1%','Moy. SaaS B2B: 1,5%','green',42)}
+          ${this.summaryCard('💸','CAC','€ 47','Payback 2 mois','violet',20)}
+          ${this.summaryCard('🔗','Viral coefficient','1,4','K-factor > 1 = viral','green',95)}
+        </div>
+
+        <div class="g2">
+          <div class="card">
+            <div class="card-hd"><h3>🫙 Funnel acquisition · 30j</h3></div>
+            <div class="card-body">
+              ${[
+                {s:'Visiteurs landing',n:18420,p:100,c:'var(--blue)'},
+                {s:'Signup démo',n:1248,p:6.8,c:'var(--cyan)'},
+                {s:'Trial activé',n:892,p:4.8,c:'var(--violet)'},
+                {s:'Setup complet',n:412,p:2.2,c:'var(--amber)'},
+                {s:'Conversion payant',n:387,p:2.1,c:'var(--green)'},
+              ].map((s,i)=>`
+                <div class="funnel-step" style="margin-left:${i*4}%">
+                  <span class="funnel-label">${s.s}</span>
+                  <span class="funnel-n">${s.n.toLocaleString('fr-FR')}</span>
+                  <span class="funnel-pct">${s.p}%</span>
+                </div>`).join('')}
+              <div style="padding:14px;background:var(--bg2);border-radius:10px;margin-top:14px;font-size:12px">💡 <b>Gros drop</b> entre trial activé (892) et setup complet (412) → <b>46% abandon</b>. Onboarding à simplifier.</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-hd"><h3>📊 Canaux d'acquisition</h3></div>
+            <div class="card-body">
+              ${[
+                {n:'🔍 SEO organic',v:42,c:162},
+                {n:'📱 Social ads (Insta/TikTok)',v:24,c:93},
+                {n:'🔗 Referrals (K-factor)',v:18,c:70},
+                {n:'📧 Email outbound',v:8,c:31},
+                {n:'🤝 Partnerships',v:5,c:19},
+                {n:'💬 Word of mouth',v:3,c:12}
+              ].map(ch=>`<div style="margin-bottom:12px">
+                <div class="flex between" style="margin-bottom:4px"><b style="font-size:12.5px">${ch.n}</b><span class="mono" style="font-size:11px">${ch.c} signups · ${ch.v}%</span></div>
+                <div class="progress" style="height:7px"><div class="progress-bar" style="width:${ch.v}%"></div></div>
+              </div>`).join('')}
+            </div>
+          </div>
+        </div>
+
+        <div class="g3">
+          <div class="card" style="padding:20px">
+            <h3 style="margin-bottom:12px">🔗 Top referrers</h3>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              ${this.state.clients.slice(0,5).map((c,i)=>`<div class="flex" style="gap:10px">
+                <div class="client-av" style="background:${c.color};width:28px;height:28px;font-size:11px">${c.initials}</div>
+                <span style="flex:1;font-size:12.5px;font-weight:600">${c.name}</span>
+                <span class="chip green">${5-i} filleuls</span>
+              </div>`).join('')}
+            </div>
+            <button class="btn btn-s" style="width:100%;margin-top:14px" onclick="Px.toast('Programme referral lancé','success')">🎁 Activer bonus</button>
+          </div>
+
+          <div class="card" style="padding:20px">
+            <h3 style="margin-bottom:12px">📍 Landing pages performance</h3>
+            ${[
+              {u:'/latam',v:8420,c:542,r:6.4},
+              {u:'/chile',v:4210,c:298,r:7.1},
+              {u:'/boulangerie',v:2890,c:184,r:6.4},
+              {u:'/peluqueria',v:1910,c:112,r:5.9},
+              {u:'/home',v:990,c:12,r:1.2}
+            ].map(lp=>`<div class="flex between" style="padding:8px 0;border-top:1px solid var(--line2);font-size:12px">
+              <span class="mono" style="color:var(--blue)">${lp.u}</span>
+              <span class="mono" style="color:var(--muted)">${lp.v.toLocaleString('fr-FR')} views</span>
+              <span class="mono" style="font-weight:700">${lp.r}%</span>
+            </div>`).join('')}
+          </div>
+
+          <div class="card" style="padding:20px">
+            <h3 style="margin-bottom:12px">🎯 Next best actions</h3>
+            <div style="font-size:12px;color:var(--ink2);line-height:1.7">
+              <div style="padding:10px;background:var(--blue-soft);border-radius:8px;margin-bottom:8px">
+                <b>1. Fix onboarding gap</b><br>
+                <span style="color:var(--muted)">46% drop entre trial et setup → simplifier l'étape WhatsApp Business.</span>
+              </div>
+              <div style="padding:10px;background:var(--green-soft);border-radius:8px;margin-bottom:8px">
+                <b>2. Booster referrals</b><br>
+                <span style="color:var(--muted)">K-factor à 1,4 · program à 3,0 avec incentive 1 mois gratuit.</span>
+              </div>
+              <div style="padding:10px;background:var(--violet-soft);border-radius:8px">
+                <b>3. Expansion géo</b><br>
+                <span style="color:var(--muted)">Mexico + Peru: 150k PyMEs Whatsapp-actives. Ouverture Q3.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  },
+
+  // ---------- BROADCASTS ----------
+  viewBroadcasts(){
+    return `
+      <div class="view">
+        <div class="page-hd">
+          <div><h1>📢 Broadcasts & annonces</h1><div class="sub">Communique avec tes 47 PyMEs d'un clic.</div></div>
+          <button class="btn btn-p" onclick="Px.openModal('broadcast')">+ Nouveau broadcast</button>
+        </div>
+
+        <div class="g3">
+          <div class="card" style="padding:20px"><div style="font-size:26px">📣</div><h3 style="margin:10px 0 4px">Releases produit</h3><p style="font-size:12.5px;color:var(--muted)">Annonce chaque nouvelle feature aux clients concernés.</p><button class="btn btn-s mt16" style="width:100%" onclick="Px.openModal('broadcast')">Créer →</button></div>
+          <div class="card" style="padding:20px"><div style="font-size:26px">🎯</div><h3 style="margin:10px 0 4px">Tips métier IA</h3><p style="font-size:12.5px;color:var(--muted)">Partage un insight cross-client, pertinent par segment.</p><button class="btn btn-s mt16" style="width:100%" onclick="Px.openModal('broadcast')">Créer →</button></div>
+          <div class="card" style="padding:20px"><div style="font-size:26px">📊</div><h3 style="margin:10px 0 4px">Rapport mensuel auto</h3><p style="font-size:12.5px;color:var(--muted)">Chaque client reçoit son rapport perso · automatisé.</p><span class="chip green mt16" style="margin-top:16px">✓ Actif</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd"><h3>📬 Historique broadcasts · 30j</h3></div>
+          <div class="card-body" style="padding:0 18px 18px">
+            ${[
+              {d:'20 avril',t:'🎉 Nueva función: transcripción vocal',aud:'47',open:94,rep:12},
+              {d:'14 avril',t:'📊 Rapport mensuel mars · auto',aud:'47',open:89,rep:3},
+              {d:'10 avril',t:'💡 Tip IA: promo fin de semana (LATAM)',aud:'28',open:82,rep:21},
+              {d:'05 avril',t:'🇨🇱 Consejo específico Chile (Fiestas Patrias)',aud:'47',open:91,rep:8},
+              {d:'01 avril',t:'🎁 30% nueva referencia · lanzamiento',aud:'38',open:78,rep:14},
+            ].map(b=>`<div class="flex" style="padding:14px 0;border-top:1px solid var(--line2);gap:14px">
+              <div style="width:36px;height:36px;background:var(--blue-soft);color:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center">📢</div>
+              <div style="flex:1"><div style="font-weight:600;font-size:13px">${b.t}</div><div style="font-size:11px;color:var(--muted)">${b.d} · ${b.aud} destinataires</div></div>
+              <div class="flex" style="gap:16px;font-family:'JetBrains Mono',monospace;font-size:12px">
+                <div style="text-align:center"><div style="font-weight:700;color:var(--blue)">${b.open}%</div><div style="font-size:10px;color:var(--muted)">ouverture</div></div>
+                <div style="text-align:center"><div style="font-weight:700;color:var(--green)">${b.rep}</div><div style="font-size:10px;color:var(--muted)">réponses</div></div>
+              </div>
+              <button class="btn-g">📊</button>
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>`;
+  },
+
+  // ---------- ALERTS ----------
+  viewAlerts(){
+    return `
+      <div class="view">
+        <div class="page-hd">
+          <div><h1>🔔 Alertes & incidents</h1><div class="sub">Triggered automatiquement · Rules configurables</div></div>
+          <button class="btn btn-s" onclick="Px.toast('Règles ouvertes','info')">⚙ Règles d'alerte</button>
+        </div>
+
+        <div class="g4">
+          ${this.summaryCard('🔴','Critiques','1','Action immédiate','red',100)}
+          ${this.summaryCard('🟡','Warnings','3','À surveiller','amber',60)}
+          ${this.summaryCard('🔵','Opportunités','2','Upsell/Expansion','blue',80)}
+          ${this.summaryCard('✓','Résolues 7j','24','Tous SLA respectés','green',100)}
+        </div>
+
+        <div class="card">
+          <div class="card-hd"><h3>⚠️ Alertes actives</h3></div>
+          <div class="card-body" style="padding:0 18px 18px">
+            ${this.state.alerts.concat([
+              {id:5,lvl:'blue',title:'Expansion LATAM — 43 signups Mexico cette semaine',body:'Le pipeline Mexico explose (+180%). Ouvrir formellement MX en priorité.',age:'Il y a 1j'},
+              {id:6,lvl:'amber',title:'Claude API tokens à 68% du cap mensuel',body:'Reset J+9. Prévoir upgrade Anthropic Scale ou optimiser prompts.',age:'Il y a 3h'}
+            ]).map(a=>`<div style="padding:14px;border-top:1px solid var(--line2);display:flex;gap:14px;align-items:flex-start">
+              <div style="width:36px;height:36px;border-radius:10px;background:var(--${a.lvl==='red'?'red-soft':a.lvl==='amber'?'amber-soft':'blue-soft'});color:var(--${a.lvl==='red'?'red':a.lvl==='amber'?'amber':'blue'});display:flex;align-items:center;justify-content:center;font-size:16px">${a.lvl==='red'?'🚨':a.lvl==='amber'?'⚠️':'💡'}</div>
+              <div style="flex:1"><div style="font-weight:700;font-size:13px">${a.title}</div><div style="font-size:12px;color:var(--muted);margin-top:3px">${a.body}</div><div style="font-size:11px;color:var(--muted);margin-top:6px">${a.age}</div></div>
+              <div class="flex" style="gap:6px"><button class="btn btn-p" style="font-size:11px" onclick="Px.toast('Action déclenchée','success')">Agir</button><button class="btn btn-s" style="font-size:11px" onclick="Px.toast('Silencé 24h','info')">Silence</button></div>
+            </div>`).join('')}
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd"><h3>⚙ Règles d'alerte actives</h3><span class="chip blue">12</span></div>
+          <div class="card-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
+            ${[
+              'Health score < 40 pendant 3j',
+              'Paiement échoué × 2 consécutifs',
+              'Trial expire dans 48h',
+              '0 message sur 7j consécutifs',
+              'NPS < 20 sur survey',
+              'Usage features > 80% (upsell)',
+              'Churn prédit > 70% probabilité',
+              'API latency p95 > 500ms 10min',
+              'Claude tokens > 80% cap',
+              'Stripe webhook fail × 3',
+              'Support ticket > SLA',
+              'Workflow n8n failed × 2'
+            ].map(r=>`<div style="padding:12px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;gap:10px"><span style="width:8px;height:8px;background:var(--green);border-radius:50%"></span><span style="flex:1;font-size:12px">${r}</span><button class="btn-g" onclick="Px.toast('Règle éditée','info')">⚙</button></div>`).join('')}
+          </div>
+        </div>
+      </div>`;
+  },
+
+  // ---------- SETTINGS ----------
+  viewSettings(){
+    return `
+      <div class="view">
+        <div class="page-hd"><div><h1>⚙️ Paramètres · Nexus Pulse</h1><div class="sub">Ton cockpit, tes règles.</div></div></div>
+        <div class="g2e">
+          <div class="card" style="padding:22px">
+            <h3 style="margin-bottom:14px">👥 Équipe</h3>
+            ${[
+              {n:'Juan Paillard',r:'Co-founder · Sales & Marketing',av:'J',col:'linear-gradient(135deg,#1A56DB,#7A3CFF)'},
+              {n:'Iñigo Arze',r:'Co-founder · Tech & Product',av:'I',col:'linear-gradient(135deg,#06B6D4,#22C55E)'}
+            ].map(m=>`<div class="flex" style="padding:10px 0;border-top:1px solid var(--line2);gap:12px">
+              <div class="team-av" style="background:${m.col};width:36px;height:36px;font-size:13px">${m.av}</div>
+              <div style="flex:1"><div style="font-weight:600;font-size:13px">${m.n}</div><div style="font-size:11px;color:var(--muted)">${m.r}</div></div>
+              <span class="chip green">Admin</span>
+            </div>`).join('')}
+            <button class="btn btn-s" style="width:100%;margin-top:12px" onclick="Px.toast('Invitation envoyée','success')">+ Inviter un membre</button>
+          </div>
+
+          <div class="card" style="padding:22px">
+            <h3 style="margin-bottom:14px">🔑 API & intégrations</h3>
+            ${['Anthropic Claude API','Stripe (Live)','Supabase (Prod)','Vercel','Railway','WhatsApp Business','Meta Business','Google Cloud'].map(i=>`<div class="flex between" style="padding:8px 0;border-top:1px solid var(--line2)">
+              <span style="font-size:13px">${i}</span>
+              <span class="chip green">✓ Connecté</span>
+            </div>`).join('')}
+          </div>
+
+          <div class="card" style="padding:22px">
+            <h3 style="margin-bottom:14px">🛎 Notifications</h3>
+            ${[
+              {n:'Alertes push desktop',on:true},
+              {n:'Daily digest email 09:00',on:true},
+              {n:'Weekend mode (silence weekends)',on:false},
+              {n:'Slack #ops channel alerts',on:true},
+              {n:'SMS pour alertes rouges',on:true},
+              {n:'Investor weekly report',on:true}
+            ].map(n=>`<div class="flex between" style="padding:10px 0;border-top:1px solid var(--line2)">
+              <span style="font-size:13px">${n.n}</span>
+              <label style="position:relative;display:inline-block;width:34px;height:20px"><input type="checkbox" ${n.on?'checked':''} style="display:none"><span style="position:absolute;inset:0;background:${n.on?'var(--blue)':'var(--line)'};border-radius:999px;cursor:pointer;transition:background .2s"><span style="position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:2px;${n.on?'right:2px':'left:2px'};transition:all .2s"></span></span></label>
+            </div>`).join('')}
+          </div>
+
+          <div class="card" style="padding:22px">
+            <h3 style="margin-bottom:14px">🎨 Apparence</h3>
+            <div style="padding:10px 0;border-bottom:1px solid var(--line2)"><div class="flex between"><span style="font-size:13px">Thème sombre</span><label style="position:relative;display:inline-block;width:34px;height:20px"><input type="checkbox" ${this.state.theme==='dark'?'checked':''} onchange="Px.toggleTheme()" style="display:none"><span style="position:absolute;inset:0;background:${this.state.theme==='dark'?'var(--blue)':'var(--line)'};border-radius:999px;cursor:pointer"><span style="position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:2px;${this.state.theme==='dark'?'right:2px':'left:2px'}"></span></span></label></div></div>
+            <div style="padding:10px 0;border-bottom:1px solid var(--line2)"><span style="font-size:13px;display:block;margin-bottom:8px">Accent color</span>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">${['#1A56DB','#7A3CFF','#06B6D4','#22C55E','#EF4444','#F59E0B'].map(c=>`<div style="width:32px;height:32px;border-radius:10px;background:${c};cursor:pointer" onclick="document.documentElement.style.setProperty('--blue','${c}');Px.toast('Couleur appliquée','success')"></div>`).join('')}</div>
+            </div>
+            <div style="padding:10px 0"><button class="btn btn-s" style="width:100%" onclick="if(confirm('Reset démo?'))Px.reset()">🔄 Reset démo</button></div>
+          </div>
+        </div>
+      </div>`;
+  }
+};
+
+window.addEventListener('DOMContentLoaded',()=>Px.init());
+</script>
+</body>
+</html>

@@ -1,0 +1,2041 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1A56DB">
+<title>Nexus — App Nexus InJu · MVP</title>
+<style>
+:root{
+  --bg:#F8FAFC; --bg2:#F1F5F9; --panel:#FFFFFF; --ink:#0F172A; --ink2:#334155; --muted:#64748B;
+  --line:#E2E8F0; --line2:#F1F5F9;
+  --blue:#1A56DB; --blue-soft:#EFF4FE; --blue-ink:#1E40AF; --blue-ghost:#DBE5FD;
+  --green:#22C55E; --green-soft:#ECFDF5;
+  --amber:#F59E0B; --amber-soft:#FFFBEB;
+  --red:#EF4444; --red-soft:#FEF2F2;
+  --violet:#7A3CFF; --violet-soft:#F3E8FF;
+  --cyan:#06B6D4; --cyan-soft:#ECFEFF;
+  --shadow:0 1px 2px rgba(15,23,42,.04), 0 4px 16px -8px rgba(15,23,42,.08);
+  --shadow-lg:0 8px 32px -12px rgba(15,23,42,.16);
+  --shadow-xl:0 20px 60px -20px rgba(15,23,42,.24);
+  --radius:14px; --radius-sm:8px;
+}
+html[data-theme="dark"]{
+  --bg:#0B0F16; --bg2:#0F1520; --panel:#121824; --ink:#E8ECF3; --ink2:#B8C1CE; --muted:#8A94A6;
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.04);
+  --blue-soft:rgba(26,86,219,.15); --blue-ghost:rgba(26,86,219,.3);
+  --green-soft:rgba(34,197,94,.12); --amber-soft:rgba(245,158,11,.12); --red-soft:rgba(239,68,68,.12);
+  --violet-soft:rgba(122,60,255,.15); --cyan-soft:rgba(6,182,212,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-family:'Inter','Segoe UI',-apple-system,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;font-size:14px;min-height:100vh}
+.mono{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}
+button{font-family:inherit;cursor:pointer}
+input,textarea,select{font-family:inherit;font-size:14px}
+a{color:inherit;text-decoration:none}
+::selection{background:var(--blue-ghost);color:var(--blue-ink)}
+
+/* LAYOUT */
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.main{display:flex;flex-direction:column;min-width:0}
+
+/* SIDEBAR */
+.sidebar{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.side-hd{padding:20px 18px;border-bottom:1px solid var(--line2)}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.logo{width:32px;height:32px}
+.brand-name{font-size:17px;font-weight:800;letter-spacing:-.02em}
+.brand-name span{color:var(--blue)}
+.p-card{display:flex;align-items:center;gap:12px;padding:12px;background:linear-gradient(135deg,var(--blue),var(--blue-ink));border-radius:12px;color:#fff}
+.p-avatar{width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.p-who{flex:1;min-width:0}
+.p-who .n{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-who .b{font-size:11px;opacity:.85}
+.p-switch{background:rgba(255,255,255,.12);border:0;padding:6px;border-radius:6px;color:#fff;cursor:pointer;transition:background .15s}
+.p-switch:hover{background:rgba(255,255,255,.22)}
+
+.side-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:16px 20px 6px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 18px;cursor:pointer;transition:all .15s;border-left:3px solid transparent;color:var(--ink2)}
+.nav-item:hover{background:var(--bg2)}
+.nav-item.active{background:var(--blue-soft);border-left-color:var(--blue);color:var(--blue-ink)}
+.nav-ic{width:30px;height:30px;border-radius:8px;background:var(--bg2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;font-size:15px}
+.nav-item.active .nav-ic{background:var(--blue);color:#fff}
+.nav-lbl{font-size:13px;font-weight:500;flex:1}
+.nav-meta{font-size:11px;color:var(--muted);padding:2px 7px;background:var(--bg2);border-radius:999px;font-weight:600}
+.nav-item.active .nav-meta{background:var(--blue);color:#fff}
+
+.side-foot{margin-top:auto;padding:14px 18px;border-top:1px solid var(--line2);display:flex;flex-direction:column;gap:8px}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg2);border-radius:8px;font-size:12px;color:var(--ink2)}
+.toggle-row.warn{background:var(--amber-soft);color:#B45309}
+.switch{position:relative;display:inline-block;width:32px;height:18px}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;inset:0;background:var(--line);border-radius:999px;transition:.2s}
+.slider:before{position:absolute;content:"";height:14px;width:14px;left:2px;top:2px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.switch input:checked + .slider{background:var(--blue)}
+.switch input:checked + .slider:before{transform:translateX(14px)}
+.live-dot{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.live-dot .dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;gap:14px;padding:12px 24px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50;flex-shrink:0}
+.breadcrumb{font-size:13px;color:var(--muted);flex:1}
+.breadcrumb b{color:var(--ink);font-weight:600}
+.search-btn{display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--bg2);border:1px solid transparent;border-radius:8px;width:280px;transition:all .15s;color:var(--muted);cursor:pointer}
+.search-btn:hover{background:var(--panel);border-color:var(--line)}
+.search-btn .kbd{font-size:10px;padding:2px 6px;background:var(--panel);border:1px solid var(--line);border-radius:4px;margin-left:auto;font-family:'JetBrains Mono',monospace;color:var(--muted)}
+.icon-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--panel);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:all .15s;color:var(--ink2)}
+.icon-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-soft)}
+.badge-dot{position:absolute;top:4px;right:4px;min-width:14px;height:14px;padding:0 3px;background:var(--red);color:#fff;border-radius:999px;border:2px solid var(--panel);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.lang-btn{display:flex;gap:0;background:var(--bg2);border-radius:7px;padding:2px;border:1px solid var(--line)}
+.lang-btn button{padding:4px 8px;border-radius:5px;border:0;background:transparent;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.05em;transition:all .15s}
+.lang-btn button.on{background:var(--panel);color:var(--blue);box-shadow:var(--shadow)}
+.avatar{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--blue-ink));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;cursor:pointer;transition:transform .15s}
+.avatar:hover{transform:scale(1.05)}
+
+/* VIEW CONTAINER */
+.view{padding:28px 32px 60px;max-width:1280px;margin:0 auto;width:100%}
+.view.hidden{display:none}
+.page-hd{margin-bottom:22px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.page-hd h1{font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+.page-hd h1 em{color:var(--blue);font-style:normal}
+.page-hd .sub{color:var(--muted);font-size:14px;margin-top:4px}
+.date-pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;background:var(--panel);border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--ink2)}
+.date-pill .dot{width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 0 3px var(--green-soft)}
+
+/* CARDS */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:all .2s}
+.card-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 10px;gap:12px}
+.card-hd h3{font-size:14px;font-weight:700;letter-spacing:-.01em}
+.card-hd .actions{display:flex;gap:6px}
+.card-body{padding:10px 20px 20px}
+
+/* BUTTONS */
+.btn{padding:9px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:0;transition:all .15s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-p{background:var(--blue);color:#fff}
+.btn-p:hover{background:var(--blue-ink);transform:translateY(-1px);box-shadow:0 4px 12px -4px var(--blue)}
+.btn-s{background:var(--panel);color:var(--ink2);border:1px solid var(--line)}
+.btn-s:hover{border-color:var(--blue);color:var(--blue)}
+.btn-g{background:transparent;color:var(--muted);border:1px solid var(--line);padding:6px 12px;font-size:12px;border-radius:6px}
+.btn-g:hover{color:var(--blue);border-color:var(--blue)}
+.btn-success{background:var(--green);color:#fff}
+.btn-success:hover{background:#16A34A}
+.btn-danger{background:var(--red);color:#fff}
+.btn-warn{background:var(--amber);color:#fff}
+.btn-ghost{padding:5px 10px;border-radius:6px;font-size:12px;color:var(--muted);border:1px solid var(--line);background:var(--panel);cursor:pointer;transition:all .15s}
+.btn-ghost:hover{color:var(--blue);border-color:var(--blue)}
+
+/* STATS GRID */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.stat:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.stat-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.stat-ic{width:36px;height:36px;border-radius:10px;background:var(--blue-soft);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:16px}
+.stat-ic.g{background:var(--green-soft);color:var(--green)}
+.stat-ic.a{background:var(--amber-soft);color:var(--amber)}
+.stat-ic.p{background:var(--violet-soft);color:var(--violet)}
+.stat-ic.c{background:var(--cyan-soft);color:var(--cyan)}
+.delta{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px}
+.delta.up{background:var(--green-soft);color:var(--green)}
+.delta.dn{background:var(--red-soft);color:var(--red)}
+.delta.eq{background:var(--bg2);color:var(--muted)}
+.stat-lbl{font-size:11px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.stat-val{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* TIPS */
+.tips{padding:22px 24px;border-radius:var(--radius);background:linear-gradient(135deg,var(--blue-soft) 0%,var(--green-soft) 100%);border:1px solid var(--blue-ghost);position:relative;overflow:hidden;margin-bottom:16px}
+.tips::before{content:"";position:absolute;top:-50px;right:-50px;width:200px;height:200px;background:radial-gradient(circle,rgba(26,86,219,.15),transparent 70%);border-radius:50%;pointer-events:none}
+.tips-hd{display:flex;align-items:center;gap:10px;margin-bottom:12px;position:relative}
+.tips-ic{width:40px;height:40px;border-radius:12px;background:var(--panel);border:1px solid var(--blue-ghost);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:var(--shadow)}
+.tips-hd .t{font-size:13px;font-weight:700;color:var(--blue-ink)}
+.tips-hd .t small{display:block;font-size:11px;color:var(--muted);font-weight:500;margin-top:1px}
+.tips-body{font-size:14px;color:var(--ink);line-height:1.6;position:relative;margin-bottom:14px}
+.tips-body b{color:var(--blue-ink);font-weight:700}
+.tips-actions{display:flex;gap:8px;position:relative;flex-wrap:wrap}
+
+/* GRID 2-col */
+.grid2{display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-bottom:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+
+/* MESSAGES / INBOX */
+.msg{display:flex;gap:12px;padding:12px 20px;border-top:1px solid var(--line2);transition:background .15s;cursor:pointer;position:relative}
+.msg:first-of-type{border-top:0}
+.msg:hover{background:var(--bg2)}
+.msg.unread{background:linear-gradient(90deg,var(--blue-soft) 0,transparent 80%)}
+.msg.unread:hover{background:var(--blue-soft)}
+.msg.active{background:var(--blue-soft)!important;border-left:3px solid var(--blue)}
+.msg-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0}
+.msg-body{flex:1;min-width:0}
+.msg-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;gap:8px}
+.msg-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.msg-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.msg-unread-dot{width:7px;height:7px;background:var(--blue);border-radius:50%;flex-shrink:0}
+.msg-time{font-size:11px;color:var(--muted)}
+.msg-txt{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg-tag{display:inline-block;margin-top:4px;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.02em}
+.msg-tag.new{background:var(--green-soft);color:var(--green)}
+.msg-tag.vip{background:#FEF3C7;color:#B45309}
+.msg-tag.rec{background:var(--blue-soft);color:var(--blue)}
+.msg-tag.alert{background:var(--red-soft);color:var(--red)}
+.msg-tag.biz{background:var(--violet-soft);color:var(--violet)}
+.ch{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--muted);margin-left:6px}
+
+/* PODIUM */
+.podium-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line);cursor:pointer;transition:transform .15s}
+.podium-row:hover{transform:translateX(4px)}
+.podium-row:last-child{border:0}
+.rank{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0}
+.rank-1{background:linear-gradient(135deg,#FCD34D,#F59E0B);color:#78350F;box-shadow:0 4px 12px -4px #F59E0B}
+.rank-2{background:linear-gradient(135deg,#E5E7EB,#9CA3AF);color:#1F2937}
+.rank-3{background:linear-gradient(135deg,#FDBA74,#C2410C);color:#7C2D12}
+.rank-n{background:var(--bg2);color:var(--muted)}
+.p-info{flex:1;min-width:0}
+.p-name{font-size:13px;font-weight:600}
+.p-stat{font-size:11px;color:var(--muted)}
+.p-score{font-size:14px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--blue)}
+.p-bar{width:100%;height:4px;background:var(--bg2);border-radius:999px;overflow:hidden;margin-top:5px}
+.p-bar span{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:999px;transition:width .6s}
+
+/* FORM */
+.form-row{margin-bottom:16px}
+.form-lbl{font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:.04em}
+.form-ctrl{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--panel);color:var(--ink);transition:all .15s;font-size:13px}
+.form-ctrl:focus{outline:0;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,.12)}
+textarea.form-ctrl{resize:vertical;min-height:80px;font-family:inherit}
+
+/* CHAT INTERFACE */
+.chat-layout{display:grid;grid-template-columns:340px 1fr;gap:14px;min-height:calc(100vh - 200px)}
+.chat-list{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column}
+.chat-list-hd{padding:14px 18px;border-bottom:1px solid var(--line2)}
+.chat-list-tabs{display:flex;gap:6px;margin-top:10px;overflow-x:auto}
+.chat-tab{flex-shrink:0;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:600;background:var(--bg2);border:1px solid var(--line);cursor:pointer;color:var(--ink2)}
+.chat-tab.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.chat-messages-list{flex:1;overflow-y:auto;max-height:calc(100vh - 280px)}
+.chat-conv{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);display:flex;flex-direction:column;overflow:hidden}
+.chat-conv-hd{padding:14px 18px;border-bottom:1px solid var(--line2);display:flex;align-items:center;gap:12px}
+.chat-conv-body{flex:1;padding:20px;overflow-y:auto;background:var(--bg2);min-height:420px;max-height:calc(100vh - 340px)}
+.bubble{max-width:68%;padding:10px 14px;border-radius:14px;margin-bottom:8px;font-size:13.5px;line-height:1.45;position:relative}
+.bubble.them{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-top-left-radius:4px;margin-right:auto}
+.bubble.me{background:#DCF8C6;color:#0F172A;border-top-right-radius:4px;margin-left:auto}
+html[data-theme="dark"] .bubble.me{background:#056162;color:#E8ECF3}
+.bubble .t{font-size:10px;color:var(--muted);margin-top:4px;text-align:right}
+.bubble.voice::before{content:"🎙";margin-right:6px}
+.chat-draft{background:var(--blue-soft);border:1px dashed var(--blue-ghost);padding:10px 14px;border-radius:10px;font-size:13px;color:var(--blue-ink);margin-bottom:8px;position:relative}
+.chat-draft::before{content:"🤖 Brouillon IA — ";font-weight:600}
+.chat-draft-actions{display:flex;gap:6px;margin-top:8px}
+.chat-input{display:flex;gap:8px;padding:14px 18px;border-top:1px solid var(--line2);background:var(--panel)}
+.chat-input input{flex:1;padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:var(--bg2);font-size:13px}
+.chat-input input:focus{outline:0;border-color:var(--blue)}
+
+/* MODAL */
+#modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+#modal-overlay.hidden{display:none}
+.modal{background:var(--panel);border-radius:var(--radius);max-width:640px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-xl);animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-hd{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.modal-hd h3{font-size:16px;font-weight:700}
+.modal-close{border:0;background:var(--bg2);width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:16px;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.modal-close:hover{background:var(--red-soft);color:var(--red)}
+.modal-body{padding:22px}
+.modal-foot{padding:14px 22px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px;background:var(--bg2)}
+
+/* TOAST */
+#toast-container{position:fixed;top:20px;right:20px;z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--blue);padding:12px 16px;border-radius:var(--radius-sm);box-shadow:var(--shadow-xl);min-width:280px;font-size:13px;display:flex;align-items:flex-start;gap:10px;animation:slideIn .3s ease;pointer-events:auto}
+.toast.success{border-left-color:var(--green)}
+.toast.warn{border-left-color:var(--amber)}
+.toast.error{border-left-color:var(--red)}
+.toast .i{font-size:18px;flex-shrink:0}
+.toast-body{flex:1}
+.toast-body b{display:block;margin-bottom:2px}
+.toast-body small{color:var(--muted);font-size:11.5px}
+@keyframes slideIn{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* COMMAND PALETTE */
+#command-palette{position:fixed;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(4px);z-index:150;display:flex;align-items:flex-start;justify-content:center;padding-top:100px}
+#command-palette.hidden{display:none}
+.cp{background:var(--panel);border-radius:var(--radius);max-width:560px;width:calc(100% - 40px);overflow:hidden;box-shadow:var(--shadow-xl);animation:slideUp .2s ease}
+.cp-input{width:100%;padding:18px 24px;border:0;border-bottom:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:16px}
+.cp-input:focus{outline:0}
+.cp-results{max-height:440px;overflow-y:auto}
+.cp-group{padding:6px 0}
+.cp-group-title{padding:6px 24px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.cp-item{padding:10px 24px;display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px}
+.cp-item:hover,.cp-item.on{background:var(--blue-soft);color:var(--blue-ink)}
+.cp-item .ic{font-size:15px}
+.cp-item .meta{margin-left:auto;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+
+/* BADGES/CHIPS */
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;background:var(--bg2);color:var(--ink2)}
+.chip.blue{background:var(--blue-soft);color:var(--blue)}
+.chip.green{background:var(--green-soft);color:var(--green)}
+.chip.amber{background:var(--amber-soft);color:var(--amber)}
+.chip.red{background:var(--red-soft);color:var(--red)}
+.chip.violet{background:var(--violet-soft);color:var(--violet)}
+
+/* ONBOARDING */
+.onb{padding:18px 22px;background:linear-gradient(135deg,var(--violet-soft),var(--cyan-soft));border:1px solid var(--violet-soft);border-radius:var(--radius);margin-bottom:16px}
+.onb-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.onb-progress{flex:1;height:6px;background:var(--panel);border-radius:999px;overflow:hidden;margin:0 14px}
+.onb-progress span{display:block;height:100%;background:linear-gradient(90deg,var(--violet),var(--cyan));transition:width .6s;border-radius:999px}
+.onb-steps{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
+.onb-step{flex-shrink:0;min-width:180px;padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;cursor:pointer;transition:all .15s}
+.onb-step:hover{border-color:var(--violet)}
+.onb-step.done{opacity:.6;background:var(--green-soft);border-color:var(--green)}
+.onb-step .n{width:24px;height:24px;border-radius:50%;background:var(--bg2);display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--muted);margin-bottom:8px}
+.onb-step.done .n{background:var(--green);color:#fff}
+.onb-step h4{font-size:12.5px;font-weight:600;margin-bottom:4px}
+.onb-step p{font-size:11px;color:var(--muted)}
+
+/* HEATMAP */
+.heatmap{display:grid;grid-template-columns:60px repeat(7,1fr);gap:3px;padding:10px 0}
+.heat-cell{aspect-ratio:1.5;border-radius:3px;background:var(--bg2);position:relative;cursor:pointer}
+.heat-h0{background:var(--bg2)}
+.heat-h1{background:#DBEAFE}
+.heat-h2{background:#93C5FD}
+.heat-h3{background:#3B82F6}
+.heat-h4{background:#1E3A8A}
+.heat-lbl{font-size:10px;color:var(--muted);padding:0 6px;display:flex;align-items:center;font-family:'JetBrains Mono',monospace}
+
+/* STREAK */
+.streak{display:flex;align-items:center;gap:16px;padding:14px 18px;background:linear-gradient(135deg,#FFF7ED,#FED7AA);border:1px solid #FDBA74;border-radius:var(--radius);color:#7C2D12;margin-bottom:12px}
+html[data-theme="dark"] .streak{background:linear-gradient(135deg,rgba(253,186,116,.15),rgba(251,146,60,.08));color:#FED7AA}
+.streak-flame{font-size:32px;animation:flame 2s ease-in-out infinite}
+@keyframes flame{0%,100%{transform:scale(1) rotate(-2deg)}50%{transform:scale(1.08) rotate(2deg)}}
+.streak-n{font-size:28px;font-weight:800;font-family:'JetBrains Mono',monospace}
+.streak-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+
+/* AI BUTTON FLOAT */
+.ai-fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;border:0;cursor:pointer;box-shadow:0 10px 30px -8px var(--violet);z-index:40;display:flex;align-items:center;justify-content:center;font-size:22px;transition:transform .2s}
+.ai-fab:hover{transform:scale(1.08) rotate(-8deg)}
+.ai-fab::after{content:"";position:absolute;inset:-4px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--violet));opacity:.3;animation:pulseRing 2s infinite;z-index:-1}
+@keyframes pulseRing{0%{transform:scale(1);opacity:.5}100%{transform:scale(1.3);opacity:0}}
+
+/* TIMELINE */
+.timeline{position:relative;padding-left:24px}
+.timeline::before{content:"";position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tl-item{position:relative;padding-bottom:18px}
+.tl-item::before{content:"";position:absolute;left:-24px;top:4px;width:14px;height:14px;border-radius:50%;background:var(--panel);border:3px solid var(--blue)}
+.tl-item.alt::before{border-color:var(--green)}
+.tl-item.amb::before{border-color:var(--amber)}
+.tl-time{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.tl-body{font-size:13px;color:var(--ink);margin-top:3px}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.filter-pill{padding:6px 12px;background:var(--panel);border:1px solid var(--line);border-radius:999px;font-size:12px;cursor:pointer;color:var(--ink2);transition:all .15s;font-weight:500}
+.filter-pill:hover{border-color:var(--blue);color:var(--blue)}
+.filter-pill.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* INVOICE LIST */
+.inv-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line2);transition:background .15s}
+.inv-row:hover{background:var(--bg2)}
+.inv-id{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);width:100px}
+.inv-amt{font-weight:700;margin-left:auto;font-family:'JetBrains Mono',monospace}
+
+/* MOBILE */
+@media(max-width:1024px){.app{grid-template-columns:1fr}.sidebar{display:none}.stats{grid-template-columns:repeat(2,1fr)}.grid2,.grid3,.grid4{grid-template-columns:1fr}.chat-layout{grid-template-columns:1fr}.view{padding:20px 16px 40px}.search-btn{width:auto;flex:1;max-width:200px}}
+@media(max-width:640px){.stats{grid-template-columns:1fr}.topbar{padding:10px 16px}.search-btn{display:none}.page-hd h1{font-size:22px}}
+
+/* HIDDEN UTILITY */
+.hidden{display:none!important}
+.mt8{margin-top:8px}.mt16{margin-top:16px}.mt24{margin-top:24px}
+.flex{display:flex;gap:10px;align-items:center}.between{justify-content:space-between}
+.shake{animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
+</style>
+</head>
+<body>
+
+<!-- TOAST + MODAL + COMMAND PALETTE -->
+<div id="toast-container"></div>
+<div id="modal-overlay" class="hidden"><div class="modal" id="modal-content"></div></div>
+<div id="command-palette" class="hidden">
+  <div class="cp">
+    <input class="cp-input" id="cpInput" placeholder="Rechercher client, message, action…" autocomplete="off"/>
+    <div class="cp-results" id="cpResults"></div>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="side-hd">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 32 32" fill="none">
+          <path d="M16 2L4 7v10c0 7.5 5.4 12.5 12 13 6.6-.5 12-5.5 12-13V7L16 2z" fill="#1A56DB"/>
+          <path d="M11 22V10l4.5 7V10M21 10v12" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="brand-name">Ne<span>xus</span></div>
+      </div>
+      <div class="p-card">
+        <div class="p-avatar" id="bizLogo">🥖</div>
+        <div class="p-who">
+          <div class="n" id="bizName">Panadería Don Carlos</div>
+          <div class="b" id="bizOwner">Carlos · Santiago</div>
+        </div>
+        <button class="p-switch" title="Changer d'entreprise" onclick="Nx.toast('Profil unique en démo','info')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="side-title" data-i18n="nav.main">Navigation</div>
+    <nav id="navContainer"></nav>
+
+    <div class="side-foot">
+      <div class="toggle-row" id="vacationRow">
+        <span>✈️ Mode vacances</span>
+        <label class="switch"><input type="checkbox" id="vacationToggle" onchange="Nx.toggleVacation()"><span class="slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <span id="themeLbl">🌞 Thème clair</span>
+        <label class="switch"><input type="checkbox" id="themeToggle" onchange="Nx.toggleTheme()"><span class="slider"></span></label>
+      </div>
+      <button class="btn btn-s" style="width:100%;justify-content:center;font-size:11.5px" onclick="Nx.openModal('sos')">🆘 SOS Augustin</button>
+      <div class="live-dot"><span class="dot"></span> Canaux connectés</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="breadcrumb">
+        <span>Nexus</span> · <b id="breadcrumb">Tableau de bord</b>
+      </div>
+      <button class="search-btn" onclick="Nx.openPalette()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <span data-i18n="topbar.search">Rechercher…</span>
+        <span class="kbd">⌘K</span>
+      </button>
+      <div class="lang-btn">
+        <button onclick="Nx.setLang('fr')" id="lang-fr" class="on">FR</button>
+        <button onclick="Nx.setLang('es')" id="lang-es">ES</button>
+        <button onclick="Nx.setLang('en')" id="lang-en">EN</button>
+      </div>
+      <button class="icon-btn" onclick="Nx.showNotifs()" title="Notifications" id="notifBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a2 2 0 003.4 0"/></svg>
+        <span class="badge-dot" id="notifBadge">3</span>
+      </button>
+      <button class="icon-btn" onclick="Nx.navigate('settings')" title="Paramètres">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 01-4 0v-.1a1.7 1.7 0 00-1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 010-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3h0a1.7 1.7 0 001-1.5V3a2 2 0 014 0v.1a1.7 1.7 0 001 1.5h0a1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8h0a1.7 1.7 0 001.5 1H21a2 2 0 010 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>
+      </button>
+      <div class="avatar" onclick="Nx.openModal('avatar')">CM</div>
+    </div>
+
+    <div id="viewContainer"></div>
+
+  </main>
+</div>
+
+<!-- AI FAB -->
+<button class="ai-fab" onclick="Nx.openAiChat()" title="Nexus AI">✨</button>
+
+<script>
+/* ============================================================
+   NEXUS MVP — Client App · v1.0
+   Built for Juan & Inigo · Panadería Don Carlos demo
+   ============================================================ */
+
+// -------- I18N DICTIONARY --------
+const I18N = {
+  fr: {
+    'nav.main':'Navigation', 'nav.dashboard':'Tableau de bord', 'nav.profile':'Profil entreprise',
+    'nav.inbox':'Messagerie', 'nav.crm':'Clients & CRM', 'nav.stats':'Statistiques',
+    'nav.campaigns':'Campagnes', 'nav.payments':'Paiement & Plan', 'nav.tutorial':'Tuto & aide',
+    'nav.settings':'Paramètres', 'topbar.search':'Rechercher…',
+    'greet.morning':'Buenos días', 'greet.afternoon':'Buenas tardes', 'greet.evening':'Buenas noches',
+    'stats.conv':'Conversations aujourd\'hui','stats.clients':'Clients actifs',
+    'stats.revenue':'CA estimé (avril)','stats.response':'Taux de réponse',
+    'inbox.unread':'Messages à répondre','podium.title':'🏆 Top clients du mois',
+    'tips.title':'Le conseil de Nexus','tips.sub':'ton agent IA a analysé tes données',
+    'campaigns.create':'Créer une campagne','crm.search':'Rechercher un client…'
+  },
+  es: {
+    'nav.main':'Navegación', 'nav.dashboard':'Tablero', 'nav.profile':'Perfil empresa',
+    'nav.inbox':'Mensajería', 'nav.crm':'Clientes & CRM', 'nav.stats':'Estadísticas',
+    'nav.campaigns':'Campañas', 'nav.payments':'Pago & Plan', 'nav.tutorial':'Tutorial y ayuda',
+    'nav.settings':'Ajustes', 'topbar.search':'Buscar…',
+    'greet.morning':'Buenos días','greet.afternoon':'Buenas tardes','greet.evening':'Buenas noches',
+    'stats.conv':'Conversaciones hoy','stats.clients':'Clientes activos',
+    'stats.revenue':'Ingresos (abril)','stats.response':'Tasa de respuesta',
+    'inbox.unread':'Mensajes por responder','podium.title':'🏆 Top clientes del mes',
+    'tips.title':'El consejo de Nexus','tips.sub':'tu agente IA analizó tus datos',
+    'campaigns.create':'Crear una campaña','crm.search':'Buscar un cliente…'
+  },
+  en: {
+    'nav.main':'Navigation','nav.dashboard':'Dashboard','nav.profile':'Business Profile',
+    'nav.inbox':'Inbox','nav.crm':'Clients & CRM','nav.stats':'Stats',
+    'nav.campaigns':'Campaigns','nav.payments':'Billing','nav.tutorial':'Help & Tutorial',
+    'nav.settings':'Settings','topbar.search':'Search…',
+    'greet.morning':'Good morning','greet.afternoon':'Good afternoon','greet.evening':'Good evening',
+    'stats.conv':'Conversations today','stats.clients':'Active clients',
+    'stats.revenue':'Revenue (April)','stats.response':'Response rate',
+    'inbox.unread':'Messages to answer','podium.title':'🏆 Top clients this month',
+    'tips.title':'Nexus advice','tips.sub':'your AI agent analyzed your data',
+    'campaigns.create':'Create a campaign','crm.search':'Search client…'
+  }
+};
+const t = (k) => (Nx.state && I18N[Nx.state.lang] && I18N[Nx.state.lang][k]) || k;
+
+// -------- MOCK DATA --------
+const MOCK_CLIENTS = [
+  {id:1,name:'María González',phone:'+56 9 8765 4321',avatar:'MG',color:'#1A56DB',score:94,orders:12,spent:184000,lastSeen:'Hace 4 min',channel:'whatsapp',tag:'vip',tags:['VIP','Amiga'],notes:'Cumpleaños 14 agosto. Le encanta pan amasado.',status:'active'},
+  {id:2,name:'Diego Ramírez',phone:'+56 9 8888 1122',avatar:'DR',color:'#22C55E',score:87,orders:9,spent:142000,lastSeen:'Hace 18 min',channel:'whatsapp',tag:'rec',tags:['Récurrent'],notes:'Paga siempre por transferencia.',status:'active'},
+  {id:3,name:'Ana Silva',phone:'+56 9 4532 7799',avatar:'AS',color:'#7A3CFF',score:82,orders:7,spent:98000,lastSeen:'Hace 2 h',channel:'whatsapp',tag:'rec',tags:['Récurrent'],notes:'Prefiere delivery después de las 18h.',status:'active'},
+  {id:4,name:'Pablo Herrera',phone:'+56 9 1234 5678',avatar:'PH',color:'#F59E0B',score:75,orders:6,spent:78000,lastSeen:'Ayer',channel:'instagram',tag:'',tags:['Instagram'],notes:'',status:'active'},
+  {id:5,name:'Valentina Rojas',phone:'+56 9 7777 3333',avatar:'VR',color:'#EF4444',score:71,orders:5,spent:64000,lastSeen:'Hace 3 días',channel:'whatsapp',tag:'',tags:[],notes:'',status:'active'},
+  {id:6,name:'Isabel Torres',phone:'+56 9 9988 7766',avatar:'IT',color:'#F59E0B',score:48,orders:1,spent:12000,lastSeen:'Hace 1 h',channel:'whatsapp',tag:'new',tags:['Nuevo'],notes:'Interesada en tortas de cumpleaños.',status:'prospect'},
+  {id:7,name:'Luis Martínez',phone:'+56 9 5544 2211',avatar:'LM',color:'#EF4444',score:62,orders:2,spent:34000,lastSeen:'Hace 3 h',channel:'email',tag:'biz',tags:['Empresa'],notes:'Evento corporativo 25/04.',status:'prospect'},
+  {id:8,name:'Sofía Pinto',phone:'+56 9 6633 8811',avatar:'SP',color:'#06B6D4',score:54,orders:3,spent:28000,lastSeen:'Hace 45 días',channel:'whatsapp',tag:'alert',tags:['Perdida'],notes:'No responde hace 45 días.',status:'lost'},
+  {id:9,name:'Rodrigo Vega',phone:'+56 9 3344 5566',avatar:'RV',color:'#1A56DB',score:68,orders:4,spent:52000,lastSeen:'Hace 50 días',channel:'whatsapp',tag:'alert',tags:['Perdida'],notes:'Cliente fiel perdido.',status:'lost'},
+  {id:10,name:'Carmen López',phone:'+56 9 2211 0099',avatar:'CL',color:'#22C55E',score:65,orders:5,spent:47000,lastSeen:'Hace 60 días',channel:'whatsapp',tag:'alert',tags:['Perdida','VIP'],notes:'Era VIP, ahora silencio.',status:'lost'},
+  {id:11,name:'Andrés Fuentes',phone:'+56 9 8765 1234',avatar:'AF',color:'#7A3CFF',score:58,orders:3,spent:38000,lastSeen:'Hace 5 días',channel:'whatsapp',tag:'',tags:[],notes:'',status:'active'},
+  {id:12,name:'Paula Núñez',phone:'+56 9 1122 3344',avatar:'PN',color:'#F59E0B',score:51,orders:2,spent:22000,lastSeen:'Hace 7 días',channel:'instagram',tag:'',tags:['Instagram'],notes:'',status:'active'}
+];
+
+const MOCK_CONVERSATIONS = [
+  {clientId:1,channel:'whatsapp',messages:[
+    {from:'them',text:'Hola Carlos, ¿tienes pan amasado disponible para mañana? Necesito 3 kilos para una reunión familiar 😊',time:'Hace 4 min',voice:false},
+  ],unread:true,draft:'Hola María! Claro que sí, te guardo 3 kilos de pan amasado para mañana. ¿A qué hora te viene mejor pasar a buscarlo? 🥖'},
+  {clientId:2,channel:'whatsapp',messages:[
+    {from:'them',text:'Gracias por la factura. ¿Aceptan transferencia bancaria?',time:'Hace 18 min'},
+  ],unread:true,draft:'Sí Diego, te paso los datos bancarios.'},
+  {clientId:6,channel:'whatsapp',messages:[
+    {from:'them',text:'Buenos días, me podrías mandar los precios de las tortas de cumpleaños porfa',time:'Hace 1 h'},
+  ],unread:false,draft:null},
+  {clientId:3,channel:'whatsapp',messages:[
+    {from:'them',text:'¿El delivery sigue gratis sobre 15 lucas?',time:'Hace 2 h'},
+  ],unread:false,draft:null},
+  {clientId:7,channel:'email',messages:[
+    {from:'them',text:'Cotización para evento corporativo 80 personas el 25 de abril',time:'Hace 3 h'},
+  ],unread:false,draft:null},
+  {clientId:4,channel:'instagram',messages:[
+    {from:'them',text:'Vi tus fotos en Insta, hermosas tortas! ¿Hacen delivery a Providencia?',time:'Ayer'},
+  ],unread:false,draft:null}
+];
+
+const MOCK_CATALOG = [
+  {id:1,name:'Pan amasado',price:3500,unit:'kg',emoji:'🥖'},
+  {id:2,name:'Empanada de pino',price:2200,unit:'un',emoji:'🥟'},
+  {id:3,name:'Torta de cumpleaños 20p',price:28000,unit:'un',emoji:'🎂'},
+  {id:4,name:'Dulces chilenos',price:1500,unit:'un',emoji:'🍬'},
+  {id:5,name:'Café con leche',price:2500,unit:'un',emoji:'☕'},
+];
+
+const MOCK_CAMPAIGNS = [
+  {id:1,name:'Promo Pan Amasado Fin de Semana',sent:120,opened:98,replied:24,status:'completed',date:'12 abr',audience:'Todos'},
+  {id:2,name:'Recuperación clientes perdidos -15%',sent:38,opened:22,replied:8,status:'running',date:'20 abr',audience:'Clientes perdidos'},
+];
+
+const MOCK_INVOICES = [
+  {id:'INV-2026-042',date:'1 avr 2026',amount:'29 €',status:'paid',desc:'Plan Pro · Mensuel'},
+  {id:'INV-2026-027',date:'1 mar 2026',amount:'29 €',status:'paid',desc:'Plan Pro · Mensuel'},
+  {id:'INV-2026-013',date:'1 fév 2026',amount:'29 €',status:'paid',desc:'Plan Pro · Mensuel'},
+  {id:'INV-2026-001',date:'15 jan 2026',amount:'0 €',status:'free',desc:'Essai gratuit (14 jours)'},
+];
+
+const FAQ_DEFAULT = [
+  {q:'¿Hacen delivery?',a:'Sí, delivery gratis sobre 15 000 CLP en Santiago centro y Providencia.'},
+  {q:'¿Cuáles son los horarios?',a:'Lunes a sábado, 7:00 a 20:00. Domingo cerrado.'},
+  {q:'¿Aceptan tarjeta?',a:'Sí, aceptamos efectivo, transferencia, Webpay y tarjetas de crédito/débito.'},
+  {q:'¿Hacen tortas por encargo?',a:'Sí, con 48 horas de anticipación. Consulta el catálogo.'},
+];
+
+const TIPS_ROTATION = [
+  {icon:'💡',type:'recover',body:'<b>3 clientes fieles</b> no han pedido nada desde hace <b>45 días</b> : María, Diego y Ana. Representan en promedio <b>28 000 CLP / mes</b>. ¿Enviamos una promo personalizada -15% para recuperarlos?',actions:[{label:'Crear campaña →',action:'createRecoveryCampaign',primary:true},{label:'Ver los 3 clientes',action:'showLostClients'},{label:'Más tarde',action:'dismissTip'}]},
+  {icon:'☀️',type:'weather',body:'Mañana llueve en Santiago. <b>Ofrece delivery gratis a tus clientes del barrio</b> — suelen aumentar un 40% sus pedidos cuando llueve.',actions:[{label:'Crear promo lluvia',action:'createWeatherCampaign',primary:true},{label:'Ignorar',action:'dismissTip'}]},
+  {icon:'💰',type:'pricing',body:'Tu <b>ticket promedio es 20% por debajo</b> del mercado de panaderías premium Santiago. <b>Subir 10%</b> generaría ~280 000 CLP / mes adicionales sin impacto en recurrencia.',actions:[{label:'Ver análisis precios',action:'showPricingAnalysis',primary:true},{label:'Más tarde',action:'dismissTip'}]},
+  {icon:'📅',type:'reminder',body:'Cumpleaños de <b>María González</b> (VIP Top 1) en <b>3 días</b>. Últimos 2 años le regalaste un cake personalizado. ¿Preparo un mensaje?',actions:[{label:'Preparar mensaje',action:'prepareBirthday',primary:true},{label:'Ignorar',action:'dismissTip'}]},
+  {icon:'🎯',type:'pattern',body:'<b>60% de tus ventas</b> ocurren entre <b>viernes 17h y sábado 12h</b>. Considera reforzar el stock de pan amasado (tu producto estrella) esos días.',actions:[{label:'Ver heatmap',action:'showHeatmap',primary:true},{label:'Entendido',action:'dismissTip'}]},
+];
+
+// -------- STATE + STORE --------
+const DEFAULT_STATE = {
+  lang: 'fr', theme: 'light', accent: '#1A56DB',
+  view: 'dashboard',
+  vacation: false, vacationMsg:'Estoy de vacaciones hasta el [FECHA]. Nexus responderá por mí ✈️',
+  streak: 12,
+  onboarding: [
+    {id:'profile',label:'Remplir ton profil entreprise',done:true},
+    {id:'whatsapp',label:'Connecter WhatsApp Business',done:true},
+    {id:'catalog',label:'Ajouter ton catalogue (5 produits mini)',done:true},
+    {id:'faq',label:'Rédiger 3 FAQ',done:true},
+    {id:'campaign',label:'Lancer ta 1ère campagne',done:false},
+  ],
+  business: {
+    name:'Panadería Don Carlos', owner:'Carlos Muñoz', city:'Santiago', country:'🇨🇱',
+    logo:'🥖', logoType:'emoji',
+    industry:'Panadería / Boulangerie artisanale',
+    hours:{mon:'7:00-20:00',tue:'7:00-20:00',wed:'7:00-20:00',thu:'7:00-20:00',fri:'7:00-20:00',sat:'7:00-19:00',sun:'Cerrado'},
+    tone:'Amical et chaleureux, tutoiement, petit emoji, jamais robotique',
+    faq: FAQ_DEFAULT,
+    catalog: MOCK_CATALOG,
+    payment:'Efectivo · Transferencia · Webpay',
+    delivery:'Gratis > 15 000 CLP',
+    tagline:'El pan de tu barrio, hecho con amor desde 1998'
+  },
+  clients: MOCK_CLIENTS,
+  conversations: MOCK_CONVERSATIONS,
+  campaigns: MOCK_CAMPAIGNS,
+  invoices: MOCK_INVOICES,
+  plan: {name:'Pro',price:'29 €',period:'/mois',features:['WhatsApp Business API','Inbox unifiée','CRM complet','Tips IA illimités','Campagnes illimitées','Support email'],next_billing:'1 mai 2026'},
+  notifications: [
+    {id:1,icon:'💬',title:'Nouveau message de María González',body:'VIP Top 1 — réponse urgente suggérée',time:'Hace 4 min',unread:true},
+    {id:2,icon:'🎯',title:'Campagne "Recuperación" → 8 réponses reçues',body:'ROI estimé: +340 000 CLP',time:'Hace 2 h',unread:true},
+    {id:3,icon:'⚠️',title:'Carmen López silencieuse depuis 60 jours',body:'Ex-VIP — envisager relance',time:'Ce matin',unread:true},
+  ],
+  tipIndex: 0,
+  dismissedTips: [],
+  changelog: [
+    {v:'0.1.0',date:'13 avril 2026',items:['🚀 Lancement MVP Nexus','💬 Inbox unifiée WhatsApp + IG + Email','🤖 Brouillons IA sous chaque message','🏆 Podium gamifié top clients','📊 Stats temps réel','✨ Tips IA proactif quotidien']},
+    {v:'0.1.1',date:'14 avril 2026',items:['🌐 Support trilingue FR/ES/EN','🌙 Thème clair/sombre','⌨️ Recherche globale ⌘K','✈️ Mode vacances','🔥 Streak quotidien façon Duolingo']},
+    {v:'0.1.2',date:'Demain',items:['📅 Sync Google Calendar','💳 Stripe subscriptions','📈 Export PDF des stats','🎙 Transcription vocal WhatsApp']},
+  ],
+  analytics: {
+    weekComparisons: {conversations:{now:284,prev:241,delta:18},clients:{now:342,prev:321,delta:6},revenue:{now:2840000,prev:2535000,delta:12}},
+    topQuestions:['¿Hacen delivery?','¿Cuáles son los horarios?','¿Aceptan transferencia?','¿Tienen pan amasado?','¿Hacen tortas por encargo?'],
+    avgResponseTime:2.3,
+    heatmap: [
+      // lines = hours (6-21), cols = Mon-Sun; values 0-4
+      [0,0,0,0,0,1,1],[0,0,0,0,0,2,2],[1,1,1,1,2,3,3],[2,2,2,2,3,4,3],[3,3,3,3,4,4,3],
+      [2,2,2,3,3,3,2],[1,1,2,2,2,2,1],[2,2,2,2,3,3,2],[3,3,3,3,4,4,3],[4,4,4,4,4,3,2],
+      [3,3,3,3,4,3,2],[2,2,2,2,3,2,1],[1,1,1,1,2,2,1],[1,1,1,1,2,2,1],[1,1,1,1,2,1,0],[0,0,0,0,1,1,0]
+    ]
+  },
+  preferences: {
+    soundNotif:true, desktopNotif:false, autoDraft:true, signature:'Carlos 🥖', dataSharingOptIn:true
+  }
+};
+
+const STORAGE_KEY = 'nexus_mvp_state_v1';
+
+const Nx = {
+  state: null,
+
+  init(){
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try { this.state = JSON.parse(saved); } catch(e){ this.state = JSON.parse(JSON.stringify(DEFAULT_STATE)); }
+    } else {
+      this.state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+    }
+    this.renderNav();
+    this.setLang(this.state.lang);
+    this.applyTheme();
+    document.getElementById('vacationToggle').checked = this.state.vacation;
+    document.getElementById('themeToggle').checked = this.state.theme === 'dark';
+    window.addEventListener('hashchange', () => this.routeFromHash());
+    window.addEventListener('keydown', this.globalKeys.bind(this));
+    this.routeFromHash();
+
+    // Live counters simulation
+    this.startLive();
+    // Welcome toast
+    setTimeout(() => this.toast('Bienvenue sur Nexus, Carlos ☀️', 'success', 'Ton agent IA veille sur tes conversations.'), 600);
+  },
+
+  save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state)); },
+  reset(){ localStorage.removeItem(STORAGE_KEY); location.reload(); },
+
+  startLive(){
+    // Simulate random micro-events
+    let ticks = 0;
+    setInterval(() => {
+      ticks++;
+      if (ticks % 12 === 0) {
+        // Nouveau message aléatoire
+        const evs = ['📩 Nouveau WhatsApp reçu','🎯 Tip IA mis à jour','💰 Nouvelle vente détectée','📈 Streak maintenu'];
+        this.toast(evs[Math.floor(Math.random()*evs.length)], 'info');
+      }
+    }, 10000);
+  },
+
+  navigate(view){
+    this.state.view = view;
+    this.save();
+    location.hash = '#/' + view;
+  },
+
+  routeFromHash(){
+    const hash = location.hash.replace('#/','') || 'dashboard';
+    this.state.view = hash;
+    this.renderView();
+    this.updateBreadcrumb();
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === hash));
+  },
+
+  updateBreadcrumb(){
+    const map = {dashboard:t('nav.dashboard'),profile:t('nav.profile'),inbox:t('nav.inbox'),crm:t('nav.crm'),stats:t('nav.stats'),campaigns:t('nav.campaigns'),payments:t('nav.payments'),tutorial:t('nav.tutorial'),settings:t('nav.settings')};
+    document.getElementById('breadcrumb').textContent = map[this.state.view] || this.state.view;
+  },
+
+  renderNav(){
+    const items = [
+      {view:'dashboard',ic:'🏠',label:'nav.dashboard'},
+      {view:'profile',ic:'👤',label:'nav.profile',meta:'80%'},
+      {view:'inbox',ic:'📬',label:'nav.inbox',meta:'5'},
+      {view:'crm',ic:'👥',label:'nav.crm'},
+      {view:'stats',ic:'📊',label:'nav.stats'},
+      {view:'campaigns',ic:'📢',label:'nav.campaigns'},
+      {view:'payments',ic:'💳',label:'nav.payments'},
+      {view:'tutorial',ic:'🎓',label:'nav.tutorial'},
+    ];
+    document.getElementById('navContainer').innerHTML = items.map(i => `
+      <div class="nav-item" data-view="${i.view}" onclick="Nx.navigate('${i.view}')">
+        <div class="nav-ic">${i.ic}</div>
+        <div class="nav-lbl" data-i18n="${i.label}">${t(i.label)}</div>
+        ${i.meta ? `<span class="nav-meta">${i.meta}</span>` : ''}
+      </div>
+    `).join('');
+  },
+
+  setLang(l){
+    this.state.lang = l;
+    document.querySelectorAll('.lang-btn button').forEach(b => b.classList.remove('on'));
+    document.getElementById('lang-'+l).classList.add('on');
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+    document.documentElement.lang = l;
+    this.updateBreadcrumb();
+    this.save();
+    this.renderView();
+  },
+
+  toggleTheme(){
+    this.state.theme = this.state.theme === 'light' ? 'dark' : 'light';
+    this.applyTheme();
+    this.save();
+  },
+  applyTheme(){
+    document.documentElement.dataset.theme = this.state.theme;
+    const isDark = this.state.theme === 'dark';
+    document.getElementById('themeLbl').textContent = isDark ? '🌙 Thème sombre' : '🌞 Thème clair';
+    document.getElementById('themeToggle').checked = isDark;
+  },
+
+  toggleVacation(){
+    this.state.vacation = !this.state.vacation;
+    this.save();
+    this.toast(this.state.vacation?'Mode vacances ACTIVÉ ✈️':'Mode vacances désactivé','success',this.state.vacation?'Nexus répondra automatiquement en ton absence':'Tu es de retour aux commandes');
+    document.getElementById('vacationRow').classList.toggle('warn', this.state.vacation);
+  },
+
+  toast(msg, type='info', body=''){
+    const icons = {success:'✅',info:'💡',warn:'⚠️',error:'❌'};
+    const d = document.createElement('div');
+    d.className = 'toast ' + type;
+    d.innerHTML = `<span class="i">${icons[type]||'💡'}</span><div class="toast-body"><b>${msg}</b>${body?`<small>${body}</small>`:''}</div>`;
+    document.getElementById('toast-container').appendChild(d);
+    setTimeout(() => { d.style.opacity = '0'; d.style.transform = 'translateX(20px)'; setTimeout(()=>d.remove(), 300); }, 4000);
+  },
+
+  openModal(type, data){
+    const ov = document.getElementById('modal-overlay');
+    const mc = document.getElementById('modal-content');
+    ov.classList.remove('hidden');
+    let html = '';
+    if (type === 'sos') {
+      html = `
+        <div class="modal-hd"><h3>🆘 SOS Augustin — Support VIP</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+        <div class="modal-body">
+          <p style="color:var(--muted);margin-bottom:14px">Besoin d'aide urgente ? Augustin répond en moins de 2h en semaine.</p>
+          <div class="form-row"><label class="form-lbl">Priorité</label>
+            <select class="form-ctrl"><option>🔴 Urgent (bloquant)</option><option>🟡 Normal (question)</option><option>🟢 Idée / suggestion</option></select>
+          </div>
+          <div class="form-row"><label class="form-lbl">Ton message</label>
+            <textarea class="form-ctrl" placeholder="Décris ton problème ou ta question…"></textarea>
+          </div>
+          <div class="flex">
+            <button class="btn btn-s" onclick="window.open('https://wa.me/33600000000','_blank')">📱 WhatsApp direct</button>
+            <button class="btn btn-s" onclick="window.open('mailto:augustin.france@gmail.com','_blank')">✉️ Email</button>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-s" onclick="Nx.closeModal()">Annuler</button>
+          <button class="btn btn-p" onclick="Nx.toast('Message envoyé à Augustin','success','Réponse attendue sous 2h'); Nx.closeModal()">Envoyer le SOS →</button>
+        </div>`;
+    } else if (type === 'avatar') {
+      html = `
+        <div class="modal-hd"><h3>Mon compte</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+        <div class="modal-body">
+          <div style="display:flex;gap:16px;align-items:center;margin-bottom:20px">
+            <div class="avatar" style="width:64px;height:64px;font-size:22px">CM</div>
+            <div><div style="font-weight:700;font-size:16px">Carlos Muñoz</div><div style="color:var(--muted);font-size:13px">carlos@panaderiadoncarlos.cl</div></div>
+          </div>
+          <button class="btn btn-s" style="width:100%;margin-bottom:8px;justify-content:flex-start" onclick="Nx.navigate('profile');Nx.closeModal()">👤 Paramètres du profil</button>
+          <button class="btn btn-s" style="width:100%;margin-bottom:8px;justify-content:flex-start" onclick="Nx.navigate('payments');Nx.closeModal()">💳 Plan & facturation</button>
+          <button class="btn btn-s" style="width:100%;margin-bottom:8px;justify-content:flex-start" onclick="Nx.navigate('settings');Nx.closeModal()">⚙️ Préférences</button>
+          <button class="btn btn-s" style="width:100%;margin-bottom:8px;justify-content:flex-start" onclick="Nx.reset()">🔄 Réinitialiser la démo</button>
+          <button class="btn btn-danger" style="width:100%;justify-content:flex-start" onclick="Nx.toast('Déconnexion (démo)','info');Nx.closeModal()">🚪 Se déconnecter</button>
+        </div>`;
+    } else if (type === 'client' && data) {
+      const c = data;
+      html = `
+        <div class="modal-hd"><h3>Fiche client · ${c.name}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+        <div class="modal-body">
+          <div style="display:flex;gap:16px;margin-bottom:20px;align-items:center">
+            <div class="msg-av" style="width:56px;height:56px;font-size:18px;background:${c.color}">${c.avatar}</div>
+            <div style="flex:1"><div style="font-weight:700;font-size:16px">${c.name}</div><div style="color:var(--muted);font-size:13px">${c.phone} · ${c.lastSeen}</div>
+              <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">${c.tags.map(tg=>`<span class="chip blue">${tg}</span>`).join('')}</div></div>
+            <div style="text-align:right"><div style="font-size:28px;font-weight:800;color:var(--blue);font-family:'JetBrains Mono',monospace">${c.score}</div><div style="font-size:10px;color:var(--muted)">SCORE</div></div>
+          </div>
+          <div class="grid3" style="margin-bottom:20px">
+            <div class="card" style="padding:14px"><div class="stat-lbl">Commandes</div><div class="stat-val mono">${c.orders}</div></div>
+            <div class="card" style="padding:14px"><div class="stat-lbl">Total dépensé</div><div class="stat-val mono">${(c.spent/1000).toFixed(0)}k <small style="font-size:12px;color:var(--muted)">CLP</small></div></div>
+            <div class="card" style="padding:14px"><div class="stat-lbl">Panier moyen</div><div class="stat-val mono">${Math.round(c.spent/c.orders/100)/10}k</div></div>
+          </div>
+          <div class="form-row"><label class="form-lbl">Notes privées (non lues par l'IA)</label>
+            <textarea class="form-ctrl" id="clientNotes">${c.notes||''}</textarea>
+          </div>
+          <h4 style="font-size:13px;font-weight:700;margin:20px 0 10px">📅 Timeline des échanges</h4>
+          <div class="timeline">
+            <div class="tl-item"><div class="tl-time">Il y a 4 min · WhatsApp</div><div class="tl-body">Demande 3kg pan amasado pour demain</div></div>
+            <div class="tl-item alt"><div class="tl-time">Il y a 3 jours · Commande</div><div class="tl-body">12 empanadas + 2kg pan · 18 400 CLP</div></div>
+            <div class="tl-item amb"><div class="tl-time">Il y a 1 semaine · WhatsApp</div><div class="tl-body">Question sur les horaires du samedi</div></div>
+            <div class="tl-item"><div class="tl-time">Il y a 2 semaines · Commande</div><div class="tl-body">Torte cumpleaños 30p · 42 000 CLP</div></div>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-s" onclick="Nx.sendThankyou(${c.id})">🙏 Envoyer un merci</button>
+          <button class="btn btn-s" onclick="Nx.saveClientNotes(${c.id})">💾 Sauvegarder notes</button>
+          <button class="btn btn-p" onclick="Nx.closeModal();Nx.openConversation(${c.id})">💬 Ouvrir la conversation</button>
+        </div>`;
+    } else if (type === 'invoice' && data) {
+      html = `
+        <div class="modal-hd"><h3>Facture ${data.id}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+        <div class="modal-body">
+          <div style="padding:24px;background:var(--bg2);border-radius:10px;text-align:center;margin-bottom:14px">
+            <div style="font-size:28px">${this.state.business.logo}</div>
+            <div style="font-weight:700;margin:8px 0 4px">${this.state.business.name}</div>
+            <div style="color:var(--muted);font-size:12px">${this.state.business.city}, Chile</div>
+          </div>
+          <div style="padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:10px">
+            <div class="flex between"><span>Facture</span><b>${data.id}</b></div>
+            <div class="flex between"><span>Date</span><b>${data.date}</b></div>
+            <div class="flex between"><span>Description</span><b>${data.desc}</b></div>
+            <hr style="margin:12px 0;border:0;border-top:1px solid var(--line2)">
+            <div class="flex between" style="font-size:18px"><span>Total TTC</span><b>${data.amount}</b></div>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-s" onclick="window.print();Nx.toast('PDF prêt','success')">📄 Télécharger PDF</button>
+          <button class="btn btn-p" onclick="Nx.closeModal()">OK</button>
+        </div>`;
+    } else if (type === 'notifs') {
+      html = `
+        <div class="modal-hd"><h3>🔔 Notifications</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+        <div class="modal-body" style="padding:0">
+          ${this.state.notifications.map(n => `
+            <div style="padding:14px 20px;border-bottom:1px solid var(--line2);display:flex;gap:12px;${n.unread?'background:var(--blue-soft)':''}">
+              <div style="font-size:22px">${n.icon}</div>
+              <div style="flex:1"><div style="font-weight:600;font-size:13px">${n.title}</div><div style="color:var(--muted);font-size:12px;margin-top:2px">${n.body}</div><div style="color:var(--muted);font-size:11px;margin-top:4px">${n.time}</div></div>
+            </div>`).join('')}
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-s" onclick="Nx.markAllRead()">Tout marquer comme lu</button>
+          <button class="btn btn-p" onclick="Nx.closeModal()">OK</button>
+        </div>`;
+    } else if (type === 'upgrade') {
+      html = `
+        <div class="modal-hd"><h3>💎 Passer à Agent 01 Complet</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+        <div class="modal-body">
+          <p style="color:var(--muted);margin-bottom:16px">Upgrade vers Agent 01 = secrétaire virtuelle qui répond à ta place 24/7.</p>
+          <div class="grid2" style="margin-bottom:20px">
+            <div class="card" style="padding:18px;border:2px solid var(--line)">
+              <div style="font-weight:700;font-size:15px">Agent 02 <span class="chip green" style="margin-left:6px">Actuel</span></div>
+              <div style="font-size:24px;font-weight:800;margin:8px 0">29 €<small style="font-size:12px;color:var(--muted)">/mois</small></div>
+              <ul style="list-style:none;padding:0;font-size:12px;color:var(--muted);line-height:1.8">
+                <li>✓ Organisateur + inbox</li>
+                <li>✓ CRM + tips IA</li>
+                <li>✓ Marketing manuel</li>
+              </ul>
+            </div>
+            <div class="card" style="padding:18px;border:2px solid var(--blue);background:var(--blue-soft)">
+              <div style="font-weight:700;font-size:15px;color:var(--blue-ink)">Full Suite 🚀</div>
+              <div style="font-size:24px;font-weight:800;margin:8px 0">59 €<small style="font-size:12px;color:var(--muted)">/mois</small></div>
+              <ul style="list-style:none;padding:0;font-size:12px;color:var(--ink2);line-height:1.8">
+                <li>✅ Tout Agent 02</li>
+                <li>✅ Agent 01 (secrétaire 24/7)</li>
+                <li>✅ Réponses auto hors heures</li>
+                <li>✅ Analytics avancés</li>
+                <li>✅ Support prioritaire</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-s" onclick="Nx.closeModal()">Plus tard</button>
+          <button class="btn btn-p" onclick="Nx.toast('Upgrade simulé (démo)','success','30€/mois + Agent 01 activé');Nx.closeModal()">Passer en Full Suite →</button>
+        </div>`;
+    } else if (type === 'share-data') {
+      html = `
+        <div class="modal-hd"><h3>🔌 Partage de données 1 clic</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+        <div class="modal-body">
+          <p style="color:var(--muted);margin-bottom:14px">Envoie en 1 clic tes infos pro dans un chat client — plus besoin de chercher.</p>
+          <div class="grid2">
+            ${['🏦 Infos bancaires','📄 Devis type','📋 Catalogue produits','🏢 Infos entreprise','📸 Photos vitrine','💳 Lien paiement','📅 Disponibilités','📞 Carte de visite'].map(d=>`<button class="btn btn-s" style="justify-content:flex-start" onclick="Nx.toast('${d.split(' ').slice(1).join(' ')} copiée dans le chat','success');Nx.closeModal()">${d}</button>`).join('')}
+          </div>
+        </div>`;
+    } else if (type === 'pricing-analysis') {
+      html = `
+        <div class="modal-hd"><h3>💰 Analyse de prix — Benchmark Santiago</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+        <div class="modal-body">
+          <p style="color:var(--muted);margin-bottom:18px">Comparaison avec 12 panaderías premium Santiago centro (source : Nexus Market Data).</p>
+          ${[
+            {p:'Pan amasado (1kg)',you:3500,mkt:4200,delta:-17},
+            {p:'Empanada de pino',you:2200,mkt:2800,delta:-21},
+            {p:'Torta cumpleaños 20p',you:28000,mkt:35000,delta:-20},
+            {p:'Dulces chilenos',you:1500,mkt:1800,delta:-17}
+          ].map(x=>`
+            <div style="padding:14px;background:var(--bg2);border-radius:10px;margin-bottom:8px">
+              <div class="flex between" style="margin-bottom:6px"><b>${x.p}</b><span class="chip red">${x.delta}%</span></div>
+              <div style="font-size:12px;color:var(--muted)">Toi : <b>${x.you} CLP</b> · Marché : <b>${x.mkt} CLP</b></div>
+            </div>
+          `).join('')}
+          <div style="padding:14px;background:var(--green-soft);border-radius:10px;margin-top:14px">
+            <b style="color:var(--green)">🎯 Recommandation Nexus</b><br>
+            <span style="font-size:12px;color:var(--ink2)">Hausse de 10% sur tout le catalogue → +280 000 CLP/mois. Impact churn estimé : <b>&lt;2%</b>.</span>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-s" onclick="Nx.closeModal()">Plus tard</button>
+          <button class="btn btn-p" onclick="Nx.toast('Hausse appliquée au catalogue (démo)','success','5 produits mis à jour');Nx.closeModal()">Appliquer +10%</button>
+        </div>`;
+    } else if (type === 'vocal-summary') {
+      html = `
+        <div class="modal-hd"><h3>🎙 Résumé vocal quotidien</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+        <div class="modal-body">
+          <div style="padding:30px;background:linear-gradient(135deg,var(--blue-soft),var(--cyan-soft));border-radius:16px;text-align:center;margin-bottom:16px">
+            <div style="font-size:48px;margin-bottom:10px">🎙</div>
+            <div style="font-weight:700;font-size:15px">Résumé du jour · 30 secondes</div>
+            <div style="color:var(--muted);font-size:12px;margin-top:4px">Écoutable en voiture</div>
+          </div>
+          <div style="padding:16px;background:var(--bg2);border-radius:10px;font-size:13px;line-height:1.7;color:var(--ink2)">
+            "Salut Carlos, voici ton résumé Nexus du 21 avril. <b>47 conversations</b> aujourd'hui, dont 12 automatisées. <b>María González</b>, ta cliente VIP, veut 3 kilos de pan amasado pour demain — elle attend ta réponse depuis 4 minutes. <b>3 clientes fidèles</b> sont silencieuses depuis 45 jours, pense à lancer la campagne de récupération. CA du jour estimé : <b>284 000 pesos</b>. Ton streak est à <b>12 jours</b>. Passe une bonne journée 🥖."
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-s" onclick="Nx.playVocal()">▶️ Écouter</button>
+          <button class="btn btn-p" onclick="Nx.closeModal()">OK</button>
+        </div>`;
+    } else if (type === 'ai-chat') {
+      html = `
+        <div class="modal-hd"><h3>✨ Nexus AI — ton coach business</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+        <div class="modal-body" style="padding:0;max-height:60vh">
+          <div id="aiMessages" style="padding:20px;max-height:400px;overflow-y:auto">
+            <div class="bubble them">Hola Carlos 👋 Je suis Nexus, ton IA. Demande-moi n'importe quoi — analyser tes ventes, écrire une promo, relancer un client…</div>
+          </div>
+          <div style="padding:14px;border-top:1px solid var(--line);display:flex;gap:8px">
+            <input class="form-ctrl" id="aiInput" placeholder="Tape ta question…" onkeypress="if(event.key==='Enter')Nx.askAi()"/>
+            <button class="btn btn-p" onclick="Nx.askAi()">Envoyer</button>
+          </div>
+          <div style="padding:8px 14px 14px;display:flex;gap:6px;flex-wrap:wrap">
+            ${['📊 Analyse mes ventes','🎯 Relance les clients perdus','✍️ Écris une promo week-end','🔥 Top produit du mois'].map(q=>`<button class="btn-g" onclick="Nx.askAi('${q}')">${q}</button>`).join('')}
+          </div>
+        </div>`;
+    }
+    mc.innerHTML = html;
+  },
+
+  closeModal(){ document.getElementById('modal-overlay').classList.add('hidden'); },
+
+  openConversation(clientId){
+    this.navigate('inbox');
+    setTimeout(() => { this.state.activeConv = clientId; this.renderView(); }, 100);
+  },
+
+  sendThankyou(clientId){
+    this.toast('💌 Merci envoyé','success','Message personnalisé envoyé via WhatsApp');
+    this.closeModal();
+  },
+
+  saveClientNotes(clientId){
+    const notes = document.getElementById('clientNotes').value;
+    const c = this.state.clients.find(c=>c.id===clientId);
+    if (c) { c.notes = notes; this.save(); this.toast('Notes sauvegardées','success'); }
+  },
+
+  markAllRead(){
+    this.state.notifications.forEach(n => n.unread = false);
+    document.getElementById('notifBadge').style.display = 'none';
+    this.save();
+    this.toast('Tout marqué comme lu','success');
+  },
+
+  showNotifs(){ this.openModal('notifs'); },
+
+  playVocal(){
+    if ('speechSynthesis' in window) {
+      const msg = new SpeechSynthesisUtterance("Salut Carlos ! Voici ton résumé Nexus. 47 conversations aujourd'hui, dont 12 automatisées par l'IA. María González attend une réponse depuis 4 minutes. Ton streak est à 12 jours. Passe une bonne journée !");
+      msg.lang = 'fr-FR';
+      speechSynthesis.speak(msg);
+      this.toast('🎙 Lecture en cours','info');
+    } else this.toast('Synthèse vocale non supportée','warn');
+  },
+
+  // ---------- COMMAND PALETTE ----------
+  openPalette(){
+    const p = document.getElementById('command-palette');
+    p.classList.remove('hidden');
+    document.getElementById('cpInput').value = '';
+    this.renderPaletteResults('');
+    setTimeout(()=>document.getElementById('cpInput').focus(),40);
+    document.getElementById('cpInput').oninput = (e) => this.renderPaletteResults(e.target.value);
+  },
+  closePalette(){ document.getElementById('command-palette').classList.add('hidden'); },
+  renderPaletteResults(q){
+    q = q.toLowerCase();
+    const actions = [
+      {g:'Navigation',items:[
+        {ic:'🏠',label:'Tableau de bord',meta:'G D',fn:()=>this.navigate('dashboard')},
+        {ic:'💬',label:'Messagerie',meta:'G I',fn:()=>this.navigate('inbox')},
+        {ic:'👥',label:'Clients & CRM',meta:'G C',fn:()=>this.navigate('crm')},
+        {ic:'📊',label:'Statistiques',meta:'G S',fn:()=>this.navigate('stats')},
+        {ic:'📢',label:'Campagnes',meta:'G M',fn:()=>this.navigate('campaigns')},
+        {ic:'💳',label:'Paiement & Plan',meta:'G P',fn:()=>this.navigate('payments')},
+        {ic:'👤',label:'Profil entreprise',meta:'G U',fn:()=>this.navigate('profile')},
+      ]},
+      {g:'Actions',items:[
+        {ic:'✨',label:'Ouvrir Nexus AI',fn:()=>this.openAiChat()},
+        {ic:'📢',label:'Créer une campagne',fn:()=>{this.navigate('campaigns');setTimeout(()=>Nx.openCampaignBuilder(),200)}},
+        {ic:'🆘',label:'SOS Augustin',fn:()=>this.openModal('sos')},
+        {ic:'🔌',label:'Partage 1-clic',fn:()=>this.openModal('share-data')},
+        {ic:'✈️',label:'Toggle mode vacances',fn:()=>{this.toggleVacation();document.getElementById('vacationToggle').checked=this.state.vacation}},
+        {ic:'🌙',label:'Toggle thème',fn:()=>this.toggleTheme()},
+        {ic:'🎙',label:'Résumé vocal du jour',fn:()=>this.openModal('vocal-summary')},
+        {ic:'📄',label:'Exporter stats en PDF',fn:()=>{this.toast('PDF en préparation','info');setTimeout(()=>window.print(),600)}},
+      ]},
+      {g:'Clients',items:this.state.clients.slice(0,8).map(c=>({ic:'👤',label:c.name,meta:'Score '+c.score,fn:()=>this.openModal('client',c)}))},
+    ];
+    let html = '';
+    actions.forEach(group=>{
+      const filtered = group.items.filter(i => !q || i.label.toLowerCase().includes(q));
+      if (filtered.length) {
+        html += `<div class="cp-group"><div class="cp-group-title">${group.g}</div>`;
+        filtered.forEach((it,idx)=>{
+          html += `<div class="cp-item" onclick='Nx._cpRun(${actions.indexOf(group)},${group.items.indexOf(it)})'><span class="ic">${it.ic}</span><span>${it.label}</span>${it.meta?`<span class="meta">${it.meta}</span>`:''}</div>`;
+        });
+        html += '</div>';
+      }
+    });
+    this._cpCache = actions;
+    document.getElementById('cpResults').innerHTML = html || '<div style="padding:30px;text-align:center;color:var(--muted);font-size:13px">Aucun résultat</div>';
+  },
+  _cpRun(gi,ii){ this._cpCache[gi].items[ii].fn(); this.closePalette(); },
+
+  globalKeys(e){
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k'){ e.preventDefault(); this.openPalette(); }
+    if (e.key === 'Escape'){ this.closePalette(); this.closeModal(); }
+  },
+
+  openAiChat(){ this.openModal('ai-chat'); },
+  askAi(preset){
+    const input = document.getElementById('aiInput');
+    const q = preset || input.value.trim();
+    if (!q) return;
+    const msgs = document.getElementById('aiMessages');
+    msgs.innerHTML += `<div class="bubble me">${q}</div>`;
+    input.value = '';
+    msgs.scrollTop = msgs.scrollHeight;
+
+    setTimeout(() => {
+      const answers = {
+        'analyse mes ventes': '📊 En avril, CA estimé <b>2,84M CLP</b> (+12% vs mars). Top produit : <b>Pan amasado</b> (62% des ventes). Jour le plus fort : <b>samedi</b> (38% du CA hebdo). Tu es en streak de 12 jours, bravo 🔥.',
+        'relance': '🎯 J\'ai identifié <b>3 clientes silencieuses</b> depuis 45+ jours : María, Sofía, Carmen. Leur CA cumulé est de ~340k CLP/mois. Veux-tu que je prépare une campagne -15% personnalisée ?',
+        'promo': '✍️ Voici 3 versions pour ta promo week-end :<br>1. "🥖 Hola! Este fin de semana: 3kg de pan amasado = 10k CLP (en vez de 12k). Escríbeme para reservar 💛"<br>2. "Panadería Don Carlos · -20% sobre tortas caseras por encargo el sábado. Últimas 10 disponibles 🎂"<br>3. "Fin de semana en Don Carlos: empanadas 2x1 el domingo después de las 10h. Te esperamos 🥟"',
+        'top produit': '🏆 Top 3 du mois :<br>1. Pan amasado — 620 kg vendus · 2,17M CLP<br>2. Empanadas de pino — 380 unités · 836k CLP<br>3. Tortas cumpleaños — 12 commandes · 336k CLP<br>Le pan amasado représente <b>76% du volume</b>.'
+      };
+      let answer = '🤖 Analyse en cours… ';
+      const qLow = q.toLowerCase();
+      if (qLow.includes('vente') || qLow.includes('analyse')) answer = answers['analyse mes ventes'];
+      else if (qLow.includes('relance') || qLow.includes('perdus') || qLow.includes('lost')) answer = answers['relance'];
+      else if (qLow.includes('promo') || qLow.includes('campagne') || qLow.includes('écris')) answer = answers['promo'];
+      else if (qLow.includes('top') || qLow.includes('produit')) answer = answers['top produit'];
+      else answer = '🤖 Je ne connais pas encore la réponse précise (démo). Mais voici ce que je peux faire : <b>analyser tes ventes</b>, <b>relancer des clients</b>, <b>écrire des promos</b>, ou <b>t\'alerter sur des opportunités</b>. Demande-moi directement !';
+
+      msgs.innerHTML += `<div class="bubble them">${answer}</div>`;
+      msgs.scrollTop = msgs.scrollHeight;
+    }, 600);
+  },
+
+  // ---------- VIEW RENDERING ----------
+  renderView(){
+    const vc = document.getElementById('viewContainer');
+    const v = this.state.view;
+    if (v === 'dashboard') vc.innerHTML = this.viewDashboard();
+    else if (v === 'profile') vc.innerHTML = this.viewProfile();
+    else if (v === 'inbox') vc.innerHTML = this.viewInbox();
+    else if (v === 'crm') vc.innerHTML = this.viewCrm();
+    else if (v === 'stats') vc.innerHTML = this.viewStats();
+    else if (v === 'campaigns') vc.innerHTML = this.viewCampaigns();
+    else if (v === 'payments') vc.innerHTML = this.viewPayments();
+    else if (v === 'tutorial') vc.innerHTML = this.viewTutorial();
+    else if (v === 'settings') vc.innerHTML = this.viewSettings();
+    else vc.innerHTML = '<div class="view"><h1>Page introuvable</h1><p>Retourner au <a href="#/dashboard" style="color:var(--blue)">tableau de bord</a>.</p></div>';
+  },
+
+  viewDashboard(){
+    const hour = new Date().getHours();
+    const greet = hour < 12 ? t('greet.morning') : hour < 18 ? t('greet.afternoon') : t('greet.evening');
+    const tip = TIPS_ROTATION[this.state.tipIndex % TIPS_ROTATION.length];
+    const doneStep = this.state.onboarding.filter(s=>s.done).length;
+    const totalStep = this.state.onboarding.length;
+    const onbPct = Math.round(doneStep/totalStep*100);
+
+    return `
+      <div class="view">
+        <div class="page-hd">
+          <div><h1>${greet}, <em>Carlos</em> ☀️</h1><div class="sub">Voici ce qui s'est passé pendant que tu dormais — 3 nouveaux clients, 1 opportunité en or.</div></div>
+          <div class="flex" style="gap:8px">
+            <span class="date-pill"><span class="dot"></span> ${new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})} · Santiago · 🌤 18°C</span>
+            <span class="chip blue">Jour ${this.state.streak+1} avec Nexus</span>
+          </div>
+        </div>
+
+        ${onbPct < 100 ? `
+        <div class="onb">
+          <div class="onb-hd">
+            <div><div style="font-weight:700;font-size:14px">🚀 Onboarding — ${onbPct}%</div><div style="font-size:12px;color:var(--muted)">${doneStep}/${totalStep} étapes complétées</div></div>
+            <div class="onb-progress"><span style="width:${onbPct}%"></span></div>
+            <button class="btn-g" onclick="Nx.state.onboarding.forEach(s=>s.done=true);Nx.save();Nx.renderView()">Tout cocher</button>
+          </div>
+          <div class="onb-steps">
+            ${this.state.onboarding.map((s,i)=>`
+              <div class="onb-step ${s.done?'done':''}" onclick="Nx.state.onboarding[${i}].done=!Nx.state.onboarding[${i}].done;Nx.save();Nx.renderView()">
+                <div class="n">${s.done?'✓':(i+1)}</div>
+                <h4>${s.label}</h4>
+                <p>${s.done?'Complété 🎉':'À faire'}</p>
+              </div>`).join('')}
+          </div>
+        </div>` : ''}
+
+        <div class="streak">
+          <div class="streak-flame">🔥</div>
+          <div>
+            <div class="streak-n">${this.state.streak} jours</div>
+            <div class="streak-lbl">Sans oublier un client</div>
+          </div>
+          <div style="flex:1"></div>
+          <button class="btn btn-s" style="background:rgba(255,255,255,.4)" onclick="Nx.toast('Continue comme ça 🔥','success')">Voir les détails</button>
+        </div>
+
+        <section class="stats">
+          ${this.statCard('💬','stats.conv',47,18,'dont 12 automatisées par l\'IA','')}
+          ${this.statCard('👥','stats.clients',342,6,'+21 ce mois-ci','g')}
+          ${this.statCard('💰','stats.revenue','2,84M',12,'projection: 3,1M · CLP','a')}
+          ${this.statCard('✓','stats.response','94%',5,'temps moyen 2:18 min','p')}
+        </section>
+
+        <section class="tips">
+          <div class="tips-hd">
+            <div class="tips-ic">${tip.icon}</div>
+            <div class="t">${t('tips.title')}<small>${t('tips.sub')} · il y a 3 min</small></div>
+            <div style="margin-left:auto;display:flex;gap:4px">
+              <button class="icon-btn" title="Tip précédent" onclick="Nx.state.tipIndex=(Nx.state.tipIndex-1+${TIPS_ROTATION.length})%${TIPS_ROTATION.length};Nx.renderView()">‹</button>
+              <button class="icon-btn" title="Tip suivant" onclick="Nx.state.tipIndex=(Nx.state.tipIndex+1)%${TIPS_ROTATION.length};Nx.renderView()">›</button>
+            </div>
+          </div>
+          <div class="tips-body">${tip.body}</div>
+          <div class="tips-actions">
+            ${tip.actions.map(a=>`<button class="btn ${a.primary?'btn-p':'btn-s'}" onclick="Nx.tipAction('${a.action}')">${a.label}</button>`).join('')}
+          </div>
+        </section>
+
+        <section class="grid2">
+          <div class="card">
+            <div class="card-hd">
+              <h3>📬 ${t('inbox.unread')} <span class="chip blue" style="margin-left:6px">5</span></h3>
+              <div class="actions"><button class="btn-g" onclick="Nx.navigate('inbox')">Tout voir →</button></div>
+            </div>
+            ${this.state.conversations.slice(0,5).map(conv=>this.msgRow(conv)).join('')}
+          </div>
+
+          <div class="card">
+            <div class="card-hd"><h3>${t('podium.title')}</h3><button class="btn-g" onclick="Nx.navigate('crm')">CRM →</button></div>
+            <div class="card-body">
+              ${this.state.clients.filter(c=>c.status==='active').sort((a,b)=>b.score-a.score).slice(0,5).map((c,i)=>`
+                <div class="podium-row" onclick="Nx.openModal('client',Nx.state.clients.find(x=>x.id===${c.id}))">
+                  <div class="rank rank-${i<3?(i+1):'n'}">${i+1}</div>
+                  <div class="p-info">
+                    <div class="p-name">${c.name}</div>
+                    <div class="p-stat">${c.orders} commandes · ${c.spent.toLocaleString('es-CL')} CLP</div>
+                    <div class="p-bar"><span style="width:${c.score}%"></span></div>
+                  </div>
+                  <div class="p-score">${c.score}</div>
+                </div>`).join('')}
+            </div>
+          </div>
+        </section>
+
+        <section class="card" style="margin-bottom:16px">
+          <div class="card-hd">
+            <h3>📈 Activité des 30 derniers jours</h3>
+            <div class="actions">
+              <button class="btn-g">7j</button>
+              <button class="btn-g" style="color:var(--blue);border-color:var(--blue)">30j</button>
+              <button class="btn-g" onclick="Nx.openModal('vocal-summary')">🎙 Résumé vocal</button>
+              <button class="btn-g" onclick="window.print()">📄 Export PDF</button>
+            </div>
+          </div>
+          <div style="padding:0 20px 20px">
+            ${this.chartSvg()}
+          </div>
+        </section>
+
+        <section class="grid3">
+          ${this.quickActionCard('🔌','Partage 1-clic','Envoyer infos bancaires, devis, catalogue dans un chat',()=>"Nx.openModal('share-data')")}
+          ${this.quickActionCard('✨','Nexus AI','Demander une analyse, écrire une promo, relancer un client',()=>"Nx.openAiChat()")}
+          ${this.quickActionCard('📢','Nouvelle campagne','Créer et envoyer en 60 secondes',()=>"Nx.navigate('campaigns')")}
+        </section>
+
+        <section class="card">
+          <div class="card-hd"><h3>🎯 Actions rapides & agent IA</h3></div>
+          <div style="padding:0 20px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
+            ${this.agentTodayCard()}
+          </div>
+        </section>
+      </div>`;
+  },
+
+  statCard(icon,i18nKey,val,delta,sub,kind){
+    const deltaClass = delta > 0 ? 'up' : delta < 0 ? 'dn' : 'eq';
+    const deltaSign = delta > 0 ? '▲' : delta < 0 ? '▼' : '–';
+    return `
+      <div class="stat" onclick="Nx.navigate('stats')">
+        <div class="stat-top">
+          <div class="stat-ic ${kind||''}">${icon}</div>
+          <span class="delta ${deltaClass}">${deltaSign} ${Math.abs(delta)}%</span>
+        </div>
+        <div class="stat-lbl">${t(i18nKey)}</div>
+        <div class="stat-val mono">${val}</div>
+        <div class="stat-sub">${sub}</div>
+      </div>`;
+  },
+
+  quickActionCard(icon,title,sub,onclick){
+    return `<div class="card" style="padding:22px;cursor:pointer" onclick="${onclick()}">
+      <div style="font-size:30px;margin-bottom:10px">${icon}</div>
+      <div style="font-weight:700;margin-bottom:4px">${title}</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.5">${sub}</div>
+    </div>`;
+  },
+
+  agentTodayCard(){
+    const items = [
+      {ic:'🤖',val:'12/24',lbl:'Réponses auto'},
+      {ic:'⚡',val:'2:18',lbl:'Temps moyen'},
+      {ic:'😊',val:'98%',lbl:'Sentiment positif'},
+      {ic:'🎯',val:'3/5',lbl:'Tips appliqués'},
+      {ic:'🌙',val:'00:42',lbl:'Gestion nocturne'},
+      {ic:'📝',val:'28',lbl:'Brouillons créés'},
+    ];
+    return items.map(i=>`<div style="padding:14px;background:var(--bg2);border-radius:10px">
+      <div style="font-size:18px">${i.ic}</div>
+      <div style="font-size:18px;font-weight:800;margin-top:6px" class="mono">${i.val}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">${i.lbl}</div>
+    </div>`).join('');
+  },
+
+  msgRow(conv){
+    const c = this.state.clients.find(x=>x.id===conv.clientId);
+    if (!c) return '';
+    const lastMsg = conv.messages[conv.messages.length-1];
+    const chMap = {whatsapp:'📱 WhatsApp',instagram:'📸 Instagram',email:'✉️ Email'};
+    return `<div class="msg ${conv.unread?'unread':''}" onclick="Nx.openConversation(${c.id})">
+      <div class="msg-av" style="background:${c.color}">${c.avatar}</div>
+      <div class="msg-body">
+        <div class="msg-row">
+          <div><span class="msg-name">${c.name}</span><span class="ch">${chMap[conv.channel]}</span></div>
+          <div class="msg-right"><span class="msg-time">${lastMsg.time}</span>${conv.unread?'<span class="msg-unread-dot"></span>':''}</div>
+        </div>
+        <div class="msg-txt">${lastMsg.text}</div>
+        ${c.tag?`<span class="msg-tag ${c.tag}">${c.tag.toUpperCase()}</span>`:''}
+      </div>
+    </div>`;
+  },
+
+  chartSvg(){
+    return `<svg viewBox="0 0 760 220" style="width:100%;height:220px">
+      <defs>
+        <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="#1A56DB" stop-opacity=".3"/>
+          <stop offset="100%" stop-color="#1A56DB" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <g stroke="#F1F5F9" stroke-width="1">
+        <line x1="0" y1="50" x2="760" y2="50"/>
+        <line x1="0" y1="110" x2="760" y2="110"/>
+        <line x1="0" y1="170" x2="760" y2="170"/>
+      </g>
+      <path d="M0,150 C80,130 120,160 180,110 C240,70 300,100 360,85 C420,75 480,105 540,70 C600,40 660,60 760,45 L760,220 L0,220 Z" fill="url(#g1)"/>
+      <path d="M0,150 C80,130 120,160 180,110 C240,70 300,100 360,85 C420,75 480,105 540,70 C600,40 660,60 760,45" fill="none" stroke="#1A56DB" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M0,180 C80,175 120,170 180,165 C240,150 300,160 360,145 C420,135 480,140 540,125 C600,115 660,120 760,105" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 4"/>
+      <path d="M0,190 C80,185 120,175 180,170 C240,175 300,165 360,175 C420,165 480,155 540,160 C600,145 660,150 760,135" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 3"/>
+      <g fill="#1A56DB">
+        <circle cx="180" cy="110" r="3.5"/><circle cx="360" cy="85" r="3.5"/><circle cx="540" cy="70" r="3.5"/><circle cx="760" cy="45" r="4"/>
+      </g>
+      <g font-family="JetBrains Mono,monospace" font-size="10" fill="#94A3B8">
+        <text x="5" y="212">1avr</text><text x="130" y="212">7</text><text x="255" y="212">14</text><text x="380" y="212">21</text><text x="500" y="212">28</text><text x="620" y="212">1mai</text>
+      </g>
+    </svg>`;
+  },
+
+  // ---------- PROFILE VIEW ----------
+  viewProfile(){
+    const b = this.state.business;
+    return `
+      <div class="view">
+        <div class="page-hd">
+          <div><h1>👤 Profil de ton entreprise</h1><div class="sub">Plus tu donnes d'infos à Nexus, meilleures sont les réponses de l'IA.</div></div>
+          <span class="chip green">✓ 80% complété</span>
+        </div>
+
+        <div class="grid2">
+          <div class="card" style="padding:22px">
+            <h3 style="margin-bottom:16px">Identité</h3>
+            <div class="form-row"><label class="form-lbl">Logo / emoji</label>
+              <div style="display:flex;gap:10px;align-items:center">
+                <div style="font-size:40px">${b.logo}</div>
+                <input class="form-ctrl" style="max-width:100px;font-size:22px;text-align:center" value="${b.logo}" oninput="Nx.updateBiz('logo',this.value)">
+                <button class="btn btn-s" onclick="Nx.toast('Upload simulé','success','PNG 512×512 conseillé')">📎 Importer PNG</button>
+              </div></div>
+            <div class="form-row"><label class="form-lbl">Nom commercial</label>
+              <input class="form-ctrl" value="${b.name}" oninput="Nx.updateBiz('name',this.value)"></div>
+            <div class="form-row"><label class="form-lbl">Gérant</label>
+              <input class="form-ctrl" value="${b.owner}" oninput="Nx.updateBiz('owner',this.value)"></div>
+            <div class="form-row"><label class="form-lbl">Ville · Pays</label>
+              <div class="flex"><input class="form-ctrl" value="${b.city}" oninput="Nx.updateBiz('city',this.value)"><input class="form-ctrl" style="max-width:70px;font-size:22px;text-align:center" value="${b.country}" oninput="Nx.updateBiz('country',this.value)"></div></div>
+            <div class="form-row"><label class="form-lbl">Secteur d'activité</label>
+              <input class="form-ctrl" value="${b.industry}" oninput="Nx.updateBiz('industry',this.value)"></div>
+            <div class="form-row"><label class="form-lbl">Baseline / tagline</label>
+              <input class="form-ctrl" value="${b.tagline}" oninput="Nx.updateBiz('tagline',this.value)"></div>
+            <button class="btn btn-p" onclick="Nx.toast('Profil sauvegardé','success')">💾 Sauvegarder</button>
+          </div>
+
+          <div class="card" style="padding:22px">
+            <h3 style="margin-bottom:16px">🕒 Horaires d'ouverture</h3>
+            ${['mon','tue','wed','thu','fri','sat','sun'].map(d=>{
+              const map = {mon:'Lundi',tue:'Mardi',wed:'Mercredi',thu:'Jeudi',fri:'Vendredi',sat:'Samedi',sun:'Dimanche'};
+              return `<div class="form-row"><label class="form-lbl">${map[d]}</label>
+                <input class="form-ctrl" value="${b.hours[d]}" oninput="Nx.updateBizHours('${d}',this.value)"></div>`;
+            }).join('')}
+          </div>
+
+          <div class="card" style="padding:22px;grid-column:span 2">
+            <h3 style="margin-bottom:16px">🎨 Ton de l'IA</h3>
+            <div class="form-row"><label class="form-lbl">Comment l'IA doit parler avec tes clients</label>
+              <textarea class="form-ctrl" rows="3" oninput="Nx.updateBiz('tone',this.value)">${b.tone}</textarea></div>
+            <div class="filter-bar">
+              <span style="font-size:12px;color:var(--muted)">Presets :</span>
+              <button class="filter-pill" onclick="Nx.applyTone('Amical et chaleureux, tutoiement, petit emoji')">😊 Amical</button>
+              <button class="filter-pill" onclick="Nx.applyTone('Professionnel, vouvoiement, factuel')">💼 Pro</button>
+              <button class="filter-pill" onclick="Nx.applyTone('Direct et efficace, peu de mots')">⚡ Direct</button>
+              <button class="filter-pill" onclick="Nx.applyTone('Chaleureux, humour léger, emojis')">🎉 Convivial</button>
+            </div>
+          </div>
+
+          <div class="card" style="padding:22px;grid-column:span 2">
+            <h3 style="margin-bottom:16px">📖 FAQ automatique</h3>
+            <p style="color:var(--muted);font-size:12px;margin-bottom:14px">Nexus répond automatiquement quand un client pose l'une de ces questions.</p>
+            <div id="faqContainer">
+              ${b.faq.map((f,i)=>this.faqRow(f,i)).join('')}
+            </div>
+            <button class="btn btn-s" onclick="Nx.addFaq()" style="margin-top:10px">+ Ajouter une FAQ</button>
+          </div>
+
+          <div class="card" style="padding:22px;grid-column:span 2">
+            <h3 style="margin-bottom:16px">🛍️ Catalogue produits</h3>
+            <div class="grid3">
+              ${b.catalog.map((p,i)=>`
+                <div style="padding:14px;border:1px solid var(--line);border-radius:10px">
+                  <div style="font-size:30px">${p.emoji}</div>
+                  <input class="form-ctrl" style="margin-top:8px" value="${p.name}" onchange="Nx.state.business.catalog[${i}].name=this.value;Nx.save()">
+                  <div class="flex" style="margin-top:6px"><input class="form-ctrl" value="${p.price}" onchange="Nx.state.business.catalog[${i}].price=+this.value;Nx.save()"><input class="form-ctrl" style="max-width:60px" value="${p.unit}" onchange="Nx.state.business.catalog[${i}].unit=this.value;Nx.save()"></div>
+                  <button class="btn-g" style="margin-top:8px;width:100%" onclick="Nx.state.business.catalog.splice(${i},1);Nx.save();Nx.renderView()">🗑 Retirer</button>
+                </div>`).join('')}
+              <div style="padding:14px;border:2px dashed var(--line);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted)" onclick="Nx.addProduct()">+ Ajouter un produit</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  },
+
+  faqRow(f,i){
+    return `<div style="padding:12px;background:var(--bg2);border-radius:10px;margin-bottom:8px;position:relative">
+      <input class="form-ctrl" style="background:var(--panel);margin-bottom:6px;font-weight:600" placeholder="Question…" value="${f.q}" onchange="Nx.state.business.faq[${i}].q=this.value;Nx.save()">
+      <textarea class="form-ctrl" style="background:var(--panel)" rows="2" placeholder="Réponse…" onchange="Nx.state.business.faq[${i}].a=this.value;Nx.save()">${f.a}</textarea>
+      <button style="position:absolute;top:10px;right:10px;background:transparent;border:0;cursor:pointer;color:var(--muted)" onclick="Nx.state.business.faq.splice(${i},1);Nx.save();Nx.renderView()">✕</button>
+    </div>`;
+  },
+
+  addFaq(){
+    this.state.business.faq.push({q:'',a:''});
+    this.save();
+    this.renderView();
+  },
+  addProduct(){
+    this.state.business.catalog.push({id:Date.now(),name:'Nouveau produit',price:1000,unit:'un',emoji:'📦'});
+    this.save();
+    this.renderView();
+  },
+  updateBiz(k,v){ this.state.business[k] = v; this.save(); },
+  updateBizHours(d,v){ this.state.business.hours[d] = v; this.save(); },
+  applyTone(v){ this.state.business.tone = v; this.save(); this.renderView(); this.toast('Ton mis à jour','success'); },
+
+  // ---------- INBOX VIEW ----------
+  viewInbox(){
+    const filter = this.state.inboxFilter || 'all';
+    const convs = filter==='all' ? this.state.conversations : this.state.conversations.filter(c=>c.channel===filter);
+    const activeId = this.state.activeConv || convs[0]?.clientId;
+    const activeConv = this.state.conversations.find(c=>c.clientId===activeId);
+    const activeClient = activeConv ? this.state.clients.find(c=>c.id===activeId) : null;
+
+    return `
+      <div class="view">
+        <div class="page-hd">
+          <div><h1>📬 Messagerie unifiée</h1><div class="sub">Tous tes canaux dans une seule boîte — WhatsApp, Instagram, Email.</div></div>
+          <div class="flex">
+            <button class="btn btn-s" onclick="Nx.toast('Recherche ouverte','info');Nx.openPalette()">🔍 Rechercher</button>
+            <button class="btn btn-s" onclick="Nx.openModal('share-data')">🔌 Partage 1-clic</button>
+          </div>
+        </div>
+
+        <div class="chat-layout">
+
+          <div class="chat-list">
+            <div class="chat-list-hd">
+              <div class="flex between"><b>Conversations</b><span class="chip">${convs.length}</span></div>
+              <div class="chat-list-tabs">
+                <button class="chat-tab ${filter==='all'?'on':''}" onclick="Nx.setInboxFilter('all')">Tous</button>
+                <button class="chat-tab ${filter==='whatsapp'?'on':''}" onclick="Nx.setInboxFilter('whatsapp')">📱 WhatsApp</button>
+                <button class="chat-tab ${filter==='instagram'?'on':''}" onclick="Nx.setInboxFilter('instagram')">📸 Instagram</button>
+                <button class="chat-tab ${filter==='email'?'on':''}" onclick="Nx.setInboxFilter('email')">✉️ Email</button>
+              </div>
+            </div>
+            <div class="chat-messages-list">
+              ${convs.map(conv=>{
+                const c = this.state.clients.find(x=>x.id===conv.clientId);
+                if (!c) return '';
+                return `<div class="msg ${conv.unread?'unread':''} ${c.id===activeId?'active':''}" onclick="Nx.state.activeConv=${c.id};Nx.renderView()">
+                  <div class="msg-av" style="background:${c.color}">${c.avatar}</div>
+                  <div class="msg-body">
+                    <div class="msg-row"><div><span class="msg-name">${c.name}</span></div>
+                      <div class="msg-right">${conv.unread?'<span class="msg-unread-dot"></span>':''}<span class="msg-time">${conv.messages[conv.messages.length-1].time}</span></div></div>
+                    <div class="msg-txt">${conv.messages[conv.messages.length-1].text}</div>
+                    ${c.tag?`<span class="msg-tag ${c.tag}">${c.tag.toUpperCase()}</span>`:''}
+                  </div>
+                </div>`;
+              }).join('')}
+            </div>
+          </div>
+
+          ${activeClient ? `
+          <div class="chat-conv">
+            <div class="chat-conv-hd">
+              <div class="msg-av" style="background:${activeClient.color};width:40px;height:40px">${activeClient.avatar}</div>
+              <div style="flex:1">
+                <div style="font-weight:700">${activeClient.name}</div>
+                <div style="font-size:11px;color:var(--muted)">${activeClient.phone} · ${activeClient.lastSeen}</div>
+              </div>
+              <button class="icon-btn" onclick="Nx.openModal('client',Nx.state.clients.find(c=>c.id===${activeClient.id}))" title="Fiche client">👤</button>
+              <button class="icon-btn" onclick="Nx.toast('Appel simulé','info','Bientôt intégré VoIP')" title="Appeler">📞</button>
+              <button class="icon-btn" onclick="Nx.openModal('share-data')" title="Partager doc">🔌</button>
+              <button class="icon-btn" onclick="Nx.translateConv()" title="Traduire FR ↔ ES">🌐</button>
+            </div>
+            <div class="chat-conv-body" id="chatBody">
+              ${activeConv.messages.map(m=>`<div class="bubble ${m.from}">${m.text}<div class="t">${m.time}</div></div>`).join('')}
+              ${activeConv.draft ? `<div class="chat-draft">${activeConv.draft}<div class="chat-draft-actions"><button class="btn-g" onclick="Nx.sendDraft(${activeClient.id})">✓ Envoyer tel quel</button><button class="btn-g" onclick="Nx.editDraft(${activeClient.id})">✏️ Modifier</button><button class="btn-g" onclick="Nx.regenDraft(${activeClient.id})">🔄 Reformuler</button></div></div>` : ''}
+            </div>
+            <div class="chat-input">
+              <button class="icon-btn" onclick="Nx.toast('Transcription vocale 🎙 (démo)','info')" title="Voice note">🎙</button>
+              <input id="chatInputField" placeholder="Écris un message ou appuie sur 🎙…" onkeypress="if(event.key==='Enter')Nx.sendMessage(${activeClient.id})"/>
+              <button class="icon-btn" onclick="Nx.toast('Suggestion IA',':)','Propose une réponse contextuelle')" title="Brouillon IA">✨</button>
+              <button class="btn btn-p" onclick="Nx.sendMessage(${activeClient.id})">Envoyer</button>
+            </div>
+          </div>
+          ` : '<div class="card" style="padding:40px;text-align:center;color:var(--muted)">Sélectionne une conversation pour commencer</div>'}
+
+        </div>
+      </div>`;
+  },
+
+  setInboxFilter(f){ this.state.inboxFilter = f; this.renderView(); },
+
+  sendMessage(clientId){
+    const input = document.getElementById('chatInputField');
+    const txt = input.value.trim();
+    if (!txt) return;
+    const conv = this.state.conversations.find(c=>c.clientId===clientId);
+    conv.messages.push({from:'me',text:txt,time:'À l\'instant'});
+    conv.unread = false;
+    conv.draft = null;
+    this.save();
+    input.value = '';
+    this.renderView();
+    this.toast('Message envoyé','success');
+
+    // Simulate AI response 2s later
+    setTimeout(() => {
+      const autoReplies = ['Perfecto, gracias Carlos! 😊','Dale, lo anoto.','Mil gracias! Nos vemos mañana 🥖','Genial, ¿a qué hora?'];
+      conv.messages.push({from:'them',text:autoReplies[Math.floor(Math.random()*autoReplies.length)],time:'À l\'instant'});
+      conv.unread = true;
+      this.save();
+      if (this.state.view === 'inbox' && this.state.activeConv === clientId) this.renderView();
+      this.toast('💬 Nouvelle réponse','info');
+    }, 2000);
+  },
+
+  sendDraft(clientId){
+    const conv = this.state.conversations.find(c=>c.clientId===clientId);
+    if (conv.draft) {
+      conv.messages.push({from:'me',text:conv.draft,time:'À l\'instant'});
+      conv.draft = null;
+      conv.unread = false;
+      this.save();
+      this.renderView();
+      this.toast('✓ Brouillon envoyé','success');
+    }
+  },
+
+  editDraft(clientId){
+    const conv = this.state.conversations.find(c=>c.clientId===clientId);
+    document.getElementById('chatInputField').value = conv.draft;
+    conv.draft = null;
+    this.save();
+    this.renderView();
+  },
+
+  regenDraft(clientId){
+    const conv = this.state.conversations.find(c=>c.clientId===clientId);
+    const alts = [
+      'Hola! Con gusto te guardo lo que necesitas para mañana 🥖',
+      'Claro que sí! Pásame la hora y lo dejo listo 😊',
+      'Perfecto, te lo confirmo. Nos vemos mañana!'
+    ];
+    conv.draft = alts[Math.floor(Math.random()*alts.length)];
+    this.save();
+    this.renderView();
+    this.toast('🔄 Brouillon reformulé','info');
+  },
+
+  translateConv(){ this.toast('🌐 Traduction activée','success','FR ↔ ES en temps réel'); },
+
+  // ---------- CRM VIEW ----------
+  viewCrm(){
+    const filter = this.state.crmFilter || 'all';
+    const search = (this.state.crmSearch || '').toLowerCase();
+    let clients = this.state.clients;
+    if (filter==='active') clients = clients.filter(c=>c.status==='active');
+    else if (filter==='prospect') clients = clients.filter(c=>c.status==='prospect');
+    else if (filter==='lost') clients = clients.filter(c=>c.status==='lost');
+    else if (filter==='vip') clients = clients.filter(c=>c.tags.includes('VIP'));
+    if (search) clients = clients.filter(c=>c.name.toLowerCase().includes(search) || c.notes.toLowerCase().includes(search));
+    clients.sort((a,b)=>b.score-a.score);
+
+    return `
+      <div class="view">
+        <div class="page-hd">
+          <div><h1>👥 Clients & CRM</h1><div class="sub">${this.state.clients.length} clients · ${this.state.clients.filter(c=>c.status==='active').length} actifs · ${this.state.clients.filter(c=>c.status==='lost').length} perdus</div></div>
+          <div class="flex">
+            <button class="btn btn-s" onclick="Nx.toast('Export CSV simulé','success')">📤 Exporter CSV</button>
+            <button class="btn btn-p" onclick="Nx.toast('Formulaire d\\'ajout (démo)','info')">+ Ajouter un client</button>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <div style="flex:1;max-width:320px">
+            <input class="form-ctrl" placeholder="${t('crm.search')}" value="${this.state.crmSearch||''}" oninput="Nx.state.crmSearch=this.value;Nx.renderView()">
+          </div>
+          <button class="filter-pill ${filter==='all'?'on':''}" onclick="Nx.state.crmFilter='all';Nx.renderView()">Tous (${this.state.clients.length})</button>
+          <button class="filter-pill ${filter==='active'?'on':''}" onclick="Nx.state.crmFilter='active';Nx.renderView()">Actifs (${this.state.clients.filter(c=>c.status==='active').length})</button>
+          <button class="filter-pill ${filter==='prospect'?'on':''}" onclick="Nx.state.crmFilter='prospect';Nx.renderView()">Prospects (${this.state.clients.filter(c=>c.status==='prospect').length})</button>
+          <button class="filter-pill ${filter==='lost'?'on':''}" onclick="Nx.state.crmFilter='lost';Nx.renderView()">Perdus (${this.state.clients.filter(c=>c.status==='lost').length})</button>
+          <button class="filter-pill ${filter==='vip'?'on':''}" onclick="Nx.state.crmFilter='vip';Nx.renderView()">⭐ VIP</button>
+        </div>
+
+        <div class="card" style="margin-bottom:14px;padding:20px;background:linear-gradient(135deg,#FFF7ED,#FEF3C7)">
+          <h3 style="margin-bottom:14px;color:#78350F">🏆 Podium général — Top 10</h3>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px">
+            ${this.state.clients.filter(c=>c.status==='active').sort((a,b)=>b.score-a.score).slice(0,10).map((c,i)=>`
+              <div style="padding:14px;background:var(--panel);border-radius:10px;text-align:center;cursor:pointer" onclick="Nx.openModal('client',Nx.state.clients.find(x=>x.id===${c.id}))">
+                <div class="rank rank-${i<3?(i+1):'n'}" style="margin:0 auto 8px">${i+1}</div>
+                <div class="msg-av" style="width:40px;height:40px;margin:0 auto 6px;background:${c.color}">${c.avatar}</div>
+                <div style="font-size:12px;font-weight:600">${c.name.split(' ')[0]}</div>
+                <div style="font-size:11px;color:var(--muted)">${c.score} pts</div>
+              </div>`).join('')}
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd"><h3>Tous les clients · ${clients.length}</h3>
+            <div class="actions"><button class="btn-g">Trier par score ▾</button></div></div>
+          ${clients.map(c=>`
+            <div style="padding:14px 20px;border-top:1px solid var(--line2);display:flex;gap:14px;align-items:center;cursor:pointer" onclick="Nx.openModal('client',Nx.state.clients.find(x=>x.id===${c.id}))">
+              <div class="msg-av" style="background:${c.color}">${c.avatar}</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-weight:600;display:flex;gap:6px;align-items:center;flex-wrap:wrap">${c.name}${c.tags.map(tg=>`<span class="chip blue" style="font-size:10px;padding:1px 6px">${tg}</span>`).join('')}</div>
+                <div style="font-size:12px;color:var(--muted)">${c.phone} · ${c.lastSeen} · ${c.orders} commandes · ${c.spent.toLocaleString('es-CL')} CLP</div>
+              </div>
+              ${c.status==='lost' ? '<span class="chip red">⚠ Perdu</span>' : c.status==='prospect' ? '<span class="chip amber">Prospect</span>' : ''}
+              <div style="text-align:right"><div style="font-size:18px;font-weight:800;color:var(--blue)" class="mono">${c.score}</div><div style="font-size:10px;color:var(--muted)">SCORE</div></div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  },
+
+  // ---------- STATS VIEW ----------
+  viewStats(){
+    const a = this.state.analytics;
+    return `
+      <div class="view">
+        <div class="page-hd">
+          <div><h1>📊 Statistiques & santé business</h1><div class="sub">Toutes tes métriques en un coup d'œil. Compare, exporte, écoute.</div></div>
+          <div class="flex">
+            <button class="btn btn-s" onclick="Nx.openModal('vocal-summary')">🎙 Résumé vocal</button>
+            <button class="btn btn-s" onclick="window.print()">📄 Exporter PDF</button>
+          </div>
+        </div>
+
+        <div class="stats">
+          ${this.statCard('💬','Conversations totales','2 840',a.weekComparisons.conversations.delta,'cette semaine vs précédente','')}
+          ${this.statCard('👥','Nouveaux clients',21,a.weekComparisons.clients.delta,'ce mois','g')}
+          ${this.statCard('💰','Revenus (avril)','2,84M',a.weekComparisons.revenue.delta,'projection : 3,1M CLP','a')}
+          ${this.statCard('⚡','Temps moyen',a.avgResponseTime+' min',-15,'< 5min = Excellent','p')}
+        </div>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="card-hd"><h3>🔥 Heatmap — Quand tes clients écrivent</h3>
+              <div class="actions"><button class="btn-g">7j</button><button class="btn-g" style="color:var(--blue);border-color:var(--blue)">30j</button></div></div>
+            <div class="card-body">
+              <div class="heatmap">
+                <div class="heat-lbl"></div>
+                ${['L','M','Mer','J','V','S','D'].map(d=>`<div class="heat-lbl" style="justify-content:center">${d}</div>`).join('')}
+                ${a.heatmap.map((row,h)=>`
+                  <div class="heat-lbl">${h+6}h</div>
+                  ${row.map(v=>`<div class="heat-cell heat-h${v}" title="${h+6}h — niveau ${v}/4"></div>`).join('')}
+                `).join('')}
+              </div>
+              <div style="font-size:11px;color:var(--muted);margin-top:10px;display:flex;gap:6px;align-items:center;justify-content:center">
+                Moins <span class="heat-cell heat-h0" style="width:14px"></span><span class="heat-cell heat-h1" style="width:14px"></span><span class="heat-cell heat-h2" style="width:14px"></span><span class="heat-cell heat-h3" style="width:14px"></span><span class="heat-cell heat-h4" style="width:14px"></span> Plus
+              </div>
+              <div style="padding:14px;background:var(--blue-soft);border-radius:10px;margin-top:14px;font-size:12px">💡 <b>Insight :</b> 60% de tes messages arrivent entre <b>vendredi 17h</b> et <b>samedi 12h</b>. Prévois du stock.</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-hd"><h3>❓ Top questions cette semaine</h3></div>
+            <div class="card-body">
+              ${a.topQuestions.map((q,i)=>`
+                <div style="padding:10px 0;border-bottom:1px dashed var(--line);display:flex;align-items:center;gap:10px">
+                  <div style="width:24px;height:24px;border-radius:50%;background:var(--blue-soft);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px">${i+1}</div>
+                  <div style="flex:1;font-size:13px">${q}</div>
+                  <span class="chip">${Math.round(40-i*6)} fois</span>
+                </div>`).join('')}
+              <div style="padding:14px;background:var(--green-soft);border-radius:10px;margin-top:10px;font-size:12px">💡 <b>Suggestion :</b> ajoute une section FAQ à ton site ou Insta, ça économisera 20+ messages/semaine.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="card-hd"><h3>📈 Évolution sur 30 jours</h3></div>
+            <div class="card-body">${this.chartSvg()}</div>
+          </div>
+
+          <div class="card">
+            <div class="card-hd"><h3>📊 Répartition clients</h3></div>
+            <div class="card-body">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+                <div style="text-align:center;padding:20px">
+                  ${this.donutSvg()}
+                </div>
+                <div>
+                  ${[{c:'#1A56DB',l:'Récurrents',v:'68%',n:232},{c:'#22C55E',l:'Nouveaux',v:'18%',n:62},{c:'#F59E0B',l:'Occasionnels',v:'10%',n:34},{c:'#EF4444',l:'Perdus',v:'4%',n:14}].map(x=>`
+                    <div class="flex" style="padding:6px 0"><span style="width:10px;height:10px;background:${x.c};border-radius:2px"></span><span style="font-size:12px">${x.l}</span><span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">${x.n}</span><b style="font-size:12px">${x.v}</b></div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd"><h3>🎯 Achievements débloqués</h3></div>
+          <div class="card-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px">
+            ${[
+              {ic:'🔥',n:'Streak 10 jours',u:true},{ic:'💬',n:'100 conversations',u:true},{ic:'🏆',n:'Top 5 clients actifs',u:true},
+              {ic:'🤖',n:'50 automatisations',u:true},{ic:'📢',n:'1ère campagne',u:true},{ic:'💰',n:'1M CLP mensuel',u:true},
+              {ic:'🎯',n:'Streak 30 jours',u:false},{ic:'⭐',n:'500 clients',u:false},{ic:'🚀',n:'5M CLP mensuel',u:false}
+            ].map(ach=>`
+              <div style="padding:16px;background:${ach.u?'linear-gradient(135deg,var(--amber-soft),var(--amber-soft))':'var(--bg2)'};border:1px solid ${ach.u?'var(--amber)':'var(--line)'};border-radius:10px;text-align:center;${ach.u?'':'opacity:.4'}">
+                <div style="font-size:30px;margin-bottom:6px">${ach.ic}</div>
+                <div style="font-size:12px;font-weight:600">${ach.n}</div>
+                <div style="font-size:10px;color:var(--muted);margin-top:4px">${ach.u?'Débloqué':'Verrouillé'}</div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>`;
+  },
+
+  donutSvg(){
+    return `<svg width="140" height="140" viewBox="0 0 42 42">
+      <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#F1F5F9" stroke-width="4"/>
+      <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#1A56DB" stroke-width="4" stroke-dasharray="68 32" stroke-dashoffset="25" transform="rotate(-90 21 21)"/>
+      <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#22C55E" stroke-width="4" stroke-dasharray="18 82" stroke-dashoffset="-43" transform="rotate(-90 21 21)"/>
+      <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#F59E0B" stroke-width="4" stroke-dasharray="10 90" stroke-dashoffset="-61" transform="rotate(-90 21 21)"/>
+      <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#EF4444" stroke-width="4" stroke-dasharray="4 96" stroke-dashoffset="-71" transform="rotate(-90 21 21)"/>
+      <text x="21" y="22" text-anchor="middle" dominant-baseline="middle" font-size="5" font-weight="800" fill="currentColor">342</text>
+      <text x="21" y="28" text-anchor="middle" dominant-baseline="middle" font-size="2.5" fill="#8A94A6">clients</text>
+    </svg>`;
+  },
+
+  // ---------- CAMPAIGNS VIEW ----------
+  viewCampaigns(){
+    return `
+      <div class="view">
+        <div class="page-hd">
+          <div><h1>📢 Campagnes marketing</h1><div class="sub">Promos, relances, annonces — en 60 secondes, prêtes à envoyer.</div></div>
+          <button class="btn btn-p" onclick="Nx.openCampaignBuilder()">+ ${t('campaigns.create')}</button>
+        </div>
+
+        <div class="grid3">
+          <div class="stat" onclick="Nx.openCampaignBuilder()">
+            <div class="stat-ic">📢</div><div class="stat-lbl">Campagnes envoyées</div><div class="stat-val mono">12</div><div class="stat-sub">ce mois</div>
+          </div>
+          <div class="stat">
+            <div class="stat-ic g">📬</div><div class="stat-lbl">Ouverture moyenne</div><div class="stat-val mono">82%</div><div class="stat-sub">WhatsApp = +++ email</div>
+          </div>
+          <div class="stat">
+            <div class="stat-ic a">💰</div><div class="stat-lbl">Revenus générés</div><div class="stat-val mono">380k <small style="font-size:12px;color:var(--muted)">CLP</small></div><div class="stat-sub">via campagnes ce mois</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-hd"><h3>📋 Bibliothèque de templates</h3><div class="actions"><button class="btn-g" onclick="Nx.toast('Import template (démo)','info')">+ Importer</button></div></div>
+          <div class="card-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
+            ${[
+              {e:'🌹',n:'Saint-Valentin',d:'-20% sur les cœurs'},
+              {e:'🇨🇱',n:'Fiestas Patrias',d:'Pack empanadas + dulces'},
+              {e:'🎄',n:'Noël LATAM',d:'Panetón + pan de pascua'},
+              {e:'🌞',n:'Promo été',d:'Rafraîchissant week-end'},
+              {e:'🎂',n:'Anniversaire VIP',d:'Torte offerte au top 5'},
+              {e:'💚',n:'Récupération client',d:'-15% après 45j silence'},
+              {e:'☔',n:'Jour de pluie',d:'Delivery gratis'},
+              {e:'🎉',n:'Annonce nouveauté',d:'Nouveau produit au catalogue'},
+            ].map(tpl=>`
+              <div style="padding:16px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;cursor:pointer;transition:all .2s" onclick="Nx.openCampaignBuilder('${tpl.n}')" onmouseover="this.style.borderColor='var(--blue)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--line)';this.style.transform='none'">
+                <div style="font-size:28px;margin-bottom:8px">${tpl.e}</div>
+                <div style="font-weight:700;font-size:13px">${tpl.n}</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px">${tpl.d}</div>
+                <button class="btn-g" style="margin-top:8px;width:100%">Utiliser →</button>
+              </div>`).join('')}
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd"><h3>📊 Campagnes récentes</h3></div>
+          ${this.state.campaigns.map(c=>`
+            <div style="padding:14px 20px;border-top:1px solid var(--line2);display:flex;gap:14px;align-items:center">
+              <div style="flex:1">
+                <div style="font-weight:600">${c.name}</div>
+                <div style="font-size:12px;color:var(--muted)">${c.audience} · ${c.date}</div>
+              </div>
+              <div class="flex" style="gap:20px;font-family:'JetBrains Mono',monospace;font-size:12px">
+                <div style="text-align:center"><div style="font-weight:700">${c.sent}</div><div style="font-size:10px;color:var(--muted)">envoyés</div></div>
+                <div style="text-align:center"><div style="font-weight:700;color:var(--blue)">${c.opened}</div><div style="font-size:10px;color:var(--muted)">ouverts</div></div>
+                <div style="text-align:center"><div style="font-weight:700;color:var(--green)">${c.replied}</div><div style="font-size:10px;color:var(--muted)">réponses</div></div>
+              </div>
+              <span class="chip ${c.status==='completed'?'green':'blue'}">${c.status==='completed'?'Terminée':'En cours'}</span>
+              <button class="btn-g" onclick="Nx.toast('Rapport ouvert','info')">📊</button>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  },
+
+  openCampaignBuilder(templateName){
+    this.openModal('ai-chat');
+    // Replace with custom campaign modal
+    const mc = document.getElementById('modal-content');
+    mc.innerHTML = `
+      <div class="modal-hd"><h3>📢 Nouvelle campagne ${templateName?`— ${templateName}`:''}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-body">
+        <div class="form-row"><label class="form-lbl">Nom de la campagne</label>
+          <input class="form-ctrl" id="campName" value="${templateName||'Promo pan amasado week-end'}"></div>
+        <div class="form-row"><label class="form-lbl">Cible</label>
+          <select class="form-ctrl" id="campTarget">
+            <option>🏆 Top 10 clients VIP</option>
+            <option>👥 Tous les clients actifs (342)</option>
+            <option>💔 Clients perdus 45+ jours (3)</option>
+            <option>✨ Nouveaux clients (ce mois)</option>
+            <option>🎂 Anniversaire ce mois (2)</option>
+            <option>⚙️ Segment personnalisé</option>
+          </select></div>
+        <div class="form-row"><label class="form-lbl">Message</label>
+          <textarea class="form-ctrl" id="campMsg" rows="4">Hola 👋 Este fin de semana en Don Carlos: 3kg de pan amasado por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! 🥖</textarea>
+          <div class="flex mt8"><button class="btn-g" onclick="Nx.generateCampMsg()">✨ Générer 3 versions IA</button><button class="btn-g" onclick="Nx.toast('A/B test activé','success')">🧪 A/B test 10%</button></div></div>
+        <div class="form-row"><label class="form-lbl">Photo (optionnel)</label>
+          <div style="display:flex;gap:8px"><button class="btn btn-s">📎 Importer</button><button class="btn btn-s">🖼 Choisir du catalogue</button></div></div>
+        <div class="form-row"><label class="form-lbl">Quand envoyer</label>
+          <select class="form-ctrl">
+            <option>Maintenant</option>
+            <option selected>Dimanche 19h (heure de lecture max)</option>
+            <option>Demain 9h</option>
+            <option>Planifier une date…</option>
+          </select></div>
+
+        <div style="padding:16px;background:var(--bg2);border-radius:10px;margin-top:14px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:8px">📱 APERÇU WHATSAPP</div>
+          <div class="bubble me" style="margin:0;max-width:100%">Hola 👋 Este fin de semana en Don Carlos: 3kg de pan amasado por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! 🥖<div class="t">19:00</div></div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-s" onclick="Nx.closeModal()">Annuler</button>
+        <button class="btn btn-s" onclick="Nx.toast('Brouillon sauvé','success')">💾 Brouillon</button>
+        <button class="btn btn-p" onclick="Nx.sendCampaign()">🚀 Envoyer campagne</button>
+      </div>`;
+  },
+
+  generateCampMsg(){
+    const options = [
+      'Hola 👋 Este fin de semana en Don Carlos: 3kg de pan amasado por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! 🥖',
+      'Panadería Don Carlos · El sábado pan amasado a 3 500 CLP/kg (precio lanzamiento). Solo por WhatsApp, reserva antes del viernes 18h 💛',
+      'Fin de semana especial 🥖 Pack de 3kg pan amasado recién horneado por 10 lucas. Te lo dejamos listo a la hora que quieras. Escríbeme!'
+    ];
+    document.getElementById('campMsg').value = options[Math.floor(Math.random()*options.length)];
+    this.toast('✨ 3 versions générées','success');
+  },
+
+  sendCampaign(){
+    const name = document.getElementById('campName').value;
+    this.state.campaigns.unshift({id:Date.now(),name,sent:0,opened:0,replied:0,status:'running',date:'Aujourd\'hui',audience:document.getElementById('campTarget').value});
+    this.save();
+    this.closeModal();
+    this.toast('🚀 Campagne lancée','success','Suivi en temps réel dans les stats');
+    this.state.onboarding.find(s=>s.id==='campaign').done = true;
+    this.save();
+    // Simulate live counter
+    setTimeout(()=>this.toast('📬 120 messages envoyés','info'),1000);
+    setTimeout(()=>this.toast('👀 98 ouverts (82%)','info'),2500);
+    setTimeout(()=>this.toast('💬 24 réponses reçues','success'),4000);
+  },
+
+  // ---------- PAYMENTS VIEW ----------
+  viewPayments(){
+    const p = this.state.plan;
+    return `
+      <div class="view">
+        <div class="page-hd">
+          <div><h1>💳 Plan & facturation</h1><div class="sub">Gère ton abonnement, tes factures et tes options.</div></div>
+          <button class="btn btn-p" onclick="Nx.openModal('upgrade')">🚀 Upgrade</button>
+        </div>
+
+        <div class="grid2">
+          <div class="card" style="padding:24px;background:linear-gradient(135deg,var(--blue),var(--blue-ink));color:#fff">
+            <div style="font-size:12px;opacity:.85;text-transform:uppercase;letter-spacing:.1em">Plan actuel</div>
+            <div style="font-size:28px;font-weight:800;margin:10px 0">${p.name} · ${p.price}${p.period}</div>
+            <div style="font-size:13px;opacity:.9;margin-bottom:18px">Prochain prélèvement : ${p.next_billing}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              ${p.features.map(f=>`<div style="font-size:12px;opacity:.9">✓ ${f}</div>`).join('')}
+            </div>
+            <div style="margin-top:18px;display:flex;gap:8px">
+              <button class="btn" style="background:rgba(255,255,255,.2);color:#fff" onclick="Nx.openModal('upgrade')">Changer de plan</button>
+              <button class="btn" style="background:rgba(255,255,255,.1);color:#fff" onclick="Nx.toast('Plan annulé en fin de mois (démo)','warn')">Annuler</button>
+            </div>
+          </div>
+
+          <div class="card" style="padding:24px">
+            <h3 style="margin-bottom:14px">💳 Moyen de paiement</h3>
+            <div style="padding:14px;background:var(--bg2);border-radius:10px;display:flex;align-items:center;gap:12px;margin-bottom:10px">
+              <div style="width:40px;height:28px;background:linear-gradient(135deg,#1A1F71,#F59E0B);border-radius:4px;font-size:10px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">VISA</div>
+              <div style="flex:1"><div style="font-weight:600">•••• •••• •••• 4242</div><div style="font-size:11px;color:var(--muted)">Exp. 08/27 · Carlos Muñoz</div></div>
+              <span class="chip green">Actif</span>
+            </div>
+            <button class="btn btn-s" style="width:100%" onclick="Nx.toast('Stripe Portal (démo)','info','Redirection Stripe')">+ Ajouter une carte</button>
+
+            <h3 style="margin:20px 0 14px">📋 Infos facturation</h3>
+            <div class="form-row"><label class="form-lbl">Raison sociale</label><input class="form-ctrl" value="Panadería Don Carlos SpA"></div>
+            <div class="form-row"><label class="form-lbl">RUT</label><input class="form-ctrl" value="76.123.456-7"></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:14px">
+          <div class="card-hd"><h3>📄 Historique factures</h3>
+            <div class="actions"><button class="btn-g">Télécharger tout</button></div></div>
+          ${this.state.invoices.map(inv=>`
+            <div class="inv-row">
+              <span class="mono inv-id">${inv.id}</span>
+              <span>${inv.date}</span>
+              <span style="flex:1;color:var(--muted);font-size:12px">${inv.desc}</span>
+              <span class="chip ${inv.status==='paid'?'green':inv.status==='free'?'blue':'red'}">${inv.status==='paid'?'Payée':inv.status==='free'?'Essai':'En attente'}</span>
+              <span class="mono inv-amt">${inv.amount}</span>
+              <button class="btn-g" onclick="Nx.openModal('invoice',${JSON.stringify(inv).replace(/"/g,'&quot;')})">Voir</button>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  },
+
+  // ---------- TUTORIAL VIEW ----------
+  viewTutorial(){
+    return `
+      <div class="view">
+        <div class="page-hd">
+          <div><h1>🎓 Tuto & aide</h1><div class="sub">Tout ce qu'il faut savoir pour maîtriser Nexus en 15 minutes.</div></div>
+          <div class="flex"><button class="btn btn-s" onclick="Nx.openModal('sos')">🆘 SOS Augustin</button></div>
+        </div>
+
+        <div class="grid2">
+          <div class="card" style="padding:24px">
+            <h3 style="margin-bottom:16px">🚀 Démarrage rapide</h3>
+            <div style="padding-left:28px;position:relative">
+              ${[
+                {t:'Remplir ton profil',d:'Nom, logo, horaires, ton de l\'IA',d:1},
+                {t:'Connecter WhatsApp Business',d:'1 scan QR code · 30 secondes',d:2},
+                {t:'Valider 3 FAQ automatiques',d:'Les questions qui reviennent le plus',d:3},
+                {t:'Tester la messagerie',d:'Envoyer un message test depuis ton phone',d:4},
+                {t:'Lancer ta 1ère campagne',d:'Pioche dans la bibliothèque de templates',d:5},
+              ].map((s,i)=>`
+                <div style="padding:14px 0;border-bottom:1px solid var(--line2);display:flex;gap:12px;align-items:flex-start;cursor:pointer" onclick="Nx.toast('Étape ${i+1} — ${s.t}','info')">
+                  <div style="width:28px;height:28px;border-radius:50%;background:var(--blue-soft);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0">${i+1}</div>
+                  <div style="flex:1"><div style="font-weight:600">${s.t}</div><div style="font-size:12px;color:var(--muted)">${s.d}</div></div>
+                  <button class="btn-g">Voir →</button>
+                </div>`).join('')}
+            </div>
+          </div>
+
+          <div class="card" style="padding:24px">
+            <h3 style="margin-bottom:16px">📺 Tutoriels vidéo</h3>
+            ${[
+              {t:'Comment répondre avec l\'IA',dur:'2:14'},
+              {t:'Créer une campagne marketing',dur:'3:47'},
+              {t:'Utiliser le CRM et le podium',dur:'4:12'},
+              {t:'Lire tes statistiques',dur:'2:58'},
+              {t:'Mode vacances et automatisations',dur:'1:33'},
+              {t:'Partage de données 1-clic',dur:'1:42'},
+            ].map(v=>`
+              <div style="padding:14px 0;border-bottom:1px solid var(--line2);display:flex;gap:12px;align-items:center;cursor:pointer" onclick="Nx.toast('Vidéo (démo)','info')">
+                <div style="width:64px;height:40px;background:linear-gradient(135deg,var(--blue),var(--violet));border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px">▶</div>
+                <div style="flex:1"><div style="font-weight:600;font-size:13px">${v.t}</div></div>
+                <span class="mono" style="font-size:11px;color:var(--muted)">${v.dur}</span>
+              </div>`).join('')}
+          </div>
+
+          <div class="card" style="padding:24px;grid-column:span 2">
+            <h3 style="margin-bottom:16px">📝 Changelog · ce qui arrive</h3>
+            ${this.state.changelog.map(cl=>`
+              <div style="padding:16px 0;border-bottom:1px solid var(--line2)">
+                <div class="flex between" style="margin-bottom:8px">
+                  <div class="flex" style="gap:8px"><span class="chip blue mono">v${cl.v}</span><span style="font-weight:600">${cl.date}</span></div>
+                </div>
+                <ul style="list-style:none;padding:0">
+                  ${cl.items.map(i=>`<li style="padding:4px 0;font-size:13px;color:var(--ink2)">${i}</li>`).join('')}
+                </ul>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>`;
+  },
+
+  viewSettings(){
+    const p = this.state.preferences;
+    return `
+      <div class="view">
+        <div class="page-hd">
+          <div><h1>⚙️ Paramètres</h1><div class="sub">Personnalise ton Nexus aux petits oignons.</div></div>
+        </div>
+        <div class="grid2">
+          <div class="card" style="padding:22px">
+            <h3 style="margin-bottom:16px">🎨 Apparence</h3>
+            ${this.toggleRow('Thème sombre',this.state.theme==='dark','Nx.toggleTheme()')}
+            <div class="form-row mt16"><label class="form-lbl">Couleur d'accent</label>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                ${['#1A56DB','#7A3CFF','#22C55E','#F59E0B','#EF4444','#06B6D4'].map(c=>`<div style="width:34px;height:34px;border-radius:10px;background:${c};cursor:pointer;border:3px solid ${this.state.accent===c?'var(--ink)':'transparent'}" onclick="Nx.setAccent('${c}')"></div>`).join('')}
+              </div></div>
+            <div class="form-row"><label class="form-lbl">Langue d'interface</label>
+              <div class="lang-btn" style="width:fit-content">
+                <button onclick="Nx.setLang('fr')" class="${this.state.lang==='fr'?'on':''}">Français</button>
+                <button onclick="Nx.setLang('es')" class="${this.state.lang==='es'?'on':''}">Español</button>
+                <button onclick="Nx.setLang('en')" class="${this.state.lang==='en'?'on':''}">English</button>
+              </div></div>
+          </div>
+
+          <div class="card" style="padding:22px">
+            <h3 style="margin-bottom:16px">🔔 Notifications</h3>
+            ${this.toggleRow('Son des notifications',p.soundNotif,'Nx.togglePref("soundNotif")')}
+            ${this.toggleRow('Notifications bureau',p.desktopNotif,'Nx.togglePref("desktopNotif")')}
+            ${this.toggleRow('Brouillon IA automatique',p.autoDraft,'Nx.togglePref("autoDraft")')}
+            <div class="form-row mt16"><label class="form-lbl">Signature auto</label><input class="form-ctrl" value="${p.signature}" oninput="Nx.state.preferences.signature=this.value;Nx.save()"></div>
+          </div>
+
+          <div class="card" style="padding:22px">
+            <h3 style="margin-bottom:16px">🔒 Sécurité & données</h3>
+            ${this.toggleRow('Partager mes données anonymisées pour améliorer Nexus',p.dataSharingOptIn,'Nx.togglePref("dataSharingOptIn")')}
+            <div class="mt16"><button class="btn btn-s" style="width:100%" onclick="Nx.toast('Export initié','info','Archive ZIP prête dans 2 min')">📤 Exporter toutes mes données</button></div>
+            <div class="mt8"><button class="btn btn-s" style="width:100%" onclick="Nx.toast('2FA activée','success')">🔐 Activer 2FA</button></div>
+            <div class="mt8"><button class="btn btn-danger" style="width:100%" onclick="if(confirm('Vraiment réinitialiser?'))Nx.reset()">🗑 Réinitialiser le compte</button></div>
+          </div>
+
+          <div class="card" style="padding:22px">
+            <h3 style="margin-bottom:16px">🔌 Intégrations</h3>
+            ${[
+              {n:'WhatsApp Business API',s:'connected',ic:'📱'},
+              {n:'Google Calendar',s:'connected',ic:'📅'},
+              {n:'Gmail',s:'connected',ic:'✉️'},
+              {n:'Instagram DM',s:'pending',ic:'📸'},
+              {n:'Stripe',s:'connected',ic:'💳'},
+              {n:'Mercado Pago',s:'available',ic:'🇨🇱'},
+              {n:'Google Analytics',s:'available',ic:'📊'},
+              {n:'Zapier',s:'available',ic:'⚡'},
+            ].map(i=>`<div style="padding:10px 0;display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--line2)">
+              <span style="font-size:18px">${i.ic}</span>
+              <span style="flex:1;font-size:13px">${i.n}</span>
+              <span class="chip ${i.s==='connected'?'green':i.s==='pending'?'amber':''}">${i.s==='connected'?'Connecté':i.s==='pending'?'En attente':'Connecter'}</span>
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>`;
+  },
+
+  toggleRow(label,checked,onchange){
+    return `<div class="toggle-row" style="margin-bottom:8px"><span>${label}</span>
+      <label class="switch"><input type="checkbox" ${checked?'checked':''} onchange="${onchange}"><span class="slider"></span></label>
+    </div>`;
+  },
+
+  togglePref(k){
+    this.state.preferences[k] = !this.state.preferences[k];
+    this.save();
+    this.toast('Préférence mise à jour','success');
+  },
+
+  setAccent(c){
+    this.state.accent = c;
+    document.documentElement.style.setProperty('--blue',c);
+    this.save();
+    this.renderView();
+  },
+
+  // ---------- TIP ACTIONS ----------
+  tipAction(action){
+    switch(action){
+      case 'createRecoveryCampaign': this.openCampaignBuilder('Récupération clients perdus -15%'); break;
+      case 'showLostClients': this.state.crmFilter='lost'; this.navigate('crm'); break;
+      case 'createWeatherCampaign': this.openCampaignBuilder('Promo jour de pluie'); break;
+      case 'showPricingAnalysis': this.openModal('pricing-analysis'); break;
+      case 'prepareBirthday': this.openCampaignBuilder('Joyeux anniversaire María'); break;
+      case 'showHeatmap': this.navigate('stats'); break;
+      case 'dismissTip': this.state.tipIndex = (this.state.tipIndex+1) % TIPS_ROTATION.length; this.save(); this.renderView(); break;
+    }
+  }
+};
+
+// Boot
+window.addEventListener('DOMContentLoaded', () => Nx.init());
+</script>
+</body>
+</html>

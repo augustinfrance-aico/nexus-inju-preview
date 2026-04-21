@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexus InJu — Hub de démonstration</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F8FAFC; --panel:#FFFFFF; --ink:#0F172A; --muted:#64748B;
+  --line:#E2E8F0;
+  --blue:#1A56DB; --blue-soft:#EFF4FE; --blue-ink:#1E40AF;
+  --violet:#7A3CFF; --cyan:#06B6D4; --green:#22C55E; --amber:#F59E0B;
+}
+html,body{background:var(--bg);color:var(--ink);font-family:'Inter','Segoe UI',-apple-system,sans-serif;line-height:1.5;min-height:100vh}
+body{background:radial-gradient(ellipse 80% 60% at top,rgba(26,86,219,.05),transparent 60%),var(--bg)}
+.wrap{max-width:1280px;margin:0 auto;padding:60px 24px 80px}
+
+.hero{text-align:center;margin-bottom:48px}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;padding:6px 14px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:20px;box-shadow:0 2px 8px -2px rgba(15,23,42,.06)}
+.eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(34,197,94,.2);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+h1{font-size:clamp(32px,4.5vw,52px);font-weight:800;letter-spacing:-.02em;line-height:1.05;margin-bottom:18px;
+   background:linear-gradient(120deg,#0F172A 0%,#1A56DB 60%,#06B6D4 100%);
+   -webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--muted);font-size:17px;max-width:760px;margin:0 auto}
+
+.hub{display:grid;grid-template-columns:1.2fr 1fr;gap:20px;margin-bottom:32px}
+@media(max-width:900px){.hub{grid-template-columns:1fr}}
+
+.card-big{background:var(--panel);border:1px solid var(--line);border-radius:20px;overflow:hidden;position:relative;transition:all .25s;display:flex;flex-direction:column}
+.card-big:hover{transform:translateY(-4px);box-shadow:0 30px 60px -25px rgba(15,23,42,.2);border-color:transparent}
+.card-big::before{content:"";position:absolute;inset:0;padding:2px;border-radius:20px;background:linear-gradient(135deg,var(--blue),var(--violet),var(--cyan));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity .25s;pointer-events:none}
+.card-big:hover::before{opacity:.6}
+
+.preview{aspect-ratio:16/10;background:#F1F5F9;position:relative;overflow:hidden}
+.preview iframe{position:absolute;inset:0;width:166%;height:166%;transform:scale(.6);transform-origin:top left;border:0;pointer-events:none}
+.preview-blue iframe{background:#F8FAFC}
+.preview-pulse iframe{background:#F7F9FC}
+
+.card-body{padding:28px 30px 30px;flex:1;display:flex;flex-direction:column}
+.tag{display:inline-block;padding:4px 12px;border-radius:999px;font-size:10.5px;font-weight:800;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;margin-bottom:14px}
+.tag.client{background:var(--blue-soft);color:var(--blue);border:1px solid rgba(26,86,219,.3)}
+.tag.pulse{background:linear-gradient(135deg,rgba(122,60,255,.1),rgba(6,182,212,.15));color:var(--violet);border:1px solid rgba(122,60,255,.3)}
+.card-big h3{font-size:26px;font-weight:800;letter-spacing:-.01em;margin-bottom:10px}
+.card-big p{color:var(--muted);font-size:14px;margin-bottom:20px;line-height:1.65}
+.features{list-style:none;padding:0;margin-bottom:24px}
+.features li{font-size:13px;color:var(--ink);padding:6px 0;padding-left:24px;position:relative}
+.features li::before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:800}
+
+.btns{display:flex;gap:10px;margin-top:auto}
+.btn{flex:1;padding:13px;text-align:center;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none;cursor:pointer;border:0;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn-p{background:linear-gradient(135deg,var(--blue),var(--blue-ink));color:#fff;box-shadow:0 8px 20px -8px var(--blue)}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 12px 30px -10px var(--blue)}
+.btn-v{background:linear-gradient(135deg,var(--violet),var(--cyan));color:#fff;box-shadow:0 8px 20px -8px var(--violet)}
+.btn-v:hover{transform:translateY(-1px);box-shadow:0 12px 30px -10px var(--violet)}
+.btn-s{background:var(--panel);color:var(--ink);border:1px solid var(--line)}
+.btn-s:hover{border-color:var(--blue);color:var(--blue)}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:40px}
+@media(max-width:760px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+.stat{padding:20px;background:var(--panel);border:1px solid var(--line);border-radius:14px;text-align:center}
+.stat-n{font-size:30px;font-weight:800;font-family:'JetBrains Mono',monospace;background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat-l{font-size:11px;color:var(--muted);margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+
+.extras{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px 30px;margin-top:20px}
+.extras h4{font-size:16px;font-weight:700;margin-bottom:14px}
+.extras-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.extras-item{padding:14px;border:1px solid var(--line);border-radius:10px;display:flex;gap:12px;align-items:center;transition:all .2s;text-decoration:none;color:var(--ink)}
+.extras-item:hover{border-color:var(--blue);transform:translateX(4px);background:var(--blue-soft)}
+.extras-item .ic{width:36px;height:36px;background:var(--blue-soft);color:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.extras-item b{display:block;font-size:13px}
+.extras-item small{color:var(--muted);font-size:11px}
+
+.note{margin-top:30px;padding:22px 26px;background:linear-gradient(135deg,var(--blue-soft),rgba(122,60,255,.06));border:1px solid rgba(26,86,219,.2);border-radius:14px;display:flex;gap:16px;align-items:flex-start}
+.note .ic{width:40px;height:40px;border-radius:10px;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.note h4{font-size:15px;margin-bottom:6px}
+.note p{color:var(--muted);font-size:13px;line-height:1.7}
+.note b{color:var(--ink)}
+
+footer{margin-top:50px;text-align:center;color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:.08em}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section class="hero">
+    <div class="eyebrow"><span class="dot"></span>MVP LIVE · 21 AVRIL 2026 · V0.1</div>
+    <h1>Nexus InJu — démonstration complète</h1>
+    <p class="lead">Hola Juan, hola Iñigo. Voici les <b style="color:#0F172A">deux applications</b> de votre stack Nexus, chacune 100% fonctionnelle. À gauche, l'app que verront vos clients PyMEs (Carlos, María, Diego…). À droite, votre cockpit : <b style="color:#0F172A">Nexus Pulse</b>, le centre de contrôle de tout votre empire SaaS LATAM.</p>
+  </section>
+
+  <div class="stats-row">
+    <div class="stat"><div class="stat-n">2</div><div class="stat-l">Apps fonctionnelles</div></div>
+    <div class="stat"><div class="stat-n">100+</div><div class="stat-l">Features codées</div></div>
+    <div class="stat"><div class="stat-n">47</div><div class="stat-l">PyMEs mock Chile</div></div>
+    <div class="stat"><div class="stat-n">0€</div><div class="stat-l">Surcoût scope</div></div>
+  </div>
+
+  <div class="hub">
+
+    <!-- APP CLIENT -->
+    <div class="card-big">
+      <div class="preview preview-blue"><iframe src="app.html" loading="lazy"></iframe></div>
+      <div class="card-body">
+        <span class="tag client">APP CLIENT · CARLOS / PANADERÍA DON CARLOS</span>
+        <h3>L'app Nexus · côté PME</h3>
+        <p>Le dashboard que chaque PyME LATAM aura dans sa poche. Fidèle à votre document "Agent 2.0 Nexus" : 4 blocs centraux + 8 sections sidebar. Toutes les 50 features bonus sont intégrées et fonctionnelles. Persistance localStorage, multilingue FR/ES/EN, thème clair/sombre, recherche ⌘K globale.</p>
+        <ul class="features">
+          <li>Dashboard · Stats · Inbox unifiée WhatsApp+IG+Email</li>
+          <li>CRM gamifié · podium top 10 · fiche complète timeline</li>
+          <li>Tips IA proactif avec 5 scénarios rotatifs</li>
+          <li>Campagnes · templates · générateur IA · aperçu WhatsApp</li>
+          <li>Stripe · factures · upgrade Agent 01 flow</li>
+          <li>Profil entreprise complet · FAQ · catalogue</li>
+          <li>Tuto interactif · changelog · SOS Augustin</li>
+          <li>AI copilot flottant · streak Duolingo · onboarding progress</li>
+        </ul>
+        <div class="btns">
+          <a class="btn btn-p" href="app.html" target="_blank">🚀 Ouvrir l'app →</a>
+          <a class="btn btn-s" href="app.html" target="_blank">Plein écran</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- NEXUS PULSE -->
+    <div class="card-big">
+      <div class="preview preview-pulse"><iframe src="pulse.html" loading="lazy"></iframe></div>
+      <div class="card-body">
+        <span class="tag pulse">NEXUS PULSE · COCKPIT JUAN & IÑIGO</span>
+        <h3>Le cockpit · votre empire</h3>
+        <p>Votre centre de contrôle SaaS. MRR live (ticker animé), carte du Chili avec 47 PyMEs actives, funnel growth, cohort analysis, agents IA health, logs temps réel, feature flags, alertes prédictives IA, broadcasts 1-clic. Tout ce qu'il faut pour piloter et lever des fonds.</p>
+        <ul class="features">
+          <li>MRR ticker live € 14,726 + forecast 3 mois</li>
+          <li>47 PyMEs Chile · plans, health, NPS, churn risk</li>
+          <li>Carte du Chili avec markers par statut</li>
+          <li>Cohort retention M0→M3 · LTV/CAC 17x</li>
+          <li>Agents IA dashboard (02 actif · 01 beta · 03 planifié)</li>
+          <li>Ops · logs live · feature flags · workflows n8n</li>
+          <li>Support · tickets · NPS 68 · knowledge base</li>
+          <li>Copilot IA Ops · "prédict MRR", "clients à risque", "rapport investisseurs"</li>
+        </ul>
+        <div class="btns">
+          <a class="btn btn-v" href="pulse.html" target="_blank">⚡ Ouvrir Pulse →</a>
+          <a class="btn btn-s" href="pulse.html" target="_blank">Plein écran</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <section class="extras">
+    <h4>📎 Documents connexes</h4>
+    <div class="extras-grid">
+      <a class="extras-item" href="v1-professional.html" target="_blank">
+        <div class="ic">🎨</div>
+        <div><b>Prototype V1 Professional</b><small>Le premier mockup (base choisie)</small></div>
+      </a>
+      <a class="extras-item" href="v2-modular.html" target="_blank">
+        <div class="ic">🎨</div>
+        <div><b>Prototype V2 Modular</b><small>Alternative dark mode grid</small></div>
+      </a>
+      <a class="extras-item" href="v3-playful.html" target="_blank">
+        <div class="ic">🎨</div>
+        <div><b>Prototype V3 Playful</b><small>Alternative néon orbe</small></div>
+      </a>
+      <a class="extras-item" href="info-revenus.html" target="_blank">
+        <div class="ic">💰</div>
+        <div><b>Comment capter l'info €</b><small>4 mécanismes · réponse Q. Juan</small></div>
+      </a>
+      <a class="extras-item" href="../50_IDEES_BONUS.html" target="_blank">
+        <div class="ic">🎁</div>
+        <div><b>50 idées bonus</b><small>Toutes intégrées dans l'app MVP</small></div>
+      </a>
+      <a class="extras-item" href="index.html" target="_blank">
+        <div class="ic">🧭</div>
+        <div><b>Hub 3 directions (original)</b><small>Les 3 prototypes côte à côte</small></div>
+      </a>
+    </div>
+  </section>
+
+  <section class="note">
+    <div class="ic">💡</div>
+    <div>
+      <h4>Demain en démo (22/04)</h4>
+      <p>Commencez par cette page (launcher.html) pour donner le contexte. Ouvrez <b>app.html</b> dans un nouvel onglet pour faire vivre la PyME (demandez à quelqu'un de cliquer sur un tip IA, un brouillon IA, créer une campagne). Puis <b>pulse.html</b> pour montrer le cockpit — impressionner sur la carte du Chili et le copilot IA. Chaque donnée persiste dans le localStorage, donc les modifs restent entre les tests.</p>
+    </div>
+  </section>
+
+  <footer>NEXUS INJU · DASHBOARD MVP + PULSE · 21/04/2026 · BUILT BY AUGUSTIN POUR JUAN & IÑIGO · 100% LOCAL, ZÉRO DÉPENDANCE</footer>
+</div>
+</body>
+</html>
