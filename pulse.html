@@ -1032,14 +1032,28 @@ Abre tu Nexus para descubrir las novedades.</textarea></div>
 
   revenueChart(){
     const data = [6800,7900,9100,10200,12100,13500,14726];
+    const labels = ['Nov','Déc','Jan','Fév','Mar','Avr','Mai'];
     const max = Math.max(...data);
+    // Dimensions en pixels (le viewBox = pixels rendus, donc font-size reste lisible)
+    const W = 700, H = 240;
+    const padX = 24, padTop = 32, padBottom = 28;
+    const plotW = W - padX*2;
+    const plotH = H - padTop - padBottom;
+    const barW = plotW / data.length * 0.62;
+    const gap = (plotW - barW*data.length) / (data.length-1);
     const bars = data.map((v,i)=>{
-      const height = v/max*100;
-      const x = i*14+4;
-      return `<g><rect x="${x}%" y="${100-height}%" width="10%" height="${height}%" fill="url(#revG)" rx="4"/><text x="${x+5}%" y="98%" font-size="9" fill="#8A94A6" text-anchor="middle" font-family="JetBrains Mono">${['Nov','Déc','Jan','Fév','Mar','Avr','Mai'][i]}</text><text x="${x+5}%" y="${100-height-2}%" font-size="10" fill="#1A56DB" text-anchor="middle" font-family="JetBrains Mono" font-weight="700">€${(v/1000).toFixed(1)}k</text></g>`;
+      const h = v/max*plotH;
+      const x = padX + i*(barW+gap);
+      const y = padTop + (plotH - h);
+      const cx = x + barW/2;
+      return `<g>
+        <rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" fill="url(#revG)" rx="6"/>
+        <text x="${cx.toFixed(1)}" y="${(y-8).toFixed(1)}" font-size="12" fill="#1A56DB" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="700">€${(v/1000).toFixed(1)}k</text>
+        <text x="${cx.toFixed(1)}" y="${(H-10).toFixed(1)}" font-size="11" fill="#8A94A6" text-anchor="middle" font-family="JetBrains Mono,monospace">${labels[i]}</text>
+      </g>`;
     }).join('');
-    return `<svg viewBox="0 0 100 60" style="width:100%;height:260px;overflow:visible" preserveAspectRatio="none">
-      <defs><linearGradient id="revG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1A56DB"/><stop offset="100%" stop-color="#7A3CFF" stop-opacity=".6"/></linearGradient></defs>
+    return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;max-height:280px;display:block" preserveAspectRatio="xMidYMid meet" role="img" aria-label="MRR growth 6 derniers mois">
+      <defs><linearGradient id="revG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1A56DB"/><stop offset="100%" stop-color="#7A3CFF" stop-opacity=".55"/></linearGradient></defs>
       ${bars}
     </svg>`;
   },
@@ -1077,9 +1091,9 @@ Abre tu Nexus para descubrir las novedades.</textarea></div>
 
   summaryCard(ic,lbl,val,sub,color,pct){
     return `<div class="card" style="padding:20px">
-      <div class="flex between" style="margin-bottom:10px"><div style="font-size:24px">${ic}</div><span class="chip ${color}">${pct}%</span></div>
+      <div class="flex between" style="margin-bottom:10px"><div style="font-size:clamp(20px,3vw,24px)">${ic}</div><span class="chip ${color}">${pct}%</span></div>
       <div style="font-size:10.5px;color:var(--muted);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">${lbl}</div>
-      <div style="font-size:22px;font-weight:800">${val}</div>
+      <div style="font-size:clamp(16px,2.4vw,22px);font-weight:800;line-height:1.2;word-break:break-word;overflow-wrap:anywhere">${val}</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:10px">${sub}</div>
       <div class="progress"><div class="progress-bar" style="width:${pct}%;background:linear-gradient(90deg,var(--blue),var(--${color}))"></div></div>
     </div>`;
