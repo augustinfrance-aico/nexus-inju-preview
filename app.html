@@ -140,7 +140,7 @@ a{color:inherit;text-decoration:none}
 .delta.dn{background:var(--red-soft);color:var(--red)}
 .delta.eq{background:var(--bg2);color:var(--muted)}
 .stat-lbl{font-size:11px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.05em;font-weight:600}
-.stat-val{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.stat-val{font-size:clamp(17px,2.4vw,22px);font-weight:800;letter-spacing:-.02em;line-height:1.2;word-break:break-word;overflow-wrap:anywhere}
 .stat-sub{font-size:11px;color:var(--muted);margin-top:2px}
 
 /* TIPS */
@@ -206,7 +206,7 @@ a{color:inherit;text-decoration:none}
 textarea.form-ctrl{resize:vertical;min-height:80px;font-family:inherit}
 
 /* CHAT INTERFACE */
-.chat-layout{display:grid;grid-template-columns:340px 1fr;gap:14px;min-height:calc(100vh - 200px)}
+.chat-layout{display:grid;grid-template-columns:340px 1fr;gap:14px;min-height:min(calc(100vh - 200px),720px)}
 .chat-list{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column}
 .chat-list-hd{padding:14px 18px;border-bottom:1px solid var(--line2)}
 .chat-list-tabs{display:flex;gap:6px;margin-top:10px;overflow-x:auto}
@@ -304,7 +304,7 @@ html[data-theme="dark"] .bubble.me{background:#056162;color:#E8ECF3}
 html[data-theme="dark"] .streak{background:linear-gradient(135deg,rgba(253,186,116,.15),rgba(251,146,60,.08));color:#FED7AA}
 .streak-flame{font-size:32px;animation:flame 2s ease-in-out infinite}
 @keyframes flame{0%,100%{transform:scale(1) rotate(-2deg)}50%{transform:scale(1.08) rotate(2deg)}}
-.streak-n{font-size:28px;font-weight:800;font-family:'JetBrains Mono',monospace}
+.streak-n{font-size:clamp(20px,3vw,28px);font-weight:800;font-family:'JetBrains Mono',monospace;line-height:1.15}
 .streak-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
 
 /* AI BUTTON FLOAT */
@@ -335,9 +335,64 @@ html[data-theme="dark"] .streak{background:linear-gradient(135deg,rgba(253,186,1
 .inv-id{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);width:100px}
 .inv-amt{font-weight:700;margin-left:auto;font-family:'JetBrains Mono',monospace}
 
-/* MOBILE */
-@media(max-width:1024px){.app{grid-template-columns:1fr}.sidebar{display:none}.stats{grid-template-columns:repeat(2,1fr)}.grid2,.grid3,.grid4{grid-template-columns:1fr}.chat-layout{grid-template-columns:1fr}.view{padding:20px 16px 40px}.search-btn{width:auto;flex:1;max-width:200px}}
-@media(max-width:640px){.stats{grid-template-columns:1fr}.topbar{padding:10px 16px}.search-btn{display:none}.page-hd h1{font-size:22px}}
+/* MENU TOGGLE (hamburger) — visible uniquement sur mobile */
+.menu-toggle{display:none;width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:var(--panel);align-items:center;justify-content:center;cursor:pointer;color:var(--ink2);flex-shrink:0;transition:all .15s}
+.menu-toggle:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-soft)}
+.menu-toggle:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.sidebar-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(2px);z-index:85;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s}
+.sidebar-backdrop.show{opacity:1;visibility:visible}
+
+/* FOCUS RINGS (a11y) */
+button:focus-visible,a:focus-visible,.nav-item:focus-visible,.filter-pill:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:6px}
+
+/* MOBILE-FIRST cascade */
+@media(max-width:1280px){.view{padding:24px 26px 50px}}
+@media(max-width:1024px){
+  .app{grid-template-columns:1fr}
+  .sidebar{position:fixed;inset:0 auto 0 0;width:280px;max-width:85vw;z-index:90;transform:translateX(-100%);transition:transform .25s ease;box-shadow:0 20px 60px rgba(0,0,0,.3);height:100vh;display:flex}
+  .sidebar.open{transform:translateX(0)}
+  .menu-toggle{display:inline-flex}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .grid2,.grid3,.grid4{grid-template-columns:1fr}
+  .chat-layout{grid-template-columns:1fr}
+  .view{padding:20px 18px 44px}
+  .search-btn{width:auto;flex:1;max-width:220px}
+}
+@media(max-width:760px){
+  .topbar{padding:10px 14px;gap:8px}
+  .breadcrumb{font-size:12.5px;min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lang-btn button{padding:3px 7px;font-size:10.5px}
+  .search-btn{display:none}
+  .ai-fab{bottom:18px;right:18px;width:50px;height:50px;font-size:20px}
+}
+@media(max-width:520px){
+  .stats{grid-template-columns:1fr}
+  .topbar{padding:8px 12px;gap:6px}
+  .page-hd h1{font-size:20px}
+  .page-hd .sub{font-size:12px}
+  .view{padding:14px 12px 30px}
+  .icon-btn{width:32px;height:32px}
+  .lang-btn{padding:1px}.lang-btn button{padding:2px 5px;font-size:10px}
+  .avatar{width:30px;height:30px;font-size:11px}
+  .streak-flame{font-size:24px}
+  .streak-n{font-size:22px}
+  .modal{max-width:100%;border-radius:12px}
+  .modal-hd{padding:14px 18px}
+  .modal-body{padding:16px}
+  #toast-container{top:14px;right:14px;left:14px}
+  .toast{min-width:0;width:100%}
+  .ai-fab{bottom:14px;right:14px;width:46px;height:46px;font-size:18px}
+}
+@media(max-width:380px){
+  .view{padding:12px 10px 26px}
+  .page-hd h1{font-size:18px}
+  .breadcrumb{font-size:11.5px}
+}
+
+/* PERF — réduire animations si demandé */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
 
 /* HIDDEN UTILITY */
 .hidden{display:none!important}
@@ -359,13 +414,15 @@ html[data-theme="dark"] .streak{background:linear-gradient(135deg,rgba(253,186,1
   </div>
 </div>
 
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="Nx.toggleSidebar(false)"></div>
+
 <div class="app">
 
   <!-- SIDEBAR -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="side-hd">
-      <div class="brand">
-        <svg class="logo" viewBox="0 0 32 32" fill="none">
+      <div class="brand" onclick="Nx.navigate('dashboard')" style="cursor:pointer" role="link" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();Nx.navigate('dashboard')}" aria-label="Retour au tableau de bord">
+        <svg class="logo" viewBox="0 0 32 32" fill="none" aria-hidden="true">
           <path d="M16 2L4 7v10c0 7.5 5.4 12.5 12 13 6.6-.5 12-5.5 12-13V7L16 2z" fill="#1A56DB"/>
           <path d="M11 22V10l4.5 7V10M21 10v12" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -405,8 +462,14 @@ html[data-theme="dark"] .streak{background:linear-gradient(135deg,rgba(253,186,1
 
     <!-- TOPBAR -->
     <div class="topbar">
+      <button class="menu-toggle" onclick="Nx.toggleSidebar()" aria-label="Ouvrir le menu" title="Menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <button class="icon-btn" onclick="Nx.navigate('dashboard')" title="Accueil" aria-label="Retour au tableau de bord" style="flex-shrink:0">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>
+      </button>
       <div class="breadcrumb">
-        <span>Nexus</span> · <b id="breadcrumb">Tableau de bord</b>
+        <a href="#/dashboard" onclick="event.preventDefault();Nx.navigate('dashboard')" style="color:inherit;cursor:pointer;font-weight:600">Nexus</a> · <b id="breadcrumb">Tableau de bord</b>
       </div>
       <button class="search-btn" onclick="Nx.openPalette()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
@@ -660,6 +723,17 @@ const Nx = {
     this.state.view = view;
     this.save();
     location.hash = '#/' + view;
+    if (window.matchMedia('(max-width:1024px)').matches) this.toggleSidebar(false);
+  },
+
+  toggleSidebar(forceState){
+    const sb = document.getElementById('sidebar');
+    const bd = document.getElementById('sidebarBackdrop');
+    if (!sb || !bd) return;
+    const open = (typeof forceState === 'boolean') ? forceState : !sb.classList.contains('open');
+    sb.classList.toggle('open', open);
+    bd.classList.toggle('show', open);
+    document.body.style.overflow = open ? 'hidden' : '';
   },
 
   routeFromHash(){
@@ -782,7 +856,7 @@ const Nx = {
             <div class="msg-av" style="width:56px;height:56px;font-size:18px;background:${c.color}">${c.avatar}</div>
             <div style="flex:1"><div style="font-weight:700;font-size:16px">${c.name}</div><div style="color:var(--muted);font-size:13px">${c.phone} · ${c.lastSeen}</div>
               <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">${c.tags.map(tg=>`<span class="chip blue">${tg}</span>`).join('')}</div></div>
-            <div style="text-align:right"><div style="font-size:28px;font-weight:800;color:var(--blue);font-family:'JetBrains Mono',monospace">${c.score}</div><div style="font-size:10px;color:var(--muted)">SCORE</div></div>
+            <div style="text-align:right"><div style="font-size:clamp(20px,4vw,28px);font-weight:800;color:var(--blue);font-family:'JetBrains Mono',monospace;line-height:1.15">${c.score}</div><div style="font-size:10px;color:var(--muted)">SCORE</div></div>
           </div>
           <div class="grid3" style="margin-bottom:20px">
             <div class="card" style="padding:14px"><div class="stat-lbl">Commandes</div><div class="stat-val mono">${c.orders}</div></div>
@@ -848,7 +922,7 @@ const Nx = {
           <div class="grid2" style="margin-bottom:20px">
             <div class="card" style="padding:18px;border:2px solid var(--line)">
               <div style="font-weight:700;font-size:15px">Agent 02 <span class="chip green" style="margin-left:6px">Actuel</span></div>
-              <div style="font-size:24px;font-weight:800;margin:8px 0">29 €<small style="font-size:12px;color:var(--muted)">/mois</small></div>
+              <div style="font-size:clamp(18px,3.5vw,24px);font-weight:800;margin:8px 0;line-height:1.2">29 €<small style="font-size:12px;color:var(--muted)">/mois</small></div>
               <ul style="list-style:none;padding:0;font-size:12px;color:var(--muted);line-height:1.8">
                 <li>✓ Organisateur + inbox</li>
                 <li>✓ CRM + tips IA</li>
@@ -857,7 +931,7 @@ const Nx = {
             </div>
             <div class="card" style="padding:18px;border:2px solid var(--blue);background:var(--blue-soft)">
               <div style="font-weight:700;font-size:15px;color:var(--blue-ink)">Full Suite 🚀</div>
-              <div style="font-size:24px;font-weight:800;margin:8px 0">59 €<small style="font-size:12px;color:var(--muted)">/mois</small></div>
+              <div style="font-size:clamp(18px,3.5vw,24px);font-weight:800;margin:8px 0;line-height:1.2">59 €<small style="font-size:12px;color:var(--muted)">/mois</small></div>
               <ul style="list-style:none;padding:0;font-size:12px;color:var(--ink2);line-height:1.8">
                 <li>✅ Tout Agent 02</li>
                 <li>✅ Agent 01 (secrétaire 24/7)</li>
@@ -1838,7 +1912,7 @@ const Nx = {
         <div class="grid2">
           <div class="card" style="padding:24px;background:linear-gradient(135deg,var(--blue),var(--blue-ink));color:#fff">
             <div style="font-size:12px;opacity:.85;text-transform:uppercase;letter-spacing:.1em">Plan actuel</div>
-            <div style="font-size:28px;font-weight:800;margin:10px 0">${p.name} · ${p.price}${p.period}</div>
+            <div style="font-size:clamp(18px,3.5vw,26px);font-weight:800;margin:10px 0;line-height:1.2;word-break:break-word">${p.name} · ${p.price}${p.period}</div>
             <div style="font-size:13px;opacity:.9;margin-bottom:18px">Prochain prélèvement : ${p.next_billing}</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
               ${p.features.map(f=>`<div style="font-size:12px;opacity:.9">✓ ${f}</div>`).join('')}
