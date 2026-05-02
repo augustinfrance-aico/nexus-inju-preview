@@ -200,14 +200,177 @@ body::before{content:"";position:fixed;inset:0;background-image:var(--grid-patte
 .health-bar{width:100%;height:5px;background:var(--bg2);border-radius:999px;overflow:hidden;margin-top:3px}
 .health-bar span{display:block;height:100%;background:linear-gradient(90deg,var(--red),var(--amber),var(--green));border-radius:999px}
 
-/* MAP */
-.map-wrap{position:relative;background:linear-gradient(180deg,var(--bg2),var(--panel));border-radius:var(--radius);padding:20px;overflow:hidden;min-height:360px}
+/* MAP — Chili 3D */
+.map-wrap{
+  position:relative;
+  background:radial-gradient(ellipse 80% 60% at 50% 100%, rgba(122,60,255,.08), transparent 60%),
+             radial-gradient(ellipse 70% 50% at 50% 0%, rgba(26,86,219,.08), transparent 60%),
+             linear-gradient(180deg,var(--bg2),var(--panel));
+  border-radius:var(--radius);
+  padding:20px;
+  overflow:hidden;
+  min-height:520px;
+}
+.chile-stage{
+  position:relative;
+  width:100%; height:480px;
+  perspective:1400px;
+  perspective-origin:50% 35%;
+  display:flex; align-items:center; justify-content:center;
+}
+.chile-3d{
+  position:relative;
+  width:340px; height:480px;
+  transform-style:preserve-3d;
+  transform:rotateX(58deg) rotateZ(-8deg);
+  transition:transform 1s cubic-bezier(.2,.8,.2,1);
+  animation:chileFloat 8s ease-in-out infinite alternate;
+}
+.chile-stage:hover .chile-3d{transform:rotateX(48deg) rotateZ(-4deg) scale(1.04);animation-play-state:paused}
+@keyframes chileFloat{
+  0%{transform:rotateX(58deg) rotateZ(-8deg) translateY(0)}
+  100%{transform:rotateX(56deg) rotateZ(-6deg) translateY(-8px)}
+}
+.chile-floor{
+  position:absolute; left:-25%; right:-25%; bottom:-40px; height:80px;
+  background:radial-gradient(ellipse, rgba(26,86,219,.45), transparent 65%);
+  filter:blur(24px);
+  transform:translateZ(-40px);
+  pointer-events:none;
+}
+.chile-svg{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  filter:drop-shadow(0 30px 40px rgba(0,0,0,.5));
+}
+.chile-pins{
+  position:absolute; inset:0;
+  transform-style:preserve-3d;
+  pointer-events:none;
+}
+.pin{
+  position:absolute;
+  transform-style:preserve-3d;
+  pointer-events:auto;
+}
+.pin .stem{
+  position:absolute; left:50%; bottom:0;
+  width:1.5px; height:34px;
+  background:linear-gradient(180deg, var(--c), transparent);
+  box-shadow:0 0 6px var(--c);
+  transform:translateX(-50%) rotateX(-58deg) rotateZ(8deg);
+  transform-origin:bottom center;
+}
+.pin .head{
+  position:absolute; left:50%; bottom:30px;
+  width:11px; height:11px; border-radius:50%;
+  background:var(--c);
+  transform:translate(-50%,50%) rotateX(-58deg) rotateZ(8deg);
+  box-shadow:0 0 0 4px var(--cs), 0 0 18px var(--c), inset 0 1px 0 rgba(255,255,255,.4);
+  cursor:pointer;
+  animation:pinPulse 2.4s ease-in-out infinite;
+}
+.pin:hover .head{transform:translate(-50%,50%) rotateX(-58deg) rotateZ(8deg) scale(1.5);z-index:5}
+.pin .shadow{
+  position:absolute; left:50%; bottom:-2px;
+  width:14px; height:5px; border-radius:50%;
+  background:rgba(0,0,0,.5);
+  filter:blur(2px);
+  transform:translate(-50%,50%);
+  pointer-events:none;
+}
+.pin.glow .head{
+  box-shadow:0 0 0 5px var(--cs), 0 0 28px var(--c), 0 0 50px var(--c), inset 0 1px 0 rgba(255,255,255,.5);
+  animation:pinPulseStrong 1.8s ease-in-out infinite;
+}
+@keyframes pinPulse{
+  0%,100%{box-shadow:0 0 0 4px var(--cs), 0 0 18px var(--c), inset 0 1px 0 rgba(255,255,255,.4)}
+  50%{box-shadow:0 0 0 7px var(--cs), 0 0 26px var(--c), inset 0 1px 0 rgba(255,255,255,.4)}
+}
+@keyframes pinPulseStrong{
+  0%,100%{box-shadow:0 0 0 5px var(--cs), 0 0 28px var(--c), 0 0 50px var(--c)}
+  50%{box-shadow:0 0 0 9px var(--cs), 0 0 40px var(--c), 0 0 70px var(--c)}
+}
+.pin-tooltip{
+  position:absolute; left:50%; bottom:48px;
+  transform:translate(-50%,0) rotateX(-58deg) rotateZ(8deg);
+  background:rgba(11,15,26,.94);
+  border:1px solid var(--line);
+  padding:6px 10px;
+  border-radius:8px;
+  font-size:11px; color:var(--ink);
+  white-space:nowrap;
+  opacity:0; pointer-events:none;
+  transition:opacity .2s;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  box-shadow:0 8px 20px rgba(0,0,0,.5);
+}
+.pin-tooltip b{color:#fff;display:block;font-size:12px}
+.pin-tooltip small{color:var(--muted);font-size:10px;display:block;margin-top:1px}
+.pin:hover .pin-tooltip{opacity:1}
+
+.chile-city{
+  position:absolute;
+  font-family:'JetBrains Mono',monospace;
+  font-size:10.5px;
+  color:rgba(200,210,230,.8);
+  font-weight:600;
+  letter-spacing:.05em;
+  pointer-events:none;
+  transform:rotateX(-58deg) rotateZ(8deg);
+  transform-origin:left center;
+  text-shadow:0 1px 4px rgba(0,0,0,.8);
+  white-space:nowrap;
+}
+.chile-city.cap{color:#fff; font-weight:700; font-size:12px}
+.chile-city.cap::before{
+  content:"★ ";
+  color:#F59E0B;
+}
+
 .map-marker{position:absolute;width:10px;height:10px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 4px var(--blue-soft),0 0 12px var(--blue);animation:markerPulse 3s infinite;cursor:pointer;transition:transform .2s}
 .map-marker:hover{transform:scale(1.5);z-index:2}
 .map-marker.red{background:var(--red);box-shadow:0 0 0 4px var(--red-soft),0 0 12px var(--red)}
 .map-marker.amber{background:var(--amber);box-shadow:0 0 0 4px var(--amber-soft),0 0 12px var(--amber)}
 .map-marker.violet{background:var(--violet);box-shadow:0 0 0 4px var(--violet-soft),0 0 12px var(--violet)}
 @keyframes markerPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
+
+/* COMPASS + SCALE */
+.chile-compass{
+  position:absolute; top:14px; right:14px;
+  width:60px; height:60px; border-radius:50%;
+  background:rgba(15,23,42,.6); border:1px solid var(--line);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--muted);
+  z-index:5;
+}
+.chile-compass .n{position:absolute; top:6px; color:#F59E0B; font-weight:800; font-size:11px}
+.chile-compass .arrow{
+  width:2px; height:24px;
+  background:linear-gradient(180deg,#F59E0B 50%, transparent 50%);
+  position:relative;
+}
+.chile-compass .arrow::before{
+  content:""; position:absolute; top:-4px; left:50%; transform:translateX(-50%);
+  width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-bottom:8px solid #F59E0B;
+}
+.chile-stats{
+  position:absolute; bottom:14px; left:14px;
+  display:flex; gap:8px; z-index:5;
+}
+.chile-stat-pill{
+  padding:6px 11px; border-radius:999px;
+  background:rgba(15,23,42,.6); border:1px solid var(--line);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  font-size:10.5px; color:var(--ink); font-weight:600;
+  display:flex; align-items:center; gap:6px;
+}
+.chile-stat-pill .dot{width:6px;height:6px;border-radius:50%}
+.chile-stat-pill .dot.b{background:#1A56DB;box-shadow:0 0 8px #1A56DB}
+.chile-stat-pill .dot.v{background:#7A3CFF;box-shadow:0 0 8px #7A3CFF}
+.chile-stat-pill .dot.r{background:#EF4444;box-shadow:0 0 8px #EF4444}
+.chile-stat-pill .dot.a{background:#F59E0B;box-shadow:0 0 8px #F59E0B}
 
 /* FUNNEL */
 .funnel-step{padding:12px 18px;margin-bottom:6px;background:var(--bg2);border-radius:10px;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden}
@@ -965,12 +1128,6 @@ Abre tu Nexus para descubrir las novedades.</textarea></div>
             <div class="card-body">
               <div class="map-wrap">
                 ${this.chileMap()}
-                <div style="position:absolute;bottom:10px;right:12px;padding:8px 12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;font-size:11px;display:flex;gap:10px">
-                  <div class="flex" style="gap:4px"><span class="map-marker" style="position:relative;top:0;left:0"></span>Actif</div>
-                  <div class="flex" style="gap:4px"><span class="map-marker amber" style="position:relative;top:0;left:0"></span>Trial</div>
-                  <div class="flex" style="gap:4px"><span class="map-marker red" style="position:relative;top:0;left:0"></span>À risque</div>
-                  <div class="flex" style="gap:4px"><span class="map-marker violet" style="position:relative;top:0;left:0"></span>Scale</div>
-                </div>
               </div>
             </div>
           </div>
@@ -1059,34 +1216,194 @@ Abre tu Nexus para descubrir las novedades.</textarea></div>
   },
 
   chileMap(){
-    // simplified Chile shape + markers
     const clients = this.state.clients.slice(0,32);
+    // Coords (x%, y%) within the Chile silhouette — distributed along the country
     const coords = [
-      {x:70,y:75},{x:65,y:45},{x:68,y:60},{x:63,y:50},{x:72,y:30},{x:67,y:40},{x:70,y:55},{x:75,y:65},
-      {x:60,y:35},{x:72,y:78},{x:64,y:54},{x:68,y:68},{x:66,y:48},{x:74,y:72},{x:62,y:42},{x:70,y:62},
-      {x:68,y:58},{x:74,y:52},{x:66,y:66},{x:70,y:70},{x:72,y:56},{x:64,y:64},{x:68,y:50},{x:60,y:58},
-      {x:76,y:68},{x:70,y:48},{x:62,y:60},{x:74,y:64},{x:66,y:44},{x:72,y:46},{x:68,y:72},{x:64,y:70}
+      {x:46,y:18,city:'Arica'},{x:48,y:24,city:'Iquique'},{x:50,y:30,city:'Antofagasta'},
+      {x:46,y:36,city:'Copiapó'},{x:50,y:42,city:'La Serena'},{x:54,y:46,city:'Valparaíso'},
+      {x:52,y:50,city:'Santiago'},{x:48,y:50,city:'Santiago'},{x:50,y:48,city:'Santiago'},
+      {x:54,y:51,city:'Santiago'},{x:48,y:52,city:'Santiago'},{x:46,y:54,city:'Rancagua'},
+      {x:52,y:56,city:'Talca'},{x:48,y:58,city:'Chillán'},{x:46,y:60,city:'Concepción'},
+      {x:50,y:62,city:'Concepción'},{x:44,y:64,city:'Los Ángeles'},{x:48,y:66,city:'Temuco'},
+      {x:46,y:68,city:'Valdivia'},{x:50,y:70,city:'Osorno'},{x:48,y:72,city:'Puerto Montt'},
+      {x:44,y:74,city:'Puerto Montt'},{x:46,y:76,city:'Castro'},{x:50,y:78,city:'Coyhaique'},
+      {x:44,y:80,city:'Aysén'},{x:48,y:82,city:'Cochrane'},{x:46,y:84,city:'Tortel'},
+      {x:50,y:86,city:'Puerto Natales'},{x:44,y:88,city:'Punta Arenas'},{x:48,y:90,city:'Punta Arenas'},
+      {x:46,y:92,city:'Porvenir'},{x:48,y:94,city:'Puerto Williams'}
     ];
+
+    // Big city labels
+    const cities = [
+      {n:'Arica',x:60,y:18},
+      {n:'Iquique',x:62,y:24},
+      {n:'Antofagasta',x:62,y:31},
+      {n:'La Serena',x:62,y:42},
+      {n:'Santiago',x:64,y:50,cap:true},
+      {n:'Concepción',x:62,y:60},
+      {n:'Temuco',x:62,y:66},
+      {n:'Puerto Montt',x:62,y:72},
+      {n:'Punta Arenas',x:54,y:90}
+    ];
+
+    const colorOf = (c) => {
+      if (c.churnRisk === 'high') return {c:'#EF4444', cs:'rgba(239,68,68,.25)', glow:false};
+      if (c.plan.price === 0)     return {c:'#F59E0B', cs:'rgba(245,158,11,.25)', glow:false};
+      if (c.plan.price >= 69)     return {c:'#7A3CFF', cs:'rgba(122,60,255,.3)', glow:true};
+      return {c:'#1A56DB', cs:'rgba(26,86,219,.25)', glow:false};
+    };
+
+    const counts = {
+      active: this.state.clients.filter(c => c.plan.price > 0 && c.churnRisk !== 'high').length,
+      scale:  this.state.clients.filter(c => c.plan.price >= 69).length,
+      risk:   this.state.clients.filter(c => c.churnRisk === 'high').length,
+      trial:  this.state.clients.filter(c => c.plan.price === 0).length
+    };
+
     return `
-      <svg viewBox="0 0 100 100" style="width:100%;height:360px;position:relative" preserveAspectRatio="xMidYMid meet">
-        <defs>
-          <linearGradient id="mapGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#1A56DB" stop-opacity=".05"/>
-            <stop offset="50%" stop-color="#06B6D4" stop-opacity=".12"/>
-            <stop offset="100%" stop-color="#7A3CFF" stop-opacity=".08"/>
-          </linearGradient>
-        </defs>
-        <path d="M62,10 L66,10 L68,18 L70,28 L72,38 L73,48 L74,58 L73,68 L72,78 L70,85 L68,92 L65,95 L62,90 L60,82 L61,72 L62,62 L63,52 L62,42 L61,32 L60,22 L61,14 Z" fill="url(#mapGrad)" stroke="#1A56DB" stroke-width=".3" stroke-opacity=".4"/>
-        <text x="74" y="20" font-size="3" fill="#64748B">Iquique</text>
-        <text x="74" y="40" font-size="3" fill="#64748B" font-weight="700">Santiago</text>
-        <text x="75" y="60" font-size="3" fill="#64748B">Concepción</text>
-        <text x="76" y="78" font-size="3" fill="#64748B">Puerto Montt</text>
-        ${clients.map((c,i)=>{
-          const p = coords[i%coords.length];
-          const cls = c.churnRisk==='high'?'red':c.plan.price===0?'amber':c.plan.price>=69?'violet':'';
-          return `<circle cx="${p.x}" cy="${p.y}" r=".9" fill="${cls==='red'?'#EF4444':cls==='amber'?'#F59E0B':cls==='violet'?'#7A3CFF':'#1A56DB'}" opacity=".85"><title>${c.name} · ${c.city}</title></circle>`;
-        }).join('')}
-      </svg>`;
+      <div class="chile-stage">
+        <div class="chile-3d">
+          <div class="chile-floor"></div>
+
+          <svg class="chile-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <!-- Land gradient -->
+              <linearGradient id="landGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#1F3A8A" stop-opacity=".75"/>
+                <stop offset="35%" stop-color="#1A56DB" stop-opacity=".55"/>
+                <stop offset="65%" stop-color="#7A3CFF" stop-opacity=".35"/>
+                <stop offset="100%" stop-color="#06B6D4" stop-opacity=".25"/>
+              </linearGradient>
+              <!-- Pacific ocean glow on west -->
+              <linearGradient id="coastGlow" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#06B6D4" stop-opacity=".5"/>
+                <stop offset="100%" stop-color="#06B6D4" stop-opacity="0"/>
+              </linearGradient>
+              <!-- Border highlight -->
+              <linearGradient id="borderG" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#06B6D4"/>
+                <stop offset="100%" stop-color="#7A3CFF"/>
+              </linearGradient>
+              <!-- Topography pattern -->
+              <pattern id="topo" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse">
+                <circle cx="3" cy="3" r=".3" fill="rgba(255,255,255,.04)"/>
+              </pattern>
+              <!-- Glow filter -->
+              <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="1.5" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+
+            <!-- Pacific glow strip on west -->
+            <rect x="35" y="14" width="14" height="82" fill="url(#coastGlow)" opacity=".4"/>
+
+            <!-- Chile silhouette — accurate-ish shape: narrow north, mid bulge ~Santiago, fjords south, pointy Patagonia -->
+            <path d="
+              M 49,14
+              L 51,14
+              Q 53,16 53,20
+              L 53,26
+              Q 54,30 53.5,34
+              L 53,40
+              Q 55,44 56,48
+              Q 57,52 56,56
+              Q 56,60 55,64
+              Q 54,68 53,72
+              Q 52,76 51,80
+              Q 50,84 49,87
+              Q 47,90 46,92
+              Q 45,94 46,96
+              L 47,97
+              L 45,96
+              Q 43,94 42,91
+              Q 41,88 42,84
+              Q 43,80 44,76
+              Q 45,72 45,68
+              Q 45,64 45.5,60
+              Q 46,56 46,52
+              Q 46,48 45,44
+              Q 44,40 44,36
+              Q 44,32 45,28
+              Q 46,24 47,20
+              Q 48,16 49,14 Z
+            " fill="url(#landGrad)" stroke="url(#borderG)" stroke-width=".35" filter="url(#softGlow)"/>
+
+            <!-- Topography pattern overlay -->
+            <path d="
+              M 49,14 L 51,14 Q 53,16 53,20 L 53,26 Q 54,30 53.5,34 L 53,40
+              Q 55,44 56,48 Q 57,52 56,56 Q 56,60 55,64 Q 54,68 53,72
+              Q 52,76 51,80 Q 50,84 49,87 Q 47,90 46,92 Q 45,94 46,96
+              L 47,97 L 45,96 Q 43,94 42,91 Q 41,88 42,84
+              Q 43,80 44,76 Q 45,72 45,68 Q 45,64 45.5,60
+              Q 46,56 46,52 Q 46,48 45,44 Q 44,40 44,36
+              Q 44,32 45,28 Q 46,24 47,20 Q 48,16 49,14 Z
+            " fill="url(#topo)"/>
+
+            <!-- Mountain ridge (Andes) -->
+            <path d="M 50,18 Q 50.5,30 51,42 Q 51.5,54 51,66 Q 50.5,78 49,90"
+                  stroke="rgba(255,255,255,.18)" stroke-width=".25" fill="none" stroke-linecap="round"/>
+            <path d="M 49.5,20 Q 50,32 50.5,44 Q 51,56 50.5,68 Q 50,80 48.5,89"
+                  stroke="rgba(255,255,255,.10)" stroke-width=".18" fill="none" stroke-linecap="round" stroke-dasharray=".6,.6"/>
+
+            <!-- Latitude lines -->
+            <g stroke="rgba(255,255,255,.05)" stroke-width=".1" stroke-dasharray=".5,.8">
+              <line x1="40" y1="25" x2="58" y2="25"/>
+              <line x1="40" y1="40" x2="58" y2="40"/>
+              <line x1="40" y1="55" x2="58" y2="55"/>
+              <line x1="40" y1="70" x2="58" y2="70"/>
+              <line x1="40" y1="85" x2="58" y2="85"/>
+            </g>
+
+            <!-- Latitude labels (subtle) -->
+            <g font-family="JetBrains Mono, monospace" font-size="1.5" fill="rgba(255,255,255,.25)">
+              <text x="38" y="25.5">20°S</text>
+              <text x="38" y="40.5">30°S</text>
+              <text x="38" y="55.5">40°S</text>
+              <text x="38" y="70.5">50°S</text>
+            </g>
+
+            <!-- Capital star marker -->
+            <g transform="translate(50,50)">
+              <circle r="1.2" fill="#F59E0B" opacity=".4">
+                <animate attributeName="r" values="1.2;2.5;1.2" dur="2.5s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values=".4;0;.4" dur="2.5s" repeatCount="indefinite"/>
+              </circle>
+              <polygon points="0,-1 .3,-.3 1,-.3 .4,.2 .6,1 0,.5 -.6,1 -.4,.2 -1,-.3 -.3,-.3" fill="#F59E0B" filter="url(#softGlow)"/>
+            </g>
+          </svg>
+
+          <!-- 3D PINS layer -->
+          <div class="chile-pins">
+            ${clients.map((c,i)=>{
+              const p = coords[i % coords.length];
+              const col = colorOf(c);
+              return `<div class="pin ${col.glow?'glow':''}" style="left:${p.x}%;top:${p.y}%;--c:${col.c};--cs:${col.cs}">
+                <div class="stem"></div>
+                <div class="shadow"></div>
+                <div class="head"></div>
+                <div class="pin-tooltip"><b>${c.name}</b><small>${c.city} · €${c.mrr}/mo · ${c.plan.n}</small></div>
+              </div>`;
+            }).join('')}
+
+            <!-- City labels (3D-floating, counter-rotated) -->
+            ${cities.map(ct=>`<span class="chile-city ${ct.cap?'cap':''}" style="left:${ct.x}%;top:${ct.y}%">${ct.n}</span>`).join('')}
+          </div>
+        </div>
+
+        <!-- Compass -->
+        <div class="chile-compass">
+          <span class="n">N</span>
+          <div class="arrow"></div>
+        </div>
+
+        <!-- Stat pills -->
+        <div class="chile-stats">
+          <div class="chile-stat-pill"><span class="dot b"></span><b>${counts.active}</b> Actifs</div>
+          <div class="chile-stat-pill"><span class="dot v"></span><b>${counts.scale}</b> Scale</div>
+          <div class="chile-stat-pill"><span class="dot a"></span><b>${counts.trial}</b> Trial</div>
+          <div class="chile-stat-pill"><span class="dot r"></span><b>${counts.risk}</b> Risque</div>
+        </div>
+      </div>`;
   },
 
   summaryCard(ic,lbl,val,sub,color,pct){
