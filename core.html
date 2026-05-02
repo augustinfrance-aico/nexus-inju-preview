@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0F1A">
+<title>Nexus Core — Panadería Don Carlos</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0B0F1A; --bg2:#11172A;
+  --panel:rgba(255,255,255,.04); --panel2:rgba(255,255,255,.07);
+  --ink:#F2F5FB; --ink2:#C5CDE0; --muted:#7A85A0;
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.04);
+  --blue:#2E7BFF; --violet:#8B5CFF; --cyan:#00E5FF; --lime:#1EFF8E; --gold:#F5C45E; --red:#FF6B6B;
+  --grad-core:linear-gradient(135deg,#2E7BFF 0%,#8B5CFF 60%,#00E5FF 100%);
+  --grad-warm:linear-gradient(135deg,#F5C45E,#FF7B7B);
+  --grad-cool:linear-gradient(135deg,#1EFF8E,#00E5FF);
+}
+html[data-theme="light"]{
+  --bg:#F4F6FB; --bg2:#FFFFFF;
+  --panel:rgba(255,255,255,.7); --panel2:rgba(15,23,42,.04);
+  --ink:#0F172A; --ink2:#334155; --muted:#64748B;
+  --line:rgba(15,23,42,.08); --line2:rgba(15,23,42,.04);
+}
+html,body{
+  background:var(--bg);color:var(--ink);
+  font-family:'Inter','Segoe UI',-apple-system,sans-serif;line-height:1.5;
+  -webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden;
+}
+body{
+  background:
+    radial-gradient(ellipse 60% 40% at 15% 5%, rgba(46,123,255,.16), transparent 60%),
+    radial-gradient(ellipse 50% 35% at 85% 95%, rgba(139,92,255,.12), transparent 60%),
+    var(--bg);
+  background-attachment:fixed;
+}
+.mono{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}
+
+.shell{max-width:1180px;margin:0 auto;padding:22px 28px 120px}
+
+/* ============ TOP ============ */
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:36px}
+.home{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;cursor:pointer;transition:opacity .2s}
+.home:hover{opacity:.7}
+.home .logo{
+  width:42px;height:42px;border-radius:12px;background:var(--grad-core);
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  box-shadow:0 10px 28px -10px rgba(46,123,255,.6),inset 0 1px 0 rgba(255,255,255,.2);
+}
+.home .logo svg{width:20px;height:20px}
+.home-meta{display:flex;flex-direction:column}
+.home-meta b{font-size:11px;color:var(--cyan);text-transform:uppercase;letter-spacing:.18em;font-family:'JetBrains Mono',monospace;font-weight:700}
+.home-meta span{font-size:10px;color:var(--muted);margin-top:2px}
+
+.company{
+  display:flex;align-items:center;gap:14px;
+  padding:10px 22px;border-radius:18px;
+  background:var(--panel);border:1px solid var(--line);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+.company-logo{
+  width:38px;height:38px;border-radius:10px;
+  background:linear-gradient(135deg,#F5C45E,#FF7B7B);
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+  box-shadow:0 6px 16px -6px rgba(245,196,94,.5);
+}
+.company-info b{display:block;font-size:14px;font-weight:700;letter-spacing:-.01em}
+.company-info small{display:block;font-size:11px;color:var(--muted);margin-top:1px}
+
+.top-actions{display:flex;align-items:center;gap:10px}
+.notif{
+  width:42px;height:42px;border-radius:12px;
+  background:var(--panel);border:1px solid var(--line);color:var(--ink2);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  position:relative;transition:all .2s;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+.notif:hover{color:var(--cyan);border-color:var(--cyan);transform:translateY(-1px)}
+.notif svg{width:17px;height:17px}
+.notif .badge{
+  position:absolute;top:-2px;right:-2px;
+  min-width:18px;height:18px;border-radius:999px;
+  background:var(--red);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;border:2px solid var(--bg);
+}
+
+.menu-btn{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 16px 10px 12px;border-radius:12px;
+  background:var(--panel);border:1px solid var(--line);color:var(--ink);
+  cursor:pointer;transition:all .2s;font-size:13px;font-weight:600;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+.menu-btn:hover{background:var(--panel2);border-color:var(--cyan)}
+.menu-btn svg{width:16px;height:16px}
+
+/* ============ HERO BANNER (positive) ============ */
+.hero-banner{
+  display:flex;align-items:center;gap:16px;
+  padding:18px 24px;border-radius:18px;
+  background:linear-gradient(120deg,rgba(30,255,142,.12),rgba(0,229,255,.06));
+  border:1px solid rgba(30,255,142,.25);
+  margin-bottom:30px;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  position:relative;overflow:hidden;
+}
+.hero-banner::before{
+  content:"";position:absolute;top:-30%;right:-10%;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(30,255,142,.18),transparent 70%);
+  pointer-events:none;
+}
+.hero-banner-ic{
+  width:46px;height:46px;border-radius:12px;
+  background:var(--grad-cool);
+  display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;
+  box-shadow:0 8px 22px -8px rgba(0,229,255,.5);position:relative;z-index:1;
+}
+.hero-banner-ic svg{width:22px;height:22px}
+.hero-banner-text{flex:1;font-size:14.5px;color:var(--ink);line-height:1.55;position:relative;z-index:1}
+.hero-banner-text b{color:var(--ink);font-weight:700}
+.hero-banner-text .hl{
+  background:linear-gradient(135deg,var(--lime),var(--cyan));
+  -webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800;
+}
+
+/* ============ STATS — top 3 du jour, valorisantes ============ */
+.stats-section{
+  display:flex;align-items:center;gap:16px;margin-bottom:32px;position:relative;
+}
+.stats-arrow{
+  width:42px;height:42px;border-radius:50%;flex-shrink:0;
+  background:var(--panel);border:1px solid var(--line);color:var(--ink2);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:all .2s;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+.stats-arrow:hover{background:var(--panel2);color:var(--cyan);border-color:var(--cyan);transform:scale(1.05)}
+.stats-arrow:disabled{opacity:.3;cursor:not-allowed}
+.stats-arrow svg{width:17px;height:17px}
+
+.stats-track{
+  flex:1;display:flex;gap:16px;
+  overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;
+  scrollbar-width:none;padding:6px 2px;
+}
+.stats-track::-webkit-scrollbar{display:none}
+
+.stat{
+  flex:0 0 calc(33.333% - 11px);
+  scroll-snap-align:start;
+  padding:24px;border-radius:20px;
+  background:linear-gradient(180deg,var(--panel) 0%,var(--panel2) 100%);
+  border:1px solid var(--line);
+  position:relative;overflow:hidden;
+  transition:transform .25s,border-color .25s,box-shadow .25s;
+  cursor:pointer;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+.stat:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.18);box-shadow:0 20px 40px -16px rgba(0,0,0,.4)}
+.stat::before{
+  content:"";position:absolute;top:-40%;right:-20%;
+  width:200px;height:200px;border-radius:50%;
+  background:var(--accent-glow);
+  pointer-events:none;
+}
+.stat.s1{--accent-glow:radial-gradient(circle,rgba(30,255,142,.20),transparent 70%);--accent:#1EFF8E;--accent2:#00E5FF}
+.stat.s2{--accent-glow:radial-gradient(circle,rgba(46,123,255,.20),transparent 70%);--accent:#2E7BFF;--accent2:#8B5CFF}
+.stat.s3{--accent-glow:radial-gradient(circle,rgba(245,196,94,.20),transparent 70%);--accent:#F5C45E;--accent2:#FF7B7B}
+.stat.s4{--accent-glow:radial-gradient(circle,rgba(139,92,255,.20),transparent 70%);--accent:#8B5CFF;--accent2:#FF6B9D}
+
+.stat-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;position:relative;z-index:1}
+.stat-ic{
+  width:34px;height:34px;border-radius:10px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  box-shadow:0 6px 16px -6px var(--accent);
+}
+.stat-ic svg{width:16px;height:16px}
+.stat-tag{font-size:10px;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:.12em;font-family:'JetBrains Mono',monospace}
+
+.stat-headline{
+  font-size:16px;font-weight:700;line-height:1.35;color:var(--ink);
+  margin-bottom:6px;position:relative;z-index:1;letter-spacing:-.005em;
+}
+.stat-headline b{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800;
+}
+.stat-detail{font-size:12px;color:var(--muted);position:relative;z-index:1;line-height:1.5}
+.stat-cta{
+  margin-top:14px;display:inline-flex;align-items:center;gap:6px;
+  font-size:11.5px;color:var(--accent);font-weight:700;
+  position:relative;z-index:1;
+}
+.stat-cta svg{width:11px;height:11px;transition:transform .2s}
+.stat:hover .stat-cta svg{transform:translateX(3px)}
+
+@media(max-width:780px){
+  .stat{flex:0 0 calc(100% - 4px);max-width:none}
+  .stats-arrow{display:none}
+}
+
+/* ============ CONSEIL CAROUSEL ============ */
+.advice{
+  padding:28px 30px;border-radius:22px;
+  background:linear-gradient(180deg,var(--panel) 0%,var(--panel2) 100%);
+  border:1px solid var(--line);
+  margin-bottom:32px;position:relative;overflow:hidden;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+.advice::before{
+  content:"";position:absolute;top:-30%;left:-10%;
+  width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle,rgba(139,92,255,.15),transparent 70%);
+  pointer-events:none;
+}
+.advice-head{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  margin-bottom:18px;position:relative;z-index:1;flex-wrap:wrap;
+}
+.advice-title{display:flex;align-items:center;gap:12px}
+.advice-title-ic{
+  width:34px;height:34px;border-radius:10px;
+  background:var(--grad-core);
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  box-shadow:0 6px 18px -6px rgba(139,92,255,.5);
+}
+.advice-title-ic svg{width:17px;height:17px}
+.advice-title h3{font-size:15px;font-weight:700;letter-spacing:-.005em}
+.advice-title small{display:block;font-size:11px;color:var(--muted);margin-top:1px;font-family:'JetBrains Mono',monospace;letter-spacing:.05em}
+
+.advice-nav{display:flex;align-items:center;gap:8px}
+.advice-counter{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.06em}
+.advice-arrow{
+  width:32px;height:32px;border-radius:8px;
+  background:var(--panel2);border:1px solid var(--line);color:var(--ink2);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;
+}
+.advice-arrow:hover{background:var(--bg2);color:var(--cyan);border-color:var(--cyan)}
+.advice-arrow:disabled{opacity:.3;cursor:not-allowed}
+.advice-arrow svg{width:14px;height:14px}
+
+.advice-body{position:relative;z-index:1;min-height:140px}
+.advice-card{display:none;animation:fadeSlide .35s ease}
+.advice-card.on{display:block}
+@keyframes fadeSlide{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}
+
+.advice-context{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:5px 11px;border-radius:999px;
+  background:var(--panel2);border:1px solid var(--line);
+  font-size:10.5px;color:var(--ink2);font-weight:600;text-transform:uppercase;letter-spacing:.08em;
+  font-family:'JetBrains Mono',monospace;margin-bottom:12px;
+}
+.advice-context svg{width:11px;height:11px;color:var(--cyan)}
+
+.advice-text{
+  font-size:18px;line-height:1.55;color:var(--ink);font-weight:500;
+  margin-bottom:18px;letter-spacing:-.01em;
+}
+.advice-text b{font-weight:800}
+.advice-actions{display:flex;flex-wrap:wrap;gap:10px}
+.advice-act{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:11px;
+  background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+  font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;
+  text-decoration:none;
+}
+.advice-act:hover{transform:translateY(-2px);background:var(--bg2);border-color:var(--cyan);color:var(--cyan);box-shadow:0 8px 20px -8px rgba(0,229,255,.4)}
+.advice-act svg{width:13px;height:13px}
+.advice-act.primary{
+  background:var(--grad-core);color:#fff;border-color:transparent;
+  box-shadow:0 8px 20px -8px rgba(46,123,255,.6);
+}
+.advice-act.primary:hover{transform:translateY(-2px);box-shadow:0 12px 28px -10px rgba(139,92,255,.7);color:#fff}
+
+/* ============ DAILY BRIEF (audio + écrit) ============ */
+.brief{
+  display:grid;grid-template-columns:1.1fr 1fr;gap:18px;margin-bottom:32px;
+}
+@media(max-width:780px){.brief{grid-template-columns:1fr}}
+
+.brief-card{
+  padding:24px 26px;border-radius:20px;
+  border:1px solid var(--line);
+  position:relative;overflow:hidden;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+.brief-card.audio{
+  background:linear-gradient(160deg,rgba(139,92,255,.14),rgba(46,123,255,.06));
+  border-color:rgba(139,92,255,.25);
+}
+.brief-card.text{
+  background:linear-gradient(160deg,rgba(0,229,255,.10),rgba(30,255,142,.05));
+  border-color:rgba(0,229,255,.25);
+}
+
+.brief-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.brief-head h3{font-size:15px;font-weight:700;display:flex;align-items:center;gap:10px;letter-spacing:-.005em}
+.brief-head h3 svg{width:16px;height:16px;color:var(--accent)}
+.brief.audio{--accent:var(--violet)}
+
+.brief-mode-tabs{display:flex;gap:4px;padding:3px;background:var(--panel2);border:1px solid var(--line);border-radius:10px}
+.mode-tab{
+  border:0;background:transparent;color:var(--ink2);
+  padding:5px 10px;border-radius:7px;cursor:pointer;
+  font-size:11px;font-weight:600;letter-spacing:.04em;transition:all .15s;
+}
+.mode-tab.on{background:var(--bg2);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+
+/* Audio player */
+.audio-body{display:flex;flex-direction:column;align-items:center;gap:14px;padding:8px 0 4px}
+.voice-mic{
+  position:relative;width:96px;height:96px;border-radius:50%;
+  background:linear-gradient(135deg,#8B5CFF,#2E7BFF);
+  display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;
+  box-shadow:0 16px 40px -10px rgba(139,92,255,.6),inset 0 2px 0 rgba(255,255,255,.2);
+  transition:transform .2s;z-index:2;
+}
+.voice-mic:hover{transform:scale(1.06)}
+.voice-mic.playing{background:linear-gradient(135deg,#FF6B9D,#F5C45E)}
+.voice-mic::after{
+  content:"";position:absolute;inset:-10px;border-radius:50%;
+  border:2px solid rgba(139,92,255,.4);
+  animation:micPulse 2s ease-out infinite;
+}
+.voice-mic::before{
+  content:"";position:absolute;inset:-20px;border-radius:50%;
+  border:2px solid rgba(139,92,255,.25);
+  animation:micPulse 2s ease-out infinite .6s;
+}
+@keyframes micPulse{0%{transform:scale(.9);opacity:.8}100%{transform:scale(1.4);opacity:0}}
+.voice-mic svg{width:36px;height:36px}
+.audio-meta{text-align:center}
+.audio-meta b{display:block;font-size:14px;font-weight:700;letter-spacing:-.005em}
+.audio-meta small{display:block;font-size:11.5px;color:var(--muted);margin-top:3px}
+.audio-progress{
+  width:100%;max-width:240px;height:4px;border-radius:999px;background:var(--panel2);overflow:hidden;
+  position:relative;
+}
+.audio-progress-bar{
+  position:absolute;left:0;top:0;bottom:0;width:0%;
+  background:linear-gradient(90deg,var(--violet),var(--cyan));border-radius:999px;
+  transition:width .3s;
+}
+.audio-times{display:flex;justify-content:space-between;width:100%;max-width:240px;font-size:10.5px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:-6px}
+
+/* Text body */
+.text-body{font-size:13.5px;line-height:1.65;color:var(--ink2);max-height:180px;overflow:hidden;position:relative}
+.text-body.expanded{max-height:none}
+.text-body p{margin-bottom:8px}
+.text-body p b{color:var(--ink);font-weight:700}
+.text-body::after{
+  content:"";position:absolute;bottom:0;left:0;right:0;height:60px;
+  background:linear-gradient(180deg,transparent,var(--bg) 80%);
+  pointer-events:none;transition:opacity .25s;
+}
+.text-body.expanded::after{opacity:0}
+.text-cta{
+  margin-top:12px;display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;color:var(--cyan);background:transparent;border:0;cursor:pointer;font-weight:700;
+}
+.text-cta svg{width:12px;height:12px}
+
+/* ============ MESSAGES PREVIEW (5 + flou 6e) ============ */
+.preview-section{
+  padding:24px 26px;border-radius:20px;
+  background:linear-gradient(180deg,var(--panel) 0%,var(--panel2) 100%);
+  border:1px solid var(--line);
+  margin-bottom:32px;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+.preview-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.preview-head h3{font-size:14px;font-weight:700;display:flex;align-items:center;gap:10px}
+.preview-head h3 .star{color:var(--gold);font-size:14px}
+.preview-head a{font-size:12px;color:var(--cyan);text-decoration:none;font-weight:600;cursor:pointer}
+.preview-head a:hover{text-decoration:underline}
+
+.msg-list{display:flex;flex-direction:column;gap:10px;position:relative}
+.msg{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 14px;border-radius:13px;
+  background:var(--panel2);border:1px solid var(--line2);
+  cursor:pointer;transition:all .2s;
+}
+.msg:hover{transform:translateX(3px);border-color:var(--cyan);background:rgba(0,229,255,.05)}
+.msg-avatar{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;
+  background:var(--av,linear-gradient(135deg,#2E7BFF,#8B5CFF));
+}
+.msg-meta{flex:1;min-width:0}
+.msg-name{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
+.msg-name .star{color:var(--gold);font-size:11px}
+.msg-text{
+  font-size:12px;color:var(--muted);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:540px;
+}
+.msg-time{font-size:10.5px;color:var(--muted);font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.msg-unread{
+  width:8px;height:8px;border-radius:50%;background:var(--cyan);flex-shrink:0;
+  box-shadow:0 0 8px var(--cyan);
+}
+.msg.blur{filter:blur(3px);opacity:.5;pointer-events:none;user-select:none}
+.msg-more{
+  position:absolute;bottom:0;left:0;right:0;
+  display:flex;align-items:center;justify-content:center;
+  padding:14px 0;
+  background:linear-gradient(180deg,transparent,var(--bg) 70%);
+  pointer-events:none;
+}
+.msg-more-btn{
+  pointer-events:auto;
+  display:inline-flex;align-items:center;gap:7px;
+  padding:8px 16px;border-radius:999px;
+  background:var(--bg2);border:1px solid var(--line);color:var(--ink);
+  font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;
+  box-shadow:0 8px 20px -8px rgba(0,0,0,.4);
+}
+.msg-more-btn:hover{border-color:var(--cyan);color:var(--cyan);transform:translateY(-2px)}
+.msg-more-btn svg{width:12px;height:12px}
+
+/* ============ DRAWER ============ */
+.drawer-bg{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(11,15,26,.6);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  display:none;animation:fadeIn .2s ease;
+}
+.drawer-bg.show{display:block}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.drawer{
+  position:fixed;top:0;right:-360px;bottom:0;width:340px;
+  background:var(--bg2);border-left:1px solid var(--line);
+  z-index:201;padding:24px 22px;
+  display:flex;flex-direction:column;
+  transition:right .35s cubic-bezier(.2,.8,.2,1);
+  overflow-y:auto;
+}
+.drawer.show{right:0}
+.drawer-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px;
+  padding-bottom:18px;border-bottom:1px solid var(--line);
+}
+.drawer-head h3{font-size:14px;font-weight:700;letter-spacing:-.01em}
+.drawer-head h3 small{display:block;font-size:10.5px;color:var(--muted);font-weight:500;margin-top:2px;font-family:'JetBrains Mono',monospace;letter-spacing:.06em}
+.drawer-close{
+  width:30px;height:30px;border-radius:8px;
+  background:var(--panel);border:1px solid var(--line);color:var(--ink2);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;
+}
+.drawer-close:hover{background:var(--panel2);color:var(--ink)}
+.drawer-close svg{width:13px;height:13px}
+
+.drawer-list{display:flex;flex-direction:column;gap:4px}
+.drawer-item{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 12px;border-radius:11px;cursor:pointer;
+  text-decoration:none;color:var(--ink2);transition:all .15s;
+  border:0;background:transparent;width:100%;text-align:left;font-family:inherit;
+}
+.drawer-item:hover{background:var(--panel2);color:var(--ink)}
+.drawer-item.active{background:rgba(46,123,255,.12);color:var(--blue)}
+.drawer-item-ic{
+  width:32px;height:32px;border-radius:9px;
+  background:var(--panel);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.drawer-item.active .drawer-item-ic{background:var(--grad-core);color:#fff;border-color:transparent}
+.drawer-item-ic svg{width:14px;height:14px}
+.drawer-item-lbl{flex:1;font-size:13px;font-weight:600}
+.drawer-item-meta{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-weight:600}
+
+/* ============ MODAL (générique) ============ */
+.modal-bg{
+  position:fixed;inset:0;z-index:300;
+  background:rgba(11,15,26,.65);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  display:none;align-items:center;justify-content:center;padding:24px;
+}
+.modal-bg.show{display:flex;animation:fadeIn .25s ease}
+.modal{
+  background:var(--bg2);border:1px solid var(--line);border-radius:24px;
+  max-width:560px;width:100%;padding:0;
+  box-shadow:0 30px 80px -20px rgba(0,0,0,.6);
+  position:relative;animation:slideUp .3s cubic-bezier(.2,.8,.2,1);
+  max-height:90vh;overflow-y:auto;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.modal-pad{padding:30px 28px}
+.modal-close{
+  position:absolute;top:14px;right:14px;
+  width:32px;height:32px;border-radius:10px;background:var(--panel);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink2);
+  transition:all .2s;z-index:2;
+}
+.modal-close:hover{background:var(--panel2);color:var(--ink)}
+.modal-close svg{width:14px;height:14px}
+
+/* Stat detail modal — chart */
+.stat-modal-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:20px}
+.stat-modal-ic{
+  width:48px;height:48px;border-radius:13px;
+  background:linear-gradient(135deg,var(--accent,#2E7BFF),var(--accent2,#8B5CFF));
+  display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;
+  box-shadow:0 8px 22px -8px var(--accent,#2E7BFF);
+}
+.stat-modal-ic svg{width:22px;height:22px}
+.stat-modal-head h2{font-size:20px;font-weight:800;letter-spacing:-.01em;margin-bottom:4px}
+.stat-modal-head h2 b{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat-modal-head p{font-size:13px;color:var(--muted);line-height:1.55}
+
+.stat-big-num{
+  display:flex;align-items:flex-end;gap:14px;padding:18px 0;margin-bottom:20px;border-bottom:1px solid var(--line);
+}
+.stat-big-num .v{font-size:42px;font-weight:800;letter-spacing:-.02em;font-family:'JetBrains Mono',monospace;line-height:1}
+.stat-big-num .v b{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat-big-num .delta{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--lime);font-weight:700;padding-bottom:6px}
+.stat-big-num .delta svg{width:14px;height:14px}
+
+.bar-chart{display:flex;align-items:flex-end;gap:10px;height:140px;padding:0 4px;margin-bottom:18px}
+.bar{
+  flex:1;background:linear-gradient(180deg,var(--accent),var(--accent2));
+  border-radius:6px 6px 0 0;position:relative;
+  transition:filter .2s;cursor:pointer;
+  display:flex;align-items:flex-end;justify-content:center;
+  min-height:6px;
+}
+.bar:hover{filter:brightness(1.15)}
+.bar .lbl{
+  position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);
+  font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-weight:600;
+}
+.bar .val{
+  position:absolute;top:-22px;left:50%;transform:translateX(-50%);
+  font-size:10.5px;color:var(--ink);font-family:'JetBrains Mono',monospace;font-weight:700;opacity:0;transition:opacity .2s;
+}
+.bar:hover .val{opacity:1}
+.chart-foot{display:flex;justify-content:space-between;align-items:center;margin-top:30px;padding-top:14px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted)}
+.chart-foot b{color:var(--ink)}
+
+.tip-bulb{
+  display:flex;gap:12px;padding:14px 16px;
+  background:rgba(245,196,94,.08);border:1px solid rgba(245,196,94,.25);
+  border-radius:13px;margin-top:6px;
+}
+.tip-bulb-ic{
+  width:30px;height:30px;border-radius:8px;
+  background:var(--gold);color:#0F172A;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.tip-bulb-ic svg{width:14px;height:14px}
+.tip-bulb-text{font-size:13px;color:var(--ink);line-height:1.5}
+.tip-bulb-text b{color:var(--ink);font-weight:700}
+
+/* Vacances modal */
+.vac-form{display:flex;flex-direction:column;gap:14px;margin-top:18px}
+.vac-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:520px){.vac-row{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-family:'JetBrains Mono',monospace}
+.field input,.field textarea,.field select{
+  padding:11px 14px;border-radius:11px;
+  background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+  font-size:13.5px;font-family:inherit;transition:all .2s;
+}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,.15)}
+.field textarea{resize:vertical;min-height:80px;line-height:1.5}
+.tone-pills{display:flex;gap:8px;flex-wrap:wrap}
+.tone-pill{
+  padding:7px 14px;border-radius:999px;
+  background:var(--panel2);border:1px solid var(--line);color:var(--ink2);
+  font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;
+  font-family:inherit;
+}
+.tone-pill.on{background:rgba(46,123,255,.15);border-color:var(--blue);color:var(--blue)}
+.modal-footer-cta{display:flex;gap:10px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
+.btn{
+  flex:1;padding:12px 18px;border-radius:11px;font-size:13.5px;font-weight:700;
+  border:0;cursor:pointer;transition:all .2s;font-family:inherit;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-primary{background:var(--grad-core);color:#fff;box-shadow:0 12px 30px -10px rgba(46,123,255,.6)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 18px 40px -10px rgba(139,92,255,.7)}
+.btn-secondary{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
+.btn-secondary:hover{background:var(--bg2);border-color:var(--line2)}
+.btn svg{width:14px;height:14px}
+
+/* Onboarding overlay */
+.onboard{
+  position:fixed;inset:0;z-index:400;
+  background:radial-gradient(ellipse 70% 50% at 50% 30%, rgba(46,123,255,.18), transparent 60%),var(--bg);
+  display:none;align-items:center;justify-content:center;padding:24px;
+}
+.onboard.show{display:flex;animation:fadeIn .35s ease}
+.onboard-card{
+  max-width:520px;width:100%;
+  background:var(--bg2);border:1px solid var(--line);border-radius:28px;
+  padding:38px 34px 30px;text-align:center;
+  box-shadow:0 40px 100px -20px rgba(0,0,0,.7);
+  position:relative;overflow:hidden;
+}
+.onboard-card::before{
+  content:"";position:absolute;top:-30%;left:-10%;
+  width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle,rgba(139,92,255,.18),transparent 70%);
+  pointer-events:none;
+}
+.ob-step{display:none;animation:fadeSlide .4s ease;position:relative;z-index:1}
+.ob-step.on{display:block}
+.ob-icon{
+  width:80px;height:80px;border-radius:22px;
+  background:var(--grad-core);color:#fff;
+  display:flex;align-items:center;justify-content:center;margin:0 auto 20px;
+  box-shadow:0 16px 40px -10px rgba(46,123,255,.5),inset 0 1px 0 rgba(255,255,255,.2);
+}
+.ob-icon svg{width:38px;height:38px}
+.ob-step h2{font-size:24px;font-weight:800;letter-spacing:-.02em;margin-bottom:10px}
+.ob-step h2 b{background:var(--grad-core);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ob-step p{font-size:14.5px;color:var(--ink2);line-height:1.65;max-width:380px;margin:0 auto}
+.ob-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:28px;position:relative;z-index:1}
+.ob-dots{display:flex;gap:8px}
+.ob-dot{width:8px;height:8px;border-radius:50%;background:var(--line);transition:all .25s}
+.ob-dot.on{background:var(--cyan);width:26px;border-radius:999px;box-shadow:0 0 10px rgba(0,229,255,.5)}
+.ob-foot .btn{flex:0 0 auto;min-width:120px}
+.ob-skip{
+  position:absolute;top:18px;right:18px;
+  background:transparent;border:0;color:var(--muted);cursor:pointer;font-size:12px;font-family:inherit;
+  transition:color .2s;z-index:2;
+}
+.ob-skip:hover{color:var(--ink)}
+
+/* ============ RESPONSIVE ============ */
+@media(max-width:680px){
+  .shell{padding:16px 16px 100px}
+  .top{flex-wrap:wrap;gap:12px;margin-bottom:24px}
+  .company{flex:1;min-width:0;padding:8px 14px;order:3;width:100%}
+  .company-info b{font-size:13px}
+  .stat{padding:20px}
+  .stat-headline{font-size:15px}
+  .advice{padding:22px 20px}
+  .advice-text{font-size:16px}
+  .hero-banner{padding:14px 18px;gap:12px}
+  .hero-banner-text{font-size:13px}
+  .voice-mic{width:80px;height:80px}
+  .voice-mic svg{width:30px;height:30px}
+  .brief-card{padding:20px 22px}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- TOP -->
+  <header class="top">
+    <a class="home" href="nexus-hub.html" title="Retour au hub Nexus">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
+        </svg>
+      </div>
+      <div class="home-meta"><b>Nexus Core</b><span>Accueil</span></div>
+    </a>
+
+    <div class="company">
+      <div class="company-logo">🥖</div>
+      <div class="company-info">
+        <b>Panadería Don Carlos</b>
+        <small>Las Condes · Santiago, CL</small>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button class="notif" title="Notifications" aria-label="Notifications">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="badge">3</span>
+      </button>
+      <button class="menu-btn" id="menuBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        Menu
+      </button>
+    </div>
+  </header>
+
+  <!-- HERO BANNER (info principale du jour, valorise Nexus) -->
+  <div class="hero-banner">
+    <div class="hero-banner-ic">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    </div>
+    <div class="hero-banner-text">
+      <b>Bonne journée, Carlos.</b> <span class="hl">Grâce à Nexus</span>, tu as <b>+28 % de ventes</b> cette semaine et <b>2 clients perdus récupérés</b>. Continue, ça marche.
+    </div>
+  </div>
+
+  <!-- STATS — top 3 du jour, cliquables → pop-up -->
+  <section class="stats-section">
+    <button class="stats-arrow" id="statPrev" aria-label="Précédent">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+
+    <div class="stats-track" id="statsTrack">
+
+      <article class="stat s1" data-stat="recovered">
+        <div class="stat-head">
+          <div class="stat-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M21 11l-4-4-4 4M17 7v9"/></svg>
+          </div>
+          <span class="stat-tag">★ Top du jour</span>
+        </div>
+        <div class="stat-headline">Grâce à Nexus, tu as récupéré <b>5 clients perdus</b> cette semaine.</div>
+        <div class="stat-detail">Soit 14 % de ta base inactive, réveillée par les rappels auto.</div>
+        <span class="stat-cta">Voir le détail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+      </article>
+
+      <article class="stat s2" data-stat="newclients">
+        <div class="stat-head">
+          <div class="stat-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+          </div>
+          <span class="stat-tag">★ Top du jour</span>
+        </div>
+        <div class="stat-headline">Tu as gagné <b>3 nouveaux clients</b> aujourd'hui.</div>
+        <div class="stat-detail">Tous via WhatsApp. Conversion 38 % depuis l'IA d'accueil.</div>
+        <span class="stat-cta">Voir le détail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+      </article>
+
+      <article class="stat s3" data-stat="sales">
+        <div class="stat-head">
+          <div class="stat-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          </div>
+          <span class="stat-tag">★ Top du jour</span>
+        </div>
+        <div class="stat-headline">Tu as fait <b>10 ventes</b> aujourd'hui — meilleur lundi du mois.</div>
+        <div class="stat-detail">Panier moyen $19.30 · top produit empanadas (5 ventes).</div>
+        <span class="stat-cta">Voir le détail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+      </article>
+
+      <article class="stat s4" data-stat="response">
+        <div class="stat-head">
+          <div class="stat-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <span class="stat-tag">★ Bonus</span>
+        </div>
+        <div class="stat-headline">L'IA répond en <b>1 min 12 s</b> en moyenne.</div>
+        <div class="stat-detail">38 s plus rapide que la semaine dernière. Clients ravis.</div>
+        <span class="stat-cta">Voir le détail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+      </article>
+
+    </div>
+
+    <button class="stats-arrow" id="statNext" aria-label="Suivant">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+  </section>
+
+  <!-- CONSEIL DE NEXUS (carousel calendar/event-aware) -->
+  <section class="advice">
+    <div class="advice-head">
+      <div class="advice-title">
+        <div class="advice-title-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h4M9 11V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6M9 11h6m0 0h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4m0-9v9m-6 0h6"/></svg>
+        </div>
+        <div>
+          <h3>Conseil de Nexus</h3>
+          <small>Mis à jour il y a 2 h · IA</small>
+        </div>
+      </div>
+      <div class="advice-nav">
+        <span class="advice-counter" id="adviceCounter">1 / 5</span>
+        <button class="advice-arrow" id="advicePrev" aria-label="Précédent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <button class="advice-arrow" id="adviceNext" aria-label="Suivant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+      </div>
+    </div>
+    <div class="advice-body" id="adviceBody">
+
+      <div class="advice-card on">
+        <div class="advice-context">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Demain · Anniversaire client
+        </div>
+        <p class="advice-text">Demain c'est l'anniversaire de <b>Raviella Mendoza</b>. Voulez-vous lui envoyer un message avec un <b>code promo −15 %</b> sur ses cookies préférés ?</p>
+        <div class="advice-actions">
+          <button class="advice-act primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Envoyer maintenant
+          </button>
+          <button class="advice-act">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Programmer 9 h
+          </button>
+          <button class="advice-act">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Pas cette fois
+          </button>
+        </div>
+      </div>
+
+      <div class="advice-card">
+        <div class="advice-context">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Maintenant · 5 chats en attente
+        </div>
+        <p class="advice-text">Voulez-vous répondre à <b>5 chats</b> qui attendent encore votre validation ? L'IA a déjà préparé une réponse pour 4 d'entre eux.</p>
+        <div class="advice-actions">
+          <button class="advice-act primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Voir les 5 chats
+          </button>
+          <button class="advice-act">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Tout valider
+          </button>
+          <button class="advice-act">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            Plus tard
+          </button>
+        </div>
+      </div>
+
+      <div class="advice-card">
+        <div class="advice-context">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18l-2 13H5L3 7z"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>
+          Vendredi · Pic d'activité
+        </div>
+        <p class="advice-text">Le <b>vendredi 19 h–21 h</b> est ton créneau de pic. Programme une story Instagram à <b>18 h</b> pour capter +15 % de commandes.</p>
+        <div class="advice-actions">
+          <button class="advice-act primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Programmer la story
+          </button>
+          <button class="advice-act">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            Voir l'historique
+          </button>
+          <button class="advice-act">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Pas maintenant
+          </button>
+        </div>
+      </div>
+
+      <div class="advice-card">
+        <div class="advice-context">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg>
+          Météo · Pluie samedi
+        </div>
+        <p class="advice-text">Il va pleuvoir samedi. <b>Tes ventes de soupes augmentent de 40 %</b> les jours de pluie. Voulez-vous activer la <b>promo soupe maison</b> ?</p>
+        <div class="advice-actions">
+          <button class="advice-act primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Activer la promo
+          </button>
+          <button class="advice-act">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Plus de détails
+          </button>
+        </div>
+      </div>
+
+      <div class="advice-card">
+        <div class="advice-context">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          Question récurrente · 3 clients
+        </div>
+        <p class="advice-text">3 clients ont demandé cette semaine : <b>« Vous livrez à Providencia ? »</b>. Ajoutez-le à votre <b>profil Nexus</b> pour que l'IA réponde instantanément.</p>
+        <div class="advice-actions">
+          <button class="advice-act primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            Modifier le profil
+          </button>
+          <button class="advice-act">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Voir les 3 messages
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- DAILY BRIEF — audio + écrit jumeaux, 2 modes (lundi semaine / quotidien jour) -->
+  <section class="brief" id="brief">
+
+    <div class="brief-card audio">
+      <div class="brief-head">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          Brief audio
+        </h3>
+        <div class="brief-mode-tabs" data-target="audio">
+          <button class="mode-tab on" data-mode="day">Du jour</button>
+          <button class="mode-tab" data-mode="week">De la semaine</button>
+        </div>
+      </div>
+      <div class="audio-body">
+        <div class="voice-mic" id="voiceMic" title="Lancer le brief audio">
+          <svg id="voiceIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </div>
+        <div class="audio-meta">
+          <b id="audioTitle">Ton récap du lundi matin</b>
+          <small id="audioDuration">2 min 18 s · prêt à écouter</small>
+        </div>
+        <div class="audio-progress"><div class="audio-progress-bar" id="audioBar"></div></div>
+        <div class="audio-times"><span id="audioCur">0:00</span><span id="audioTot">2:18</span></div>
+      </div>
+    </div>
+
+    <div class="brief-card text">
+      <div class="brief-head">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Brief écrit
+        </h3>
+        <div class="brief-mode-tabs" data-target="text">
+          <button class="mode-tab on" data-mode="day">Du jour</button>
+          <button class="mode-tab" data-mode="week">De la semaine</button>
+        </div>
+      </div>
+      <div class="text-body" id="textBody">
+        <div class="text-content" data-mode="day" style="display:block">
+          <p><b>Bonjour Carlos,</b> voici ton récap du jour.</p>
+          <p>Tu as fait <b>10 ventes</b> aujourd'hui — meilleur lundi du mois. Ton top produit reste les empanadas (5 ventes, +12 % vs hier).</p>
+          <p>L'IA a répondu à <b>21 messages</b>, dont 19 sans ton intervention. <b>3 nouveaux clients</b> sont arrivés via WhatsApp et 2 d'entre eux ont déjà passé commande.</p>
+          <p>Demain c'est l'anniversaire de Raviella Mendoza — Nexus suggère un code promo. Et il va pleuvoir samedi : ta promo soupe maison est prête à être activée.</p>
+          <p><b>Bonne soirée. Tu peux fermer la boutique tranquille.</b></p>
+        </div>
+        <div class="text-content" data-mode="week" style="display:none">
+          <p><b>Récap de ta semaine, Carlos.</b></p>
+          <p>Cette semaine tu as fait <b>+28 % de ventes</b> vs la semaine dernière, et <b>récupéré 5 clients perdus</b> grâce aux rappels Nexus. Excellent.</p>
+          <p>Côté agenda : 3 RDV livraison cette semaine (mardi 14 h, jeudi 11 h, samedi 17 h) et anniversaire de Raviella demain.</p>
+          <p>L'IA a géré <b>147 conversations</b>, 94 % sans intervention. Tu as économisé environ 6 h de travail commercial.</p>
+          <p>Conseils pour la semaine : pousser les empanadas vendredi soir, activer la promo soupe samedi (pluie), et compléter le profil sur les livraisons Providencia.</p>
+          <p><b>Bon début de semaine. On garde le rythme.</b></p>
+        </div>
+      </div>
+      <button class="text-cta" id="textExpand">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        Lire en entier
+      </button>
+    </div>
+
+  </section>
+
+  <!-- MESSAGES PREVIEW — 5 + 6e flou -->
+  <div class="preview-section">
+    <div class="preview-head">
+      <h3><span class="star">★</span> Messages les plus importants</h3>
+      <a id="previewExpand">Voir tout →</a>
+    </div>
+    <div class="msg-list">
+      <div class="msg">
+        <div class="msg-avatar" style="--av:linear-gradient(135deg,#FF6B9D,#F5C45E)">MR</div>
+        <div class="msg-meta">
+          <div class="msg-name">María Rodríguez <span class="star">★</span></div>
+          <div class="msg-text">Hola Carlos ! Je veux confirmer ma commande de 12 empanadas pour samedi…</div>
+        </div>
+        <div class="msg-time">14:32</div>
+        <div class="msg-unread"></div>
+      </div>
+      <div class="msg">
+        <div class="msg-avatar" style="--av:linear-gradient(135deg,#2E7BFF,#00E5FF)">DS</div>
+        <div class="msg-meta">
+          <div class="msg-name">Diego Salazar <span class="star">★</span></div>
+          <div class="msg-text">Tu fais des livraisons à Providencia ? Je voudrais commander pour samedi…</div>
+        </div>
+        <div class="msg-time">13:08</div>
+        <div class="msg-unread"></div>
+      </div>
+      <div class="msg">
+        <div class="msg-avatar" style="--av:linear-gradient(135deg,#1EFF8E,#00E5FF)">AC</div>
+        <div class="msg-meta">
+          <div class="msg-name">Ana Castillo <span class="star">★</span></div>
+          <div class="msg-text">Merci pour les bolos d'anniversaire, ils étaient parfaits 🎂</div>
+        </div>
+        <div class="msg-time">11:47</div>
+      </div>
+      <div class="msg">
+        <div class="msg-avatar" style="--av:linear-gradient(135deg,#8B5CFF,#FF6B9D)">JC</div>
+        <div class="msg-meta">
+          <div class="msg-name">Javier Carrasco <span class="star">★</span></div>
+          <div class="msg-text">Possible de réserver le pavé entier pour 25 personnes mercredi prochain ?</div>
+        </div>
+        <div class="msg-time">10:22</div>
+      </div>
+      <div class="msg">
+        <div class="msg-avatar" style="--av:linear-gradient(135deg,#F5C45E,#1EFF8E)">RM</div>
+        <div class="msg-meta">
+          <div class="msg-name">Raviella Mendoza <span class="star">★</span></div>
+          <div class="msg-text">Vous avez encore les cookies aux figues ? Je passe demain matin…</div>
+        </div>
+        <div class="msg-time">09:14</div>
+      </div>
+
+      <!-- 6e message flou — teaser pour pousser au scroll -->
+      <div class="msg blur">
+        <div class="msg-avatar" style="--av:linear-gradient(135deg,#7A85A0,#C5CDE0)">??</div>
+        <div class="msg-meta">
+          <div class="msg-name">XXXX XXXXX</div>
+          <div class="msg-text">XXXXXX XX XXX XXXXX XX XXXXXX XX XXXX XXX XX…</div>
+        </div>
+        <div class="msg-time">08:32</div>
+      </div>
+
+      <div class="msg-more">
+        <button class="msg-more-btn" id="messagesMore">
+          Voir tous les messages
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- DRAWER (sidebar 7 sections + Tutoriel + Mode vacances) -->
+<div class="drawer-bg" id="drawerBg"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head">
+    <h3>Navigation<small>Sections principales</small></h3>
+    <button class="drawer-close" id="drawerClose">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="drawer-list">
+    <a class="drawer-item active" href="#">
+      <span class="drawer-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
+      <span class="drawer-item-lbl">Dashboard</span>
+      <span class="drawer-item-meta">Accueil</span>
+    </a>
+    <a class="drawer-item" href="app.html#/stats">
+      <span class="drawer-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+      <span class="drawer-item-lbl">Statistiques</span>
+    </a>
+    <a class="drawer-item" href="app.html#/inbox">
+      <span class="drawer-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+      <span class="drawer-item-lbl">Messages</span>
+      <span class="drawer-item-meta">12</span>
+    </a>
+    <a class="drawer-item" href="app.html#/marketing">
+      <span class="drawer-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8v18l-18-8v-2z"/></svg></span>
+      <span class="drawer-item-lbl">Campagnes</span>
+    </a>
+    <a class="drawer-item" href="app.html#/crm">
+      <span class="drawer-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+      <span class="drawer-item-lbl">Clients CRM</span>
+      <span class="drawer-item-meta">147</span>
+    </a>
+    <a class="drawer-item" href="app.html#/tips">
+      <span class="drawer-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h4M9 11V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6M9 11h6m0 0h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4m0-9v9m-6 0h6"/></svg></span>
+      <span class="drawer-item-lbl">Tips IA</span>
+    </a>
+    <a class="drawer-item" href="app.html#/profil">
+      <span class="drawer-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+      <span class="drawer-item-lbl">Profil entreprise</span>
+    </a>
+
+    <div style="height:14px"></div>
+
+    <button class="drawer-item" id="openVacances">
+      <span class="drawer-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22a8 8 0 0 1 16 0"/><circle cx="10" cy="10" r="4"/><line x1="20" y1="2" x2="20" y2="22"/></svg></span>
+      <span class="drawer-item-lbl">Mode vacances</span>
+      <span class="drawer-item-meta">Inactif</span>
+    </button>
+
+    <button class="drawer-item" id="openTutoriel">
+      <span class="drawer-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg></span>
+      <span class="drawer-item-lbl">Tutoriel</span>
+      <span class="drawer-item-meta">Revoir</span>
+    </button>
+  </div>
+</aside>
+
+<!-- MODAL Stat detail (pop-up flouté) -->
+<div class="modal-bg" id="statModal">
+  <div class="modal" id="statModalCard">
+    <button class="modal-close" id="statModalClose">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="modal-pad">
+      <div class="stat-modal-head">
+        <div class="stat-modal-ic" id="smIc"></div>
+        <div>
+          <h2 id="smTitle"></h2>
+          <p id="smDesc"></p>
+        </div>
+      </div>
+      <div class="stat-big-num">
+        <div class="v"><b id="smValue"></b></div>
+        <div class="delta" id="smDelta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          <span id="smDeltaText"></span>
+        </div>
+      </div>
+      <div class="bar-chart" id="smChart"></div>
+      <div class="chart-foot"><span id="smFootL"></span><span id="smFootR"></span></div>
+      <div class="tip-bulb">
+        <div class="tip-bulb-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6"/><path d="M12 17v4"/><path d="M12 3a7 7 0 0 0-4 12.74V17h8v-1.26A7 7 0 0 0 12 3z"/></svg></div>
+        <div class="tip-bulb-text" id="smTip"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL Mode vacances configurable -->
+<div class="modal-bg" id="vacModal">
+  <div class="modal">
+    <button class="modal-close" data-close="vacModal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="modal-pad">
+      <div class="stat-modal-head">
+        <div class="stat-modal-ic" style="--accent:#1EFF8E;--accent2:#00E5FF;background:linear-gradient(135deg,#1EFF8E,#00E5FF)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22a8 8 0 0 1 16 0"/><circle cx="10" cy="10" r="4"/><line x1="20" y1="2" x2="20" y2="22"/></svg>
+        </div>
+        <div>
+          <h2 style="--accent:#1EFF8E;--accent2:#00E5FF">Mode <b>vacances</b></h2>
+          <p>L'IA gère seule pendant que tu te reposes. Configure ce que tu veux et reviens tranquille.</p>
+        </div>
+      </div>
+
+      <div class="vac-form">
+        <div class="vac-row">
+          <div class="field">
+            <label>Date de début</label>
+            <input type="datetime-local" id="vacStart" value="2026-05-10T18:00">
+          </div>
+          <div class="field">
+            <label>Date de fin</label>
+            <input type="datetime-local" id="vacEnd" value="2026-05-17T09:00">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Ton des réponses auto</label>
+          <div class="tone-pills" id="tonePills">
+            <button class="tone-pill on" data-tone="warm">Chaleureux</button>
+            <button class="tone-pill" data-tone="pro">Professionnel</button>
+            <button class="tone-pill" data-tone="friendly">Amical</button>
+            <button class="tone-pill" data-tone="short">Court & direct</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Que doit dire l'IA aux clients ?</label>
+          <textarea id="vacMsg" placeholder="Ex : Hola ! La boulangerie est en pause jusqu'au 17 mai. Pour les commandes urgentes, l'IA peut prendre votre numéro et nous rappellerons à notre retour. Gracias !">Hola ! La boulangerie est en pause jusqu'au 17 mai. Pour les commandes urgentes, je note ta demande et Carlos te recontacte dès le retour. Gracias por tu paciencia 🥖</textarea>
+        </div>
+
+        <div class="field">
+          <label>Que peut faire l'IA pendant ton absence ?</label>
+          <div class="tone-pills">
+            <button class="tone-pill on" type="button">Répondre aux questions</button>
+            <button class="tone-pill on" type="button">Prendre les commandes urgentes</button>
+            <button class="tone-pill" type="button">Confirmer livraisons</button>
+            <button class="tone-pill" type="button">Appliquer promos auto</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer-cta">
+        <button class="btn btn-secondary" data-close="vacModal">Annuler</button>
+        <button class="btn btn-primary" id="vacActivate">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Activer le mode vacances
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ONBOARDING (1ère fois — overlay forcé) -->
+<div class="onboard" id="onboard">
+  <div class="onboard-card">
+    <button class="ob-skip" id="obSkip">Passer →</button>
+
+    <div class="ob-step on" data-step="0">
+      <div class="ob-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+      </div>
+      <h2>Bienvenue sur <b>Nexus Core</b></h2>
+      <p>Le centre de contrôle de ton business. WhatsApp, CRM, marketing, IA — tout au même endroit. On te montre l'essentiel en 4 écrans.</p>
+    </div>
+
+    <div class="ob-step" data-step="1">
+      <div class="ob-icon" style="background:linear-gradient(135deg,#1EFF8E,#00E5FF)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </div>
+      <h2>Tes <b>3 meilleurs résultats</b> du jour</h2>
+      <p>Chaque matin, Nexus te montre les 3 chiffres qui comptent. Touche une stat pour le détail complet — graphiques, comparaisons, conseils.</p>
+    </div>
+
+    <div class="ob-step" data-step="2">
+      <div class="ob-icon" style="background:linear-gradient(135deg,#8B5CFF,#FF6B9D)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h4M9 11V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6M9 11h6m0 0h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4m0-9v9m-6 0h6"/></svg>
+      </div>
+      <h2>Les <b>conseils de Nexus</b></h2>
+      <p>Pas d'obligations, des suggestions. Anniversaire client demain ? Pluie samedi ? Nexus te le dit, et tu valides en un clic.</p>
+    </div>
+
+    <div class="ob-step" data-step="3">
+      <div class="ob-icon" style="background:linear-gradient(135deg,#F5C45E,#FF7B7B)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      </div>
+      <h2>Ton <b>brief audio</b> tous les matins</h2>
+      <p>Écoute le résumé de ta journée (ou semaine) en voiture. Texte aussi disponible si tu préfères lire. C'est ton co-pilote.</p>
+    </div>
+
+    <div class="ob-foot">
+      <div class="ob-dots" id="obDots">
+        <span class="ob-dot on"></span><span class="ob-dot"></span><span class="ob-dot"></span><span class="ob-dot"></span>
+      </div>
+      <button class="btn btn-primary" id="obNext">
+        Suivant
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // =========== Stats carousel
+  const track = document.getElementById('statsTrack');
+  const sPrev = document.getElementById('statPrev');
+  const sNext = document.getElementById('statNext');
+  const stats = [...track.querySelectorAll('.stat')];
+
+  const scrollByStep = (dir) => {
+    const w = stats[0].offsetWidth + 16;
+    track.scrollBy({ left: dir * w, behavior: 'smooth' });
+  };
+  sPrev.addEventListener('click', () => scrollByStep(-1));
+  sNext.addEventListener('click', () => scrollByStep(1));
+
+  // =========== Stats detail modal
+  const STAT_DATA = {
+    recovered: {
+      title: '<b>Clients récupérés</b>', value: '5',
+      desc: 'Clients inactifs depuis +3 semaines, réveillés par les rappels Nexus cette semaine.',
+      delta: '+3 vs semaine dernière',
+      chart: [{l:'Lun',v:0},{l:'Mar',v:1},{l:'Mer',v:1},{l:'Jeu',v:0},{l:'Ven',v:2},{l:'Sam',v:1},{l:'Dim',v:0}],
+      footL:'Total mois : <b>14</b> · Objectif <b>20</b>', footR:'Taux conversion <b>62 %</b>',
+      tip:'Sur les 8 clients qui n\'ont pas répondu, 6 sont des hommes 35-50 ans. Essaie un message audio plutôt qu\'écrit.',
+      acc:['#1EFF8E','#00E5FF'],
+      ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M21 11l-4-4-4 4M17 7v9"/></svg>'
+    },
+    newclients: {
+      title: '<b>Nouveaux clients</b>', value: '3',
+      desc: 'Premier contact aujourd\'hui via WhatsApp. Tous ont posé une question sur ton offre.',
+      delta: '+1 vs hier',
+      chart: [{l:'9h',v:1},{l:'10h',v:0},{l:'11h',v:1},{l:'12h',v:0},{l:'13h',v:0},{l:'14h',v:1},{l:'15h',v:0}],
+      footL:'Total semaine : <b>12</b>', footR:'Coût par client <b>0 €</b>',
+      tip:'2/3 sont des femmes 25-40 ans. Ton lead magnet "recette empanada maison" performe bien sur ce segment.',
+      acc:['#2E7BFF','#8B5CFF'],
+      ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>'
+    },
+    sales: {
+      title: '<b>Ventes du jour</b>', value: '10',
+      desc: 'Meilleur lundi du mois. Top produit : empanadas (5 ventes).',
+      delta: '+25 % vs lundi dernier',
+      chart: [{l:'Lun',v:10},{l:'Mar',v:7},{l:'Mer',v:9},{l:'Jeu',v:8},{l:'Ven',v:14},{l:'Sam',v:12},{l:'Dim',v:6}],
+      footL:'Panier moyen : <b>$19.30</b>', footR:'CA semaine : <b>$1,287</b>',
+      tip:'Le vendredi 19h-21h reste ton créneau roi. Programme une story Instagram à 18h pour amplifier.',
+      acc:['#F5C45E','#FF7B7B'],
+      ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>'
+    },
+    response: {
+      title: 'Temps de <b>réponse IA</b>', value: '1m 12s',
+      desc: 'L\'IA répond en moins de 2 minutes en moyenne. Objectif atteint.',
+      delta: '−38 s vs semaine dernière',
+      chart: [{l:'Lun',v:80},{l:'Mar',v:75},{l:'Mer',v:90},{l:'Jeu',v:70},{l:'Ven',v:65},{l:'Sam',v:72},{l:'Dim',v:60}],
+      footL:'Plus rapide : <b>Dim (1m)</b>', footR:'Objectif < 2 min ✓',
+      tip:'Tes réponses sont 3× plus rapides que la moyenne LATAM. C\'est ton avantage compétitif.',
+      acc:['#8B5CFF','#FF6B9D'],
+      ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+    }
+  };
+
+  const sm = document.getElementById('statModal');
+  const smIc = document.getElementById('smIc');
+  const smTitle = document.getElementById('smTitle');
+  const smDesc = document.getElementById('smDesc');
+  const smValue = document.getElementById('smValue');
+  const smDeltaText = document.getElementById('smDeltaText');
+  const smChart = document.getElementById('smChart');
+  const smFootL = document.getElementById('smFootL');
+  const smFootR = document.getElementById('smFootR');
+  const smTip = document.getElementById('smTip');
+  const setVar = (el, n, v) => el.style.setProperty(n, v);
+
+  const openStat = (key) => {
+    const d = STAT_DATA[key]; if (!d) return;
+    setVar(smIc, '--accent', d.acc[0]); setVar(smIc, '--accent2', d.acc[1]);
+    smIc.style.background = `linear-gradient(135deg,${d.acc[0]},${d.acc[1]})`;
+    smIc.innerHTML = d.ic;
+    smTitle.innerHTML = d.title;
+    setVar(smTitle, '--accent', d.acc[0]); setVar(smTitle, '--accent2', d.acc[1]);
+    smDesc.textContent = d.desc;
+    smValue.textContent = d.value;
+    setVar(smValue.parentElement, '--accent', d.acc[0]); setVar(smValue.parentElement, '--accent2', d.acc[1]);
+    smDeltaText.textContent = d.delta;
+    const max = Math.max(...d.chart.map(c => c.v), 1);
+    smChart.innerHTML = d.chart.map(c => {
+      const h = (c.v / max) * 100;
+      return `<div class="bar" style="height:${h}%;background:linear-gradient(180deg,${d.acc[0]},${d.acc[1]})"><span class="val">${c.v}</span><span class="lbl">${c.l}</span></div>`;
+    }).join('');
+    smFootL.innerHTML = d.footL; smFootR.innerHTML = d.footR;
+    smTip.innerHTML = `<b>Tip :</b> ${d.tip}`;
+    sm.classList.add('show');
+  };
+  document.querySelectorAll('.stat').forEach(s => s.addEventListener('click', () => openStat(s.dataset.stat)));
+  document.getElementById('statModalClose').addEventListener('click', () => sm.classList.remove('show'));
+  sm.addEventListener('click', e => { if (e.target === sm) sm.classList.remove('show'); });
+
+  // =========== Conseil carousel
+  const cards = [...document.querySelectorAll('.advice-card')];
+  const aPrev = document.getElementById('advicePrev');
+  const aNext = document.getElementById('adviceNext');
+  const counter = document.getElementById('adviceCounter');
+  let cur = 0;
+  const setCard = (i) => {
+    cur = (i + cards.length) % cards.length;
+    cards.forEach((c, idx) => c.classList.toggle('on', idx === cur));
+    counter.textContent = `${cur + 1} / ${cards.length}`;
+  };
+  aPrev.addEventListener('click', () => setCard(cur - 1));
+  aNext.addEventListener('click', () => setCard(cur + 1));
+  let auto = setInterval(() => setCard(cur + 1), 9000);
+  document.querySelector('.advice').addEventListener('mouseenter', () => clearInterval(auto));
+
+  // =========== Brief audio + texte (mode tabs)
+  const dayDur = 138, weekDur = 312;
+  let curMode = { audio: 'day', text: 'day' };
+
+  const updateAudio = () => {
+    const dur = curMode.audio === 'day' ? dayDur : weekDur;
+    const min = Math.floor(dur / 60), sec = dur % 60;
+    document.getElementById('audioTitle').textContent = curMode.audio === 'day' ? 'Ton récap du jour' : 'Récap de la semaine';
+    document.getElementById('audioDuration').textContent = `${min} min ${String(sec).padStart(2,'0')} s · prêt à écouter`;
+    document.getElementById('audioTot').textContent = `${min}:${String(sec).padStart(2,'0')}`;
+  };
+  const updateText = () => {
+    document.querySelectorAll('.text-content').forEach(c => {
+      c.style.display = c.dataset.mode === curMode.text ? 'block' : 'none';
+    });
+  };
+
+  document.querySelectorAll('.brief-mode-tabs').forEach(group => {
+    const target = group.dataset.target;
+    group.querySelectorAll('.mode-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        group.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('on'));
+        tab.classList.add('on');
+        curMode[target] = tab.dataset.mode;
+        if (target === 'audio') updateAudio();
+        else updateText();
+      });
+    });
+  });
+
+  // Audio fake play
+  const mic = document.getElementById('voiceMic');
+  const bar = document.getElementById('audioBar');
+  const cur_ = document.getElementById('audioCur');
+  const ico = document.getElementById('voiceIcon');
+  let playing = false, t0 = 0, raf = null;
+  const playIc = '<polygon points="5 3 19 12 5 21 5 3"/>';
+  const pauseIc = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+  mic.addEventListener('click', () => {
+    playing = !playing;
+    mic.classList.toggle('playing', playing);
+    ico.innerHTML = playing ? pauseIc : playIc;
+    if (playing) {
+      t0 = Date.now();
+      const tick = () => {
+        if (!playing) return;
+        const dur = curMode.audio === 'day' ? dayDur : weekDur;
+        const elapsed = Math.min((Date.now() - t0) / 1000, dur);
+        bar.style.width = `${(elapsed / dur) * 100}%`;
+        const m = Math.floor(elapsed / 60), s = Math.floor(elapsed % 60);
+        cur_.textContent = `${m}:${String(s).padStart(2,'0')}`;
+        if (elapsed < dur) raf = requestAnimationFrame(tick);
+        else { playing = false; mic.classList.remove('playing'); ico.innerHTML = playIc; }
+      };
+      tick();
+    }
+  });
+
+  // Text expand
+  document.getElementById('textExpand').addEventListener('click', (e) => {
+    const tb = document.getElementById('textBody');
+    tb.classList.toggle('expanded');
+    e.currentTarget.firstElementChild.style.transform = tb.classList.contains('expanded') ? 'rotate(180deg)' : 'rotate(0)';
+    e.currentTarget.lastChild.textContent = tb.classList.contains('expanded') ? ' Réduire' : ' Lire en entier';
+  });
+
+  // =========== Drawer
+  const drawer = document.getElementById('drawer');
+  const drawerBg = document.getElementById('drawerBg');
+  const openDrawer = () => { drawer.classList.add('show'); drawerBg.classList.add('show'); };
+  const closeDrawer = () => { drawer.classList.remove('show'); drawerBg.classList.remove('show'); };
+  document.getElementById('menuBtn').addEventListener('click', openDrawer);
+  document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+  drawerBg.addEventListener('click', closeDrawer);
+
+  // =========== Mode vacances
+  const vacModal = document.getElementById('vacModal');
+  document.getElementById('openVacances').addEventListener('click', () => {
+    closeDrawer();
+    setTimeout(() => vacModal.classList.add('show'), 200);
+  });
+  document.querySelectorAll('[data-close]').forEach(el => {
+    el.addEventListener('click', () => document.getElementById(el.dataset.close).classList.remove('show'));
+  });
+  vacModal.addEventListener('click', e => { if (e.target === vacModal) vacModal.classList.remove('show'); });
+  document.querySelectorAll('.tone-pills').forEach(group => {
+    group.querySelectorAll('.tone-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        if (group === document.getElementById('tonePills')) {
+          group.querySelectorAll('.tone-pill').forEach(p => p.classList.remove('on'));
+          pill.classList.add('on');
+        } else {
+          pill.classList.toggle('on');
+        }
+      });
+    });
+  });
+  document.getElementById('vacActivate').addEventListener('click', () => {
+    document.querySelector('#openVacances .drawer-item-meta').textContent = 'Actif';
+    document.querySelector('#openVacances .drawer-item-meta').style.color = '#1EFF8E';
+    vacModal.classList.remove('show');
+    alert('Mode vacances activé. Bonnes vacances Carlos 🌴');
+  });
+
+  // =========== Tutoriel button → re-open onboarding
+  document.getElementById('openTutoriel').addEventListener('click', () => {
+    closeDrawer();
+    setTimeout(() => { obStep = 0; renderOnboard(); document.getElementById('onboard').classList.add('show'); }, 200);
+  });
+
+  // =========== Onboarding (1ère fois forcé)
+  const onboard = document.getElementById('onboard');
+  const obSteps = [...document.querySelectorAll('.ob-step')];
+  const obDots = [...document.querySelectorAll('.ob-dot')];
+  const obNext = document.getElementById('obNext');
+  let obStep = 0;
+  const renderOnboard = () => {
+    obSteps.forEach((s, i) => s.classList.toggle('on', i === obStep));
+    obDots.forEach((d, i) => d.classList.toggle('on', i === obStep));
+    obNext.innerHTML = obStep === obSteps.length - 1
+      ? 'Commencer <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>'
+      : 'Suivant <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>';
+  };
+  obNext.addEventListener('click', () => {
+    if (obStep < obSteps.length - 1) { obStep++; renderOnboard(); }
+    else { onboard.classList.remove('show'); localStorage.setItem('nx_onboard_done', '1'); }
+  });
+  document.getElementById('obSkip').addEventListener('click', () => {
+    onboard.classList.remove('show'); localStorage.setItem('nx_onboard_done', '1');
+  });
+  if (!localStorage.getItem('nx_onboard_done')) {
+    setTimeout(() => onboard.classList.add('show'), 600);
+  }
+
+  // =========== Esc closes everything
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      [sm, vacModal].forEach(m => m.classList.remove('show'));
+      closeDrawer();
+    }
+  });
+
+  // =========== Messages "Voir tout" → drawer Messages
+  document.getElementById('messagesMore').addEventListener('click', () => location.href = 'app.html#/inbox');
+  document.getElementById('previewExpand').addEventListener('click', () => location.href = 'app.html#/inbox');
+})();
+</script>
+</body>
+</html>

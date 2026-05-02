@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0F1A">
+<title>Aperçu Nexus — sans data</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0B0F1A; --bg2:#11172A;
+  --panel:rgba(255,255,255,.04); --panel2:rgba(255,255,255,.07);
+  --ink:#F2F5FB; --ink2:#C5CDE0; --muted:#7A85A0;
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.04);
+  --blue:#2E7BFF; --violet:#8B5CFF; --cyan:#00E5FF; --lime:#1EFF8E; --gold:#F5C45E; --red:#FF6B6B;
+}
+html,body{
+  background:var(--bg);color:var(--ink);
+  font-family:'Inter','Segoe UI',-apple-system,sans-serif;line-height:1.5;
+  -webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden;
+}
+body{
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 5%, rgba(46,123,255,.18), transparent 60%),
+    radial-gradient(ellipse 60% 45% at 85% 95%, rgba(139,92,255,.14), transparent 60%),
+    var(--bg);
+  background-attachment:fixed;
+}
+
+/* TEASER BANNER (sticky top) */
+.teaser{
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;gap:14px;
+  padding:14px 24px;
+  background:rgba(11,15,26,.85);
+  border-bottom:1px solid var(--line);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+.teaser-back{
+  width:36px;height:36px;border-radius:10px;
+  background:var(--panel);border:1px solid var(--line);color:var(--ink);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  text-decoration:none;flex-shrink:0;transition:all .2s;
+}
+.teaser-back:hover{border-color:var(--cyan);color:var(--cyan)}
+.teaser-back svg{width:16px;height:16px}
+.teaser-text{flex:1;font-size:13px;color:var(--ink2)}
+.teaser-text b{color:var(--ink)}
+.teaser-text .pill{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:3px 9px;border-radius:999px;
+  background:rgba(245,196,94,.15);border:1px solid rgba(245,196,94,.3);
+  color:var(--gold);font-size:10.5px;font-weight:800;letter-spacing:.08em;
+  font-family:'JetBrains Mono',monospace;text-transform:uppercase;margin-right:8px;
+}
+.teaser-cta{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:11px;
+  background:var(--accent-grad,linear-gradient(135deg,#2E7BFF,#8B5CFF));
+  color:#fff;font-weight:700;font-size:12.5px;border:0;cursor:pointer;
+  text-decoration:none;transition:transform .2s;
+}
+.teaser-cta:hover{transform:translateY(-1px)}
+.teaser-cta svg{width:13px;height:13px}
+
+/* HERO */
+.shell{max-width:1180px;margin:0 auto;padding:36px 28px 60px;position:relative}
+
+.hero{
+  display:flex;align-items:flex-start;gap:22px;margin-bottom:36px;
+}
+.hero-icon{
+  width:96px;height:96px;border-radius:24px;
+  background:var(--accent-grad);
+  display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;
+  box-shadow:0 24px 48px -14px var(--accent-shadow), inset 0 1px 0 rgba(255,255,255,.22);
+}
+.hero-icon svg{width:48px;height:48px}
+.hero-meta h1{
+  font-size:clamp(28px,4.5vw,42px);font-weight:800;letter-spacing:-.02em;line-height:1.05;
+  margin-bottom:10px;
+}
+.hero-meta h1 b{
+  background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero-meta .tag{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:5px 11px;border-radius:999px;
+  background:var(--panel);border:1px solid var(--line);
+  color:var(--accent);font-size:10.5px;font-weight:700;letter-spacing:.18em;
+  font-family:'JetBrains Mono',monospace;text-transform:uppercase;
+  margin-bottom:8px;
+}
+.hero-meta .tag .pulse{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.hero-meta p{color:var(--ink2);font-size:15px;line-height:1.6;max-width:640px}
+
+/* MOCK GRID — fonctionnalités preview sans data */
+.mock-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:32px;
+}
+@media(max-width:760px){.mock-grid{grid-template-columns:1fr}}
+
+.mock-card{
+  padding:24px;border-radius:18px;
+  background:linear-gradient(180deg,var(--panel) 0%,var(--panel2) 100%);
+  border:1px solid var(--line);
+  position:relative;overflow:hidden;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  min-height:200px;
+}
+.mock-card::before{
+  content:"";position:absolute;top:-30%;right:-15%;
+  width:200px;height:200px;border-radius:50%;
+  background:var(--accent-glow);
+  pointer-events:none;
+}
+.mock-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;position:relative;z-index:1}
+.mock-ic{
+  width:38px;height:38px;border-radius:11px;
+  background:var(--accent-grad);
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  box-shadow:0 6px 18px -6px var(--accent-shadow);
+}
+.mock-ic svg{width:18px;height:18px}
+.mock-head h3{font-size:15px;font-weight:700;letter-spacing:-.005em}
+.mock-head h3 small{display:block;font-size:11px;color:var(--muted);font-weight:500;margin-top:2px}
+.mock-body{position:relative;z-index:1}
+.mock-body p{font-size:13.5px;color:var(--ink2);line-height:1.6;margin-bottom:12px}
+
+/* Skeleton bars (no data) */
+.skel{display:flex;flex-direction:column;gap:8px}
+.skel-bar{
+  height:14px;border-radius:8px;
+  background:linear-gradient(90deg,var(--panel2) 25%,rgba(255,255,255,.08) 50%,var(--panel2) 75%);
+  background-size:200% 100%;
+  animation:skelLoad 1.8s linear infinite;
+}
+.skel-bar.w70{width:70%}
+.skel-bar.w50{width:50%}
+.skel-bar.w90{width:90%}
+.skel-bar.w40{width:40%}
+@keyframes skelLoad{
+  0%{background-position:200% 0}
+  100%{background-position:-200% 0}
+}
+
+/* Locked overlay */
+.mock-locked{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;
+  background:linear-gradient(180deg,rgba(11,15,26,0) 0%,rgba(11,15,26,.6) 60%,rgba(11,15,26,.85) 100%);
+  border-radius:18px;
+  padding:20px;
+  text-align:center;z-index:2;
+}
+.mock-locked .lock{
+  width:38px;height:38px;border-radius:50%;
+  background:rgba(255,255,255,.06);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;color:var(--gold);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.mock-locked .lock svg{width:16px;height:16px}
+.mock-locked b{font-size:13px;color:var(--ink);font-weight:700}
+.mock-locked small{font-size:11.5px;color:var(--muted)}
+
+/* FEATURE LIST */
+.feat-list{
+  padding:24px 26px;border-radius:18px;
+  background:linear-gradient(180deg,var(--panel) 0%,var(--panel2) 100%);
+  border:1px solid var(--line);
+  margin-bottom:32px;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+.feat-list h2{
+  font-size:18px;font-weight:800;letter-spacing:-.01em;margin-bottom:18px;
+  display:flex;align-items:center;gap:10px;
+}
+.feat-list h2 svg{width:18px;height:18px;color:var(--accent)}
+.feat-list ul{list-style:none;display:grid;grid-template-columns:repeat(2,1fr);gap:10px 20px}
+@media(max-width:680px){.feat-list ul{grid-template-columns:1fr}}
+.feat-list li{
+  display:flex;align-items:flex-start;gap:10px;
+  font-size:13.5px;color:var(--ink2);line-height:1.55;
+}
+.feat-list li svg{width:16px;height:16px;color:var(--accent);flex-shrink:0;margin-top:1px}
+
+/* CTA BOTTOM */
+.cta-bottom{
+  padding:36px 32px;border-radius:22px;
+  background:var(--accent-grad);
+  display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;
+  position:relative;overflow:hidden;
+  box-shadow:0 24px 60px -16px var(--accent-shadow);
+}
+.cta-bottom::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(ellipse at top right, rgba(255,255,255,.15), transparent 60%);
+  pointer-events:none;
+}
+.cta-bottom-text{flex:1;min-width:260px;position:relative;z-index:1;color:#fff}
+.cta-bottom-text h3{font-size:22px;font-weight:800;letter-spacing:-.01em;margin-bottom:6px}
+.cta-bottom-text p{font-size:14px;opacity:.92;line-height:1.55}
+.cta-bottom-actions{display:flex;gap:10px;position:relative;z-index:1;flex-wrap:wrap}
+.btn-w{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:13px 22px;border-radius:13px;font-weight:700;font-size:14px;
+  cursor:pointer;border:0;text-decoration:none;transition:transform .2s;font-family:inherit;
+}
+.btn-w.primary{background:#fff;color:#0F172A}
+.btn-w.primary:hover{transform:translateY(-2px)}
+.btn-w.ghost{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(8px)}
+.btn-w.ghost:hover{background:rgba(255,255,255,.25);transform:translateY(-2px)}
+.btn-w svg{width:14px;height:14px}
+
+/* PRICING ROW */
+.price-row{
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  padding:18px 22px;border-radius:14px;
+  background:var(--panel2);border:1px solid var(--line);
+  margin-bottom:20px;
+}
+.price-row b{font-size:24px;font-weight:800;letter-spacing:-.02em;font-family:'JetBrains Mono',monospace}
+.price-row b span{
+  background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.price-row small{font-size:12px;color:var(--muted)}
+
+@media(max-width:560px){
+  .hero{flex-direction:column;gap:16px}
+  .hero-icon{width:80px;height:80px}
+  .hero-icon svg{width:38px;height:38px}
+  .hero-meta h1{font-size:26px}
+  .teaser-cta{display:none}
+  .shell{padding:24px 16px 60px}
+}
+</style>
+</head>
+<body>
+
+<!-- TEASER STICKY -->
+<header class="teaser">
+  <a class="teaser-back" href="nexus-hub.html" title="Retour au hub">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+  </a>
+  <div class="teaser-text">
+    <span class="pill">Aperçu</span>
+    <b id="teaserTitle">Nexus Module</b> · navigation libre, sans tes données. <b style="color:#1EFF8E">Active-le pour voir tes vrais chiffres.</b>
+  </div>
+  <button class="teaser-cta" id="teaserCta">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    Tester 1 semaine gratuit
+  </button>
+</header>
+
+<div class="shell">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-icon" id="heroIcon"></div>
+    <div class="hero-meta">
+      <span class="tag"><span class="pulse"></span><span id="heroTag">Verrouillé · Phase 2</span></span>
+      <h1 id="heroTitle"></h1>
+      <p id="heroDesc"></p>
+    </div>
+  </section>
+
+  <!-- PRICE -->
+  <div class="price-row">
+    <div>
+      <small>À partir de</small><br>
+      <b><span id="priceMain"></span> /mois</b>
+    </div>
+    <div style="text-align:right">
+      <small>Activation</small><br>
+      <span style="font-size:13px;font-weight:700">1 clic depuis le hub</span>
+    </div>
+  </div>
+
+  <!-- MOCK GRID — UI preview sans data -->
+  <section class="mock-grid" id="mockGrid"></section>
+
+  <!-- FEATURE LIST -->
+  <section class="feat-list">
+    <h2>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      <span id="featTitle">Ce que tu pourras faire</span>
+    </h2>
+    <ul id="featList"></ul>
+  </section>
+
+  <!-- CTA bottom -->
+  <section class="cta-bottom">
+    <div class="cta-bottom-text">
+      <h3 id="ctaTitle">Prêt à débloquer ?</h3>
+      <p id="ctaDesc">Active ce module en 1 clic. Pas d'engagement. Première semaine gratuite si tu nous dis pourquoi tu en as besoin.</p>
+    </div>
+    <div class="cta-bottom-actions">
+      <a class="btn-w primary" href="nexus-hub.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Activer maintenant
+      </a>
+      <a class="btn-w ghost" href="nexus-hub.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        Retour au hub
+      </a>
+    </div>
+  </section>
+
+</div>
+
+<script>
+const MODULES = {
+  ledger: {
+    name: 'Nexus <b>Ledger</b>',
+    short: 'Ledger',
+    tag: 'Finance · Bientôt disponible',
+    desc: 'Le compte de résultat live de ton business. Revenus, charges, marge nette, projections. Sans Excel, sans comptable, sans prise de tête.',
+    price: '19 €',
+    grad: 'linear-gradient(135deg,#1EFF8E,#00E5FF)',
+    accent: '#1EFF8E', shadow: 'rgba(30,255,142,.5)', glow: 'radial-gradient(circle,rgba(30,255,142,.18),transparent 70%)',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+    mocks: [
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>', t:'Cashflow live', s:'Vue mois courant', body:'Ton solde, tes encaissements et tes décaissements à la minute.' },
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>', t:'Marge nette', s:'Par produit · par jour', body:'Tu sauras enfin quel produit fait gagner et lequel coûte.' },
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>', t:'RIB intégré', s:'Copier en 1 clic', body:'Ton RIB, ton IBAN, ton lien Wise. Partagé en 1 clic dans le chat client.' },
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>', t:'Export comptable', s:'Mensuel · automatique', body:'Le 1er du mois, ton expert reçoit le PDF clean. Plus jamais de retard.' }
+    ],
+    feats: [
+      'Synchro multi-comptes bancaires (Wise, Mercado Pago, banques locales)',
+      'Catégorisation auto des dépenses par IA',
+      'Projections cashflow 90 jours',
+      'Alertes seuils personnalisés (ex : si solde < $500, alerte)',
+      'Export PDF comptable mensuel automatique',
+      'Vue par produit, par client, par segment'
+    ],
+    ctaT:'Prêt à voir ton vrai compte de résultat ?',
+    ctaD:'Active Ledger maintenant et reconnecte tes banques en 3 minutes. Première semaine offerte.'
+  },
+  rh: {
+    name: 'Nexus <b>RH</b>',
+    short: 'RH',
+    tag: 'Équipe · Bientôt disponible',
+    desc: 'Gestion humaine simplifiée : équipe, planning, paie, congés. Pour le patron qui passe à l\'échelle sans devenir DRH.',
+    price: '24 €',
+    grad: 'linear-gradient(135deg,#F5C45E,#FF7B7B)',
+    accent: '#F5C45E', shadow: 'rgba(245,196,94,.5)', glow: 'radial-gradient(circle,rgba(245,196,94,.18),transparent 70%)',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    mocks: [
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.7a8 8 0 0 1 10 0"/></svg>', t:'Fiches équipe', s:'Avec contrats', body:'Chaque collaborateur, sa fiche complète, ses contrats, ses docs.' },
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>', t:'Planning auto', s:'Drag & drop', body:'Le planning de la semaine se construit tout seul. Tu valides.' },
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>', t:'Paie mensuelle', s:'1 clic', body:'Bulletins générés, virements préparés. Tu approuves et c\'est parti.' },
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>', t:'Onboarding', s:'Workflow nouveau collab', body:'Du contrat au premier jour : tout est checklisté.' }
+    ],
+    feats: [
+      'Pointages auto via QR code à l\'entrée du commerce',
+      'Demandes de congés depuis WhatsApp',
+      'Fiches de paie générées automatiquement',
+      'Suivi heures sup et primes',
+      'Onboarding nouveau collaborateur en 30 minutes',
+      'Conformité légale Chili / LATAM'
+    ],
+    ctaT:'Prêt à arrêter de gérer la paie sur Excel ?',
+    ctaD:'Active RH maintenant. On importe tes collaborateurs depuis ton fichier Excel en 2 minutes.'
+  },
+  voice: {
+    name: 'Nexus <b>Voice</b>',
+    short: 'Voice',
+    tag: 'Agent vocal · Bientôt disponible',
+    desc: 'Un agent qui répond au téléphone à ta place, en espagnol natif, en français ou en anglais. Numéro dédié inclus.',
+    price: '29 €',
+    grad: 'linear-gradient(135deg,#8B5CFF,#FF7B7B)',
+    accent: '#8B5CFF', shadow: 'rgba(139,92,255,.5)', glow: 'radial-gradient(circle,rgba(139,92,255,.18),transparent 70%)',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>',
+    mocks: [
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>', t:'Numéro dédié', s:'+56 9...', body:'Ton agent vocal a son propre numéro. Tu mets l\'autre en sourdine.' },
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>', t:'Voix sur mesure', s:'6 voix au choix', body:'Choisis l\'accent, le ton, la chaleur. Test gratuit.' },
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>', t:'Prise RDV auto', s:'Sync agenda', body:'L\'agent fixe les RDV directement dans ton Google Calendar.' },
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>', t:'Résumé d\'appel', s:'Envoyé après chaque appel', body:'Tu reçois un résumé écrit de chaque appel. Plus rien n\'échappe.' }
+    ],
+    feats: [
+      'Voix naturelle ES, FR, EN (et bientôt PT, DE, IT)',
+      'Prise de RDV automatique dans ton agenda',
+      'Qualification du lead en temps réel',
+      'Transfert intelligent si l\'humain est dispo',
+      'Résumé d\'appel envoyé sur WhatsApp ou email',
+      'Numéro dédié inclus dans l\'abonnement'
+    ],
+    ctaT:'Prêt à ne plus jamais rater un appel ?',
+    ctaD:'Active Voice maintenant. On configure ta voix et ton numéro en 5 minutes.'
+  },
+  sales: {
+    name: 'Nexus <b>Sales</b>',
+    short: 'Sales',
+    tag: 'Closer IA · Bientôt disponible',
+    desc: 'Un closer IA qui pousse les bons clients au bon moment : relances chaudes, upsell, recovery panier.',
+    price: '19 €',
+    grad: 'linear-gradient(135deg,#FF6B9D,#F5C45E)',
+    accent: '#FF6B9D', shadow: 'rgba(255,107,157,.5)', glow: 'radial-gradient(circle,rgba(255,107,157,.18),transparent 70%)',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>',
+    mocks: [
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h4M9 11V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6"/></svg>', t:'Scoring chaud / froid', s:'Auto par IA', body:'Chaque client a un score. Les chauds passent en priorité.' },
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>', t:'Relances signal', s:'Déclenchement intelligent', body:'Si un client ouvre 3 fois ton menu sans commander, l\'IA relance.' },
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>', t:'Upsell IA', s:'Basé sur l\'historique', body:'L\'IA propose le bon upsell : « tu vas adorer notre nouveau cookie ».' },
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>', t:'Pipe d\'opportunités', s:'Vue temps réel', body:'Combien d\'argent dort dans tes paniers abandonnés ? Tu sauras.' }
+    ],
+    feats: [
+      'Scoring intelligent chaud / tiède / froid',
+      'Relances déclenchées par signal d\'engagement',
+      'Upsell automatique basé sur l\'historique d\'achat',
+      'Recovery panier abandonné WhatsApp',
+      'Tableau d\'opportunités par stade',
+      'A/B test des messages de relance'
+    ],
+    ctaT:'Prêt à transformer chaque opportunité ?',
+    ctaD:'Active Sales et récupère le revenu qui dort dans tes conversations.'
+  },
+  calendar: {
+    name: 'Nexus <b>Calendar</b>',
+    short: 'Calendar',
+    tag: 'Agenda IA · Bientôt disponible',
+    desc: 'Ton agenda piloté par l\'IA. Ouvre des créneaux intelligents, gère les annulations, relance les no-show.',
+    price: '9 €',
+    grad: 'linear-gradient(135deg,#00E5FF,#2E7BFF)',
+    accent: '#00E5FF', shadow: 'rgba(0,229,255,.5)', glow: 'radial-gradient(circle,rgba(0,229,255,.18),transparent 70%)',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+    mocks: [
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>', t:'Synchro multi-agenda', s:'Google · Apple · Outlook', body:'Tous tes agendas se parlent. Plus de double-réservation.' },
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>', t:'Créneaux intelligents', s:'Par service', body:'Coupe homme = 30 min · brushing = 1 h. L\'IA gère la durée.' },
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>', t:'Anti no-show', s:'Relances 24 h + 2 h', body:'Tu réduis les no-show de 60 % avec les rappels auto.' },
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>', t:'Vue équipe', s:'Multi-agenda', body:'Toute l\'équipe sur un écran. Tu vois qui peut prendre quoi.' }
+    ],
+    feats: [
+      'Synchro Google Calendar / Apple / Outlook',
+      'Créneaux intelligents par type de service',
+      'Relances no-show automatiques (24 h + 2 h)',
+      'Vue équipe multi-agendas',
+      'Réservation depuis WhatsApp',
+      'Buffer time configurable entre RDV'
+    ],
+    ctaT:'Prêt à arrêter de jongler entre 3 agendas ?',
+    ctaD:'Active Calendar et synchronise tes agendas en 1 clic.'
+  },
+  marketing: {
+    name: 'Nexus <b>Boost</b>',
+    short: 'Boost',
+    tag: 'Campagnes · Bientôt disponible',
+    desc: 'Crée et envoie des campagnes ciblées en 30 secondes. WhatsApp, Instagram, Email — un seul écran.',
+    price: '14 €',
+    grad: 'linear-gradient(135deg,#FF7B7B,#8B5CFF)',
+    accent: '#FF7B7B', shadow: 'rgba(255,123,123,.5)', glow: 'radial-gradient(circle,rgba(255,123,123,.18),transparent 70%)',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8v18l-18-8v-2z"/></svg>',
+    mocks: [
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>', t:'Templates IA', s:'Personnalisés', body:'L\'IA écrit tes campagnes. Tu valides ou tu modifies.' },
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>', t:'Ciblage segment', s:'5 segments natifs', body:'VIP, récurrent, nouveau, normal, perdu. Tu cibles le bon.' },
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 20 8 16"/><line x1="12" y1="20" x2="12" y2="4"/><polyline points="8 8 12 4 16 8"/></svg>', t:'Réplication 1 clic', s:'Templates sauvés', body:'Une bonne campagne ? Sauvegarde-la, relance-la quand tu veux.' },
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>', t:'A/B test natif', s:'2 versions', body:'Lance 2 versions. L\'IA choisit la gagnante automatiquement.' }
+    ],
+    feats: [
+      'Templates IA personnalisés à ton ton',
+      'Ciblage par segment (VIP, perdus, nouveaux…)',
+      'Mode automatique programmable (ex : promo le 28 du mois)',
+      'A/B test natif',
+      'Système de crédits anti-spam',
+      'Sauvegarde de campagnes en templates'
+    ],
+    ctaT:'Prêt à arrêter de copier-coller tes promos ?',
+    ctaD:'Active Boost et lance ta première campagne ciblée en 30 secondes.'
+  },
+  analytics: {
+    name: 'Nexus <b>Insights</b>',
+    short: 'Insights',
+    tag: 'Analytics IA · Bientôt disponible',
+    desc: 'Lis ton business comme un livre. KPIs vivants, cohort analysis, prédictions revenus 90 jours.',
+    price: '12 €',
+    grad: 'linear-gradient(135deg,#1EFF8E,#2E7BFF)',
+    accent: '#1EFF8E', shadow: 'rgba(30,255,142,.5)', glow: 'radial-gradient(circle,rgba(30,255,142,.18),transparent 70%)',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+    mocks: [
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>', t:'KPIs live', s:'Mise à jour minute', body:'Conversion, CA, panier, fréquence. Tout tes chiffres, à la minute.' },
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>', t:'Cohort analysis', s:'Rétention par mois', body:'Combien de tes clients de janvier sont encore là en juin ?' },
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>', t:'Prédictions 90 j', s:'IA prédictive', body:'Ton CA prévu sur 3 mois, avec intervalle de confiance.' },
+      { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>', t:'Alertes anomalies', s:'Détection auto', body:'Chute de 30 % du CA hier ? Tu reçois une alerte direct.' }
+    ],
+    feats: [
+      'Dashboard KPIs live (CA, conversion, panier, NPS)',
+      'Cohort analysis et rétention par mois',
+      'Prédictions revenus à 30 / 60 / 90 jours',
+      'Détection automatique d\'anomalies',
+      'Comparaison vs benchmark de ton secteur',
+      'Export PDF executive summary'
+    ],
+    ctaT:'Prêt à voir ton business clairement ?',
+    ctaD:'Active Insights et reçois ton premier rapport sous 48 heures.'
+  }
+};
+
+(() => {
+  const params = new URLSearchParams(location.search);
+  const key = params.get('module') || 'ledger';
+  const m = MODULES[key] || MODULES.ledger;
+
+  // Inject CSS variables
+  document.documentElement.style.setProperty('--accent-grad', m.grad);
+  document.documentElement.style.setProperty('--accent', m.accent);
+  document.documentElement.style.setProperty('--accent-shadow', m.shadow);
+  document.documentElement.style.setProperty('--accent-glow', m.glow);
+
+  // Hero
+  document.title = `Aperçu ${m.short} — Nexus`;
+  document.getElementById('teaserTitle').textContent = `Nexus ${m.short}`;
+  document.getElementById('heroIcon').innerHTML = m.icon;
+  document.getElementById('heroTitle').innerHTML = m.name;
+  document.getElementById('heroDesc').textContent = m.desc;
+  document.getElementById('heroTag').textContent = m.tag;
+  document.getElementById('priceMain').textContent = m.price;
+  document.getElementById('ctaTitle').textContent = m.ctaT;
+  document.getElementById('ctaDesc').textContent = m.ctaD;
+
+  // Mocks
+  document.getElementById('mockGrid').innerHTML = m.mocks.map(mk => `
+    <div class="mock-card">
+      <div class="mock-head">
+        <div class="mock-ic">${mk.ic}</div>
+        <h3>${mk.t}<small>${mk.s}</small></h3>
+      </div>
+      <div class="mock-body">
+        <p>${mk.body}</p>
+        <div class="skel">
+          <div class="skel-bar w90"></div>
+          <div class="skel-bar w70"></div>
+          <div class="skel-bar w50"></div>
+          <div class="skel-bar w40"></div>
+        </div>
+      </div>
+      <div class="mock-locked">
+        <div class="lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <b>Active pour voir tes données</b>
+        <small>Cet aperçu n'affiche pas tes vrais chiffres</small>
+      </div>
+    </div>
+  `).join('');
+
+  // Feature list
+  document.getElementById('featTitle').textContent = `Ce que ${m.short} fera pour toi`;
+  document.getElementById('featList').innerHTML = m.feats.map(f => `
+    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>${f}</li>
+  `).join('');
+
+  // Teaser CTA
+  document.getElementById('teaserCta').addEventListener('click', () => {
+    alert(`Tu seras le premier prévenu quand ${m.short} sera disponible. Bientôt avec une offre spéciale early adopter.`);
+  });
+})();
+</script>
+</body>
+</html>

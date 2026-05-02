@@ -1599,6 +1599,17 @@ const Nx = {
 
   translateConv(){ this.toast('🌐 Traduction activée','success','FR ↔ ES en temps réel'); },
 
+  confirmDeleteClient(id, ev){
+    if (ev) ev.stopPropagation();
+    const c = this.state.clients.find(x => x.id === id);
+    if (!c) return;
+    if (!confirm(`Éliminer ${c.name} du CRM ?\n\nNexus se trompe parfois. Tu peux retirer ce client si ce n'en est pas un (ex : ta mère, un fournisseur, une erreur).\n\nL'historique sera conservé 30 jours en cas de regret.`)) return;
+    this.state.clients = this.state.clients.filter(x => x.id !== id);
+    this.save();
+    this.renderView();
+    this.toast(`✓ ${c.name} retiré du CRM`, 'success', 'Tu peux le restaurer dans Paramètres > Corbeille pendant 30 jours');
+  },
+
   // ---------- CRM VIEW ----------
   viewCrm(){
     const filter = this.state.crmFilter || 'all';
@@ -1632,32 +1643,48 @@ const Nx = {
           <button class="filter-pill ${filter==='vip'?'on':''}" onclick="Nx.state.crmFilter='vip';Nx.renderView()">⭐ VIP</button>
         </div>
 
-        <div class="card" style="margin-bottom:14px;padding:20px;background:linear-gradient(135deg,#FFF7ED,#FEF3C7)">
-          <h3 style="margin-bottom:14px;color:#78350F">🏆 Podium général — Top 10</h3>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px">
-            ${this.state.clients.filter(c=>c.status==='active').sort((a,b)=>b.score-a.score).slice(0,10).map((c,i)=>`
-              <div style="padding:14px;background:var(--panel);border-radius:10px;text-align:center;cursor:pointer" onclick="Nx.openModal('client',Nx.state.clients.find(x=>x.id===${c.id}))">
-                <div class="rank rank-${i<3?(i+1):'n'}" style="margin:0 auto 8px">${i+1}</div>
-                <div class="msg-av" style="width:40px;height:40px;margin:0 auto 6px;background:${c.color}">${c.avatar}</div>
-                <div style="font-size:12px;font-weight:600">${c.name.split(' ')[0]}</div>
-                <div style="font-size:11px;color:var(--muted)">${c.score} pts</div>
+        <div class="card" style="margin-bottom:14px;padding:24px;background:linear-gradient(135deg,#FFF7ED,#FEF3C7)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h3 style="color:#78350F">🏆 Podium — Top 3 du mois</h3>
+            <span style="font-size:11px;color:#92400E;background:#FCD34D;padding:4px 10px;border-radius:999px;font-weight:700">★ Tes meilleurs ambassadeurs</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+            ${this.state.clients.filter(c=>c.status==='active').sort((a,b)=>b.score-a.score).slice(0,3).map((c,i)=>`
+              <div style="padding:18px;background:var(--panel);border-radius:14px;cursor:pointer;border:2px solid ${i===0?'#F59E0B':i===1?'#94A3B8':'#B45309'};position:relative;transition:transform .2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'" onclick="Nx.openModal('client',Nx.state.clients.find(x=>x.id===${c.id}))">
+                <div style="position:absolute;top:-12px;left:18px;width:34px;height:34px;border-radius:50%;background:${i===0?'#F59E0B':i===1?'#94A3B8':'#B45309'};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,.2)">${i===0?'🥇':i===1?'🥈':'🥉'}</div>
+                <div style="display:flex;gap:14px;align-items:center;margin-top:6px;margin-bottom:14px">
+                  <div class="msg-av" style="width:54px;height:54px;background:${c.color};font-size:18px">${c.avatar}</div>
+                  <div style="flex:1;min-width:0">
+                    <div style="font-weight:700;font-size:15px;letter-spacing:-.01em">${c.name}</div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:2px">${c.phone}</div>
+                  </div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px;background:var(--bg2);border-radius:10px">
+                  <div style="text-align:center"><div style="font-size:18px;font-weight:800;color:var(--blue)" class="mono">${c.score}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Score</div></div>
+                  <div style="text-align:center"><div style="font-size:18px;font-weight:800;color:var(--green)" class="mono">${c.orders}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Commandes</div></div>
+                  <div style="text-align:center"><div style="font-size:14px;font-weight:800" class="mono">${(c.spent/1000).toFixed(0)}k</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">CLP</div></div>
+                </div>
+                ${c.tags.length?`<div style="margin-top:10px;display:flex;gap:4px;flex-wrap:wrap">${c.tags.map(tg=>`<span class="chip blue" style="font-size:10px;padding:2px 7px">${tg}</span>`).join('')}</div>`:''}
               </div>`).join('')}
           </div>
+          <div style="margin-top:14px;font-size:12px;color:#78350F;text-align:center"><b>${this.state.clients.filter(c=>c.status==='active').length - 3}</b> autres clients actifs · <a href="#/crm" style="color:#92400E;text-decoration:underline" onclick="Nx.toast('Liste filtrée','info')">voir tous</a></div>
         </div>
 
         <div class="card">
           <div class="card-hd"><h3>Tous les clients · ${clients.length}</h3>
             <div class="actions"><button class="btn-g">Trier par score ▾</button></div></div>
           ${clients.map(c=>`
-            <div style="padding:14px 20px;border-top:1px solid var(--line2);display:flex;gap:14px;align-items:center;cursor:pointer" onclick="Nx.openModal('client',Nx.state.clients.find(x=>x.id===${c.id}))">
-              <div class="msg-av" style="background:${c.color}">${c.avatar}</div>
-              <div style="flex:1;min-width:0">
+            <div class="crm-row" style="padding:14px 20px;border-top:1px solid var(--line2);display:flex;gap:14px;align-items:center;position:relative">
+              <div class="msg-av" style="background:${c.color};cursor:pointer" onclick="Nx.openModal('client',Nx.state.clients.find(x=>x.id===${c.id}))">${c.avatar}</div>
+              <div style="flex:1;min-width:0;cursor:pointer" onclick="Nx.openModal('client',Nx.state.clients.find(x=>x.id===${c.id}))">
                 <div style="font-weight:600;display:flex;gap:6px;align-items:center;flex-wrap:wrap">${c.name}${c.tags.map(tg=>`<span class="chip blue" style="font-size:10px;padding:1px 6px">${tg}</span>`).join('')}</div>
                 <div style="font-size:12px;color:var(--muted)">${c.phone} · ${c.lastSeen} · ${c.orders} commandes · ${c.spent.toLocaleString('es-CL')} CLP</div>
               </div>
               ${c.status==='lost' ? '<span class="chip red">⚠ Perdu</span>' : c.status==='prospect' ? '<span class="chip amber">Prospect</span>' : ''}
-              <div style="text-align:right"><div style="font-size:18px;font-weight:800;color:var(--blue)" class="mono">${c.score}</div><div style="font-size:10px;color:var(--muted)">SCORE</div></div>
+              <div style="text-align:right;cursor:pointer" onclick="Nx.openModal('client',Nx.state.clients.find(x=>x.id===${c.id}))"><div style="font-size:18px;font-weight:800;color:var(--blue)" class="mono">${c.score}</div><div style="font-size:10px;color:var(--muted)">SCORE</div></div>
+              <button class="btn-g crm-del" title="Éliminer ce client" onclick="Nx.confirmDeleteClient(${c.id}, event)" style="color:var(--red);padding:6px 10px;opacity:0;transition:opacity .15s">🗑</button>
             </div>`).join('')}
+        <style>.crm-row:hover .crm-del{opacity:1}</style>
         </div>
       </div>`;
   },
@@ -1790,6 +1817,80 @@ const Nx = {
           </div>
         </div>
 
+        <!-- 5 SEGMENTS NATIFS — cohérence avec stats CRM -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-hd"><h3>🎯 Cibler par segment</h3><div class="actions"><span style="font-size:11px;color:var(--muted)">5 segments natifs · synchro CRM</span></div></div>
+          <div class="card-body" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
+            ${[
+              {k:'vip',e:'⭐',n:'Clients VIP',col:'#F5C45E',bg:'#FEF3C7'},
+              {k:'recurrent',e:'🔁',n:'Récurrents',col:'#1A56DB',bg:'#DBE5FD'},
+              {k:'new',e:'🌱',n:'Nouveaux',col:'#22C55E',bg:'#ECFDF5'},
+              {k:'normal',e:'👥',n:'Normaux',col:'#64748B',bg:'#F1F5F9'},
+              {k:'lost',e:'💔',n:'Perdus',col:'#EF4444',bg:'#FEF2F2'}
+            ].map(seg=>{
+              const count = seg.k==='vip'?this.state.clients.filter(c=>c.tags.includes('VIP')).length
+                          :seg.k==='lost'?this.state.clients.filter(c=>c.status==='lost').length
+                          :seg.k==='new'?this.state.clients.filter(c=>c.status==='prospect').length
+                          :seg.k==='recurrent'?Math.round(this.state.clients.filter(c=>c.status==='active').length*0.4)
+                          :Math.round(this.state.clients.filter(c=>c.status==='active').length*0.6);
+              return `
+                <div onclick="Nx.openCampaignBuilder('Segment ${seg.n}','${seg.k}')" style="padding:16px;background:${seg.bg};border:1px solid ${seg.col}33;border-radius:12px;cursor:pointer;transition:all .2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px -8px ${seg.col}55'" onmouseout="this.style.transform='none';this.style.boxShadow='none'">
+                  <div style="font-size:24px;margin-bottom:6px">${seg.e}</div>
+                  <div style="font-weight:700;font-size:13px;color:${seg.col}">${seg.n}</div>
+                  <div style="font-size:18px;font-weight:800;margin-top:4px;color:#0F172A" class="mono">${count}</div>
+                  <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px">clients</div>
+                </div>`;
+            }).join('')}
+          </div>
+        </div>
+
+        <!-- CRÉDITS HEBDO — anti-abus -->
+        <div class="card" style="margin-bottom:16px;background:linear-gradient(135deg,#EFF6FF,#FEF3C7);padding:18px 22px;display:flex;align-items:center;gap:18px">
+          <div style="width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,#1A56DB,#7A3CFF);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">⚡</div>
+          <div style="flex:1">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+              <div style="font-size:13px;font-weight:700">Crédits campagnes — semaine en cours</div>
+              <div class="mono" style="font-size:14px;font-weight:800"><span style="color:#1A56DB">247</span><span style="color:var(--muted)"> / 500</span></div>
+            </div>
+            <div style="height:8px;border-radius:999px;background:#E2E8F0;overflow:hidden;margin-bottom:6px"><div style="height:100%;width:49.4%;background:linear-gradient(90deg,#1A56DB,#7A3CFF);border-radius:999px"></div></div>
+            <div style="font-size:11px;color:var(--muted)">253 envois restants · reset dimanche · <a onclick="Nx.toast('Pack VIP +1000 envois pour 5€','info')" style="color:#1A56DB;cursor:pointer;font-weight:600">Booster (+1000 pour 5€)</a></div>
+          </div>
+        </div>
+
+        <!-- CAMPAGNES AUTO -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-hd"><h3>🤖 Campagnes automatiques</h3><div class="actions"><button class="btn-p" onclick="Nx.openAutoCampaign()">+ Nouvelle auto</button></div></div>
+          <div class="card-body">
+            <div style="padding:14px 16px;background:var(--bg2);border:1px solid var(--line);border-radius:11px;display:flex;align-items:center;gap:14px;margin-bottom:8px">
+              <div style="width:42px;height:42px;border-radius:11px;background:#22C55E22;color:#22C55E;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📅</div>
+              <div style="flex:1">
+                <div style="font-weight:700;font-size:13.5px">Promo fin de mois — −15 %</div>
+                <div style="font-size:11.5px;color:var(--muted);margin-top:2px">Déclenchée le 28 de chaque mois · cible Récurrents · 2 derniers jours</div>
+              </div>
+              <span class="chip green" style="font-size:11px">● Active</span>
+              <button class="btn-g">Modifier</button>
+            </div>
+            <div style="padding:14px 16px;background:var(--bg2);border:1px solid var(--line);border-radius:11px;display:flex;align-items:center;gap:14px;margin-bottom:8px">
+              <div style="width:42px;height:42px;border-radius:11px;background:#F59E0B22;color:#F59E0B;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🎂</div>
+              <div style="flex:1">
+                <div style="font-weight:700;font-size:13.5px">Anniversaires clients</div>
+                <div style="font-size:11.5px;color:var(--muted);margin-top:2px">La veille à 9h · cible chaque client · code promo personnalisé</div>
+              </div>
+              <span class="chip green" style="font-size:11px">● Active</span>
+              <button class="btn-g">Modifier</button>
+            </div>
+            <div style="padding:14px 16px;background:var(--bg2);border:1px solid var(--line);border-radius:11px;display:flex;align-items:center;gap:14px">
+              <div style="width:42px;height:42px;border-radius:11px;background:#EF444422;color:#EF4444;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">💔</div>
+              <div style="flex:1">
+                <div style="font-weight:700;font-size:13.5px">Récupération clients perdus</div>
+                <div style="font-size:11.5px;color:var(--muted);margin-top:2px">Quand silence > 45 j · cible Perdus · message chaleureux + −10 %</div>
+              </div>
+              <span class="chip" style="font-size:11px;background:#94A3B822;color:#475569">○ Pause</span>
+              <button class="btn-g">Activer</button>
+            </div>
+          </div>
+        </div>
+
         <div class="card" style="margin-bottom:16px">
           <div class="card-hd"><h3>📋 Bibliothèque de templates</h3><div class="actions"><button class="btn-g" onclick="Nx.toast('Import template (démo)','info')">+ Importer</button></div></div>
           <div class="card-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
@@ -1832,23 +1933,26 @@ const Nx = {
       </div>`;
   },
 
-  openCampaignBuilder(templateName){
+  openCampaignBuilder(templateName, presetSegment){
     this.openModal('ai-chat');
-    // Replace with custom campaign modal
     const mc = document.getElementById('modal-content');
+    const segOpts = [
+      {k:'vip',e:'⭐',n:'Clients VIP',c:this.state.clients.filter(x=>x.tags.includes('VIP')).length},
+      {k:'recurrent',e:'🔁',n:'Récurrents',c:Math.round(this.state.clients.filter(x=>x.status==='active').length*0.4)},
+      {k:'new',e:'🌱',n:'Nouveaux',c:this.state.clients.filter(x=>x.status==='prospect').length},
+      {k:'normal',e:'👥',n:'Normaux',c:Math.round(this.state.clients.filter(x=>x.status==='active').length*0.6)},
+      {k:'lost',e:'💔',n:'Perdus',c:this.state.clients.filter(x=>x.status==='lost').length},
+      {k:'custom',e:'⚙️',n:'Personnalisé',c:'—'}
+    ];
+    const presetIdx = segOpts.findIndex(s => s.k === presetSegment);
     mc.innerHTML = `
       <div class="modal-hd"><h3>📢 Nouvelle campagne ${templateName?`— ${templateName}`:''}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
       <div class="modal-body">
         <div class="form-row"><label class="form-lbl">Nom de la campagne</label>
           <input class="form-ctrl" id="campName" value="${templateName||'Promo pan amasado week-end'}"></div>
-        <div class="form-row"><label class="form-lbl">Cible</label>
+        <div class="form-row"><label class="form-lbl">Cibler par segment <span style="color:var(--muted);font-weight:400">· cohérent avec ton CRM</span></label>
           <select class="form-ctrl" id="campTarget">
-            <option>🏆 Top 10 clients VIP</option>
-            <option>👥 Tous les clients actifs (342)</option>
-            <option>💔 Clients perdus 45+ jours (3)</option>
-            <option>✨ Nouveaux clients (ce mois)</option>
-            <option>🎂 Anniversaire ce mois (2)</option>
-            <option>⚙️ Segment personnalisé</option>
+            ${segOpts.map((s,i)=>`<option value="${s.k}" ${i===(presetIdx>=0?presetIdx:1)?'selected':''}>${s.e} ${s.n} ${s.c!=='—'?'('+s.c+')':''}</option>`).join('')}
           </select></div>
         <div class="form-row"><label class="form-lbl">Message</label>
           <textarea class="form-ctrl" id="campMsg" rows="4">Hola 👋 Este fin de semana en Don Carlos: 3kg de pan amasado por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! 🥖</textarea>
@@ -1856,12 +1960,18 @@ const Nx = {
         <div class="form-row"><label class="form-lbl">Photo (optionnel)</label>
           <div style="display:flex;gap:8px"><button class="btn btn-s">📎 Importer</button><button class="btn btn-s">🖼 Choisir du catalogue</button></div></div>
         <div class="form-row"><label class="form-lbl">Quand envoyer</label>
-          <select class="form-ctrl">
+          <select class="form-ctrl" id="campSchedule">
             <option>Maintenant</option>
             <option selected>Dimanche 19h (heure de lecture max)</option>
             <option>Demain 9h</option>
             <option>Planifier une date…</option>
           </select></div>
+
+        <!-- Coût en crédits -->
+        <div style="padding:12px 14px;background:linear-gradient(135deg,#EFF6FF,#FEF3C7);border-radius:10px;margin-top:14px;display:flex;justify-content:space-between;align-items:center;font-size:12.5px">
+          <span><b>Coût estimé</b> · <span class="mono">~85 envois</span> sur tes 253 crédits restants cette semaine</span>
+          <span style="color:#1A56DB;font-weight:700">⚡ 85 crédits</span>
+        </div>
 
         <div style="padding:16px;background:var(--bg2);border-radius:10px;margin-top:14px">
           <div style="font-size:11px;color:var(--muted);margin-bottom:8px">📱 APERÇU WHATSAPP</div>
@@ -1870,9 +1980,70 @@ const Nx = {
       </div>
       <div class="modal-foot">
         <button class="btn btn-s" onclick="Nx.closeModal()">Annuler</button>
+        <button class="btn btn-s" onclick="Nx.saveAsTemplate()">📋 Sauver comme template</button>
         <button class="btn btn-s" onclick="Nx.toast('Brouillon sauvé','success')">💾 Brouillon</button>
         <button class="btn btn-p" onclick="Nx.sendCampaign()">🚀 Envoyer campagne</button>
       </div>`;
+  },
+
+  saveAsTemplate(){
+    const name = document.getElementById('campName')?.value || 'Sans nom';
+    this.toast('📋 Template sauvegardé', 'success', `"${name}" disponible dans ta bibliothèque`);
+  },
+
+  openAutoCampaign(){
+    this.openModal('ai-chat');
+    const mc = document.getElementById('modal-content');
+    mc.innerHTML = `
+      <div class="modal-hd"><h3>🤖 Nouvelle campagne automatique</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-body">
+        <div style="padding:14px;background:var(--blue-soft);border-radius:10px;margin-bottom:14px;font-size:13px;color:#1E40AF">
+          💡 <b>Mode auto :</b> tu programmes une fois, Nexus envoie tout seul à la fréquence choisie. Tu peux pause / modifier à tout moment.
+        </div>
+        <div class="form-row"><label class="form-lbl">Nom de l'automatisation</label>
+          <input class="form-ctrl" id="autoName" value="Promo fin de mois −15 %"></div>
+        <div class="form-row"><label class="form-lbl">Déclencheur</label>
+          <select class="form-ctrl" id="autoTrigger">
+            <option>📅 Le X de chaque mois (ex : 28)</option>
+            <option>🔁 Tous les Y (ex : tous les vendredis 17h)</option>
+            <option>🎂 La veille de chaque anniversaire client</option>
+            <option>💔 Quand un client n'a pas commandé depuis N jours</option>
+            <option>☔ Selon météo (ex : pluie → promo soupe)</option>
+            <option>📈 Selon stat (ex : si CA semaine < seuil)</option>
+          </select></div>
+        <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div><label class="form-lbl">Jour</label><input class="form-ctrl" type="number" min="1" max="31" value="28"></div>
+          <div><label class="form-lbl">Heure</label><input class="form-ctrl" type="time" value="09:00"></div>
+        </div>
+        <div class="form-row"><label class="form-lbl">Cible</label>
+          <select class="form-ctrl">
+            <option>⭐ VIP</option>
+            <option selected>🔁 Récurrents</option>
+            <option>🌱 Nouveaux</option>
+            <option>👥 Normaux</option>
+            <option>💔 Perdus</option>
+          </select></div>
+        <div class="form-row"><label class="form-lbl">Message</label>
+          <textarea class="form-ctrl" rows="3">Hola {prenom} 👋 Petit clin d'œil de Don Carlos : −15 % sur ta prochaine commande jusqu'au 30. À très vite !</textarea>
+          <div class="flex mt8"><button class="btn-g">✨ Suggérer un message IA</button></div>
+        </div>
+        <div class="form-row"><label class="form-lbl">Limite anti-abus</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px"><input type="checkbox" checked> Max 1 fois / client / semaine</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px"><input type="checkbox" checked> Pause si crédits &lt; 50</label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-s" onclick="Nx.closeModal()">Annuler</button>
+        <button class="btn btn-s" onclick="Nx.toast('Test envoyé sur ton numéro','info')">🧪 Tester sur moi</button>
+        <button class="btn btn-p" onclick="Nx.activateAutoCampaign()">🤖 Activer l'automatisation</button>
+      </div>`;
+  },
+
+  activateAutoCampaign(){
+    this.closeModal();
+    this.toast('🤖 Campagne auto activée', 'success', 'Prochaine exécution : 28 du mois à 09:00');
   },
 
   generateCampMsg(){

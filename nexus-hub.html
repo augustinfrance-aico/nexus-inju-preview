@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0F1A">
+<title>Nexus — Hub</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0B0F1A; --bg2:#11172A;
+  --panel:rgba(255,255,255,.05); --panel2:rgba(255,255,255,.08);
+  --ink:#F2F5FB; --ink2:#C5CDE0; --muted:#7A85A0;
+  --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.05);
+  --blue:#2E7BFF; --violet:#8B5CFF; --cyan:#00E5FF; --lime:#1EFF8E; --gold:#F5C45E; --red:#FF6B6B;
+  --grad-core:linear-gradient(135deg,#2E7BFF 0%,#8B5CFF 60%,#00E5FF 100%);
+}
+html[data-theme="light"]{
+  --bg:#F4F6FB; --bg2:#FFFFFF;
+  --panel:rgba(255,255,255,.7); --panel2:rgba(15,23,42,.05);
+  --ink:#0F172A; --ink2:#334155; --muted:#64748B;
+  --line:rgba(15,23,42,.08); --line2:rgba(15,23,42,.04);
+}
+html,body{
+  background:var(--bg); color:var(--ink);
+  font-family:'Inter','Segoe UI',-apple-system,sans-serif; line-height:1.5;
+  -webkit-font-smoothing:antialiased; min-height:100vh; overflow-x:hidden;
+}
+body{
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 5%, rgba(46,123,255,.22), transparent 60%),
+    radial-gradient(ellipse 60% 45% at 85% 95%, rgba(139,92,255,.18), transparent 60%),
+    radial-gradient(ellipse 50% 35% at 50% 50%, rgba(0,229,255,.08), transparent 70%),
+    var(--bg);
+  background-attachment:fixed;
+}
+html[data-theme="light"] body{
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 5%, rgba(46,123,255,.10), transparent 60%),
+    radial-gradient(ellipse 60% 45% at 85% 95%, rgba(139,92,255,.08), transparent 60%),
+    var(--bg);
+  background-attachment:fixed;
+}
+.mono{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}
+
+/* ============ BOOT SCREEN ============ */
+#boot{
+  position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:32px;background:var(--bg);
+  transition:opacity .55s ease, visibility .55s ease;
+}
+#boot.gone{opacity:0;visibility:hidden;pointer-events:none}
+.boot-logo{
+  width:96px;height:96px;border-radius:24px;background:var(--grad-core);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 80px rgba(46,123,255,.5), inset 0 1px 0 rgba(255,255,255,.2);
+  animation:logoFloat 2.4s ease-in-out infinite alternate;position:relative;
+}
+.boot-logo::before{
+  content:""; position:absolute; inset:-8px; border-radius:30px;
+  border:1px solid rgba(255,255,255,.10);
+  animation:ringPulse 2s ease-out infinite;
+}
+.boot-logo svg{width:48px;height:48px;color:#fff}
+@keyframes logoFloat{0%{transform:translateY(0) scale(1)}100%{transform:translateY(-6px) scale(1.04)}}
+@keyframes ringPulse{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.4);opacity:0}}
+.boot-title{font-size:22px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;text-align:center}
+.boot-title span{font-size:11px;letter-spacing:.4em;background:var(--grad-core);-webkit-background-clip:text;background-clip:text;color:transparent;display:block;margin-top:6px}
+.boot-bar{width:240px;height:3px;border-radius:999px;background:var(--line);overflow:hidden;position:relative}
+.boot-bar::after{
+  content:"";position:absolute;left:-40%;top:0;bottom:0;width:40%;
+  background:var(--grad-core);border-radius:999px;
+  animation:bootSlide 1.6s ease-in-out infinite;
+}
+@keyframes bootSlide{0%{left:-40%}100%{left:100%}}
+.boot-status{font-size:11px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase}
+.boot-status .live{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--lime);margin-right:8px;vertical-align:middle;box-shadow:0 0 10px var(--lime);animation:livePulse 1.2s ease-in-out infinite}
+@keyframes livePulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ============ HUB ============ */
+.hub{
+  min-height:100vh;display:flex;flex-direction:column;
+  padding:22px 28px 28px;max-width:1280px;margin:0 auto;
+  opacity:0;transform:translateY(10px);transition:opacity .6s ease .1s, transform .6s ease .1s;
+}
+.hub.show{opacity:1;transform:translateY(0)}
+
+/* TOP BAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{
+  width:36px;height:36px;border-radius:10px;background:var(--grad-core);
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  box-shadow:0 8px 24px -10px rgba(46,123,255,.6);
+}
+.brand-mark svg{width:18px;height:18px}
+.brand-name{font-size:16px;font-weight:800;letter-spacing:-.01em}
+.brand-name b{font-weight:800;background:var(--grad-core);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.toolbar{display:flex;align-items:center;gap:8px}
+.tb-btn{
+  width:38px;height:38px;border-radius:11px;
+  background:var(--panel);border:1px solid var(--line);color:var(--ink2);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:all .2s; backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  position:relative;
+}
+.tb-btn:hover{background:var(--panel2);color:var(--cyan);border-color:var(--cyan);transform:translateY(-1px)}
+.tb-btn svg{width:16px;height:16px}
+.tb-btn.sos{color:var(--red)}
+.tb-btn.sos:hover{border-color:var(--red);color:#fff;background:var(--red)}
+.tb-avatar{
+  width:38px;height:38px;border-radius:50%;cursor:pointer;
+  background:linear-gradient(135deg,#2E7BFF,#8B5CFF);
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;
+  border:1px solid var(--line);transition:all .2s;
+}
+.tb-avatar:hover{transform:scale(1.05);box-shadow:0 8px 20px -8px rgba(139,92,255,.6)}
+.tb-divider{width:1px;height:22px;background:var(--line);margin:0 4px}
+
+/* WELCOME */
+.welcome{text-align:center;padding:18px 0 20px}
+.welcome .eye{
+  display:inline-flex;align-items:center;gap:8px;padding:5px 12px;border-radius:999px;
+  background:var(--panel);border:1px solid var(--line);
+  font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);font-family:'JetBrains Mono',monospace;
+  margin-bottom:14px; backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+.welcome .eye .dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+.welcome h1{
+  font-size:clamp(26px,4.5vw,38px);font-weight:800;letter-spacing:-.025em;line-height:1.1;
+  background:linear-gradient(120deg,var(--ink) 20%,var(--ink2) 60%,var(--muted) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  margin-bottom:8px;
+}
+html[data-theme="light"] .welcome h1{
+  background:linear-gradient(120deg,#0F172A 20%,#1A56DB 70%,#7A3CFF 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.welcome p{color:var(--muted);font-size:14px;max-width:520px;margin:0 auto;line-height:1.6}
+
+/* ============ LAUNCHPAD ============ */
+.launchpad{
+  flex:1; display:flex; flex-direction:column; align-items:center;
+  padding:22px 0 40px; position:relative; width:100%;
+}
+.pages{
+  width:100%; max-width:980px;
+  display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scroll-behavior:smooth;
+  scrollbar-width:none; -webkit-overflow-scrolling:touch;
+}
+.pages::-webkit-scrollbar{display:none}
+.page{
+  flex:0 0 100%; scroll-snap-align:center;
+  display:flex; align-items:center; justify-content:center;
+  padding:20px 16px;
+  min-height:520px;
+}
+
+/* APP CARD — single visible per slide (carousel) */
+.app{
+  display:flex; flex-direction:column; align-items:center; gap:18px;
+  cursor:pointer; text-decoration:none; color:inherit;
+  transition:transform .25s cubic-bezier(.2,.8,.2,1);
+  position:relative;
+  width:100%; max-width:420px;
+  padding:42px 32px 32px;
+  border-radius:30px;
+  background:linear-gradient(180deg,var(--panel) 0%,var(--panel2) 100%);
+  border:1px solid var(--line);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  text-align:center;
+}
+.app:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.18)}
+.app::before{
+  content:"";position:absolute;inset:0;border-radius:30px;
+  background:radial-gradient(ellipse 80% 50% at 50% 0%, var(--accent-glow,transparent), transparent 70%);
+  pointer-events:none;
+}
+.app.core{--accent-glow:rgba(46,123,255,.20)}
+.app.ledger{--accent-glow:rgba(30,255,142,.18)}
+.app.rh{--accent-glow:rgba(245,196,94,.18)}
+.app.voice{--accent-glow:rgba(139,92,255,.18)}
+.app.sales{--accent-glow:rgba(255,107,157,.18)}
+.app.calendar{--accent-glow:rgba(0,229,255,.18)}
+.app.marketing{--accent-glow:rgba(255,123,123,.18)}
+.app.analytics{--accent-glow:rgba(30,255,142,.18)}
+
+.app-icon{
+  width:128px; height:128px; border-radius:32px;
+  display:flex; align-items:center; justify-content:center; color:#fff;
+  position:relative;
+  box-shadow:
+    0 24px 48px -14px rgba(0,0,0,.5),
+    inset 0 1px 0 rgba(255,255,255,.22),
+    inset 0 -2px 4px rgba(0,0,0,.15);
+}
+.app-icon svg{width:64px;height:64px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.25));position:relative;z-index:1}
+.app-icon::before{
+  content:"";position:absolute;inset:0;border-radius:32px;
+  background:linear-gradient(180deg,rgba(255,255,255,.20) 0%,rgba(255,255,255,0) 50%);
+  pointer-events:none;
+}
+.app-label{
+  font-size:26px; font-weight:800; text-align:center; letter-spacing:-.02em;
+  color:var(--ink);
+  position:relative;z-index:1;
+}
+.app-sub{
+  font-size:11px; color:var(--muted); font-family:'JetBrains Mono',monospace;
+  letter-spacing:.18em; text-transform:uppercase; margin-top:-10px;
+  position:relative;z-index:1;
+}
+.app-desc{
+  font-size:14px; color:var(--ink2); line-height:1.6;
+  max-width:320px; margin-top:-4px;
+  position:relative;z-index:1;
+}
+.app-cta{
+  margin-top:6px;
+  display:inline-flex; align-items:center; gap:8px;
+  padding:13px 24px; border-radius:14px;
+  background:var(--cta-bg,var(--grad-core));
+  color:#fff; font-weight:700; font-size:13.5px;
+  border:0; cursor:pointer; text-decoration:none;
+  box-shadow:0 12px 30px -10px rgba(0,0,0,.4);
+  transition:transform .2s, box-shadow .2s;
+  position:relative;z-index:1;
+}
+.app-cta:hover{transform:translateY(-2px);box-shadow:0 18px 40px -12px rgba(0,0,0,.5)}
+.app-cta svg{width:16px;height:16px}
+.app.core .app-cta{--cta-bg:linear-gradient(135deg,#2E7BFF,#8B5CFF)}
+.app.ledger .app-cta{--cta-bg:linear-gradient(135deg,#1EFF8E,#00E5FF)}
+.app.rh .app-cta{--cta-bg:linear-gradient(135deg,#F5C45E,#FF7B7B)}
+.app.voice .app-cta{--cta-bg:linear-gradient(135deg,#8B5CFF,#FF7B7B)}
+.app.sales .app-cta{--cta-bg:linear-gradient(135deg,#FF6B9D,#F5C45E)}
+.app.calendar .app-cta{--cta-bg:linear-gradient(135deg,#00E5FF,#2E7BFF)}
+.app.marketing .app-cta{--cta-bg:linear-gradient(135deg,#FF7B7B,#8B5CFF)}
+.app.analytics .app-cta{--cta-bg:linear-gradient(135deg,#1EFF8E,#2E7BFF)}
+.app.locked .app-cta{background:rgba(255,255,255,.06);box-shadow:none;color:var(--muted)}
+.app.locked .app-cta:hover{transform:none}
+
+/* GRADIENTS */
+.app.core .app-icon{background:linear-gradient(135deg,#2E7BFF 0%,#8B5CFF 60%,#00E5FF 100%)}
+.app.ledger .app-icon{background:linear-gradient(135deg,#1EFF8E 0%,#00E5FF 100%)}
+.app.rh .app-icon{background:linear-gradient(135deg,#F5C45E 0%,#FF7B7B 100%)}
+.app.voice .app-icon{background:linear-gradient(135deg,#8B5CFF 0%,#FF7B7B 100%)}
+.app.sales .app-icon{background:linear-gradient(135deg,#FF6B9D 0%,#F5C45E 100%)}
+.app.calendar .app-icon{background:linear-gradient(135deg,#00E5FF 0%,#2E7BFF 100%)}
+.app.marketing .app-icon{background:linear-gradient(135deg,#FF7B7B 0%,#8B5CFF 100%)}
+.app.analytics .app-icon{background:linear-gradient(135deg,#1EFF8E 0%,#2E7BFF 100%)}
+
+/* LIVE pulse on Core */
+.app.core::after{
+  content:""; position:absolute; top:6px; right:18px;
+  width:10px; height:10px; border-radius:50%; background:var(--lime);
+  border:2px solid var(--bg);
+  box-shadow:0 0 10px var(--lime);
+  animation:livePulse 1.4s ease-in-out infinite;
+}
+
+/* LOCKED state */
+.app.locked .app-icon{filter:grayscale(.85) brightness(.55)}
+.app.locked .lock-badge{
+  position:absolute; top:18px; right:18px;
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 12px; border-radius:999px;
+  background:rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.12);
+  font-size:10.5px; font-weight:700; letter-spacing:.1em; color:var(--ink2);
+  font-family:'JetBrains Mono',monospace; text-transform:uppercase;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  z-index:2;
+}
+.app.locked .lock-badge svg{width:11px;height:11px}
+.lock-badge{display:none}
+
+/* CAROUSEL ARROWS */
+.car-nav{
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:46px; height:46px; border-radius:50%;
+  background:var(--panel); border:1px solid var(--line); color:var(--ink);
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+  transition:all .2s; z-index:10;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+.car-nav:hover{background:var(--panel2);border-color:var(--cyan);color:var(--cyan);transform:translateY(-50%) scale(1.06)}
+.car-nav:disabled{opacity:.25;cursor:not-allowed}
+.car-nav svg{width:18px;height:18px}
+.car-nav.prev{left:8px}
+.car-nav.next{right:8px}
+@media(max-width:680px){.car-nav{display:none}}
+
+/* ADD slot */
+.app.add .app-icon{
+  background:transparent;
+  border:2px dashed var(--line);
+  box-shadow:none;
+  color:var(--muted);
+}
+.app.add .app-icon::before{display:none}
+.app.add:hover .app-icon{border-color:var(--cyan);color:var(--cyan)}
+
+/* PAGE DOTS */
+.page-dots{display:flex;gap:8px;margin-top:18px;justify-content:center}
+.pd{
+  width:8px;height:8px;border-radius:50%;background:var(--line);cursor:pointer;border:0;padding:0;
+  transition:all .25s;
+}
+.pd.on{background:var(--cyan);width:26px;border-radius:999px;box-shadow:0 0 10px rgba(0,229,255,.5)}
+
+/* BOTTOM-RIGHT SHARE FAB */
+.share-fab{
+  position:fixed; right:24px; bottom:24px; z-index:100;
+  display:flex; align-items:center; gap:10px;
+  padding:13px 20px 13px 16px; border-radius:999px;
+  background:var(--grad-core); color:#fff; font-weight:700; font-size:13.5px;
+  border:0; cursor:pointer;
+  box-shadow:0 16px 40px -12px rgba(46,123,255,.6), inset 0 1px 0 rgba(255,255,255,.2);
+  transition:transform .2s, box-shadow .2s;
+}
+.share-fab:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 22px 50px -12px rgba(139,92,255,.7)}
+.share-fab svg{width:16px;height:16px}
+
+/* MODAL */
+.modal-bg{
+  position:fixed;inset:0;z-index:300;
+  background:rgba(11,15,26,.65);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  display:none;align-items:center;justify-content:center;
+  padding:24px;
+  animation:fadeIn .25s ease;
+}
+.modal-bg.show{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{
+  background:var(--bg2); border:1px solid var(--line); border-radius:24px;
+  max-width:480px; width:100%; padding:32px 30px 28px;
+  box-shadow:0 30px 80px -20px rgba(0,0,0,.6);
+  position:relative;
+  animation:slideUp .3s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.modal-close{
+  position:absolute;top:14px;right:14px;
+  width:32px;height:32px;border-radius:10px;background:var(--panel);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink2);
+  transition:all .2s;
+}
+.modal-close:hover{background:var(--panel2);color:var(--ink)}
+.modal-close svg{width:14px;height:14px}
+.modal-icon{
+  width:64px;height:64px;border-radius:18px;
+  display:flex;align-items:center;justify-content:center;color:#fff;margin-bottom:18px;
+  box-shadow:0 12px 30px -10px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.2);
+}
+.modal-icon svg{width:30px;height:30px}
+.modal-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--accent);
+  margin-bottom:8px;
+}
+.modal-tag .pulse{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.modal h2{font-size:24px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px}
+.modal h2 b{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
+.modal-desc{color:var(--ink2);font-size:14px;line-height:1.65;margin-bottom:20px}
+.modal-feats{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:22px}
+.modal-feats li{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink2)}
+.modal-feats li::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.modal-price{
+  padding:18px;border-radius:14px;background:var(--panel);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px;
+}
+.price-l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:600}
+.price-v{font-size:24px;font-weight:800;letter-spacing:-.02em;margin-top:2px}
+.price-v b{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.price-v small{font-size:13px;color:var(--muted);font-weight:500}
+.price-cta{
+  padding:10px 18px;border-radius:11px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;font-weight:700;font-size:13px;border:0;cursor:pointer;
+  transition:transform .15s;
+}
+.price-cta:hover{transform:translateY(-1px)}
+.modal-foot{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--muted);margin-top:8px}
+.modal-foot a{color:var(--cyan);text-decoration:none;cursor:pointer}
+.modal-preview-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:11px 16px;border-radius:11px;margin-top:12px;
+  background:transparent;border:1px solid var(--line);color:var(--ink);
+  font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;
+}
+.modal-preview-btn:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(0,229,255,.04);transform:translateY(-1px)}
+.modal-preview-btn svg{width:14px;height:14px}
+
+/* "NEW" badge on locked modules */
+.app .new-badge{
+  position:absolute; top:18px; left:18px;
+  display:none; align-items:center; gap:6px;
+  padding:6px 11px; border-radius:999px;
+  background:linear-gradient(135deg,#FF6B9D,#F5C45E);
+  color:#fff; font-size:10.5px; font-weight:800; letter-spacing:.1em;
+  font-family:'JetBrains Mono',monospace; text-transform:uppercase;
+  box-shadow:0 8px 20px -6px rgba(255,107,157,.55);
+  z-index:2; animation:newPulse 1.6s ease-in-out infinite;
+}
+.app.is-new .new-badge{display:inline-flex}
+@keyframes newPulse{
+  0%,100%{transform:scale(1);box-shadow:0 8px 20px -6px rgba(255,107,157,.55)}
+  50%{transform:scale(1.06);box-shadow:0 12px 28px -6px rgba(255,107,157,.75)}
+}
+
+/* TOAST */
+.toast{
+  position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);
+  background:rgba(11,15,26,.94);border:1px solid var(--line);
+  padding:12px 18px;border-radius:12px;
+  font-size:13px;color:var(--ink);
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 20px 60px -10px rgba(0,0,0,.5);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  opacity:0;visibility:hidden;transition:all .3s; z-index:300;
+}
+.toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+.toast svg{width:16px;height:16px;color:var(--lime)}
+
+@media(max-width:560px){
+  .hub{padding:18px 16px 100px}
+  .welcome h1{font-size:24px}
+  .app-icon{width:72px;height:72px;border-radius:18px}
+  .app-icon svg{width:36px;height:36px}
+  .app.locked .lock-badge{transform:translateX(30px)}
+  .share-fab{padding:12px 18px 12px 14px;font-size:12.5px}
+  .toolbar .tb-btn:nth-child(1),
+  .toolbar .tb-btn:nth-child(2){display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== BOOT ===== -->
+<div id="boot">
+  <div class="boot-logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+    </svg>
+  </div>
+  <div class="boot-title">N E X U S<span>// HUB</span></div>
+  <div class="boot-bar"></div>
+  <div class="boot-status"><span class="live"></span>Initialisation des modules</div>
+</div>
+
+<!-- ===== HUB ===== -->
+<main class="hub" id="hub">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
+        </svg>
+      </div>
+      <div class="brand-name">Ne<b>xus</b></div>
+    </div>
+    <div class="toolbar">
+      <button class="tb-btn" title="Méthode de paiement" aria-label="Paiement">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      </button>
+      <button class="tb-btn" title="Configuration" aria-label="Configuration">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+      <button class="tb-btn" id="theme-btn" title="Thème clair / sombre" aria-label="Thème">
+        <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="tb-btn sos" title="SAV — Service Après-Vente" aria-label="SAV">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </button>
+      <span class="tb-divider"></span>
+      <div class="tb-avatar" title="Profil">CR</div>
+    </div>
+  </div>
+
+  <!-- WELCOME -->
+  <section class="welcome">
+    <div class="eye"><span class="dot"></span>Hola Carlos · 8 modules · 1 actif</div>
+    <h1>Tes modules Nexus.</h1>
+    <p>Glisse vers la droite pour découvrir les modules suivants.</p>
+  </section>
+
+  <!-- LAUNCHPAD — single-card carousel -->
+  <div class="launchpad">
+
+    <button class="car-nav prev" id="carPrev" aria-label="Précédent">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+
+    <div class="pages" id="pages">
+
+      <div class="page">
+        <a class="app core" href="core.html">
+          <div class="app-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+            </svg>
+          </div>
+          <div class="app-label">Nexus Core</div>
+          <div class="app-sub">● Actif · Live</div>
+          <p class="app-desc">Le cœur. Inbox WhatsApp + Instagram + Gmail, CRM clients, agent IA, dashboard temps réel.</p>
+          <span class="app-cta">Entrer dans Nexus Core <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+        </a>
+      </div>
+
+      <div class="page">
+        <div class="app ledger locked" data-module="ledger">
+          <span class="lock-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bientôt</span>
+          <div class="app-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="1" x2="12" y2="23"/>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+          <div class="app-label">Nexus Ledger</div>
+          <div class="app-sub">Finance</div>
+          <p class="app-desc">Le compte de résultat live. Revenus, charges, marge nette, projections.</p>
+          <span class="app-cta">Découvrir · 19 €/mois <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+        </div>
+      </div>
+
+      <div class="page">
+        <div class="app rh locked" data-module="rh">
+          <span class="lock-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bientôt</span>
+          <div class="app-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <div class="app-label">Nexus RH</div>
+          <div class="app-sub">Équipe</div>
+          <p class="app-desc">Équipe, planning, paie, congés. Pour le patron qui passe à l'échelle.</p>
+          <span class="app-cta">Découvrir · 24 €/mois <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+        </div>
+      </div>
+
+      <div class="page">
+        <div class="app voice locked" data-module="voice">
+          <span class="lock-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bientôt</span>
+          <div class="app-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/>
+              <line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          </div>
+          <div class="app-label">Nexus Voice</div>
+          <div class="app-sub">Agent vocal</div>
+          <p class="app-desc">Un agent qui répond au téléphone à ta place, en espagnol natif. Numéro dédié inclus.</p>
+          <span class="app-cta">Découvrir · 29 €/mois <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+        </div>
+      </div>
+
+      <div class="page">
+        <div class="app sales locked is-new" data-module="sales">
+          <span class="new-badge">★ Nouveau</span>
+          <span class="lock-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bientôt</span>
+          <div class="app-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+              <polyline points="17 6 23 6 23 12"/>
+            </svg>
+          </div>
+          <div class="app-label">Nexus Sales</div>
+          <div class="app-sub">Closer IA</div>
+          <p class="app-desc">Relances chaudes, upsell, recovery panier. Le bon message au bon moment, automatiquement.</p>
+          <span class="app-cta">Découvrir · 19 €/mois <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+        </div>
+      </div>
+
+      <div class="page">
+        <div class="app calendar locked" data-module="calendar">
+          <span class="lock-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bientôt</span>
+          <div class="app-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </div>
+          <div class="app-label">Nexus Calendar</div>
+          <div class="app-sub">Agenda IA</div>
+          <p class="app-desc">Synchro Google · Apple · Outlook. Créneaux intelligents, relances no-show auto.</p>
+          <span class="app-cta">Découvrir · 9 €/mois <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+        </div>
+      </div>
+
+      <div class="page">
+        <div class="app marketing locked" data-module="marketing">
+          <span class="lock-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bientôt</span>
+          <div class="app-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 11l18-8v18l-18-8v-2z"/>
+              <line x1="11.6" y1="11.6" x2="11.6" y2="20"/>
+            </svg>
+          </div>
+          <div class="app-label">Nexus Boost</div>
+          <div class="app-sub">Campagnes</div>
+          <p class="app-desc">Crée et envoie des campagnes ciblées en 30 secondes. WhatsApp · Instagram · Email.</p>
+          <span class="app-cta">Découvrir · 14 €/mois <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+        </div>
+      </div>
+
+      <div class="page">
+        <div class="app analytics locked" data-module="analytics">
+          <span class="lock-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bientôt</span>
+          <div class="app-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+          </div>
+          <div class="app-label">Nexus Insights</div>
+          <div class="app-sub">Analytics IA</div>
+          <p class="app-desc">Lis ton business comme un livre. KPIs vivants, cohort, prédictions revenus 90 j.</p>
+          <span class="app-cta">Découvrir · 12 €/mois <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+        </div>
+      </div>
+
+    </div>
+
+    <button class="car-nav next" id="carNext" aria-label="Suivant">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+
+    <!-- Pagination dots -->
+    <div class="page-dots" id="pageDots">
+      <button class="pd on" data-idx="0" aria-label="Module 1"></button>
+      <button class="pd" data-idx="1" aria-label="Module 2"></button>
+      <button class="pd" data-idx="2" aria-label="Module 3"></button>
+      <button class="pd" data-idx="3" aria-label="Module 4"></button>
+      <button class="pd" data-idx="4" aria-label="Module 5"></button>
+      <button class="pd" data-idx="5" aria-label="Module 6"></button>
+      <button class="pd" data-idx="6" aria-label="Module 7"></button>
+      <button class="pd" data-idx="7" aria-label="Module 8"></button>
+    </div>
+  </div>
+
+</main>
+
+<!-- BOTTOM-RIGHT SHARE FAB -->
+<button class="share-fab" id="shareBtn">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+  Partager en 1 clic
+</button>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal">
+  <div class="modal" id="modalCard">
+    <button class="modal-close" id="modalClose">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="modal-icon" id="modalIcon"></div>
+    <div class="modal-tag" id="modalTag"><span class="pulse"></span><span id="modalTagText">Phase 2</span></div>
+    <h2 id="modalTitle"></h2>
+    <p class="modal-desc" id="modalDesc"></p>
+    <ul class="modal-feats" id="modalFeats"></ul>
+    <div class="modal-price">
+      <div>
+        <div class="price-l">À partir de</div>
+        <div class="price-v"><b id="modalPrice"></b> <small>/mois</small></div>
+      </div>
+      <button class="price-cta" id="modalCta">Notifier au lancement</button>
+    </div>
+    <button class="modal-preview-btn" id="modalPreview">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      Voir un aperçu sans data
+    </button>
+    <div class="modal-foot">
+      <span>Activable en 1 clic dans Nexus Core</span>
+      <a id="modalLearn">En savoir +</a>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  <span id="toastMsg">Tu seras notifié au lancement de ce module.</span>
+</div>
+
+<script>
+(() => {
+  // ===== Boot
+  const boot = document.getElementById('boot');
+  const hub  = document.getElementById('hub');
+  setTimeout(() => { boot.classList.add('gone'); hub.classList.add('show'); }, 2300);
+
+  // ===== Theme
+  const themeBtn  = document.getElementById('theme-btn');
+  const themeIcon = document.getElementById('theme-icon');
+  const sunIcon   = '<path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/><circle cx="12" cy="12" r="5"/>';
+  const moonIcon  = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  themeBtn.addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const nxt = cur === 'light' ? '' : 'light';
+    if (nxt) document.documentElement.setAttribute('data-theme', nxt);
+    else document.documentElement.removeAttribute('data-theme');
+    themeIcon.innerHTML = nxt === 'light' ? sunIcon : moonIcon;
+  });
+
+  // ===== Pages swiper (single-card carousel)
+  const pages = document.getElementById('pages');
+  const dots  = [...document.querySelectorAll('.pd')];
+  const pageEls = [...pages.querySelectorAll('.page')];
+  const carPrev = document.getElementById('carPrev');
+  const carNext = document.getElementById('carNext');
+  let curIdx = 0;
+
+  const setPage = (i) => {
+    curIdx = Math.max(0, Math.min(pageEls.length - 1, i));
+    const target = pageEls[curIdx];
+    if (!target) return;
+    pages.scrollTo({ left: target.offsetLeft, behavior: 'smooth' });
+    dots.forEach((d, k) => d.classList.toggle('on', k === curIdx));
+    carPrev.disabled = curIdx === 0;
+    carNext.disabled = curIdx === pageEls.length - 1;
+  };
+  dots.forEach(d => d.addEventListener('click', () => setPage(+d.dataset.idx)));
+  carPrev.addEventListener('click', () => setPage(curIdx - 1));
+  carNext.addEventListener('click', () => setPage(curIdx + 1));
+
+  let scrollT;
+  pages.addEventListener('scroll', () => {
+    clearTimeout(scrollT);
+    scrollT = setTimeout(() => {
+      const idx = Math.round(pages.scrollLeft / pages.clientWidth);
+      curIdx = idx;
+      dots.forEach((d, i) => d.classList.toggle('on', i === idx));
+      carPrev.disabled = idx === 0;
+      carNext.disabled = idx === pageEls.length - 1;
+    }, 80);
+  });
+
+  // Keyboard nav
+  document.addEventListener('keydown', (e) => {
+    if (document.getElementById('modal').classList.contains('show')) return;
+    if (e.key === 'ArrowLeft') setPage(curIdx - 1);
+    if (e.key === 'ArrowRight') setPage(curIdx + 1);
+  });
+
+  carPrev.disabled = true;
+
+  // ===== Module catalog
+  const CATALOG = {
+    ledger: {
+      title: 'Nexus <b>Ledger</b>',
+      tag: 'Finance · Phase 2',
+      desc: 'Le compte de résultat de ton business, en live. Revenus, charges, marge nette, projections — sans Excel, sans comptable.',
+      feats: ['Revenus & dépenses synchronisés','Marge nette & cashflow projeté','RIB intégré · paiement 1 clic','Export comptable mensuel auto'],
+      price: '€19',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+      grad: 'linear-gradient(135deg,#1EFF8E 0%,#00E5FF 100%)',
+      acc: ['#1EFF8E','#00E5FF']
+    },
+    rh: {
+      title: 'Nexus <b>RH</b>',
+      tag: 'Équipe · Phase 2',
+      desc: 'Gestion humaine simplifiée : équipe, planning, paie, congés. Pour le patron qui passe à l\'échelle.',
+      feats: ['Fiches équipe & contrats','Planning & pointages auto','Paie mensuelle simplifiée','Onboarding nouveau collaborateur'],
+      price: '€24',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+      grad: 'linear-gradient(135deg,#F5C45E 0%,#FF7B7B 100%)',
+      acc: ['#F5C45E','#FF7B7B']
+    },
+    voice: {
+      title: 'Nexus <b>Voice</b>',
+      tag: 'Agent vocal · Bientôt',
+      desc: 'Un agent qui répond au téléphone à ta place, en espagnol natif. Prend les RDV, qualifie le lead, te pousse le résumé.',
+      feats: ['Voix naturelle · ES, FR, EN','Prise de RDV automatique','Résumé de chaque appel envoyé','Numéro dédié inclus'],
+      price: '€29',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>',
+      grad: 'linear-gradient(135deg,#8B5CFF 0%,#FF7B7B 100%)',
+      acc: ['#8B5CFF','#FF7B7B']
+    },
+    sales: {
+      title: 'Nexus <b>Sales</b>',
+      tag: 'Ventes · Bientôt',
+      desc: 'Un closer IA qui pousse les bons clients au bon moment : relances chaudes, upsell, recovery panier.',
+      feats: ['Scoring chaud / froid auto','Relances déclenchées par signal','Upsell IA basé sur l\'historique','Tableau de bord des opportunités'],
+      price: '€19',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>',
+      grad: 'linear-gradient(135deg,#FF6B9D 0%,#F5C45E 100%)',
+      acc: ['#FF6B9D','#F5C45E']
+    },
+    calendar: {
+      title: 'Nexus <b>Calendar</b>',
+      tag: 'Agenda · Bientôt',
+      desc: 'Ton agenda piloté par l\'IA. Ouvre des créneaux, gère les annulations, relance les no-show.',
+      feats: ['Synchro Google / Apple / Outlook','Créneaux intelligents par service','Relances no-show auto','Vue équipe multi-agendas'],
+      price: '€9',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+      grad: 'linear-gradient(135deg,#00E5FF 0%,#2E7BFF 100%)',
+      acc: ['#00E5FF','#2E7BFF']
+    },
+    marketing: {
+      title: 'Nexus <b>Boost</b>',
+      tag: 'Campagnes · Bientôt',
+      desc: 'Crée et envoie des campagnes ciblées en 30 secondes. WhatsApp, Instagram, Email — un seul écran.',
+      feats: ['Templates IA personnalisés','Ciblage par segment client','Réplication 1 clic','A/B test natif'],
+      price: '€14',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8v18l-18-8v-2z"/><line x1="11.6" y1="11.6" x2="11.6" y2="20"/></svg>',
+      grad: 'linear-gradient(135deg,#FF7B7B 0%,#8B5CFF 100%)',
+      acc: ['#FF7B7B','#8B5CFF']
+    },
+    analytics: {
+      title: 'Nexus <b>Insights</b>',
+      tag: 'Analytics · Bientôt',
+      desc: 'Lis ton business comme un livre. KPIs vivants, cohort analysis, prédictions IA.',
+      feats: ['Dashboard live KPIs','Analyse cohort & rétention','Prédictions revenus 90 jours','Alertes anomalies'],
+      price: '€12',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+      grad: 'linear-gradient(135deg,#1EFF8E 0%,#2E7BFF 100%)',
+      acc: ['#1EFF8E','#2E7BFF']
+    },
+    add: {
+      title: 'Marketplace <b>Nexus</b>',
+      tag: 'Découvrir',
+      desc: 'Tous les modules disponibles et à venir. Active ce dont tu as besoin, paie uniquement ce que tu utilises.',
+      feats: ['+12 modules en roadmap','Activation 1 clic','Pas d\'engagement','Bundle -30% dès 3 modules'],
+      price: '€0',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+      grad: 'linear-gradient(135deg,#2E7BFF 0%,#8B5CFF 100%)',
+      acc: ['#2E7BFF','#8B5CFF']
+    }
+  };
+
+  // ===== Modal
+  const modal = document.getElementById('modal');
+  const mIcon = document.getElementById('modalIcon');
+  const mTag  = document.getElementById('modalTagText');
+  const mTitle= document.getElementById('modalTitle');
+  const mDesc = document.getElementById('modalDesc');
+  const mFeats= document.getElementById('modalFeats');
+  const mPrice= document.getElementById('modalPrice');
+  const mCta  = document.getElementById('modalCta');
+
+  const openModal = (key) => {
+    const m = CATALOG[key];
+    if (!m) return;
+    mIcon.style.background = m.grad;
+    mIcon.innerHTML = m.icon;
+    mTag.textContent = m.tag;
+    mTitle.innerHTML = m.title;
+    mDesc.textContent = m.desc;
+    mFeats.innerHTML = m.feats.map(f => `<li>${f}</li>`).join('');
+    mPrice.textContent = m.price;
+    document.querySelectorAll('.modal-tag').forEach(el => el.style.setProperty('--accent', m.acc[0]));
+    document.querySelector('.price-v b').style.background = m.grad;
+    document.querySelector('.price-v b').style.webkitBackgroundClip = 'text';
+    document.querySelector('.price-v b').style.backgroundClip = 'text';
+    document.querySelector('.price-v b').style.color = 'transparent';
+    document.querySelector('.modal h2 b').style.background = m.grad;
+    document.querySelector('.modal h2 b').style.webkitBackgroundClip = 'text';
+    document.querySelector('.modal h2 b').style.backgroundClip = 'text';
+    document.querySelector('.modal h2 b').style.color = 'transparent';
+    mCta.style.background = m.grad;
+    mCta.dataset.module = key;
+    modal.classList.add('show');
+  };
+  const closeModal = () => modal.classList.remove('show');
+
+  document.querySelectorAll('.app.locked, .app.add').forEach(a => {
+    a.addEventListener('click', (e) => { e.preventDefault(); openModal(a.dataset.module); });
+  });
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+  // ===== Toast
+  const toast = document.getElementById('toast');
+  const toastMsg = document.getElementById('toastMsg');
+  const showToast = (msg) => {
+    toastMsg.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => toast.classList.remove('show'), 2600);
+  };
+
+  mCta.addEventListener('click', () => {
+    const key = mCta.dataset.module;
+    showToast(`Tu seras notifié au lancement de ${(CATALOG[key]?.title || '').replace(/<[^>]+>/g,'')}.`);
+    closeModal();
+  });
+
+  // Preview button → navigate to preview page (no data, just features teaser)
+  document.getElementById('modalPreview').addEventListener('click', () => {
+    const key = mCta.dataset.module;
+    location.href = `preview.html?module=${encodeURIComponent(key)}`;
+  });
+
+  // Share FAB
+  document.getElementById('shareBtn').addEventListener('click', () => {
+    if (navigator.share) {
+      navigator.share({ title: 'Nexus', text: 'Découvre Nexus, ma plateforme business pilotée par IA.', url: location.href }).catch(()=>{});
+    } else {
+      navigator.clipboard?.writeText(location.href);
+      showToast('Lien copié — partage-le où tu veux.');
+    }
+  });
+})();
+</script>
+</body>
+</html>
