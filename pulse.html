@@ -240,24 +240,123 @@ body::before{content:"";position:fixed;inset:0;background-image:var(--grid-patte
 }
 .chile-stage{
   position:relative;
-  width:100%; height:780px;
-  perspective:2000px;
+  width:100%; height:880px;
+  perspective:2400px;
   perspective-origin:50% 30%;
-  display:flex; align-items:center; justify-content:center;
+  display:grid;
+  grid-template-columns:minmax(180px,1fr) minmax(420px,560px) minmax(180px,1fr);
+  align-items:center;
+  gap:0;
+  padding:30px 40px;
+}
+@media(max-width:1100px){
+  .chile-stage{grid-template-columns:1fr;padding:20px}
+  .chile-side{display:none !important}
+}
+.chile-stage-center{
+  position:relative;
+  height:100%;
+  display:flex;align-items:center;justify-content:center;
+  perspective:2400px;
+  perspective-origin:50% 35%;
 }
 .chile-3d{
   position:relative;
-  width:min(420px, 95vw);
-  height:760px;
+  width:min(540px, 100%);
+  height:840px;
   transform-style:preserve-3d;
-  transform:rotateX(54deg) rotateZ(-7deg);
+  transform:rotateX(50deg) rotateZ(-6deg);
   transition:transform 1.2s cubic-bezier(.2,.8,.2,1);
   animation:chileFloat 10s ease-in-out infinite alternate;
 }
-.chile-stage:hover .chile-3d{transform:rotateX(44deg) rotateZ(-3deg) scale(1.06);animation-play-state:paused}
+.chile-stage:hover .chile-3d{transform:rotateX(40deg) rotateZ(-2deg) scale(1.05);animation-play-state:paused}
 @keyframes chileFloat{
-  0%{transform:rotateX(54deg) rotateZ(-7deg) translateY(0)}
-  100%{transform:rotateX(52deg) rotateZ(-5deg) translateY(-10px)}
+  0%{transform:rotateX(50deg) rotateZ(-6deg) translateY(0)}
+  100%{transform:rotateX(48deg) rotateZ(-4deg) translateY(-10px)}
+}
+
+/* SIDE PANELS — région cards avec lignes de connexion */
+.chile-side{
+  position:relative;
+  height:100%;
+  display:flex;flex-direction:column;justify-content:center;
+  gap:14px;
+  padding:0 8px;
+  z-index:6;
+}
+.chile-side.left{align-items:flex-start}
+.chile-side.right{align-items:flex-end}
+
+.region-card{
+  position:relative;
+  background:rgba(15,23,42,.65);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px 16px;
+  width:100%;max-width:240px;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  cursor:pointer;
+  transition:all .25s cubic-bezier(.2,.8,.2,1);
+  box-shadow:0 12px 30px -16px rgba(0,0,0,.5);
+}
+.region-card:hover{
+  transform:translateY(-3px) scale(1.03);
+  border-color:var(--accent,#1A56DB);
+  box-shadow:0 20px 40px -16px var(--accent,#1A56DB);
+}
+.region-card .head{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;
+}
+.region-card .name{
+  font-size:13px;font-weight:700;letter-spacing:-.005em;color:var(--ink);
+  display:flex;align-items:center;gap:6px;
+}
+.region-card .name .pulse-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--accent);box-shadow:0 0 8px var(--accent);
+  animation:dotBlink 1.5s infinite;
+}
+.region-card .delta{
+  font-size:10.5px;font-weight:700;
+  padding:2px 8px;border-radius:999px;
+  background:var(--delta-bg);color:var(--delta-c);
+}
+.region-card .meta{font-size:11px;color:var(--muted);margin-bottom:10px}
+.region-card .stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.region-card .stat-cell{
+  padding:6px 8px;background:rgba(255,255,255,.03);border-radius:8px;
+}
+.region-card .stat-cell .v{
+  font-size:14px;font-weight:800;font-family:'JetBrains Mono',monospace;
+  color:var(--accent);line-height:1;
+}
+.region-card .stat-cell .l{
+  font-size:9px;color:var(--muted);margin-top:3px;
+  text-transform:uppercase;letter-spacing:.05em;font-weight:600;
+}
+
+/* Connection lines SVG overlay */
+.chile-connections{
+  position:absolute; inset:0;
+  width:100%;height:100%;
+  pointer-events:none;
+  z-index:2;
+}
+.conn-line{
+  stroke:var(--line-color,rgba(26,86,219,.55));
+  stroke-width:1.5;
+  fill:none;
+  stroke-dasharray:5,5;
+  opacity:.7;
+  animation:lineFlow 1.6s linear infinite;
+}
+@keyframes lineFlow{
+  0%{stroke-dashoffset:0}
+  100%{stroke-dashoffset:-20}
+}
+.conn-dot{
+  fill:var(--line-color,#1A56DB);
+  filter:drop-shadow(0 0 6px var(--line-color,#1A56DB));
 }
 .chile-floor{
   position:absolute; left:-30%; right:-30%; bottom:-60px; height:140px;
@@ -1314,10 +1413,46 @@ Abre tu Nexus para descubrir las novedades.</textarea></div>
       trial:  this.state.clients.filter(c => c.plan.price === 0).length
     };
 
+    // 5 régions clés du Chili — distribuées le long de la carte
+    const regions = [
+      {n:'Arica & Iquique', m:'Norte Grande',          y:9,  mrr:1840, clients:5,  growth:'+12%', accent:'#06B6D4'},
+      {n:'Antofagasta',     m:'Mining hub',            y:22, mrr:2950, clients:6,  growth:'+18%', accent:'#1A56DB'},
+      {n:'La Serena · Valpo', m:'Côte centrale',       y:42, mrr:2380, clients:7,  growth:'+8%',  accent:'#7A3CFF'},
+      {n:'Concepción · Sur', m:'Industrie',            y:68, mrr:1640, clients:4,  growth:'+22%', accent:'#1EFF8E'},
+      {n:'Patagonie',        m:'Aysén · Magallanes',   y:90, mrr:980,  clients:3,  growth:'+5%',  accent:'#F59E0B'}
+    ];
+    // Top 5 clients
+    const topClients = [...this.state.clients].sort((a,b)=>b.mrr-a.mrr).slice(0,5).map((c,i)=>{
+      const pinIdx = i * 6;
+      const targetY = coords[pinIdx % coords.length].y;
+      const accents = ['#7A3CFF','#1A56DB','#06B6D4','#1EFF8E','#F59E0B'];
+      return {...c, y: targetY, accent: accents[i]};
+    });
+
     return `
       <div class="chile-stage">
-        <div class="chile-3d">
-          <div class="chile-floor"></div>
+
+        <!-- LEFT panel — Top régions -->
+        <div class="chile-side left">
+          ${regions.map(r => `
+            <div class="region-card" style="--accent:${r.accent};--delta-bg:rgba(30,255,142,.15);--delta-c:#1EFF8E" data-region-y="${r.y}">
+              <div class="head">
+                <div class="name"><span class="pulse-dot"></span>${r.n}</div>
+                <span class="delta">${r.growth}</span>
+              </div>
+              <div class="meta">${r.m} · ${r.clients} clients</div>
+              <div class="stats">
+                <div class="stat-cell"><div class="v">€${r.mrr}</div><div class="l">MRR</div></div>
+                <div class="stat-cell"><div class="v">${r.clients}</div><div class="l">Comptes</div></div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- CENTER — Carte 3D -->
+        <div class="chile-stage-center">
+          <div class="chile-3d">
+            <div class="chile-floor"></div>
 
           <svg class="chile-svg" viewBox="0 0 100 180" preserveAspectRatio="xMidYMid meet">
             <defs>
@@ -1552,6 +1687,43 @@ Abre tu Nexus para descubrir las novedades.</textarea></div>
             ${cities.map(ct=>`<span class="chile-city ${ct.cap?'cap':''}" style="left:${ct.x}%;top:${ct.y}%">${ct.n}</span>`).join('')}
           </div>
         </div>
+        </div>
+
+        <!-- RIGHT panel — Top clients -->
+        <div class="chile-side right">
+          <div style="font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px;width:100%;text-align:right;font-family:'JetBrains Mono',monospace">★ Top 5 clients</div>
+          ${topClients.map((c,i) => `
+            <div class="region-card" style="--accent:${c.accent};--delta-bg:rgba(122,60,255,.15);--delta-c:#B59EFF" data-region-y="${c.y}">
+              <div class="head">
+                <div class="name"><span class="pulse-dot"></span>${c.name}</div>
+                <span class="delta">#${i+1}</span>
+              </div>
+              <div class="meta">${c.city} · ${c.industry||'PME'}</div>
+              <div class="stats">
+                <div class="stat-cell"><div class="v">€${c.mrr}</div><div class="l">MRR</div></div>
+                <div class="stat-cell"><div class="v">${c.health}%</div><div class="l">Health</div></div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Connection lines SVG (overlay on entire stage) -->
+        <svg class="chile-connections" viewBox="0 0 100 100" preserveAspectRatio="none">
+          ${regions.map(r => `
+            <g style="--line-color:${r.accent}">
+              <path class="conn-line" d="M 22,${r.y} C 32,${r.y} 40,${r.y} 50,${r.y}" vector-effect="non-scaling-stroke"/>
+              <circle class="conn-dot" cx="22" cy="${r.y}" r="3" vector-effect="non-scaling-stroke"/>
+              <circle class="conn-dot" cx="50" cy="${r.y}" r="2" vector-effect="non-scaling-stroke"/>
+            </g>
+          `).join('')}
+          ${topClients.map(c => `
+            <g style="--line-color:${c.accent}">
+              <path class="conn-line" d="M 78,${c.y} C 68,${c.y} 60,${c.y} 50,${c.y}" vector-effect="non-scaling-stroke"/>
+              <circle class="conn-dot" cx="78" cy="${c.y}" r="3" vector-effect="non-scaling-stroke"/>
+              <circle class="conn-dot" cx="50" cy="${c.y}" r="2" vector-effect="non-scaling-stroke"/>
+            </g>
+          `).join('')}
+        </svg>
 
         <!-- Compass -->
         <div class="chile-compass">
