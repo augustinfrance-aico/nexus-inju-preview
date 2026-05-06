@@ -468,8 +468,11 @@ button:focus-visible,a:focus-visible,.nav-item:focus-visible,.filter-pill:focus-
       <button class="icon-btn" onclick="Nx.navigate('dashboard')" title="Accueil" aria-label="Retour au tableau de bord" style="flex-shrink:0">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>
       </button>
+      <a href="nexus-hub.html" class="icon-btn" title="Retour au Hub Nexus" aria-label="Hub Nexus" style="flex-shrink:0;text-decoration:none;display:inline-flex;align-items:center;justify-content:center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+      </a>
       <div class="breadcrumb">
-        <a href="#/dashboard" onclick="event.preventDefault();Nx.navigate('dashboard')" style="color:inherit;cursor:pointer;font-weight:600">Nexus</a> · <b id="breadcrumb">Tableau de bord</b>
+        <a href="nexus-hub.html" style="color:inherit;cursor:pointer;font-weight:600;text-decoration:none">Hub</a> · <a href="core.html" style="color:inherit;cursor:pointer;font-weight:600;text-decoration:none">Core</a> · <b id="breadcrumb">Tableau de bord</b>
       </div>
       <button class="search-btn" onclick="Nx.openPalette()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
@@ -683,10 +686,24 @@ const Nx = {
 
   init(){
     const saved = localStorage.getItem(STORAGE_KEY);
+    const fresh = JSON.parse(JSON.stringify(DEFAULT_STATE));
     if (saved) {
-      try { this.state = JSON.parse(saved); } catch(e){ this.state = JSON.parse(JSON.stringify(DEFAULT_STATE)); }
+      try {
+        const old = JSON.parse(saved);
+        // Deep merge : protège d'un schéma obsolète après refacto
+        const merge = (def, src) => {
+          if (Array.isArray(def)) return Array.isArray(src) ? src : def;
+          if (def && typeof def === 'object') {
+            const out = {};
+            for (const k in def) out[k] = (src && k in src) ? merge(def[k], src[k]) : def[k];
+            return out;
+          }
+          return src === undefined ? def : src;
+        };
+        this.state = merge(fresh, old);
+      } catch(e){ this.state = fresh; }
     } else {
-      this.state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+      this.state = fresh;
     }
     this.renderNav();
     this.setLang(this.state.lang);
@@ -737,11 +754,19 @@ const Nx = {
   },
 
   routeFromHash(){
-    const hash = location.hash.replace('#/','') || 'dashboard';
+    const ROUTE_ALIASES = {marketing:'campaigns',profil:'profile',tuto:'tutorial',tips:'dashboard'};
+    const raw = location.hash.replace('#/','') || 'dashboard';
+    const hash = ROUTE_ALIASES[raw] || raw;
     this.state.view = hash;
     this.renderView();
     this.updateBreadcrumb();
     document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === hash));
+    if (raw === 'tips'){
+      setTimeout(() => {
+        const tipEl = document.querySelector('.tips, .tip-card, [data-tip-anchor]');
+        if (tipEl) tipEl.scrollIntoView({behavior:'smooth', block:'center'});
+      }, 120);
+    }
   },
 
   updateBreadcrumb(){
@@ -1250,8 +1275,8 @@ const Nx = {
           <div class="card-hd">
             <h3>📈 Activité des 30 derniers jours</h3>
             <div class="actions">
-              <button class="btn-g">7j</button>
-              <button class="btn-g" style="color:var(--blue);border-color:var(--blue)">30j</button>
+              <button class="btn-g" onclick="this.style.color='var(--blue)';this.style.borderColor='var(--blue)';this.nextElementSibling.style.color='';this.nextElementSibling.style.borderColor='';Nx.toast('Vue 7 jours','info')">7j</button>
+              <button class="btn-g" style="color:var(--blue);border-color:var(--blue)" onclick="this.style.color='var(--blue)';this.style.borderColor='var(--blue)';this.previousElementSibling.style.color='';this.previousElementSibling.style.borderColor='';Nx.toast('Vue 30 jours','info')">30j</button>
               <button class="btn-g" onclick="Nx.openModal('vocal-summary')">🎙 Résumé vocal</button>
               <button class="btn-g" onclick="window.print()">📄 Export PDF</button>
             </div>
@@ -1672,7 +1697,7 @@ const Nx = {
 
         <div class="card">
           <div class="card-hd"><h3>Tous les clients · ${clients.length}</h3>
-            <div class="actions"><button class="btn-g">Trier par score ▾</button></div></div>
+            <div class="actions"><button class="btn-g" onclick="Nx.toast('Tri par score','info','Du plus engagé au moins actif')">Trier par score ▾</button></div></div>
           ${clients.map(c=>`
             <div class="crm-row" style="padding:14px 20px;border-top:1px solid var(--line2);display:flex;gap:14px;align-items:center;position:relative">
               <div class="msg-av" style="background:${c.color};cursor:pointer" onclick="Nx.openModal('client',Nx.state.clients.find(x=>x.id===${c.id}))">${c.avatar}</div>
@@ -1712,7 +1737,7 @@ const Nx = {
         <div class="grid2">
           <div class="card">
             <div class="card-hd"><h3>🔥 Heatmap — Quand tes clients écrivent</h3>
-              <div class="actions"><button class="btn-g">7j</button><button class="btn-g" style="color:var(--blue);border-color:var(--blue)">30j</button></div></div>
+              <div class="actions"><button class="btn-g" onclick="this.style.color='';this.style.borderColor='';this.nextElementSibling.style.color='';this.nextElementSibling.style.borderColor='';this.style.color='var(--blue)';this.style.borderColor='var(--blue)';Nx.toast('Période 7 jours','info')">7j</button><button class="btn-g" style="color:var(--blue);border-color:var(--blue)" onclick="this.style.color='';this.style.borderColor='';this.previousElementSibling.style.color='';this.previousElementSibling.style.borderColor='';this.style.color='var(--blue)';this.style.borderColor='var(--blue)';Nx.toast('Période 30 jours','info')">30j</button></div></div>
             <div class="card-body">
               <div class="heatmap">
                 <div class="heat-lbl"></div>
@@ -1868,7 +1893,7 @@ const Nx = {
                 <div style="font-size:11.5px;color:var(--muted);margin-top:2px">Déclenchée le 28 de chaque mois · cible Récurrents · 2 derniers jours</div>
               </div>
               <span class="chip green" style="font-size:11px">● Active</span>
-              <button class="btn-g">Modifier</button>
+              <button class="btn-g" onclick="Nx.toast('Édition automatisation','info','Disponible en M2')">Modifier</button>
             </div>
             <div style="padding:14px 16px;background:var(--bg2);border:1px solid var(--line);border-radius:11px;display:flex;align-items:center;gap:14px;margin-bottom:8px">
               <div style="width:42px;height:42px;border-radius:11px;background:#F59E0B22;color:#F59E0B;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🎂</div>
@@ -1877,7 +1902,7 @@ const Nx = {
                 <div style="font-size:11.5px;color:var(--muted);margin-top:2px">La veille à 9h · cible chaque client · code promo personnalisé</div>
               </div>
               <span class="chip green" style="font-size:11px">● Active</span>
-              <button class="btn-g">Modifier</button>
+              <button class="btn-g" onclick="Nx.toast('Édition automatisation','info','Disponible en M2')">Modifier</button>
             </div>
             <div style="padding:14px 16px;background:var(--bg2);border:1px solid var(--line);border-radius:11px;display:flex;align-items:center;gap:14px">
               <div style="width:42px;height:42px;border-radius:11px;background:#EF444422;color:#EF4444;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">💔</div>
@@ -1886,7 +1911,7 @@ const Nx = {
                 <div style="font-size:11.5px;color:var(--muted);margin-top:2px">Quand silence > 45 j · cible Perdus · message chaleureux + −10 %</div>
               </div>
               <span class="chip" style="font-size:11px;background:#94A3B822;color:#475569">○ Pause</span>
-              <button class="btn-g">Activer</button>
+              <button class="btn-g" onclick="this.textContent==='Activer' ? (this.textContent='Pause',Nx.toast('Automatisation activée','success')) : (this.textContent='Activer',Nx.toast('Automatisation en pause','info'))">Activer</button>
             </div>
           </div>
         </div>
@@ -1908,7 +1933,7 @@ const Nx = {
                 <div style="font-size:28px;margin-bottom:8px">${tpl.e}</div>
                 <div style="font-weight:700;font-size:13px">${tpl.n}</div>
                 <div style="font-size:11px;color:var(--muted);margin-top:2px">${tpl.d}</div>
-                <button class="btn-g" style="margin-top:8px;width:100%">Utiliser →</button>
+                <button class="btn-g" style="margin-top:8px;width:100%" onclick="event.stopPropagation();Nx.openCampaignBuilder('${tpl.n}')">Utiliser →</button>
               </div>`).join('')}
           </div>
         </div>
@@ -1958,7 +1983,7 @@ const Nx = {
           <textarea class="form-ctrl" id="campMsg" rows="4">Hola 👋 Este fin de semana en Don Carlos: 3kg de pan amasado por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! 🥖</textarea>
           <div class="flex mt8"><button class="btn-g" onclick="Nx.generateCampMsg()">✨ Générer 3 versions IA</button><button class="btn-g" onclick="Nx.toast('A/B test activé','success')">🧪 A/B test 10%</button></div></div>
         <div class="form-row"><label class="form-lbl">Photo (optionnel)</label>
-          <div style="display:flex;gap:8px"><button class="btn btn-s">📎 Importer</button><button class="btn btn-s">🖼 Choisir du catalogue</button></div></div>
+          <div style="display:flex;gap:8px"><button class="btn btn-s" onclick="Nx.toast('📎 Photo importée','success','panaderia_promo.jpg · 1.2 MB · prêt à envoyer')">📎 Importer</button><button class="btn btn-s" onclick="Nx.toast('🖼 Catalogue ouvert','info','12 photos disponibles')">🖼 Choisir du catalogue</button></div></div>
         <div class="form-row"><label class="form-lbl">Quand envoyer</label>
           <select class="form-ctrl" id="campSchedule">
             <option>Maintenant</option>
@@ -2025,7 +2050,7 @@ const Nx = {
           </select></div>
         <div class="form-row"><label class="form-lbl">Message</label>
           <textarea class="form-ctrl" rows="3">Hola {prenom} 👋 Petit clin d'œil de Don Carlos : −15 % sur ta prochaine commande jusqu'au 30. À très vite !</textarea>
-          <div class="flex mt8"><button class="btn-g">✨ Suggérer un message IA</button></div>
+          <div class="flex mt8"><button class="btn-g" onclick="const ta=this.parentElement.parentElement.querySelector('textarea');const opts=['Hola {prenom} 🥖 Esta semana hicimos pan amasado especial pensando en ti. −15% si vienes antes del viernes. Te esperamos!','{prenom}, hace un mes que no nos vemos 💛 Tenemos algo nuevo que te va a encantar — pasa a probar y te invito un café.','¡Hola {prenom}! Promo flash fin de semana: 3kg de pan a 10 lucas. Reserva por aquí, te lo dejamos listo 🔥'];ta.value=opts[Math.floor(Math.random()*opts.length)];Nx.toast('✨ 3 versions générées','success','Choisis ou regénère')">✨ Suggérer un message IA</button></div>
         </div>
         <div class="form-row"><label class="form-lbl">Limite anti-abus</label>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -2062,7 +2087,8 @@ const Nx = {
     this.save();
     this.closeModal();
     this.toast('🚀 Campagne lancée','success','Suivi en temps réel dans les stats');
-    this.state.onboarding.find(s=>s.id==='campaign').done = true;
+    const obStep = this.state.onboarding && this.state.onboarding.find(s=>s.id==='campaign');
+    if (obStep) obStep.done = true;
     this.save();
     // Simulate live counter
     setTimeout(()=>this.toast('📬 120 messages envoyés','info'),1000);
@@ -2111,7 +2137,7 @@ const Nx = {
 
         <div class="card" style="margin-top:14px">
           <div class="card-hd"><h3>📄 Historique factures</h3>
-            <div class="actions"><button class="btn-g">Télécharger tout</button></div></div>
+            <div class="actions"><button class="btn-g" onclick="Nx.toast('📦 Archive ZIP générée','success','Téléchargement de toutes les factures dans 2 sec')">Télécharger tout</button></div></div>
           ${this.state.invoices.map(inv=>`
             <div class="inv-row">
               <span class="mono inv-id">${inv.id}</span>
@@ -2145,10 +2171,10 @@ const Nx = {
                 {t:'Tester la messagerie',d:'Envoyer un message test depuis ton phone',d:4},
                 {t:'Lancer ta 1ère campagne',d:'Pioche dans la bibliothèque de templates',d:5},
               ].map((s,i)=>`
-                <div style="padding:14px 0;border-bottom:1px solid var(--line2);display:flex;gap:12px;align-items:flex-start;cursor:pointer" onclick="Nx.toast('Étape ${i+1} — ${s.t}','info')">
+                <div style="padding:14px 0;border-bottom:1px solid var(--line2);display:flex;gap:12px;align-items:flex-start;cursor:pointer" onclick="Nx.toast('Étape ${i+1} — ${s.t}','info','${s.d}')">
                   <div style="width:28px;height:28px;border-radius:50%;background:var(--blue-soft);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0">${i+1}</div>
                   <div style="flex:1"><div style="font-weight:600">${s.t}</div><div style="font-size:12px;color:var(--muted)">${s.d}</div></div>
-                  <button class="btn-g">Voir →</button>
+                  <button class="btn-g" onclick="event.stopPropagation();Nx.toast('Tutoriel ${i+1} — ${s.t}','info','${s.d}')">Voir →</button>
                 </div>`).join('')}
             </div>
           </div>

@@ -114,6 +114,7 @@ html[data-theme="light"] body{
   background:linear-gradient(135deg,#2E7BFF,#8B5CFF);
   display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;
   border:1px solid var(--line);transition:all .2s;
+  font-family:inherit;padding:0;outline:none;
 }
 .tb-avatar:hover{transform:scale(1.05);box-shadow:0 8px 20px -8px rgba(139,92,255,.6)}
 .tb-divider{width:1px;height:22px;background:var(--line);margin:0 4px}
@@ -466,20 +467,20 @@ html[data-theme="light"] .welcome h1{
       <div class="brand-name">Ne<b>xus</b></div>
     </div>
     <div class="toolbar">
-      <button class="tb-btn" title="Méthode de paiement" aria-label="Paiement">
+      <button class="tb-btn" id="payBtn" title="Méthode de paiement" aria-label="Paiement">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
       </button>
-      <button class="tb-btn" title="Configuration" aria-label="Configuration">
+      <button class="tb-btn" id="cfgBtn" title="Configuration" aria-label="Configuration">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
       <button class="tb-btn" id="theme-btn" title="Thème clair / sombre" aria-label="Thème">
         <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
-      <button class="tb-btn sos" title="SAV — Service Après-Vente" aria-label="SAV">
+      <button class="tb-btn sos" id="savBtn" title="SAV — Service Après-Vente" aria-label="SAV">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       </button>
       <span class="tb-divider"></span>
-      <div class="tb-avatar" title="Profil">CR</div>
+      <button class="tb-avatar" id="avatarBtn" title="Profil — Carlos Romero" aria-label="Profil">CR</button>
     </div>
   </div>
 
@@ -909,6 +910,20 @@ html[data-theme="light"] .welcome h1{
       navigator.clipboard?.writeText(location.href);
       showToast('Lien copié — partage-le où tu veux.');
     }
+  });
+
+  // ===== Topbar handlers (Profil / Paiement / Configuration / SAV / Avatar)
+  document.getElementById('payBtn').addEventListener('click', () => {
+    location.href = 'app.html#/payments';
+  });
+  document.getElementById('cfgBtn').addEventListener('click', () => {
+    location.href = 'app.html#/settings';
+  });
+  document.getElementById('savBtn').addEventListener('click', () => {
+    showToast('🆘 SAV ouvert — un humain te répond sous 2 h ouvrées.');
+  });
+  document.getElementById('avatarBtn').addEventListener('click', () => {
+    location.href = 'app.html#/profil';
   });
 })();
 </script>
