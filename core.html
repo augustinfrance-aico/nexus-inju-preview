@@ -723,7 +723,7 @@ body{
           </div>
           <span class="stat-tag">★ Top du jour</span>
         </div>
-        <div class="stat-headline">Tu as gagné <b>3 nouveaux clients</b> aujourd'hui.</div>
+        <div class="stat-headline">Grâce à Nexus, tu as gagné <b>3 nouveaux clients</b> aujourd'hui.</div>
         <div class="stat-detail">Tous via WhatsApp. Conversion 38 % depuis l'IA d'accueil.</div>
         <span class="stat-cta">Voir le détail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
       </article>
@@ -735,7 +735,7 @@ body{
           </div>
           <span class="stat-tag">★ Top du jour</span>
         </div>
-        <div class="stat-headline">Tu as fait <b>10 ventes</b> aujourd'hui — meilleur lundi du mois.</div>
+        <div class="stat-headline">Grâce à Nexus, tu as fait <b>10 ventes</b> aujourd'hui — meilleur lundi du mois.</div>
         <div class="stat-detail">Panier moyen $19.30 · top produit empanadas (5 ventes).</div>
         <span class="stat-cta">Voir le détail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
       </article>
@@ -747,7 +747,7 @@ body{
           </div>
           <span class="stat-tag">★ Bonus</span>
         </div>
-        <div class="stat-headline">L'IA répond en <b>1 min 12 s</b> en moyenne.</div>
+        <div class="stat-headline">Grâce à Nexus, l'IA répond en <b>1 min 12 s</b>.</div>
         <div class="stat-detail">38 s plus rapide que la semaine dernière. Clients ravis.</div>
         <span class="stat-cta">Voir le détail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
       </article>
@@ -1363,31 +1363,82 @@ body{
     });
   });
 
-  // Audio fake play
+  // ============ Real ElevenLabs audio (voix George — British grave) ============
   const mic = document.getElementById('voiceMic');
   const bar = document.getElementById('audioBar');
   const cur_ = document.getElementById('audioCur');
   const ico = document.getElementById('voiceIcon');
-  let playing = false, t0 = 0, raf = null;
   const playIc = '<polygon points="5 3 19 12 5 21 5 3"/>';
   const pauseIc = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+  const audioPlayer = new Audio();
+  audioPlayer.preload = 'metadata';
+  let playing = false;
+
+  const setAudioSrc = () => {
+    const src = curMode.audio === 'day'
+      ? 'assets/audio/brief-jour-fr.mp3'
+      : 'assets/audio/brief-semaine-fr.mp3';
+    if (!audioPlayer.src.endsWith(src)) {
+      audioPlayer.src = src;
+      bar.style.width = '0%';
+      cur_.textContent = '0:00';
+    }
+  };
+  setAudioSrc();
+
+  // Resync when user toggles jour/semaine tabs
+  document.querySelectorAll('.brief-mode-tabs[data-target="audio"] .mode-tab').forEach(tab => {
+    tab.addEventListener('click', () => { setTimeout(setAudioSrc, 10); });
+  });
+
+  audioPlayer.addEventListener('timeupdate', () => {
+    const d = audioPlayer.duration || 1;
+    bar.style.width = `${(audioPlayer.currentTime / d) * 100}%`;
+    const m = Math.floor(audioPlayer.currentTime / 60);
+    const s = Math.floor(audioPlayer.currentTime % 60);
+    cur_.textContent = `${m}:${String(s).padStart(2,'0')}`;
+  });
+  audioPlayer.addEventListener('ended', () => {
+    playing = false;
+    mic.classList.remove('playing');
+    ico.innerHTML = playIc;
+  });
+  audioPlayer.addEventListener('loadedmetadata', () => {
+    const d = audioPlayer.duration;
+    const m = Math.floor(d / 60), s = Math.floor(d % 60);
+    document.getElementById('audioTot').textContent = `${m}:${String(s).padStart(2,'0')}`;
+    document.getElementById('audioDuration').textContent = `${m} min ${String(s).padStart(2,'0')} s · voix Nexus prête`;
+  });
+
   mic.addEventListener('click', () => {
-    playing = !playing;
-    mic.classList.toggle('playing', playing);
-    ico.innerHTML = playing ? pauseIc : playIc;
-    if (playing) {
-      t0 = Date.now();
-      const tick = () => {
-        if (!playing) return;
+    setAudioSrc();
+    if (audioPlayer.paused) {
+      audioPlayer.play().then(() => {
+        playing = true;
+        mic.classList.add('playing');
+        ico.innerHTML = pauseIc;
+      }).catch(err => {
+        console.warn('Audio play blocked:', err);
+        // Fallback : visuel uniquement si MP3 indisponible
+        playing = true;
+        mic.classList.add('playing');
+        ico.innerHTML = pauseIc;
+        let elapsed = 0;
         const dur = curMode.audio === 'day' ? dayDur : weekDur;
-        const elapsed = Math.min((Date.now() - t0) / 1000, dur);
-        bar.style.width = `${(elapsed / dur) * 100}%`;
-        const m = Math.floor(elapsed / 60), s = Math.floor(elapsed % 60);
-        cur_.textContent = `${m}:${String(s).padStart(2,'0')}`;
-        if (elapsed < dur) raf = requestAnimationFrame(tick);
-        else { playing = false; mic.classList.remove('playing'); ico.innerHTML = playIc; }
-      };
-      tick();
+        const fakeT = setInterval(() => {
+          if (!playing) { clearInterval(fakeT); return; }
+          elapsed += 0.1;
+          if (elapsed >= dur) { clearInterval(fakeT); playing = false; mic.classList.remove('playing'); ico.innerHTML = playIc; bar.style.width = '0%'; return; }
+          bar.style.width = `${(elapsed/dur)*100}%`;
+          const m = Math.floor(elapsed/60), s = Math.floor(elapsed%60);
+          cur_.textContent = `${m}:${String(s).padStart(2,'0')}`;
+        }, 100);
+      });
+    } else {
+      audioPlayer.pause();
+      playing = false;
+      mic.classList.remove('playing');
+      ico.innerHTML = playIc;
     }
   });
 

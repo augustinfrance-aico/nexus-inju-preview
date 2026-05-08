@@ -1856,27 +1856,60 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
     });
   });
 
-  // ---------- Brief audio + texte ----------
+  // ---------- Brief audio (vraie voix ElevenLabs George — British grave) ----------
   const voiceMic = document.getElementById('voiceMic');
   const voiceIcon = document.getElementById('voiceIcon');
   const audioBar = document.getElementById('audioBar');
-  let audioPlaying = false, audioT, audioPct = 0;
-  voiceMic.addEventListener('click', () => {
-    audioPlaying = !audioPlaying;
-    voiceMic.classList.toggle('playing', audioPlaying);
-    voiceIcon.innerHTML = audioPlaying
-      ? '<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>'
-      : '<polygon points="5 3 19 12 5 21 5 3"/>';
-    if (audioPlaying){
-      showToast('Brief audio en lecture · 2m 18s');
-      audioT = setInterval(() => {
-        audioPct += 1.2;
-        if (audioPct >= 100){ audioPct = 100; clearInterval(audioT); audioPlaying = false; voiceMic.classList.remove('playing'); voiceIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>'; showToast('Brief terminé.'); }
-        audioBar.style.width = audioPct + '%';
-      }, 80);
-    } else {
-      clearInterval(audioT);
+  const playSvg = '<polygon points="5 3 19 12 5 21 5 3"/>';
+  const pauseSvg = '<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>';
+  const audioPlayer = new Audio();
+  audioPlayer.preload = 'metadata';
+  let audioMode = 'day';
+  const setSrc = () => {
+    const src = audioMode === 'day' ? 'assets/audio/brief-jour-fr.mp3' : 'assets/audio/brief-semaine-fr.mp3';
+    if (!audioPlayer.src.endsWith(src)){
+      audioPlayer.src = src;
+      audioBar.style.width = '0%';
     }
+  };
+  setSrc();
+  audioPlayer.addEventListener('timeupdate', () => {
+    const d = audioPlayer.duration || 1;
+    audioBar.style.width = `${(audioPlayer.currentTime/d)*100}%`;
+  });
+  audioPlayer.addEventListener('ended', () => {
+    voiceMic.classList.remove('playing');
+    voiceIcon.innerHTML = playSvg;
+    showToast('Brief terminé.');
+  });
+  voiceMic.addEventListener('click', () => {
+    setSrc();
+    if (audioPlayer.paused){
+      audioPlayer.play().then(() => {
+        voiceMic.classList.add('playing');
+        voiceIcon.innerHTML = pauseSvg;
+        showToast('🎙 Brief Nexus · voix George');
+      }).catch(() => {
+        // Fallback fake si MP3 indisponible
+        voiceMic.classList.add('playing');
+        voiceIcon.innerHTML = pauseSvg;
+        let pct = 0;
+        const t = setInterval(() => {
+          pct += 1.2;
+          if (pct >= 100){ clearInterval(t); voiceMic.classList.remove('playing'); voiceIcon.innerHTML = playSvg; audioBar.style.width = '0%'; return; }
+          audioBar.style.width = pct + '%';
+        }, 80);
+      });
+    } else {
+      audioPlayer.pause();
+      voiceMic.classList.remove('playing');
+      voiceIcon.innerHTML = playSvg;
+    }
+  });
+  // Resync audio quand on switch jour/semaine
+  document.addEventListener('click', (e) => {
+    const tab = e.target.closest('.mode-tabs[data-target="audio"] .mode-tab');
+    if (tab) { audioMode = tab.dataset.mode; audioPlayer.pause(); voiceMic.classList.remove('playing'); voiceIcon.innerHTML = playSvg; setSrc(); }
   });
 
   // Mode tabs (audio/text day vs week)

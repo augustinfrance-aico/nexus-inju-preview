@@ -2348,7 +2348,7 @@ Abre tu Nexus para descubrir las novedades.</textarea></div>
                 {t:'#T-047',c:'Taller Los Andes',s:'Problème réception msg WhatsApp',p:'high',age:'2h',o:'Iñigo'},
                 {t:'#T-046',c:'Spa Termal',s:'Card declined relance',p:'medium',age:'4h',o:'Juan'},
                 {t:'#T-045',c:'Panadería San Pedro',s:'Question sur export CSV',p:'low',age:'1d',o:'Iñigo'}
-              ].map(tk=>`<div class="client-row" style="grid-template-columns:60px 1.5fr 2fr 60px 50px 80px 40px" onclick="Px.toast('Ticket '+${JSON.stringify(tk.t)}+' ouvert','info')">
+              ].map(tk=>`<div class="client-row" style="grid-template-columns:60px 1.5fr 2fr 60px 50px 80px 40px" onclick="Px.toast('Ticket ${tk.t} ouvert','info','Détail SLA, conversation et historique disponibles')">
                 <span class="mono" style="color:var(--muted)">${tk.t}</span>
                 <span style="font-weight:600;font-size:12.5px">${tk.c}</span>
                 <span style="font-size:12px;color:var(--ink2)">${tk.s}</span>

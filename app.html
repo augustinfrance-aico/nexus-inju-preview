@@ -833,6 +833,106 @@ const Nx = {
     setTimeout(() => { d.style.opacity = '0'; d.style.transform = 'translateX(20px)'; setTimeout(()=>d.remove(), 300); }, 4000);
   },
 
+  openTuto(key){
+    const TUTOS = {
+      profil: {
+        emoji: '👤', title: 'Remplir ton profil entreprise', sub: '~5 minutes · base de tout le reste',
+        intro: 'Le profil est le cerveau de Nexus : plus tu le remplis, plus l\'IA est précise dans ses réponses aux clients. Vise 80 % de complétion avant de passer en production.',
+        steps: [
+          'Va dans le menu <b>Profil entreprise</b> (icône en haut à gauche ou via le tableau de bord).',
+          'Renseigne les bases : nom commercial, logo (PNG carré 512×512), type d\'activité, ville.',
+          'Ajoute tes <b>horaires d\'ouverture jour par jour</b> (lundi 8 h–19 h, samedi 9 h–14 h, dimanche fermé…).',
+          'Choisis le <b>ton de l\'IA</b> : chaleureux 🥖 / professionnel 💼 / amical 😊 / court & direct ⚡.',
+          'Remplis la bulle <b>« À propos de mon commerce »</b> : raconte ton histoire, tes spécialités, ce qui te différencie. L\'IA absorbe ce contexte.',
+          'Ajoute tes <b>infos bancaires</b> (RIB, IBAN, lien Wise / Mercado Pago) pour partage en 1 clic dans le chat client.',
+          'Sauvegarde — Nexus calcule ton score de complétion (objectif 80 %+).'
+        ],
+        tip: 'Le ton de voix se ressent vraiment. Si tu hésites, mets « chaleureux » : c\'est ce qui marche le mieux pour les PME LATAM.'
+      },
+      whatsapp: {
+        emoji: '💬', title: 'Connecter WhatsApp Business à Nexus', sub: '~30 secondes · scan QR comme WhatsApp Web',
+        intro: 'Nexus utilise WAHA, un wrapper sécurisé qui passe par WhatsApp Web. Pas besoin de validation Meta, pas besoin de Business API officielle. C\'est immédiat.',
+        steps: [
+          'Sur ton téléphone, ouvre <b>WhatsApp Business</b> (pas WhatsApp perso).',
+          'Menu (3 points) → <b>Appareils connectés</b> → <b>Connecter un appareil</b>.',
+          'Reviens dans Nexus, va dans <b>Paramètres &gt; Intégrations &gt; WhatsApp</b>.',
+          'Clique <b>« Connecter mon WhatsApp »</b> → un QR code apparaît.',
+          'Scanne le QR avec ton téléphone (caméra arrière de WhatsApp).',
+          'C\'est connecté. Le statut passe au vert ✅. Tes conversations apparaissent dans Messages.',
+          'L\'IA est en mode pause par défaut — active-la quand tu es prêt (toggle dans Profil).'
+        ],
+        tip: 'Pour la bêta, ton numéro WhatsApp habituel suffit. Quand tu auras 50+ clients, prends un numéro dédié pour séparer pro/perso.'
+      },
+      faq: {
+        emoji: '❓', title: 'Configurer les FAQ automatiques', sub: '~3 minutes · l\'IA répond toute seule',
+        intro: 'Nexus analyse tes conversations passées et détecte les 3 questions qui reviennent le plus. Tu valides les réponses une fois, l\'IA répond toute seule ensuite.',
+        steps: [
+          'Va dans <b>Profil entreprise &gt; FAQ</b>.',
+          'Lis les 3 questions détectées par l\'IA (ex : « Vous livrez à Providencia ? », « Quels sont vos horaires ? », « Acceptez-vous les paiements par transfert ? »).',
+          'Pour chacune, lis la <b>réponse pré-rédigée</b> par l\'IA. Modifie-la si besoin pour matcher ton ton.',
+          'Active la réponse auto avec le toggle vert ✅.',
+          'L\'IA répondra automatiquement à ces 3 questions sans ton intervention.',
+          'Ajoute d\'autres FAQ manuellement avec <b>+ Ajouter une FAQ</b> (max 30 conseillé).'
+        ],
+        tip: 'Commence par 3 FAQ. Chaque mois, regarde quelles questions arrivent encore manuellement, ajoute-les. En 3 mois, 80 % des questions sont gérées par l\'IA.'
+      },
+      test: {
+        emoji: '🧪', title: 'Tester l\'IA en conditions réelles', sub: '~5 minutes · prends un autre téléphone',
+        intro: 'Avant d\'activer Nexus pour tes vrais clients, teste-le toi-même comme si tu étais un client. C\'est la meilleure validation.',
+        steps: [
+          'Prends un <b>autre téléphone</b> (le tien perso, ou demande à un proche / collègue).',
+          'Envoie un message au numéro WhatsApp connecté à Nexus.',
+          'Pose une question type cliente : <b>« vous livrez où ? »</b>, <b>« quels sont vos horaires samedi ? »</b>, <b>« avez-vous des empanadas véganes ? »</b>.',
+          'L\'IA répond en moins de <b>90 secondes</b> en moyenne.',
+          'Vérifie : le ton est bon ? La réponse est précise ? La rapidité est OK ?',
+          'Va dans <b>Messages &gt; Inbox</b> côté Nexus pour voir la conversation côté patron.',
+          'Tu peux <b>reprendre la main</b> à tout moment si la réponse n\'est pas top (toggle « IA / Manuel »).'
+        ],
+        tip: 'Fais ce test au moins 5 fois avec différentes questions avant le go production. Note les réponses moyennes et améliore tes FAQ ou ton profil en conséquence.'
+      },
+      campagne: {
+        emoji: '📢', title: 'Créer et envoyer ta 1ère campagne', sub: '~5 minutes · template prêt à l\'emploi',
+        intro: 'Une campagne, c\'est un message envoyé en masse à un segment de tes clients. Promo flash, anniversaire, récup client perdu — tout part d\'ici.',
+        steps: [
+          'Va dans <b>Campagnes &gt; Nouvelle campagne</b>.',
+          'Choisis un <b>template</b> dans la bibliothèque : <i>Promo flash week-end</i>, <i>Anniversaire client</i>, <i>Récup client perdu</i>, <i>Annonce nouveauté</i>.',
+          'Personnalise le message. Tu peux utiliser des <b>variables</b> : <code>{prenom}</code>, <code>{date}</code>, <code>{promo}</code> — Nexus remplace par les vraies valeurs de chaque client.',
+          'Choisis ta <b>cible</b> : VIP ⭐ / Récurrents 🔁 / Nouveaux 🌱 / Tous 👥 / Perdus 💔 / Personnalisé ⚙️.',
+          'Configure la <b>limite anti-abus</b> (recommandé : max 1 fois par client par semaine).',
+          'Vérifie l\'<b>aperçu WhatsApp</b> — c\'est exactement ce que verra le client.',
+          'Envoie maintenant ou <b>programme</b> (ex : vendredi 18 h, le jour où tes ventes décollent).',
+          'Suis les stats live : envoyés / ouverts / réponses. Réplique en 1 clic ce qui marche.'
+        ],
+        tip: 'Pour ta toute première campagne, prends « Promo week-end » et envoie-la à tes 10 meilleurs clients (filtre VIP). Tu verras des résultats en moins d\'1 h.'
+      }
+    };
+    const t = TUTOS[key];
+    if (!t) return;
+    const ov = document.getElementById('modal-overlay');
+    const mc = document.getElementById('modal-content');
+    ov.classList.remove('hidden');
+    mc.innerHTML = `
+      <div class="modal-hd">
+        <h3 style="display:flex;align-items:center;gap:10px"><span style="font-size:24px">${t.emoji}</span> ${t.title}</h3>
+        <button class="modal-close" onclick="Nx.closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:12px">${t.sub}</div>
+        <p style="font-size:14px;line-height:1.65;color:var(--ink2);margin-bottom:20px;padding:14px 16px;background:var(--blue-soft);border-radius:10px;border-left:3px solid var(--blue)">${t.intro}</p>
+        <h4 style="font-size:13px;font-weight:700;margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">📋 Étapes</h4>
+        <ol style="padding-left:0;list-style:none;margin-bottom:20px">
+          ${t.steps.map((s, i) => `<li style="padding:10px 0 10px 38px;position:relative;border-bottom:1px solid var(--line2);font-size:13.5px;line-height:1.6"><span style="position:absolute;left:0;top:10px;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-ink));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;font-family:'JetBrains Mono',monospace">${i+1}</span>${s}</li>`).join('')}
+        </ol>
+        <div style="padding:14px 16px;background:linear-gradient(135deg,#FEF3C7,#FED7AA);border-radius:10px;border-left:3px solid var(--amber);font-size:13px;line-height:1.55;color:#78350F">
+          💡 <b>Astuce</b> : ${t.tip}
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-s" onclick="Nx.closeModal()">Fermer</button>
+        <button class="btn btn-p" onclick="Nx.closeModal();Nx.toast('OK, on continue','info','Étapes suivantes du tutoriel à venir dans la version finale')">J'ai compris, suite →</button>
+      </div>`;
+  },
+
   openModal(type, data){
     const ov = document.getElementById('modal-overlay');
     const mc = document.getElementById('modal-content');
@@ -1133,33 +1233,84 @@ const Nx = {
   },
 
   openAiChat(){ this.openModal('ai-chat'); },
-  askAi(preset){
+  _aiHistory: [],
+  async askAi(preset){
     const input = document.getElementById('aiInput');
-    const q = preset || input.value.trim();
+    const q = preset || (input ? input.value.trim() : '');
     if (!q) return;
     const msgs = document.getElementById('aiMessages');
     msgs.innerHTML += `<div class="bubble me">${q}</div>`;
-    input.value = '';
+    if (input) input.value = '';
     msgs.scrollTop = msgs.scrollHeight;
 
-    setTimeout(() => {
-      const answers = {
-        'analyse mes ventes': '📊 En avril, CA estimé <b>2,84M CLP</b> (+12% vs mars). Top produit : <b>Pan amasado</b> (62% des ventes). Jour le plus fort : <b>samedi</b> (38% du CA hebdo). Tu es en streak de 12 jours, bravo 🔥.',
-        'relance': '🎯 J\'ai identifié <b>3 clientes silencieuses</b> depuis 45+ jours : María, Sofía, Carmen. Leur CA cumulé est de ~340k CLP/mois. Veux-tu que je prépare une campagne -15% personnalisée ?',
-        'promo': '✍️ Voici 3 versions pour ta promo week-end :<br>1. "🥖 Hola! Este fin de semana: 3kg de pan amasado = 10k CLP (en vez de 12k). Escríbeme para reservar 💛"<br>2. "Panadería Don Carlos · -20% sobre tortas caseras por encargo el sábado. Últimas 10 disponibles 🎂"<br>3. "Fin de semana en Don Carlos: empanadas 2x1 el domingo después de las 10h. Te esperamos 🥟"',
-        'top produit': '🏆 Top 3 du mois :<br>1. Pan amasado — 620 kg vendus · 2,17M CLP<br>2. Empanadas de pino — 380 unités · 836k CLP<br>3. Tortas cumpleaños — 12 commandes · 336k CLP<br>Le pan amasado représente <b>76% du volume</b>.'
-      };
-      let answer = '🤖 Analyse en cours… ';
-      const qLow = q.toLowerCase();
-      if (qLow.includes('vente') || qLow.includes('analyse')) answer = answers['analyse mes ventes'];
-      else if (qLow.includes('relance') || qLow.includes('perdus') || qLow.includes('lost')) answer = answers['relance'];
-      else if (qLow.includes('promo') || qLow.includes('campagne') || qLow.includes('écris')) answer = answers['promo'];
-      else if (qLow.includes('top') || qLow.includes('produit')) answer = answers['top produit'];
-      else answer = '🤖 Je ne connais pas encore la réponse précise (démo). Mais voici ce que je peux faire : <b>analyser tes ventes</b>, <b>relancer des clients</b>, <b>écrire des promos</b>, ou <b>t\'alerter sur des opportunités</b>. Demande-moi directement !';
+    // Indicateur "en train d'écrire"
+    const typingId = `typing-${Date.now()}`;
+    msgs.innerHTML += `<div class="bubble them" id="${typingId}" style="opacity:.6"><span class="ai-dots">●●●</span></div>`;
+    msgs.scrollTop = msgs.scrollHeight;
 
-      msgs.innerHTML += `<div class="bubble them">${answer}</div>`;
+    // Appel proxy serverless Vercel (Groq Llama 3.3 70B avec contexte business)
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 12000);
+      const res = await fetch('/api/claude', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: q, history: this._aiHistory.slice(-6) }),
+        signal: ctrl.signal
+      });
+      clearTimeout(timer);
+      const typingEl = document.getElementById(typingId);
+      if (!res.ok) throw new Error('proxy_unavailable');
+      const data = await res.json();
+      const answer = (data.answer || '').replace(/\n/g, '<br>');
+      this._aiHistory.push({ role: 'user', content: q }, { role: 'assistant', content: data.answer });
+      if (typingEl) typingEl.outerHTML = `<div class="bubble them">${answer}</div>`;
       msgs.scrollTop = msgs.scrollHeight;
-    }, 600);
+    } catch (err) {
+      // Fallback intelligent : 18 patterns scriptés contextuels Don Carlos
+      const qLow = q.toLowerCase();
+      let answer;
+      if (qLow.match(/vente|analyse|chiffre|ca\b|revenue|revenu/)){
+        answer = '📊 En avril, CA estimé <b>2,84M CLP</b> (+12% vs mars). Top produit : <b>Pan amasado</b> (62% des ventes). Jour le plus fort : <b>samedi</b> (38% du CA hebdo). Tu es en streak de 12 jours, bravo 🔥.';
+      } else if (qLow.match(/relance|perdus|silencieu|inacti|reveille/)){
+        answer = '🎯 J\'ai identifié <b>3 clientes silencieuses</b> depuis 45+ jours : María, Sofía, Carmen. CA cumulé ~340k CLP/mois. Veux-tu que je prépare une campagne -15% personnalisée ? Tu peux la lancer en 2 clics depuis Campagnes.';
+      } else if (qLow.match(/promo|campagne|écri|message|whatsapp/)){
+        answer = '✍️ Voici 3 versions pour ta promo week-end :<br>1. "🥖 Hola! Este fin de semana: 3kg de pan amasado = 10k CLP (en vez de 12k). Escríbeme para reservar 💛"<br>2. "Panadería Don Carlos · -20% sobre tortas caseras por encargo el sábado 🎂"<br>3. "Fin de semana en Don Carlos: empanadas 2x1 el domingo después de las 10h 🥟"';
+      } else if (qLow.match(/top.*produi|meilleur.*vente|best.*seller/)){
+        answer = '🏆 Top 3 du mois :<br>1. <b>Pan amasado</b> — 620 kg · 2,17M CLP<br>2. <b>Empanadas de pino</b> — 380 unités · 836k CLP<br>3. <b>Tortas cumpleaños</b> — 12 commandes · 336k CLP<br>Le pan amasado représente <b>76% du volume</b>.';
+      } else if (qLow.match(/horaire|ouvert|fermé|jour|samedi|dimanche/)){
+        answer = '🕘 Tes créneaux les plus rentables : <b>vendredi 19-21h</b> (créneau roi, 22% du CA hebdo) et <b>samedi 10-13h</b> (28% du CA hebdo). Le dimanche après-midi (15-19h) est le plus calme — pourrait fermer pour économiser le personnel.';
+      } else if (qLow.match(/concurren|concur|riva/)){
+        answer = '🔍 Concurrents proches : <b>Panadería San Pedro</b> (300m, prix +5% vs toi, qualité similaire) et <b>La Fournée</b> (700m, premium +30%, public différent). Avantage Nexus : aucun n\'a d\'IA WhatsApp. Profite-en pour fidéliser.';
+      } else if (qLow.match(/anniv|raviella|client.*spécia/)){
+        answer = '🎂 Demain c\'est l\'anniversaire de <b>Raviella Mendoza</b> (cliente VIP, 8 commandes en 6 mois). Suggestion : code promo -15% sur ses cookies aux figues préférés. Message déjà rédigé dans Conseils Nexus, tu valides en 1 clic.';
+      } else if (qLow.match(/pluie|météo|temps|samedi.*pluie/)){
+        answer = '🌧 Météo samedi : <b>pluie</b>. Historique : tes jours de pluie = +40% sur les soupes maison et chocolat chaud. Tu veux activer la <b>promo soupe</b> samedi ? Je l\'ai préparée, validation en 1 clic.';
+      } else if (qLow.match(/fournisseur|stock|livraison|matière|farine|levure/)){
+        answer = '📦 Tes fournisseurs actuels : Molinos del Sur (farine, livraison mardi), Quesos Patagonia (fromage, jeudi), Frutos Andinos (fruits, vendredi). Stock farine actuel : 3 semaines. Pas d\'alerte rupture.';
+      } else if (qLow.match(/employé|équipe|salarié|paye|rh|embauch/)){
+        answer = '👥 Équipe : 2 boulangers + 1 vendeuse (Carmen) + toi. Carmen est en contrat 30h, performe à <b>4,8/5</b> sur les retours clients. Si tu veux passer à 35h ou embaucher un mi-temps weekend, dis-moi.';
+      } else if (qLow.match(/marge|coût|coût|prix|rentab/)){
+        answer = '💰 Marge moyenne : <b>52%</b> sur le pan amasado, <b>38%</b> sur les empanadas, <b>61%</b> sur les tortas (le plus rentable). Recommandation : pousse les tortas via story Instagram vendredi 18h.';
+      } else if (qLow.match(/instagram|insta|réseau|social/)){
+        answer = '📸 Ton Instagram (@panaderiadoncarlos) a <b>847 followers</b> (+12 cette semaine). Posts les plus engageants : tortas anniversaires (4,8% engagement) > coulisses fournée matin (3,2%). Recommandation : 1 story/jour à 7h45 (fournée chaude).';
+      } else if (qLow.match(/streak|jour|consécut/)){
+        answer = '🔥 Tu es en <b>streak de 12 jours consécutifs</b> avec Nexus actif. Record perso. Continue jusqu\'à 30 → tu débloques le badge "Maître artisan IA" 🏆.';
+      } else if (qLow.match(/tip|conseil|suggestion|que dois|quoi.*faire/)){
+        answer = '💡 Top 3 conseils pour cette semaine :<br>1. Activer la <b>promo soupe</b> samedi (pluie prévue)<br>2. Envoyer un <b>code anniv -15%</b> à Raviella demain<br>3. Compléter ton <b>profil Nexus</b> avec les zones de livraison (3 clients ont demandé Providencia cette semaine)';
+      } else if (qLow.match(/nexus|toi|qui.*es.*tu|que.*sais.*tu/)){
+        answer = '👋 Je suis <b>Nexus</b>, ton IA business. Je connais tes 147 clients, ta CA mensuelle, tes top produits, ton équipe, tes fournisseurs, ta concurrence. Mon rôle : te faire gagner du temps et de l\'argent. Demande-moi tout ce que tu veux.';
+      } else if (qLow.match(/bonjour|hola|salut|hello/)){
+        answer = '👋 Hola Carlos ! Comment je peux t\'aider aujourd\'hui ? Tu peux me poser des questions sur tes ventes, tes clients, tes campagnes, ou me demander d\'écrire un message pour un client.';
+      } else if (qLow.match(/merci|gracias/)){
+        answer = '😊 De rien Carlos. Je suis là 24/7 dans Nexus. N\'hésite pas à revenir dès qu\'une question business pointe le bout du nez.';
+      } else {
+        answer = '🤖 Bonne question. Je peux t\'aider sur : <b>analyse ventes</b>, <b>relance clients perdus</b>, <b>écriture promos/campagnes</b>, <b>top produits</b>, <b>concurrence</b>, <b>météo & saisonnalité</b>, <b>équipe/RH</b>, <b>marges & rentabilité</b>, <b>réseaux sociaux</b>. Précise ta question et je te donne une réponse chiffrée.';
+      }
+      const typingEl = document.getElementById(typingId);
+      if (typingEl) typingEl.outerHTML = `<div class="bubble them">${answer}</div>`;
+      msgs.scrollTop = msgs.scrollHeight;
+    }
   },
 
   // ---------- VIEW RENDERING ----------
@@ -2165,16 +2316,16 @@ const Nx = {
             <h3 style="margin-bottom:16px">🚀 Démarrage rapide</h3>
             <div style="padding-left:28px;position:relative">
               ${[
-                {t:'Remplir ton profil',desc:'Nom, logo, horaires, ton de l\'IA'},
-                {t:'Connecter WhatsApp Business',desc:'1 scan QR code · 30 secondes'},
-                {t:'Valider 3 FAQ automatiques',desc:'Les questions qui reviennent le plus'},
-                {t:'Tester la messagerie',desc:'Envoyer un message test depuis ton phone'},
-                {t:'Lancer ta 1ère campagne',desc:'Pioche dans la bibliothèque de templates'},
+                {t:'Remplir ton profil',desc:'Nom, logo, horaires, ton de l\'IA',key:'profil'},
+                {t:'Connecter WhatsApp Business',desc:'1 scan QR code · 30 secondes',key:'whatsapp'},
+                {t:'Valider 3 FAQ automatiques',desc:'Les questions qui reviennent le plus',key:'faq'},
+                {t:'Tester la messagerie',desc:'Envoyer un message test depuis ton phone',key:'test'},
+                {t:'Lancer ta 1ère campagne',desc:'Pioche dans la bibliothèque de templates',key:'campagne'},
               ].map((s,i)=>`
-                <div style="padding:14px 0;border-bottom:1px solid var(--line2);display:flex;gap:12px;align-items:flex-start;cursor:pointer" onclick="Nx.toast('Étape ${i+1} — ${s.t}','info','${s.desc}')">
+                <div style="padding:14px 0;border-bottom:1px solid var(--line2);display:flex;gap:12px;align-items:flex-start;cursor:pointer" onclick="Nx.openTuto('${s.key}')">
                   <div style="width:28px;height:28px;border-radius:50%;background:var(--blue-soft);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0">${i+1}</div>
                   <div style="flex:1"><div style="font-weight:600">${s.t}</div><div style="font-size:12px;color:var(--muted)">${s.desc}</div></div>
-                  <button class="btn-g" onclick="event.stopPropagation();Nx.toast('Tutoriel ${i+1} — ${s.t}','info','${s.desc}')">Voir →</button>
+                  <button class="btn-g" onclick="event.stopPropagation();Nx.openTuto('${s.key}')">Voir →</button>
                 </div>`).join('')}
             </div>
           </div>
