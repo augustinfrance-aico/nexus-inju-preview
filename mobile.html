@@ -175,7 +175,7 @@ html[data-theme="light"] .hub-welcome h1{
 }
 .hub-welcome p{color:var(--muted);font-size:13px;max-width:340px;margin:0 auto;line-height:1.55}
 
-/* Module carousel — single card swipe avec aperçu (Tinder/Stories style) */
+/* Module carousel — Stories aperçu prononcé */
 .modgrid{
   display:flex;
   overflow-x:auto;
@@ -183,10 +183,10 @@ html[data-theme="light"] .hub-welcome h1{
   scroll-behavior:smooth;
   -webkit-overflow-scrolling:touch;
   scrollbar-width:none;
-  gap:12px;
+  gap:18px;
   margin:14px -16px 8px;
-  padding:18px 32px 24px;
-  perspective:1200px;
+  padding:24px 16% 28px;
+  perspective:1400px;
 }
 .modgrid::-webkit-scrollbar{display:none}
 .mod{
@@ -196,18 +196,20 @@ html[data-theme="light"] .hub-welcome h1{
   border:1px solid var(--line);
   -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
   cursor:pointer;text-align:center;
-  flex:0 0 84%;
+  flex:0 0 70%;
   scroll-snap-align:center;
   min-height:auto;
-  transform:scale(.92);
-  opacity:.55;
-  transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .35s ease,border-color .2s;
+  transform:scale(.78) rotateY(0deg);
+  opacity:.42;
+  filter:blur(.5px);
+  transition:transform .4s cubic-bezier(.2,.8,.2,1),opacity .4s ease,filter .4s ease,border-color .25s,box-shadow .35s;
 }
 .mod.is-snap-center{
-  transform:scale(1);
+  transform:scale(1) rotateY(0deg);
   opacity:1;
-  border-color:rgba(0,229,255,.25);
-  box-shadow:0 24px 50px -16px rgba(46,123,255,.3);
+  filter:none;
+  border-color:rgba(0,229,255,.35);
+  box-shadow:0 32px 64px -18px rgba(46,123,255,.45),0 0 0 1px rgba(0,229,255,.1) inset;
 }
 .mod:active{transform:scale(.97)}
 .mod::before{
