@@ -406,7 +406,7 @@ button:focus-visible,a:focus-visible,.nav-item:focus-visible,.filter-pill:focus-
 
 <!-- TOAST + MODAL + COMMAND PALETTE -->
 <div id="toast-container"></div>
-<div id="modal-overlay" class="hidden"><div class="modal" id="modal-content"></div></div>
+<div id="modal-overlay" class="hidden" onclick="if(event.target===this)Nx.closeModal()"><div class="modal" id="modal-content"></div></div>
 <div id="command-palette" class="hidden">
   <div class="cp">
     <input class="cp-input" id="cpInput" placeholder="Rechercher client, message, action…" autocomplete="off"/>
@@ -1659,7 +1659,7 @@ const Nx = {
 
         <div class="filter-bar">
           <div style="flex:1;max-width:320px">
-            <input class="form-ctrl" placeholder="${t('crm.search')}" value="${this.state.crmSearch||''}" oninput="Nx.state.crmSearch=this.value;Nx.renderView()">
+            <input class="form-ctrl" id="crmSearchInput" placeholder="${t('crm.search')}" value="${this.state.crmSearch||''}" oninput="Nx.state.crmSearch=this.value;clearTimeout(Nx._crmSearchT);Nx._crmSearchT=setTimeout(()=>{Nx.renderView();const e=document.getElementById('crmSearchInput');if(e){e.focus();e.setSelectionRange(e.value.length,e.value.length)}},220)">
           </div>
           <button class="filter-pill ${filter==='all'?'on':''}" onclick="Nx.state.crmFilter='all';Nx.renderView()">Tous (${this.state.clients.length})</button>
           <button class="filter-pill ${filter==='active'?'on':''}" onclick="Nx.state.crmFilter='active';Nx.renderView()">Actifs (${this.state.clients.filter(c=>c.status==='active').length})</button>
@@ -2165,16 +2165,16 @@ const Nx = {
             <h3 style="margin-bottom:16px">🚀 Démarrage rapide</h3>
             <div style="padding-left:28px;position:relative">
               ${[
-                {t:'Remplir ton profil',d:'Nom, logo, horaires, ton de l\'IA',d:1},
-                {t:'Connecter WhatsApp Business',d:'1 scan QR code · 30 secondes',d:2},
-                {t:'Valider 3 FAQ automatiques',d:'Les questions qui reviennent le plus',d:3},
-                {t:'Tester la messagerie',d:'Envoyer un message test depuis ton phone',d:4},
-                {t:'Lancer ta 1ère campagne',d:'Pioche dans la bibliothèque de templates',d:5},
+                {t:'Remplir ton profil',desc:'Nom, logo, horaires, ton de l\'IA'},
+                {t:'Connecter WhatsApp Business',desc:'1 scan QR code · 30 secondes'},
+                {t:'Valider 3 FAQ automatiques',desc:'Les questions qui reviennent le plus'},
+                {t:'Tester la messagerie',desc:'Envoyer un message test depuis ton phone'},
+                {t:'Lancer ta 1ère campagne',desc:'Pioche dans la bibliothèque de templates'},
               ].map((s,i)=>`
-                <div style="padding:14px 0;border-bottom:1px solid var(--line2);display:flex;gap:12px;align-items:flex-start;cursor:pointer" onclick="Nx.toast('Étape ${i+1} — ${s.t}','info','${s.d}')">
+                <div style="padding:14px 0;border-bottom:1px solid var(--line2);display:flex;gap:12px;align-items:flex-start;cursor:pointer" onclick="Nx.toast('Étape ${i+1} — ${s.t}','info','${s.desc}')">
                   <div style="width:28px;height:28px;border-radius:50%;background:var(--blue-soft);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0">${i+1}</div>
-                  <div style="flex:1"><div style="font-weight:600">${s.t}</div><div style="font-size:12px;color:var(--muted)">${s.d}</div></div>
-                  <button class="btn-g" onclick="event.stopPropagation();Nx.toast('Tutoriel ${i+1} — ${s.t}','info','${s.d}')">Voir →</button>
+                  <div style="flex:1"><div style="font-weight:600">${s.t}</div><div style="font-size:12px;color:var(--muted)">${s.desc}</div></div>
+                  <button class="btn-g" onclick="event.stopPropagation();Nx.toast('Tutoriel ${i+1} — ${s.t}','info','${s.desc}')">Voir →</button>
                 </div>`).join('')}
             </div>
           </div>

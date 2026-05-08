@@ -1068,7 +1068,7 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
   </div>
 
   <!-- Stats horizontal swipe -->
-  <div class="sect-head"><h3><span class="star">★</span> Top du jour</h3><a id="seeAllStats">Voir tout →</a></div>
+  <div class="sect-head"><h3><span class="star">★</span> Top du jour</h3><a id="seeAllStats" data-go="stats" style="cursor:pointer">Voir tout →</a></div>
   <div class="stats-track" id="statsTrack">
     <article class="stat s1" data-stat="recovered">
       <div class="stat-head">
@@ -2020,7 +2020,21 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
   routeFromHash();
   if (!location.hash) navigate(state.view || 'core');
 
-  // ---------- Live notif demo (subtle, every 30s) ----------
+  // ---------- Bind "Voir tout" stats link ----------
+  document.querySelectorAll('[data-go]').forEach(el => {
+    el.addEventListener('click', (e) => { e.preventDefault(); navigate(el.dataset.go); });
+  });
+
+  // ---------- Esc closes modals/drawer ----------
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-bg.show, .drawer.show, .drawer-bg.show').forEach(m => m.classList.remove('show'));
+    }
+  });
+
+  // ---------- Live notif demo : DÉSACTIVÉ pour démo client (évite popup random pendant pitch) ----------
+  // Pour réactiver post-démo : décommenter le bloc ci-dessous
+  /*
   setTimeout(() => {
     setInterval(() => {
       const evs = ['📩 Nouveau WhatsApp de Diego Salazar','🎯 Conseil Nexus mis à jour','💰 Vente détectée · empanadas x6','📈 Réponse IA : 1m 02s'];
@@ -2029,6 +2043,7 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
       }
     }, 30000);
   }, 8000);
+  */
 })();
 </script>
 </body>
