@@ -175,7 +175,7 @@ html[data-theme="light"] .hub-welcome h1{
 }
 .hub-welcome p{color:var(--muted);font-size:13px;max-width:340px;margin:0 auto;line-height:1.55}
 
-/* Module carousel — Stories aperçu prononcé */
+/* Module carousel — Stories aperçu prononcé + snap STRICT 1 card */
 .modgrid{
   display:flex;
   overflow-x:auto;
@@ -187,6 +187,9 @@ html[data-theme="light"] .hub-welcome h1{
   margin:14px -16px 8px;
   padding:24px 16% 28px;
   perspective:1400px;
+  scroll-snap-stop:always; /* force 1 swipe = 1 card */
+  touch-action:pan-x;
+  overscroll-behavior-x:contain;
 }
 .modgrid::-webkit-scrollbar{display:none}
 .mod{
@@ -198,11 +201,13 @@ html[data-theme="light"] .hub-welcome h1{
   cursor:pointer;text-align:center;
   flex:0 0 70%;
   scroll-snap-align:center;
+  scroll-snap-stop:always;
   min-height:auto;
   transform:scale(.78) rotateY(0deg);
   opacity:.42;
   filter:blur(.5px);
-  transition:transform .4s cubic-bezier(.2,.8,.2,1),opacity .4s ease,filter .4s ease,border-color .25s,box-shadow .35s;
+  transition:transform .28s cubic-bezier(.34,1.4,.64,1),opacity .28s ease,filter .28s ease,border-color .2s,box-shadow .25s;
+  -webkit-tap-highlight-color:transparent;
 }
 .mod.is-snap-center{
   transform:scale(1) rotateY(0deg);
@@ -1872,6 +1877,34 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
     const cur = Math.round(modgridEl.scrollLeft / modgridEl.clientWidth);
     goToCard(cur + 1);
   });
+  // ====== Touch swipe handler — 1 swipe = 1 card ======
+  let touchStartX = 0, touchEndX = 0, touchStartTime = 0, isSwiping = false;
+  const SWIPE_THRESHOLD = 30; // px
+  const SWIPE_TIME = 500; // ms max pour un swipe rapide
+  modgridEl.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartTime = Date.now();
+    isSwiping = true;
+  }, {passive: true});
+  modgridEl.addEventListener('touchend', (e) => {
+    if (!isSwiping) return;
+    isSwiping = false;
+    touchEndX = e.changedTouches[0].screenX;
+    const dx = touchEndX - touchStartX;
+    const dt = Date.now() - touchStartTime;
+    // Si swipe rapide ET dépasse seuil → force snap suivant/précédent
+    if (Math.abs(dx) > SWIPE_THRESHOLD && dt < SWIPE_TIME) {
+      const cur = Math.round(modgridEl.scrollLeft / modgridEl.clientWidth);
+      const nextIdx = dx < 0 ? cur + 1 : cur - 1;
+      const target = modCards[Math.max(0, Math.min(modCards.length - 1, nextIdx))];
+      if (target) {
+        // Force scroll snap
+        const center = target.offsetLeft - (modgridEl.clientWidth - target.offsetWidth) / 2;
+        modgridEl.scrollTo({left: center, behavior: 'smooth'});
+      }
+    }
+  }, {passive: true});
+
   // Snap-center class : applique le scale 1 sur la card la plus proche du centre viewport
   const updateSnapCenter = () => {
     const center = modgridEl.scrollLeft + modgridEl.clientWidth / 2;
