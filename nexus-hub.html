@@ -480,7 +480,28 @@ html[data-theme="light"] .welcome h1{
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       </button>
       <span class="tb-divider"></span>
-      <button class="tb-avatar" id="avatarBtn" title="Profil — Carlos Romero" aria-label="Profil">CR</button>
+      <button class="tb-avatar" id="avatarBtn" title="Profil" aria-label="Profil">CR</button>
+    </div>
+
+    <!-- User dropdown -->
+    <div id="userDropdown" style="display:none;position:absolute;top:64px;right:28px;z-index:200;min-width:240px;background:var(--bg2);border:1px solid var(--line);border-radius:14px;box-shadow:0 24px 60px -16px rgba(0,0,0,.6);padding:14px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)">
+      <div id="userInfo" style="padding:8px 6px 14px;border-bottom:1px solid var(--line);margin-bottom:10px">
+        <div id="userName" style="font-size:14px;font-weight:700;color:var(--ink)">Carlos Romero</div>
+        <div id="userEmail" style="font-size:11px;color:var(--muted);margin-top:3px;font-family:'JetBrains Mono',monospace">demo@nexus.app</div>
+        <div id="userBiz" style="font-size:11px;color:var(--cyan);margin-top:6px">🥖 Panadería Don Carlos</div>
+      </div>
+      <button id="profileLink" style="width:100%;text-align:left;padding:9px 10px;border-radius:9px;background:transparent;border:0;color:var(--ink2);cursor:pointer;font-size:13px;font-family:inherit;display:flex;align-items:center;gap:10px">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Mon profil entreprise
+      </button>
+      <button id="switchLink" style="width:100%;text-align:left;padding:9px 10px;border-radius:9px;background:transparent;border:0;color:var(--ink2);cursor:pointer;font-size:13px;font-family:inherit;display:flex;align-items:center;gap:10px">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11l-3-3m0 6l3-3"/></svg>
+        Changer de compte
+      </button>
+      <button id="logoutLink" style="width:100%;text-align:left;padding:9px 10px;border-radius:9px;background:transparent;border:0;color:var(--red);cursor:pointer;font-size:13px;font-family:inherit;display:flex;align-items:center;gap:10px;margin-top:4px">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        Se déconnecter
+      </button>
     </div>
   </div>
 
@@ -922,8 +943,58 @@ html[data-theme="light"] .welcome h1{
   document.getElementById('savBtn').addEventListener('click', () => {
     showToast('🆘 SAV ouvert — un humain te répond sous 2 h ouvrées.');
   });
-  document.getElementById('avatarBtn').addEventListener('click', () => {
+
+  // ===== Session / compte utilisateur =====
+  const ACCOUNTS_KEY = 'nexus_accounts';
+  const SESSION_KEY = 'nexus_session';
+  const getAccounts = () => { try { return JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || '{}'); } catch(e) { return {}; } };
+  const getSession = () => { try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch(e) { return null; } };
+
+  const session = getSession();
+  let currentAcc = null;
+  if (session && session.email) {
+    const accs = getAccounts();
+    currentAcc = accs[session.email];
+  }
+
+  const initials = (name) => name.split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase();
+
+  if (currentAcc) {
+    // Update topbar avatar + welcome
+    const avatar = document.getElementById('avatarBtn');
+    avatar.textContent = initials(currentAcc.owner || currentAcc.email);
+    avatar.title = `Profil — ${currentAcc.owner || currentAcc.email}`;
+    document.getElementById('userName').textContent = currentAcc.owner || currentAcc.email;
+    document.getElementById('userEmail').textContent = currentAcc.email;
+    document.getElementById('userBiz').textContent = `${currentAcc.business?.logo || '🏪'} ${currentAcc.business?.name || ''}`;
+    // Welcome eye chip
+    const eye = document.querySelector('.welcome .eye');
+    if (eye) eye.innerHTML = `<span class="dot"></span>Hola ${(currentAcc.owner||'').split(' ')[0] || 'toi'} · 8 modules · 1 actif`;
+  }
+
+  // Avatar dropdown toggle
+  const dropdown = document.getElementById('userDropdown');
+  document.getElementById('avatarBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+  });
+  document.addEventListener('click', (e) => {
+    if (!dropdown.contains(e.target) && e.target.id !== 'avatarBtn') {
+      dropdown.style.display = 'none';
+    }
+  });
+
+  document.getElementById('profileLink').addEventListener('click', () => {
     location.href = 'app.html#/profil';
+  });
+  document.getElementById('switchLink').addEventListener('click', () => {
+    location.href = 'signup.html';
+  });
+  document.getElementById('logoutLink').addEventListener('click', () => {
+    if (confirm('Te déconnecter de Nexus ?')) {
+      localStorage.removeItem(SESSION_KEY);
+      location.href = 'signup.html';
+    }
   });
 })();
 </script>

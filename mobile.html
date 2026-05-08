@@ -102,9 +102,12 @@ a{color:inherit;text-decoration:none}
   display:flex;align-items:center;justify-content:space-between;gap:10px;
   padding-left:14px;padding-right:14px;
   background:rgba(11,15,26,.78);
-  backdrop-filter:blur(16px) saturate(1.4);
   -webkit-backdrop-filter:blur(16px) saturate(1.4);
+  backdrop-filter:blur(16px) saturate(1.4);
   border-bottom:1px solid var(--line);
+  -webkit-transform:translate3d(0,0,0);
+  transform:translate3d(0,0,0);
+  will-change:transform;
 }
 html[data-theme="light"] .topbar{background:rgba(255,255,255,.78)}
 .tb-left,.tb-right{display:flex;align-items:center;gap:10px}
@@ -656,6 +659,10 @@ html[data-theme="light"] .hub-welcome h1{
   backdrop-filter:blur(18px) saturate(1.4);
   -webkit-backdrop-filter:blur(18px) saturate(1.4);
   border-top:1px solid var(--line);
+  /* Force GPU layer + isolation = évite les sauts iOS Safari quand l'URL bar se rétracte */
+  -webkit-transform:translate3d(0,0,0);
+  transform:translate3d(0,0,0);
+  will-change:transform;
 }
 html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
 .nav-tab{
@@ -1369,24 +1376,24 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
 
   <div class="more-section-title">Compte</div>
   <div class="more-list">
-    <button class="more-item" data-toast="Profil entreprise · disponible en M2.">
+    <button class="more-item" data-href="app.html#/profil">
       <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
       <span class="more-item-lbl">Profil entreprise</span>
       <span class="more-item-meta">80 %</span>
       <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
     </button>
-    <button class="more-item" data-toast="CRM 147 clients · vue détaillée bientôt sur mobile.">
+    <button class="more-item" data-href="app.html#/crm">
       <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
       <span class="more-item-lbl">Clients CRM</span>
       <span class="more-item-meta">147</span>
       <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
     </button>
-    <button class="more-item" data-toast="Marketing · campagnes WhatsApp + Insta dispo en M2.">
+    <button class="more-item" data-href="app.html#/marketing">
       <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8v18l-18-8v-2z"/></svg></span>
       <span class="more-item-lbl">Marketing & campagnes</span>
       <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
     </button>
-    <button class="more-item" data-toast="Tips IA · 12 conseils actifs cette semaine.">
+    <button class="more-item" data-href="app.html#/tips">
       <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h4M9 11V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6M9 11h6m0 0h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4m0-9v9m-6 0h6"/></svg></span>
       <span class="more-item-lbl">Tips IA</span>
       <span class="more-item-meta">12</span>
@@ -1417,12 +1424,12 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
 
   <div class="more-section-title">Réglages</div>
   <div class="more-list">
-    <button class="more-item" data-toast="Paramètres avancés disponibles dans la version PC.">
+    <button class="more-item" data-href="app.html#/settings">
       <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
       <span class="more-item-lbl">Paramètres</span>
       <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
     </button>
-    <button class="more-item" data-toast="Paiement géré dans la version PC pour l'instant.">
+    <button class="more-item" data-href="app.html#/payments">
       <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>
       <span class="more-item-lbl">Méthode de paiement</span>
       <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
@@ -1431,6 +1438,25 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
       <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>
       <span class="more-item-lbl">SAV — Aide humaine</span>
       <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </button>
+  </div>
+
+  <div class="more-section-title">Mon compte</div>
+  <div class="more-list" id="moreAccount">
+    <button class="more-item" id="myAccountBtn">
+      <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+      <span class="more-item-lbl" id="myAccountLbl">Carlos Romero</span>
+      <span class="more-item-meta" id="myAccountMeta">demo@nexus.app</span>
+      <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </button>
+    <button class="more-item" id="switchAccountBtn">
+      <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11l-3-3m0 6l3-3"/></svg></span>
+      <span class="more-item-lbl">Changer / créer un compte</span>
+      <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </button>
+    <button class="more-item danger" id="logoutBtn">
+      <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></span>
+      <span class="more-item-lbl">Se déconnecter</span>
     </button>
   </div>
 
@@ -1528,7 +1554,7 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
   <div class="modal" role="dialog">
     <div class="modal-grip"></div>
     <div class="modal-icon" id="mmIcon"></div>
-    <div class="modal-tag"><span class="pulse"></span><span id="mmTag">Phase 2</span></div>
+    <div class="modal-tag"><span class="pulse"></span><span id="mmTag">Module Nexus</span></div>
     <h2 id="mmTitle"></h2>
     <p class="modal-desc" id="mmDesc"></p>
     <ul class="modal-feats" id="mmFeats"></ul>
@@ -1708,7 +1734,11 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
   // Topbar logo → hub
   document.getElementById('tbLogo').addEventListener('click', () => navigate('hub'));
   // Topbar notif
-  document.getElementById('tbNotif').addEventListener('click', () => showToast('3 nouvelles notifications · centre dispo en M2.'));
+  document.getElementById('tbNotif').addEventListener('click', () => {
+    showToast('🔔 3 notifications · María a confirmé · Diego attend ta réponse · Stripe a reçu un paiement');
+    const badge = document.querySelector('#tbNotif .badge');
+    if (badge) badge.style.display = 'none';
+  });
   // Topbar menu → more
   document.getElementById('tbMenu').addEventListener('click', () => navigate('more'));
 
@@ -1978,7 +2008,7 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
       </div>
     `).join('');
     inboxList.querySelectorAll('.inbox-item').forEach(it => {
-      it.addEventListener('click', () => showToast('Conversation ' + it.dataset.name + ' · vue détaillée en M2.'));
+      it.addEventListener('click', () => location.href = 'app.html#/inbox');
     });
   }
   renderInbox();
@@ -2011,9 +2041,45 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
     showToast('Mode vacances activé. L\'IA prend le relais.');
   });
 
-  // ---------- Generic data-toast / data-go ----------
+  // ---------- Session / compte utilisateur ----------
+  const ACCOUNTS_KEY_M = 'nexus_accounts';
+  const SESSION_KEY_M = 'nexus_session';
+  const getAcc = () => { try { return JSON.parse(localStorage.getItem(ACCOUNTS_KEY_M) || '{}'); } catch(e){ return {}; } };
+  const getSes = () => { try { return JSON.parse(localStorage.getItem(SESSION_KEY_M) || 'null'); } catch(e){ return null; } };
+  const sesM = getSes();
+  let accM = null;
+  if (sesM && sesM.email) accM = getAcc()[sesM.email];
+  const myLbl = document.getElementById('myAccountLbl');
+  const myMeta = document.getElementById('myAccountMeta');
+  if (accM) {
+    if (myLbl) myLbl.textContent = accM.owner || accM.email;
+    if (myMeta) myMeta.textContent = accM.email;
+    // Update topbar title si pas déjà custom
+    const tbT = document.querySelector('.tb-title b');
+    const tbS = document.querySelector('.tb-title small');
+    if (tbT && (accM.owner || accM.email)) tbT.textContent = accM.owner || accM.email.split('@')[0];
+    if (tbS && accM.business?.name) tbS.textContent = accM.business.name;
+  }
+  document.getElementById('myAccountBtn')?.addEventListener('click', () => location.href = 'app.html#/profil');
+  document.getElementById('switchAccountBtn')?.addEventListener('click', () => location.href = 'signup.html');
+  document.getElementById('logoutBtn')?.addEventListener('click', () => {
+    if (confirm('Te déconnecter de Nexus ?')) {
+      localStorage.removeItem(SESSION_KEY_M);
+      location.href = 'signup.html';
+    }
+  });
+
+  // ---------- Generic data-toast / data-go / data-href ----------
+  document.querySelectorAll('[data-href]').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      e.preventDefault();
+      location.href = el.dataset.href;
+    });
+  });
   document.querySelectorAll('[data-toast]').forEach(el => {
     if (el.matches('.advice-act')) return; // already bound
+    if (el.dataset.href) return; // already bound
     el.addEventListener('click', e => {
       e.stopPropagation();
       showToast(el.dataset.toast);

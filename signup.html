@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0F1A">
+<title>Nexus — Créer un compte</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0B0F1A; --bg2:#11172A;
+  --panel:rgba(255,255,255,.05); --panel2:rgba(255,255,255,.08);
+  --ink:#F2F5FB; --ink2:#C5CDE0; --muted:#7A85A0;
+  --line:rgba(255,255,255,.10);
+  --blue:#2E7BFF; --violet:#8B5CFF; --cyan:#00E5FF; --lime:#1EFF8E; --red:#FF6B6B;
+  --grad-core:linear-gradient(135deg,#2E7BFF 0%,#8B5CFF 60%,#00E5FF 100%);
+}
+html,body{
+  background:var(--bg); color:var(--ink); min-height:100vh;
+  font-family:'Inter','Segoe UI',-apple-system,sans-serif; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+body{
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 5%, rgba(46,123,255,.22), transparent 60%),
+    radial-gradient(ellipse 60% 45% at 85% 95%, rgba(139,92,255,.18), transparent 60%),
+    radial-gradient(ellipse 50% 35% at 50% 50%, rgba(0,229,255,.08), transparent 70%),
+    var(--bg);
+  background-attachment:fixed;
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;
+}
+.wrap{
+  width:100%;max-width:440px;
+  background:linear-gradient(180deg,var(--panel) 0%,var(--panel2) 100%);
+  border:1px solid var(--line);
+  border-radius:24px;
+  padding:36px 32px 30px;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:0 30px 80px -20px rgba(0,0,0,.6);
+  position:relative;
+}
+
+/* Brand */
+.brand{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:8px}
+.brand-mark{
+  width:48px;height:48px;border-radius:14px;background:var(--grad-core);
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  box-shadow:0 12px 32px -10px rgba(46,123,255,.6),inset 0 1px 0 rgba(255,255,255,.2);
+}
+.brand-mark svg{width:24px;height:24px}
+.brand-name{font-size:24px;font-weight:800;letter-spacing:-.01em}
+.brand-name b{background:var(--grad-core);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+h1{
+  text-align:center;
+  font-size:22px;font-weight:800;letter-spacing:-.015em;line-height:1.25;
+  margin-top:18px;margin-bottom:6px;
+}
+.lead{text-align:center;color:var(--muted);font-size:13px;margin-bottom:24px}
+
+/* Tabs */
+.tabs{
+  display:flex;gap:4px;padding:4px;background:var(--panel2);border:1px solid var(--line);
+  border-radius:12px;margin-bottom:22px;
+}
+.tab{
+  flex:1;padding:10px;border:0;background:transparent;color:var(--ink2);
+  font-size:13px;font-weight:700;cursor:pointer;border-radius:9px;
+  transition:all .15s;font-family:inherit;
+}
+.tab.on{background:var(--bg2);color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.25)}
+
+/* Form */
+.form{display:none;flex-direction:column;gap:14px}
+.form.on{display:flex}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{
+  font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  font-family:'JetBrains Mono','SF Mono',monospace;
+}
+.field input{
+  padding:13px 14px;border-radius:11px;
+  background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+  font-size:14px;font-family:inherit;
+  transition:all .2s;width:100%;
+}
+.field input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,.15);background:var(--bg2)}
+.field input::placeholder{color:var(--muted);opacity:.7}
+.field .hint{font-size:11px;color:var(--muted);margin-top:2px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:380px){.row2{grid-template-columns:1fr}}
+
+.btn-cta{
+  margin-top:8px;
+  padding:14px 18px;border-radius:12px;
+  background:var(--grad-core);color:#fff;font-weight:700;font-size:14px;
+  border:0;cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 14px 36px -10px rgba(46,123,255,.55);
+  transition:transform .2s,box-shadow .2s;
+}
+.btn-cta:hover{transform:translateY(-2px);box-shadow:0 22px 50px -12px rgba(139,92,255,.7)}
+.btn-cta svg{width:16px;height:16px}
+
+.muted-link{
+  text-align:center;color:var(--muted);font-size:12.5px;margin-top:18px;
+}
+.muted-link a{color:var(--cyan);text-decoration:none;cursor:pointer;font-weight:600}
+.muted-link a:hover{text-decoration:underline}
+
+.divider{
+  display:flex;align-items:center;gap:14px;margin:22px 0 18px;
+  color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;
+}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.demo-btn{
+  width:100%;padding:11px 14px;border-radius:11px;
+  background:transparent;border:1px solid var(--line);color:var(--ink);
+  font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:all .2s;
+}
+.demo-btn:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(0,229,255,.04)}
+.demo-btn svg{width:14px;height:14px}
+
+.foot{
+  text-align:center;color:var(--muted);font-size:10.5px;margin-top:22px;
+  font-family:'JetBrains Mono',monospace;letter-spacing:.06em;
+}
+
+/* Toast */
+.toast{
+  position:fixed;left:50%;bottom:32px;transform:translateX(-50%) translateY(20px);
+  background:rgba(11,15,26,.95);border:1px solid var(--line);
+  padding:13px 20px;border-radius:13px;font-size:13.5px;color:var(--ink);
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 20px 60px -10px rgba(0,0,0,.55);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  opacity:0;visibility:hidden;transition:all .3s; z-index:500;max-width:90vw;
+}
+.toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+.toast.error{border-color:var(--red);color:#fff}
+.toast.success{border-color:var(--lime);color:#fff}
+.toast svg{width:16px;height:16px;flex-shrink:0}
+
+.error-msg{color:var(--red);font-size:12px;margin-top:4px;display:none}
+.error-msg.show{display:block}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="brand">
+    <div class="brand-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+      </svg>
+    </div>
+    <div class="brand-name">Ne<b>xus</b></div>
+  </div>
+
+  <h1 id="formTitle">Bienvenue sur Nexus</h1>
+  <p class="lead" id="formLead">Crée ton compte en 30 secondes pour démarrer.</p>
+
+  <div class="tabs">
+    <button class="tab on" data-mode="signup" id="tabSignup">Créer un compte</button>
+    <button class="tab" data-mode="login" id="tabLogin">Se connecter</button>
+  </div>
+
+  <!-- SIGNUP -->
+  <form class="form on" id="formSignup" autocomplete="off">
+    <div class="field">
+      <label for="suEmail">Email professionnel</label>
+      <input type="email" id="suEmail" placeholder="carlos@panaderia.cl" required autocomplete="email"/>
+      <span class="error-msg" id="suEmailErr"></span>
+    </div>
+    <div class="field">
+      <label for="suPass">Mot de passe</label>
+      <input type="password" id="suPass" placeholder="6 caractères minimum" required minlength="6" autocomplete="new-password"/>
+      <span class="hint">Au moins 6 caractères. Pas de hash en démo (localStorage).</span>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="suBiz">Nom du commerce</label>
+        <input type="text" id="suBiz" placeholder="Panadería Don Carlos" required/>
+      </div>
+      <div class="field">
+        <label for="suCity">Ville</label>
+        <input type="text" id="suCity" placeholder="Santiago, CL" required/>
+      </div>
+    </div>
+    <button class="btn-cta" type="submit">
+      Créer mon compte
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </button>
+    <div class="muted-link">
+      Déjà un compte ? <a id="goLogin">Se connecter</a>
+    </div>
+  </form>
+
+  <!-- LOGIN -->
+  <form class="form" id="formLogin" autocomplete="off">
+    <div class="field">
+      <label for="liEmail">Email</label>
+      <input type="email" id="liEmail" placeholder="ton.email@nexus.app" required autocomplete="email"/>
+    </div>
+    <div class="field">
+      <label for="liPass">Mot de passe</label>
+      <input type="password" id="liPass" placeholder="••••••••" required autocomplete="current-password"/>
+      <span class="error-msg" id="liErr">Email ou mot de passe incorrect.</span>
+    </div>
+    <button class="btn-cta" type="submit">
+      Se connecter
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+    </button>
+    <div class="muted-link">
+      Pas encore de compte ? <a id="goSignup">Créer un compte</a>
+    </div>
+  </form>
+
+  <div class="divider">ou</div>
+
+  <button class="demo-btn" id="demoBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    Continuer en démo (compte Carlos pré-rempli)
+  </button>
+
+  <p class="foot">Nexus · démo localStorage · zéro backend pour l'instant</p>
+</div>
+
+<div class="toast" id="toast">
+  <svg id="toastIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toastMsg">Compte créé.</span>
+</div>
+
+<script>
+(() => {
+  const ACCOUNTS_KEY = 'nexus_accounts';
+  const SESSION_KEY = 'nexus_session';
+
+  // Storage helpers
+  const getAccounts = () => {
+    try { return JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || '{}'); }
+    catch(e) { return {}; }
+  };
+  const saveAccounts = (a) => localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(a));
+  const setSession = (email) => localStorage.setItem(SESSION_KEY, JSON.stringify({email, since: Date.now()}));
+
+  // Seed un compte démo s'il n'existe pas
+  const seed = () => {
+    const a = getAccounts();
+    if (!a['demo@nexus.app']) {
+      a['demo@nexus.app'] = {
+        email: 'demo@nexus.app',
+        pass: 'demo1234',
+        business: { name: 'Panadería Don Carlos', city: 'Las Condes, Santiago, CL', logo: '🥖' },
+        owner: 'Carlos Romero',
+        createdAt: Date.now() - 1000*60*60*24*47,
+        plan: 'starter'
+      };
+      saveAccounts(a);
+    }
+  };
+  seed();
+
+  // Toast
+  const toast = document.getElementById('toast');
+  const toastMsg = document.getElementById('toastMsg');
+  const toastIcon = document.getElementById('toastIcon');
+  const showToast = (msg, type='success') => {
+    toastMsg.textContent = msg;
+    toast.className = `toast show ${type}`;
+    toastIcon.innerHTML = type === 'error'
+      ? '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'
+      : '<polyline points="20 6 9 17 4 12"/>';
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => toast.classList.remove('show'), 2800);
+  };
+
+  // Tabs
+  const tabSignup = document.getElementById('tabSignup');
+  const tabLogin = document.getElementById('tabLogin');
+  const formSignup = document.getElementById('formSignup');
+  const formLogin = document.getElementById('formLogin');
+  const formTitle = document.getElementById('formTitle');
+  const formLead = document.getElementById('formLead');
+
+  const showSignup = () => {
+    tabSignup.classList.add('on'); tabLogin.classList.remove('on');
+    formSignup.classList.add('on'); formLogin.classList.remove('on');
+    formTitle.textContent = 'Bienvenue sur Nexus';
+    formLead.textContent = 'Crée ton compte en 30 secondes pour démarrer.';
+  };
+  const showLogin = () => {
+    tabLogin.classList.add('on'); tabSignup.classList.remove('on');
+    formLogin.classList.add('on'); formSignup.classList.remove('on');
+    formTitle.textContent = 'Heureux de te revoir';
+    formLead.textContent = 'Connecte-toi à ton espace Nexus.';
+  };
+  tabSignup.addEventListener('click', showSignup);
+  tabLogin.addEventListener('click', showLogin);
+  document.getElementById('goLogin').addEventListener('click', showLogin);
+  document.getElementById('goSignup').addEventListener('click', showSignup);
+
+  // Si déjà loggué, propose continue ou switch user
+  const existingSession = localStorage.getItem(SESSION_KEY);
+  if (existingSession) {
+    try {
+      const s = JSON.parse(existingSession);
+      formLead.innerHTML = `Tu es déjà connecté en tant que <b>${s.email}</b>. <a id="continueBtn" style="color:var(--cyan);cursor:pointer;font-weight:600">Continuer →</a> ou choisis un autre compte ci-dessous.`;
+      setTimeout(() => {
+        const cb = document.getElementById('continueBtn');
+        if (cb) cb.addEventListener('click', () => location.href = 'nexus-hub.html');
+      }, 50);
+    } catch(e) {}
+  }
+
+  // Signup
+  formSignup.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = document.getElementById('suEmail').value.trim().toLowerCase();
+    const pass = document.getElementById('suPass').value;
+    const biz = document.getElementById('suBiz').value.trim();
+    const city = document.getElementById('suCity').value.trim();
+    const errEl = document.getElementById('suEmailErr');
+    errEl.classList.remove('show');
+
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      errEl.textContent = 'Email invalide.'; errEl.classList.add('show'); return;
+    }
+    if (pass.length < 6) {
+      showToast('Mot de passe trop court (6 min).', 'error'); return;
+    }
+    const accounts = getAccounts();
+    if (accounts[email]) {
+      errEl.textContent = 'Cet email a déjà un compte. Connecte-toi.'; errEl.classList.add('show'); return;
+    }
+    // Détection emoji logo selon nom commerce
+    const logoMap = { 'panaderia':'🥖','panadería':'🥖','boulangerie':'🥖','cafe':'☕','café':'☕','coffee':'☕','restaurant':'🍽','resto':'🍽','salon':'💇','coiffure':'💇','dent':'🦷','clinic':'⚕️','garage':'🔧','fleur':'🌸','flores':'🌸','torta':'🎂','pizza':'🍕','tienda':'🛍','boutique':'🛍'};
+    let logo = '🏪';
+    const bizLow = biz.toLowerCase();
+    for (const k in logoMap) { if (bizLow.includes(k)) { logo = logoMap[k]; break; } }
+
+    accounts[email] = {
+      email, pass,
+      business: { name: biz, city, logo },
+      owner: email.split('@')[0].replace(/[._-]/g,' ').replace(/\b\w/g, c => c.toUpperCase()),
+      createdAt: Date.now(),
+      plan: 'starter'
+    };
+    saveAccounts(accounts);
+    setSession(email);
+    showToast(`Compte créé. Bienvenue ${biz} ${logo}`, 'success');
+    setTimeout(() => location.href = 'nexus-hub.html', 1100);
+  });
+
+  // Login
+  formLogin.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = document.getElementById('liEmail').value.trim().toLowerCase();
+    const pass = document.getElementById('liPass').value;
+    const errEl = document.getElementById('liErr');
+    errEl.classList.remove('show');
+    const accounts = getAccounts();
+    const acc = accounts[email];
+    if (!acc || acc.pass !== pass) {
+      errEl.classList.add('show');
+      showToast('Identifiants incorrects.', 'error');
+      return;
+    }
+    setSession(email);
+    showToast(`Bienvenue ${acc.owner || email}`, 'success');
+    setTimeout(() => location.href = 'nexus-hub.html', 800);
+  });
+
+  // Demo button
+  document.getElementById('demoBtn').addEventListener('click', () => {
+    setSession('demo@nexus.app');
+    showToast('Session démo ouverte (Carlos / Don Carlos)', 'success');
+    setTimeout(() => location.href = 'nexus-hub.html', 700);
+  });
+})();
+</script>
+</body>
+</html>
