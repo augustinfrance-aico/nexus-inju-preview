@@ -707,6 +707,44 @@ button:focus-visible,a:focus-visible,.nav-item:focus-visible,.filter-pill:focus-
 </head>
 <body>
 
+<!-- ============ BOOT SCREEN PULSE (1.8 s) ============ -->
+<div id="pulseBoot" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0F172A 0%,#1E293B 50%,#0F172A 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:36px;transition:opacity .55s ease,visibility .55s ease;color:#F8FAFC;padding:24px;text-align:center">
+  <div style="width:96px;height:96px;border-radius:24px;background:linear-gradient(135deg,#1A56DB,#7A3CFF,#06B6D4);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 0 80px rgba(26,86,219,.5),inset 0 1px 0 rgba(255,255,255,.2);animation:pulseLogoFloat 2.4s ease-in-out infinite alternate;position:relative">
+    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    <div style="position:absolute;inset:-10px;border-radius:30px;border:1px solid rgba(255,255,255,.10);animation:pulseRing 2s ease-out infinite"></div>
+  </div>
+  <div>
+    <div style="font-size:24px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;margin-bottom:8px">N E X U S <span style="background:linear-gradient(135deg,#1A56DB,#7A3CFF,#06B6D4);-webkit-background-clip:text;background-clip:text;color:transparent">PULSE</span></div>
+    <div style="font-size:11px;letter-spacing:.4em;color:#94A3B8;font-family:'JetBrains Mono','SF Mono',monospace;text-transform:uppercase;margin-bottom:18px">Cockpit · Juan & Iñigo</div>
+    <div style="font-size:13px;color:#CBD5E1;font-family:'Inter',sans-serif;line-height:1.55;max-width:340px;margin:0 auto">
+      <span style="color:#06B6D4;font-weight:700">Monitoreo y control</span> de la actividad SaaS LATAM en tiempo real
+    </div>
+  </div>
+  <div style="width:240px;height:3px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;position:relative">
+    <div style="position:absolute;left:-40%;top:0;bottom:0;width:40%;background:linear-gradient(90deg,#1A56DB,#7A3CFF,#06B6D4);border-radius:999px;animation:pulseSlide 1.5s ease-in-out infinite"></div>
+  </div>
+  <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#94A3B8;font-family:'JetBrains Mono',monospace">
+    <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#22C55E;margin-right:8px;vertical-align:middle;box-shadow:0 0 10px #22C55E;animation:pulseLive 1.2s ease-in-out infinite"></span>
+    Conectando 47 PyMEs · Santiago · Valparaíso · Concepción
+  </div>
+</div>
+
+<style>
+@keyframes pulseLogoFloat{0%{transform:translateY(0) scale(1)}100%{transform:translateY(-6px) scale(1.04)}}
+@keyframes pulseRing{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.4);opacity:0}}
+@keyframes pulseSlide{0%{left:-40%}100%{left:100%}}
+@keyframes pulseLive{0%,100%{opacity:1}50%{opacity:.3}}
+#pulseBoot.gone{opacity:0;visibility:hidden;pointer-events:none}
+</style>
+
+<script>
+setTimeout(() => {
+  const b = document.getElementById('pulseBoot');
+  if (b) b.classList.add('gone');
+  setTimeout(() => b && b.remove(), 600);
+}, 1800);
+</script>
+
 <div id="toast-container"></div>
 <div id="modal-overlay" class="hidden"><div class="modal" id="modal-content"></div></div>
 <div id="command-palette" class="hidden">
