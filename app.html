@@ -157,6 +157,24 @@ a{color:inherit;text-decoration:none}
 /* GRID 2-col */
 .grid2{display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-bottom:16px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+.podium-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:760px){
+  .podium-grid{
+    display:flex;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    scroll-behavior:smooth;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    gap:12px;
+    padding:6px 4px 14px;
+    margin:0 -4px;
+  }
+  .podium-grid::-webkit-scrollbar{display:none}
+  .podium-grid > div{flex:0 0 calc(85% - 6px);scroll-snap-align:center}
+  /* Profil entreprise stack en single col sur mobile */
+  .grid2{grid-template-columns:1fr !important}
+}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
 
 /* MESSAGES / INBOX */
@@ -815,6 +833,29 @@ const Nx = {
     const isDark = this.state.theme === 'dark';
     document.getElementById('themeLbl').textContent = isDark ? '🌙 Thème sombre' : '🌞 Thème clair';
     document.getElementById('themeToggle').checked = isDark;
+    if (this.state.colorTheme) this.applyColorTheme();
+  },
+  setColorTheme(key, c1, c2){
+    this.state.colorTheme = key;
+    this.state.colorThemeC1 = c1;
+    this.state.colorThemeC2 = c2;
+    this.applyColorTheme();
+    this.save();
+    this.renderView();
+    this.toast(`🎨 Thème ${key} activé`,'success');
+  },
+  applyColorTheme(){
+    if (!this.state.colorThemeC1) return;
+    const r = document.documentElement.style;
+    r.setProperty('--blue', this.state.colorThemeC1);
+    r.setProperty('--blue-ink', this.state.colorThemeC1);
+    r.setProperty('--cyan', this.state.colorThemeC2);
+    r.setProperty('--violet', this.state.colorThemeC2);
+    // Soft variants (10% alpha)
+    const hex2rgb = (h) => { h = h.replace('#',''); return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]; };
+    const [r1,g1,b1] = hex2rgb(this.state.colorThemeC1);
+    r.setProperty('--blue-soft', `rgba(${r1},${g1},${b1},.08)`);
+    r.setProperty('--blue-ghost', `rgba(${r1},${g1},${b1},.18)`);
   },
 
   toggleVacation(){
@@ -1824,7 +1865,7 @@ const Nx = {
             <h3 style="color:#78350F">🏆 Podium — Top 3 du mois</h3>
             <span style="font-size:11px;color:#92400E;background:#FCD34D;padding:4px 10px;border-radius:999px;font-weight:700">★ Tes meilleurs ambassadeurs</span>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+          <div class="podium-grid">
             ${this.state.clients.filter(c=>c.status==='active').sort((a,b)=>b.score-a.score).slice(0,3).map((c,i)=>`
               <div style="padding:18px;background:var(--panel);border-radius:14px;cursor:pointer;border:2px solid ${i===0?'#F59E0B':i===1?'#94A3B8':'#B45309'};position:relative;transition:transform .2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'" onclick="Nx.openModal('client',Nx.state.clients.find(x=>x.id===${c.id}))">
                 <div style="position:absolute;top:-12px;left:18px;width:34px;height:34px;border-radius:50%;background:${i===0?'#F59E0B':i===1?'#94A3B8':'#B45309'};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,.2)">${i===0?'🥇':i===1?'🥈':'🥉'}</div>
@@ -2374,7 +2415,28 @@ const Nx = {
           <div class="card" style="padding:22px">
             <h3 style="margin-bottom:16px">🎨 Apparence</h3>
             ${this.toggleRow('Thème sombre',this.state.theme==='dark','Nx.toggleTheme()')}
-            <div class="form-row mt16"><label class="form-lbl">Couleur d'accent</label>
+            <div class="form-row mt16"><label class="form-lbl">Thème de couleur (10 presets)</label>
+              <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:8px">
+                ${[
+                  {k:'bleu',n:'Bleu',c1:'#1A56DB',c2:'#06B6D4'},
+                  {k:'violet',n:'Violet',c1:'#7A3CFF',c2:'#C084FC'},
+                  {k:'vert',n:'Vert',c1:'#10B981',c2:'#34D399'},
+                  {k:'orange',n:'Orange',c1:'#F97316',c2:'#FBBF24'},
+                  {k:'rose',n:'Rose',c1:'#EC4899',c2:'#F472B6'},
+                  {k:'rouge',n:'Rouge',c1:'#EF4444',c2:'#F87171'},
+                  {k:'cyan',n:'Cyan',c1:'#06B6D4',c2:'#67E8F9'},
+                  {k:'lime',n:'Lime',c1:'#84CC16',c2:'#BEF264'},
+                  {k:'or',n:'Or',c1:'#D4AF37',c2:'#F5C45E'},
+                  {k:'noir',n:'Mono',c1:'#1F2937',c2:'#6B7280'}
+                ].map(t=>`
+                  <div onclick="Nx.setColorTheme('${t.k}','${t.c1}','${t.c2}')" style="cursor:pointer;text-align:center;padding:6px 4px;border-radius:10px;border:2px solid ${this.state.colorTheme===t.k?'var(--ink)':'transparent'};transition:all .15s" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='transparent'">
+                    <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,${t.c1},${t.c2});margin:0 auto 4px;box-shadow:0 4px 10px -3px ${t.c1}88"></div>
+                    <div style="font-size:10px;font-weight:600;color:var(--ink2)">${t.n}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            <div class="form-row mt16"><label class="form-lbl">Couleur d'accent personnalisée</label>
               <div style="display:flex;gap:8px;flex-wrap:wrap">
                 ${['#1A56DB','#7A3CFF','#22C55E','#F59E0B','#EF4444','#06B6D4'].map(c=>`<div style="width:34px;height:34px;border-radius:10px;background:${c};cursor:pointer;border:3px solid ${this.state.accent===c?'var(--ink)':'transparent'}" onclick="Nx.setAccent('${c}')"></div>`).join('')}
               </div></div>
