@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0F1A">
+<title>Nexus — Menu V1 Grille</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0B0F1A; --bg2:#11172A;
+  --panel:rgba(255,255,255,.05); --panel2:rgba(255,255,255,.08);
+  --ink:#F2F5FB; --ink2:#C5CDE0; --muted:#7A85A0;
+  --line:rgba(255,255,255,.10);
+  --grad:linear-gradient(135deg,#2E7BFF 0%,#8B5CFF 60%,#00E5FF 100%);
+  --safe-bot:calc(env(safe-area-inset-bottom,0px) + 28px);
+  --safe-top:env(safe-area-inset-top,0px);
+}
+html,body{background:var(--bg);color:var(--ink);font-family:'Inter','Segoe UI',-apple-system,sans-serif;line-height:1.5;min-height:100vh;overflow-x:hidden}
+body{
+  background:radial-gradient(ellipse 70% 50% at 15% 5%,rgba(46,123,255,.18),transparent 60%),radial-gradient(ellipse 60% 45% at 85% 95%,rgba(139,92,255,.14),transparent 60%),var(--bg);
+  background-attachment:fixed;
+  padding-top:calc(56px + var(--safe-top));
+  padding-bottom:var(--safe-bot);
+  max-width:100vw;
+}
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  height:calc(56px + var(--safe-top));padding:var(--safe-top) 16px 0;
+  display:flex;align-items:center;gap:12px;
+  background:rgba(11,15,26,.85);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line);
+}
+.tb-back{
+  width:36px;height:36px;border-radius:10px;background:var(--panel);border:1px solid var(--line);color:var(--ink);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+}
+.tb-back svg{width:18px;height:18px}
+.tb-title{flex:1;font-size:15px;font-weight:700}
+.tb-title small{display:block;font-size:11px;color:var(--muted);font-weight:500}
+.tb-pill{padding:6px 12px;border-radius:999px;background:rgba(0,229,255,.15);color:var(--cyan,#00E5FF);font-size:11px;font-weight:700;letter-spacing:.06em;font-family:'JetBrains Mono',monospace}
+
+.shell{padding:24px 16px 24px;max-width:480px;margin:0 auto}
+.intro{margin-bottom:18px}
+.intro h1{font-size:24px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px}
+.intro p{color:var(--muted);font-size:13px}
+
+/* Grille 2x3 */
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.menu-card{
+  position:relative;
+  padding:24px 16px 20px;
+  border-radius:18px;
+  background:linear-gradient(180deg,var(--panel) 0%,var(--panel2) 100%);
+  border:1px solid var(--line);
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  cursor:pointer;text-align:center;
+  transition:transform .15s,border-color .2s;
+  text-decoration:none;color:inherit;
+  min-height:160px;
+}
+.menu-card:active{transform:scale(.97)}
+.menu-card::before{
+  content:"";position:absolute;inset:0;border-radius:18px;
+  background:radial-gradient(ellipse 80% 50% at 50% 0%,var(--glow,transparent),transparent 70%);
+  pointer-events:none;
+}
+.mc-stat::before{--glow:rgba(30,255,142,.18)}
+.mc-msg::before{--glow:rgba(46,123,255,.18)}
+.mc-camp::before{--glow:rgba(139,92,255,.18)}
+.mc-crm::before{--glow:rgba(255,107,157,.18)}
+.mc-vac::before{--glow:rgba(0,229,255,.18)}
+.mc-tuto::before{--glow:rgba(245,196,94,.18)}
+.menu-card .mc-ic{
+  width:54px;height:54px;border-radius:16px;
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  position:relative;z-index:1;
+  box-shadow:0 12px 28px -10px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.18);
+}
+.menu-card .mc-ic svg{width:26px;height:26px}
+.mc-stat .mc-ic{background:linear-gradient(135deg,#1EFF8E,#00E5FF)}
+.mc-msg .mc-ic{background:linear-gradient(135deg,#2E7BFF,#8B5CFF)}
+.mc-camp .mc-ic{background:linear-gradient(135deg,#8B5CFF,#FF6B9D)}
+.mc-crm .mc-ic{background:linear-gradient(135deg,#FF6B9D,#F5C45E)}
+.mc-vac .mc-ic{background:linear-gradient(135deg,#00E5FF,#1EFF8E)}
+.mc-tuto .mc-ic{background:linear-gradient(135deg,#F5C45E,#FF7B7B)}
+.menu-card .mc-name{font-size:14px;font-weight:700;letter-spacing:-.005em;position:relative;z-index:1}
+.menu-card .mc-meta{
+  font-size:10.5px;color:var(--muted);
+  position:relative;z-index:1;
+  font-family:'JetBrains Mono',monospace;letter-spacing:.06em;
+}
+.menu-card .mc-badge{
+  position:absolute;top:10px;right:10px;
+  min-width:20px;height:20px;border-radius:999px;
+  background:#FF6B6B;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:800;padding:0 5px;
+}
+
+.swap-bar{position:fixed;bottom:calc(8px + var(--safe-bot));left:50%;transform:translateX(-50%);display:flex;gap:6px;padding:6px;background:rgba(11,15,26,.95);border:1px solid var(--line);border-radius:999px;z-index:300;backdrop-filter:blur(12px)}
+.swap-bar a{padding:8px 14px;border-radius:999px;color:var(--muted);font-size:11px;font-weight:700;text-decoration:none;letter-spacing:.04em}
+.swap-bar a.on{background:linear-gradient(135deg,#2E7BFF,#8B5CFF);color:#fff}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="tb-back" href="mobile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></a>
+  <div class="tb-title">Plus<small>Menu V1 · Grille 2×3</small></div>
+  <span class="tb-pill">V1</span>
+</header>
+
+<div class="shell">
+  <div class="intro">
+    <h1>Toutes tes sections</h1>
+    <p>Disposition style Smart bell PDF — grille 2 colonnes × 3 rangs.</p>
+  </div>
+
+  <nav class="menu-grid">
+    <a href="app.html#/stats" class="menu-card mc-stat">
+      <div class="mc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+      <div class="mc-name">Statistiques</div>
+      <div class="mc-meta">Tous les agents</div>
+    </a>
+    <a href="app.html#/inbox" class="menu-card mc-msg">
+      <span class="mc-badge">12</span>
+      <div class="mc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+      <div class="mc-name">Messagerie</div>
+      <div class="mc-meta">WhatsApp + IG + Mail</div>
+    </a>
+    <a href="app.html#/marketing" class="menu-card mc-camp">
+      <div class="mc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8v18l-18-8v-2z"/></svg></div>
+      <div class="mc-name">Campagnes</div>
+      <div class="mc-meta">Mode auto</div>
+    </a>
+    <a href="app.html#/crm" class="menu-card mc-crm">
+      <div class="mc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <div class="mc-name">Clients CRM</div>
+      <div class="mc-meta">147 clients</div>
+    </a>
+    <a href="core.html#vacances" class="menu-card mc-vac">
+      <div class="mc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22a8 8 0 0 1 16 0"/><circle cx="10" cy="10" r="4"/><line x1="20" y1="2" x2="20" y2="22"/></svg></div>
+      <div class="mc-name">Mode vacances</div>
+      <div class="mc-meta">Configurable</div>
+    </a>
+    <a href="app.html#/tuto" class="menu-card mc-tuto">
+      <div class="mc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      <div class="mc-name">Tutoriel</div>
+      <div class="mc-meta">Guide complet</div>
+    </a>
+  </nav>
+</div>
+
+<div class="swap-bar">
+  <a href="menu-v1-grille.html" class="on">Grille</a>
+  <a href="menu-v2-cartes.html">Cartes</a>
+  <a href="menu-v3-pile.html">Pile</a>
+</div>
+</body>
+</html>

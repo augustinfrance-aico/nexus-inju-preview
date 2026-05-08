@@ -982,7 +982,11 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
   <div class="hub-welcome">
     <div class="eye" id="hubMeteo"><span class="dot"></span>📍 Las Condes · 18°C · ☀️ <span id="hubTime">14:32</span></div>
     <h1>Tes modules.</h1>
-    <p>Glisse pour découvrir les autres modules.</p>
+    <p style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);color:var(--cyan);font-size:12px;font-weight:600">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Glisse à droite ou à gauche
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </p>
   </div>
 
   <div class="modgrid" id="modgrid">
@@ -1062,6 +1066,17 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
       <div class="mod-name">Nexus Insights</div>
       <div class="mod-price">12 €/mois</div>
     </div>
+  </div>
+
+  <!-- Carousel nav arrows -->
+  <div style="display:flex;gap:14px;justify-content:center;align-items:center;margin:0 0 12px">
+    <button id="modPrev" aria-label="Module précédent" style="width:40px;height:40px;border-radius:50%;background:var(--panel);border:1px solid var(--line);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span id="modCounter" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.1em;min-width:50px;text-align:center">1 / 8</span>
+    <button id="modNext" aria-label="Module suivant" style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#2E7BFF,#8B5CFF);border:0;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;box-shadow:0 8px 18px -6px rgba(46,123,255,.5)">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
   </div>
 
   <!-- Pagination dots -->
@@ -1825,6 +1840,34 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
       const target = modCards[idx];
       if (target) modgridEl.scrollTo({left: target.offsetLeft - 18, behavior:'smooth'});
     });
+  });
+
+  // Arrows + counter
+  const modCounter = document.getElementById('modCounter');
+  const modPrev = document.getElementById('modPrev');
+  const modNext = document.getElementById('modNext');
+  const updateCounter = (idx) => { if (modCounter) modCounter.textContent = `${idx+1} / ${modCards.length}`; };
+  updateCounter(0);
+  const goToCard = (idx) => {
+    idx = Math.max(0, Math.min(modCards.length-1, idx));
+    const t = modCards[idx];
+    if (t) modgridEl.scrollTo({left: t.offsetLeft - 18, behavior:'smooth'});
+  };
+  if (modPrev) modPrev.addEventListener('click', () => {
+    const cur = Math.round(modgridEl.scrollLeft / modgridEl.clientWidth);
+    goToCard(cur - 1);
+  });
+  if (modNext) modNext.addEventListener('click', () => {
+    const cur = Math.round(modgridEl.scrollLeft / modgridEl.clientWidth);
+    goToCard(cur + 1);
+  });
+  // Hook counter to scroll
+  const oldScroll = modgridEl.onscroll;
+  modgridEl.addEventListener('scroll', () => {
+    setTimeout(() => {
+      const idx = Math.round(modgridEl.scrollLeft / modgridEl.clientWidth);
+      updateCounter(Math.max(0, Math.min(modCards.length-1, idx)));
+    }, 80);
   });
 
   // ---------- Module modal ----------

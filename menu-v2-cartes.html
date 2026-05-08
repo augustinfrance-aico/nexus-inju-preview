@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0F1A">
+<title>Nexus — Menu V2 Cartes large</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0B0F1A; --bg2:#11172A;
+  --panel:rgba(255,255,255,.05); --panel2:rgba(255,255,255,.08);
+  --ink:#F2F5FB; --ink2:#C5CDE0; --muted:#7A85A0;
+  --line:rgba(255,255,255,.10);
+  --safe-bot:calc(env(safe-area-inset-bottom,0px) + 28px);
+  --safe-top:env(safe-area-inset-top,0px);
+}
+html,body{background:var(--bg);color:var(--ink);font-family:'Inter','Segoe UI',-apple-system,sans-serif;line-height:1.5;min-height:100vh;overflow-x:hidden}
+body{
+  background:radial-gradient(ellipse 70% 50% at 15% 5%,rgba(46,123,255,.18),transparent 60%),radial-gradient(ellipse 60% 45% at 85% 95%,rgba(139,92,255,.14),transparent 60%),var(--bg);
+  background-attachment:fixed;
+  padding-top:calc(56px + var(--safe-top));
+  padding-bottom:calc(80px + var(--safe-bot));
+  max-width:100vw;
+}
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  height:calc(56px + var(--safe-top));padding:var(--safe-top) 16px 0;
+  display:flex;align-items:center;gap:12px;
+  background:rgba(11,15,26,.85);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line);
+}
+.tb-back{
+  width:36px;height:36px;border-radius:10px;background:var(--panel);border:1px solid var(--line);color:var(--ink);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+}
+.tb-back svg{width:18px;height:18px}
+.tb-title{flex:1;font-size:15px;font-weight:700}
+.tb-title small{display:block;font-size:11px;color:var(--muted);font-weight:500}
+.tb-pill{padding:6px 12px;border-radius:999px;background:rgba(139,92,255,.18);color:#B59EFF;font-size:11px;font-weight:700;letter-spacing:.06em;font-family:'JetBrains Mono',monospace}
+
+.shell{padding:24px 16px 24px;max-width:480px;margin:0 auto}
+.intro{margin-bottom:18px}
+.intro h1{font-size:24px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px}
+.intro p{color:var(--muted);font-size:13px}
+
+/* Cartes large 1 col avec preview ligne */
+.menu-list{display:flex;flex-direction:column;gap:12px}
+.menu-row{
+  position:relative;display:flex;align-items:center;gap:14px;
+  padding:18px;border-radius:18px;
+  background:linear-gradient(180deg,var(--panel) 0%,var(--panel2) 100%);
+  border:1px solid var(--line);
+  cursor:pointer;text-decoration:none;color:inherit;
+  transition:transform .15s,border-color .2s;overflow:hidden;
+}
+.menu-row:active{transform:scale(.99)}
+.menu-row::before{
+  content:"";position:absolute;top:-30%;right:-20%;width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,var(--glow,transparent),transparent 70%);
+  pointer-events:none;
+}
+.mr-stat::before{--glow:rgba(30,255,142,.18)}
+.mr-msg::before{--glow:rgba(46,123,255,.18)}
+.mr-camp::before{--glow:rgba(139,92,255,.18)}
+.mr-crm::before{--glow:rgba(255,107,157,.18)}
+.mr-vac::before{--glow:rgba(0,229,255,.18)}
+.mr-tuto::before{--glow:rgba(245,196,94,.18)}
+.menu-row .mr-ic{
+  width:48px;height:48px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  flex-shrink:0;position:relative;z-index:1;
+  box-shadow:0 10px 22px -8px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.18);
+}
+.menu-row .mr-ic svg{width:22px;height:22px}
+.mr-stat .mr-ic{background:linear-gradient(135deg,#1EFF8E,#00E5FF)}
+.mr-msg .mr-ic{background:linear-gradient(135deg,#2E7BFF,#8B5CFF)}
+.mr-camp .mr-ic{background:linear-gradient(135deg,#8B5CFF,#FF6B9D)}
+.mr-crm .mr-ic{background:linear-gradient(135deg,#FF6B9D,#F5C45E)}
+.mr-vac .mr-ic{background:linear-gradient(135deg,#00E5FF,#1EFF8E)}
+.mr-tuto .mr-ic{background:linear-gradient(135deg,#F5C45E,#FF7B7B)}
+.mr-body{flex:1;min-width:0;position:relative;z-index:1}
+.mr-name{font-size:15px;font-weight:700;letter-spacing:-.005em;margin-bottom:3px}
+.mr-desc{font-size:12px;color:var(--muted);line-height:1.4}
+.mr-meta{
+  display:inline-block;margin-top:6px;padding:3px 10px;border-radius:999px;
+  background:var(--panel2);font-size:10.5px;color:var(--ink2);font-weight:600;
+  font-family:'JetBrains Mono',monospace;letter-spacing:.04em;
+}
+.mr-chev{color:var(--muted);flex-shrink:0;position:relative;z-index:1}
+.mr-chev svg{width:16px;height:16px}
+
+.swap-bar{position:fixed;bottom:calc(8px + var(--safe-bot));left:50%;transform:translateX(-50%);display:flex;gap:6px;padding:6px;background:rgba(11,15,26,.95);border:1px solid var(--line);border-radius:999px;z-index:300;backdrop-filter:blur(12px)}
+.swap-bar a{padding:8px 14px;border-radius:999px;color:var(--muted);font-size:11px;font-weight:700;text-decoration:none;letter-spacing:.04em}
+.swap-bar a.on{background:linear-gradient(135deg,#8B5CFF,#FF6B9D);color:#fff}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="tb-back" href="mobile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></a>
+  <div class="tb-title">Plus<small>Menu V2 · Cartes large</small></div>
+  <span class="tb-pill">V2</span>
+</header>
+
+<div class="shell">
+  <div class="intro">
+    <h1>Tes sections en détail</h1>
+    <p>Disposition cartes longues — chaque section a son contexte visible.</p>
+  </div>
+
+  <nav class="menu-list">
+    <a href="app.html#/stats" class="menu-row mr-stat">
+      <div class="mr-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+      <div class="mr-body">
+        <div class="mr-name">📊 Statistiques</div>
+        <div class="mr-desc">Tous les stats de tous les agents · pending · espace minimaliste</div>
+        <span class="mr-meta">Voir →</span>
+      </div>
+      <div class="mr-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </a>
+    <a href="app.html#/inbox" class="menu-row mr-msg">
+      <div class="mr-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+      <div class="mr-body">
+        <div class="mr-name">📬 Messagerie</div>
+        <div class="mr-desc">Inbox unifié WhatsApp + Instagram + Email · 12 non lus</div>
+        <span class="mr-meta">12 messages</span>
+      </div>
+      <div class="mr-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </a>
+    <a href="app.html#/marketing" class="menu-row mr-camp">
+      <div class="mr-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8v18l-18-8v-2z"/></svg></div>
+      <div class="mr-body">
+        <div class="mr-name">📢 Campagnes</div>
+        <div class="mr-desc">Cible · stats clients · activer mode auto · sauvegarder</div>
+        <span class="mr-meta">3 actives</span>
+      </div>
+      <div class="mr-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </a>
+    <a href="app.html#/crm" class="menu-row mr-crm">
+      <div class="mr-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <div class="mr-body">
+        <div class="mr-name">👥 Clients CRM</div>
+        <div class="mr-desc">Podium top 3 · éliminer client · scoring fidélité</div>
+        <span class="mr-meta">147 clients</span>
+      </div>
+      <div class="mr-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </a>
+    <a href="core.html#vacances" class="menu-row mr-vac">
+      <div class="mr-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22a8 8 0 0 1 16 0"/><circle cx="10" cy="10" r="4"/><line x1="20" y1="2" x2="20" y2="22"/></svg></div>
+      <div class="mr-body">
+        <div class="mr-name">🌴 Mode vacances</div>
+        <div class="mr-desc">Configuration IA · quand · comment · quoi répondre</div>
+        <span class="mr-meta">Inactif</span>
+      </div>
+      <div class="mr-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </a>
+    <a href="app.html#/tuto" class="menu-row mr-tuto">
+      <div class="mr-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      <div class="mr-body">
+        <div class="mr-name">🎓 Tutoriel</div>
+        <div class="mr-desc">Guide pas à pas pour maîtriser Nexus en 15 min</div>
+        <span class="mr-meta">5 chapitres</span>
+      </div>
+      <div class="mr-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </a>
+  </nav>
+</div>
+
+<div class="swap-bar">
+  <a href="menu-v1-grille.html">Grille</a>
+  <a href="menu-v2-cartes.html" class="on">Cartes</a>
+  <a href="menu-v3-pile.html">Pile</a>
+</div>
+</body>
+</html>
