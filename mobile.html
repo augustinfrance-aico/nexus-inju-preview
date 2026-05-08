@@ -175,7 +175,7 @@ html[data-theme="light"] .hub-welcome h1{
 }
 .hub-welcome p{color:var(--muted);font-size:13px;max-width:340px;margin:0 auto;line-height:1.55}
 
-/* Module carousel — single card swipe (Tinder/Mac style) */
+/* Module carousel — single card swipe avec aperçu (Tinder/Stories style) */
 .modgrid{
   display:flex;
   overflow-x:auto;
@@ -183,9 +183,10 @@ html[data-theme="light"] .hub-welcome h1{
   scroll-behavior:smooth;
   -webkit-overflow-scrolling:touch;
   scrollbar-width:none;
-  gap:14px;
-  margin:14px -18px 8px;
-  padding:8px 18px 16px;
+  gap:12px;
+  margin:14px -16px 8px;
+  padding:18px 32px 24px;
+  perspective:1200px;
 }
 .modgrid::-webkit-scrollbar{display:none}
 .mod{
@@ -195,10 +196,18 @@ html[data-theme="light"] .hub-welcome h1{
   border:1px solid var(--line);
   -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
   cursor:pointer;text-align:center;
-  flex:0 0 calc(100% - 28px);
+  flex:0 0 84%;
   scroll-snap-align:center;
   min-height:auto;
-  transition:transform .15s,border-color .2s;
+  transform:scale(.92);
+  opacity:.55;
+  transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .35s ease,border-color .2s;
+}
+.mod.is-snap-center{
+  transform:scale(1);
+  opacity:1;
+  border-color:rgba(0,229,255,.25);
+  box-shadow:0 24px 50px -16px rgba(46,123,255,.3);
 }
 .mod:active{transform:scale(.97)}
 .mod::before{
@@ -1861,14 +1870,22 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
     const cur = Math.round(modgridEl.scrollLeft / modgridEl.clientWidth);
     goToCard(cur + 1);
   });
-  // Hook counter to scroll
-  const oldScroll = modgridEl.onscroll;
-  modgridEl.addEventListener('scroll', () => {
-    setTimeout(() => {
-      const idx = Math.round(modgridEl.scrollLeft / modgridEl.clientWidth);
-      updateCounter(Math.max(0, Math.min(modCards.length-1, idx)));
-    }, 80);
-  });
+  // Snap-center class : applique le scale 1 sur la card la plus proche du centre viewport
+  const updateSnapCenter = () => {
+    const center = modgridEl.scrollLeft + modgridEl.clientWidth / 2;
+    let closestIdx = 0, closestDist = Infinity;
+    modCards.forEach((c, i) => {
+      const cardCenter = c.offsetLeft + c.offsetWidth / 2;
+      const dist = Math.abs(cardCenter - center);
+      if (dist < closestDist) { closestDist = dist; closestIdx = i; }
+    });
+    modCards.forEach((c, i) => c.classList.toggle('is-snap-center', i === closestIdx));
+    updateCounter(closestIdx);
+    setActiveDot(closestIdx);
+  };
+  // Init + scroll listener
+  setTimeout(updateSnapCenter, 100);
+  modgridEl.addEventListener('scroll', updateSnapCenter);
 
   // ---------- Module modal ----------
   const CATALOG = {
