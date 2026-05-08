@@ -1,6 +1,7 @@
-// Vercel serverless function — proxy vers Groq Llama 3.3 70B
-// Le frontend POST sur /api/claude avec { question }
-// La clé GROQ_API_KEY est dans les variables d'environnement Vercel (jamais exposée au navigateur)
+// Vercel serverless function — proxy vers Anthropic Claude (Sonnet 4.6)
+// Le frontend POST sur /api/claude avec { question, history? }
+// La clé ANTHROPIC_API_KEY est dans les variables d'environnement Vercel (jamais exposée au navigateur)
+// Fallback automatique sur Groq Llama 3.3 70B si ANTHROPIC_API_KEY absente.
 
 const SYSTEM_PROMPT = `Tu es Nexus, l'IA assistante business de Carlos Romero, propriétaire de la Panadería Don Carlos à Las Condes (Santiago, Chili).
 
@@ -43,42 +44,66 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Question invalide' });
     }
 
-    const apiKey = process.env.GROQ_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ error: 'GROQ_API_KEY non configurée' });
-    }
+    const anthropicKey = process.env.ANTHROPIC_API_KEY;
+    const groqKey = process.env.GROQ_API_KEY;
 
     // Garde l'historique court pour limiter les coûts/latence
-    const messages = [
-      { role: 'system', content: SYSTEM_PROMPT },
-      ...history.slice(-6).map(m => ({ role: m.role, content: m.content })),
-      { role: 'user', content: question }
-    ];
+    const trimmed = history.slice(-6);
 
-    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages,
-        temperature: 0.7,
-        max_tokens: 500,
-        top_p: 0.9
-      })
-    });
-
-    if (!groqRes.ok) {
-      const errText = await groqRes.text();
-      console.error('Groq error:', groqRes.status, errText);
-      return res.status(502).json({ error: 'IA indisponible', detail: errText.slice(0, 200) });
+    // === Anthropic en priorité ===
+    if (anthropicKey) {
+      const msgs = [
+        ...trimmed.map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.content })),
+        { role: 'user', content: question }
+      ];
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': anthropicKey,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-5-20250929',
+          max_tokens: 600,
+          system: SYSTEM_PROMPT,
+          messages: msgs
+        })
+      });
+      if (!r.ok) {
+        const errText = await r.text();
+        console.error('Anthropic error:', r.status, errText);
+        // Si clé invalide ou crédit épuisé, on tente Groq
+        if (!groqKey) return res.status(502).json({ error: 'Anthropic indisponible', detail: errText.slice(0, 200) });
+      } else {
+        const data = await r.json();
+        const answer = (data.content?.[0]?.text) || 'Réponse vide.';
+        return res.status(200).json({ answer, model: 'claude-sonnet-4-5' });
+      }
     }
 
-    const data = await groqRes.json();
-    const answer = data.choices?.[0]?.message?.content || 'Réponse vide.';
-    return res.status(200).json({ answer, model: 'llama-3.3-70b-versatile' });
+    // === Fallback Groq ===
+    if (groqKey) {
+      const messages = [
+        { role: 'system', content: SYSTEM_PROMPT },
+        ...trimmed.map(m => ({ role: m.role, content: m.content })),
+        { role: 'user', content: question }
+      ];
+      const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${groqKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages, temperature: 0.7, max_tokens: 500 })
+      });
+      if (!groqRes.ok) {
+        const errText = await groqRes.text();
+        return res.status(502).json({ error: 'Groq indisponible', detail: errText.slice(0, 200) });
+      }
+      const data = await groqRes.json();
+      const answer = data.choices?.[0]?.message?.content || 'Réponse vide.';
+      return res.status(200).json({ answer, model: 'llama-3.3-70b-versatile' });
+    }
+
+    return res.status(500).json({ error: 'Aucune clé IA configurée (ANTHROPIC_API_KEY ou GROQ_API_KEY requise)' });
   } catch (err) {
     console.error('handler error:', err);
     return res.status(500).json({ error: 'Erreur serveur', detail: String(err).slice(0, 200) });
