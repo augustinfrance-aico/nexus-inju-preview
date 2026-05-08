@@ -1659,7 +1659,7 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
   const VIEWS = ['hub','core','stats','messages','more'];
 
   // ---------- State ----------
-  const defaults = { onboarded:false, view:'core', vacances:false };
+  const defaults = { onboarded:false, view:'hub', vacances:false };
   let state = { ...defaults };
   try { const raw = localStorage.getItem(STORE_KEY); if (raw) state = { ...defaults, ...JSON.parse(raw) }; } catch(e){}
   const saveState = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch(e){} };
@@ -2117,7 +2117,8 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
 
   // ---------- Init route ----------
   routeFromHash();
-  if (!location.hash) navigate(state.view || 'core');
+  // Force Hub au boot (vue par défaut style PC) sauf si l'utilisateur arrive avec un hash spécifique
+  if (!location.hash) navigate('hub');
 
   // ---------- Bind "Voir tout" stats link ----------
   document.querySelectorAll('[data-go]').forEach(el => {
