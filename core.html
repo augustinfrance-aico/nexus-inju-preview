@@ -909,7 +909,15 @@ body{
         </div>
         <div class="audio-meta">
           <b id="audioTitle">Ton récap du lundi matin</b>
-          <small id="audioDuration">2 min 18 s · prêt à écouter</small>
+          <small id="audioDuration">2 min 18 s · voix <b id="voiceLabel">Daniel</b> (Bond)</small>
+        </div>
+        <div id="voicePicker" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:4px">
+          <button class="voice-chip on" data-voice="daniel" data-vid="onwK4e9ZLuTAKqWW03F9" style="padding:5px 11px;border-radius:999px;border:1px solid var(--violet);background:rgba(139,92,255,.15);color:var(--ink);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">🎩 Daniel</button>
+          <button class="voice-chip" data-voice="george" data-vid="JBFqnCBsd6RMkjVDRZzb" style="padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink2);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">🇬🇧 George</button>
+          <button class="voice-chip" data-voice="adam" data-vid="pNInz6obpgDQGcFmaJgB" style="padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink2);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">🎙 Adam</button>
+          <button class="voice-chip" data-voice="rachel" style="padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink2);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">👩 Rachel</button>
+          <button class="voice-chip" data-voice="charlotte" style="padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink2);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">🎀 Charlotte</button>
+          <button class="voice-chip" data-voice="bella" style="padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink2);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">✨ Bella</button>
         </div>
         <div class="audio-progress"><div class="audio-progress-bar" id="audioBar"></div></div>
         <div class="audio-times"><span id="audioCur">0:00</span><span id="audioTot">2:18</span></div>
@@ -1394,6 +1402,32 @@ body{
   // Resync when user toggles jour/semaine tabs
   document.querySelectorAll('.brief-mode-tabs[data-target="audio"] .mode-tab').forEach(tab => {
     tab.addEventListener('click', () => { setTimeout(setAudioSrc, 10); });
+  });
+
+  // Voice picker (6 voix style ElevenLabs)
+  document.querySelectorAll('.voice-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.voice-chip').forEach(c => {
+        c.classList.remove('on');
+        c.style.background = 'transparent';
+        c.style.color = 'var(--ink2)';
+        c.style.border = '1px solid var(--line)';
+      });
+      chip.classList.add('on');
+      chip.style.background = 'rgba(139,92,255,.15)';
+      chip.style.color = 'var(--ink)';
+      chip.style.border = '1px solid var(--violet)';
+      const voice = chip.dataset.voice;
+      const lbl = document.getElementById('voiceLabel');
+      const labels = {daniel:'Daniel', george:'George', adam:'Adam', rachel:'Rachel', charlotte:'Charlotte', bella:'Bella'};
+      if (lbl) lbl.textContent = labels[voice] || voice;
+      // En vrai prod : API ElevenLabs avec voice_id pour générer à la volée
+      // Pour la démo : on garde le MP3 Daniel pré-généré
+      if (voice !== 'daniel') {
+        // Simulation : indiquer que la génération est possible mais payante
+        console.log('[Demo] Voix sélectionnée:', voice, '— en prod, génération ElevenLabs à la volée avec voice_id', chip.dataset.vid);
+      }
+    });
   });
 
   audioPlayer.addEventListener('timeupdate', () => {

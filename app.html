@@ -1681,7 +1681,22 @@ const Nx = {
   // ---------- INBOX VIEW ----------
   viewInbox(){
     const filter = this.state.inboxFilter || 'all';
-    const convs = filter==='all' ? this.state.conversations : this.state.conversations.filter(c=>c.channel===filter);
+    const sort = this.state.inboxSort || 'recent';
+    let convs = filter==='all' ? this.state.conversations : this.state.conversations.filter(c=>c.channel===filter);
+    if (sort === 'unread') convs = [...convs].sort((a,b) => (b.unread?1:0) - (a.unread?1:0));
+    else if (sort === 'az') {
+      convs = [...convs].sort((a,b) => {
+        const ca = this.state.clients.find(c=>c.id===a.clientId)?.name || '';
+        const cb = this.state.clients.find(c=>c.id===b.clientId)?.name || '';
+        return ca.localeCompare(cb);
+      });
+    } else if (sort === 'za') {
+      convs = [...convs].sort((a,b) => {
+        const ca = this.state.clients.find(c=>c.id===a.clientId)?.name || '';
+        const cb = this.state.clients.find(c=>c.id===b.clientId)?.name || '';
+        return cb.localeCompare(ca);
+      });
+    }
     const activeId = this.state.activeConv || convs[0]?.clientId;
     const activeConv = this.state.conversations.find(c=>c.clientId===activeId);
     const activeClient = activeConv ? this.state.clients.find(c=>c.id===activeId) : null;
@@ -1706,6 +1721,12 @@ const Nx = {
                 <button class="chat-tab ${filter==='whatsapp'?'on':''}" onclick="Nx.setInboxFilter('whatsapp')">📱 WhatsApp</button>
                 <button class="chat-tab ${filter==='instagram'?'on':''}" onclick="Nx.setInboxFilter('instagram')">📸 Instagram</button>
                 <button class="chat-tab ${filter==='email'?'on':''}" onclick="Nx.setInboxFilter('email')">✉️ Email</button>
+              </div>
+              <div class="chat-list-tabs" style="margin-top:6px">
+                <button class="chat-tab ${sort==='recent'?'on':''}" onclick="Nx.state.inboxSort='recent';Nx.renderView()" title="Plus récents">⏱ Récents</button>
+                <button class="chat-tab ${sort==='unread'?'on':''}" onclick="Nx.state.inboxSort='unread';Nx.renderView()" title="Non lus en haut">● Non lus</button>
+                <button class="chat-tab ${sort==='az'?'on':''}" onclick="Nx.state.inboxSort='az';Nx.renderView()" title="A→Z">A–Z</button>
+                <button class="chat-tab ${sort==='za'?'on':''}" onclick="Nx.state.inboxSort='za';Nx.renderView()" title="Z→A">Z–A</button>
               </div>
             </div>
             <div class="chat-messages-list">
