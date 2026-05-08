@@ -1,0 +1,2035 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0B0F1A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Nexus — Mobile</title>
+<style>
+/* =========================================================
+   NEXUS MOBILE — single-file SPA
+   Viewport cible : 375px (iPhone), responsive 320px → 480px
+   Theme : dark default, light toggle (localStorage)
+   ========================================================= */
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{
+  background:#0B0F1A;color:#F2F5FB;
+  font-family:'Inter','SF Pro Text','Segoe UI',-apple-system,sans-serif;
+  line-height:1.45;-webkit-font-smoothing:antialiased;
+  min-height:100vh;overflow-x:hidden;
+  font-size:15px;
+}
+
+:root{
+  --bg:#0B0F1A;--bg2:#11172A;
+  --panel:rgba(255,255,255,.05);--panel2:rgba(255,255,255,.08);
+  --ink:#F2F5FB;--ink2:#C5CDE0;--muted:#7A85A0;
+  --line:rgba(255,255,255,.10);--line2:rgba(255,255,255,.05);
+  --blue:#2E7BFF;--violet:#8B5CFF;--cyan:#00E5FF;--lime:#1EFF8E;--gold:#F5C45E;--red:#FF6B6B;--pink:#FF6B9D;
+  --grad-core:linear-gradient(135deg,#2E7BFF 0%,#8B5CFF 60%,#00E5FF 100%);
+  --grad-warm:linear-gradient(135deg,#F5C45E,#FF7B7B);
+  --grad-cool:linear-gradient(135deg,#1EFF8E,#00E5FF);
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bot:env(safe-area-inset-bottom,0px);
+}
+html[data-theme="light"]{
+  --bg:#F4F6FB;--bg2:#FFFFFF;
+  --panel:rgba(255,255,255,.7);--panel2:rgba(15,23,42,.05);
+  --ink:#0F172A;--ink2:#334155;--muted:#64748B;
+  --line:rgba(15,23,42,.10);--line2:rgba(15,23,42,.05);
+}
+html[data-theme="light"] body{
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 5%, rgba(46,123,255,.08), transparent 60%),
+    radial-gradient(ellipse 60% 45% at 85% 95%, rgba(139,92,255,.06), transparent 60%),
+    var(--bg);
+}
+body{
+  background:
+    radial-gradient(ellipse 80% 50% at 15% 5%, rgba(46,123,255,.18), transparent 60%),
+    radial-gradient(ellipse 70% 45% at 85% 95%, rgba(139,92,255,.14), transparent 60%),
+    var(--bg);
+  background-attachment:fixed;
+  padding-top:calc(56px + var(--safe-top));
+  padding-bottom:calc(64px + var(--safe-bot));
+  max-width:100vw;
+}
+.mono{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}
+button{font-family:inherit}
+a{color:inherit;text-decoration:none}
+
+/* ============ BOOT SCREEN ============ */
+#boot{
+  position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:24px;background:var(--bg);
+  transition:opacity .5s ease,visibility .5s ease;
+}
+#boot.gone{opacity:0;visibility:hidden;pointer-events:none}
+.boot-logo{
+  width:84px;height:84px;border-radius:22px;background:var(--grad-core);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 60px rgba(46,123,255,.5),inset 0 1px 0 rgba(255,255,255,.2);
+  animation:logoFloat 2.4s ease-in-out infinite alternate;position:relative;
+}
+.boot-logo::before{
+  content:"";position:absolute;inset:-6px;border-radius:28px;
+  border:1px solid rgba(255,255,255,.10);
+  animation:ringPulse 2s ease-out infinite;
+}
+.boot-logo svg{width:42px;height:42px;color:#fff}
+@keyframes logoFloat{0%{transform:translateY(0) scale(1)}100%{transform:translateY(-5px) scale(1.04)}}
+@keyframes ringPulse{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.45);opacity:0}}
+.boot-title{font-size:18px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;text-align:center}
+.boot-title span{font-size:10px;letter-spacing:.4em;background:var(--grad-core);-webkit-background-clip:text;background-clip:text;color:transparent;display:block;margin-top:5px}
+.boot-bar{width:200px;height:3px;border-radius:999px;background:var(--line);overflow:hidden;position:relative}
+.boot-bar::after{
+  content:"";position:absolute;left:-40%;top:0;bottom:0;width:40%;
+  background:var(--grad-core);border-radius:999px;
+  animation:bootSlide 1.4s ease-in-out infinite;
+}
+@keyframes bootSlide{0%{left:-40%}100%{left:100%}}
+.boot-status{font-size:10.5px;color:var(--muted);letter-spacing:.16em;text-transform:uppercase}
+.boot-status .live{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--lime);margin-right:8px;vertical-align:middle;box-shadow:0 0 10px var(--lime);animation:livePulse 1.2s ease-in-out infinite}
+@keyframes livePulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ============ TOPBAR (sticky 56px) ============ */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  height:calc(56px + var(--safe-top));padding-top:var(--safe-top);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding-left:14px;padding-right:14px;
+  background:rgba(11,15,26,.78);
+  backdrop-filter:blur(16px) saturate(1.4);
+  -webkit-backdrop-filter:blur(16px) saturate(1.4);
+  border-bottom:1px solid var(--line);
+}
+html[data-theme="light"] .topbar{background:rgba(255,255,255,.78)}
+.tb-left,.tb-right{display:flex;align-items:center;gap:10px}
+.tb-logo{
+  width:36px;height:36px;border-radius:11px;background:var(--grad-core);
+  display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;
+  box-shadow:0 6px 18px -8px rgba(46,123,255,.6);
+  border:0;padding:0;
+}
+.tb-logo svg{width:18px;height:18px}
+.tb-title{display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.tb-title b{font-size:14px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-title small{font-size:10.5px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.06em}
+.tb-btn{
+  width:44px;height:44px;border-radius:12px;
+  background:transparent;border:0;color:var(--ink2);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  position:relative;transition:transform .15s,color .15s;
+}
+.tb-btn:active{transform:scale(.92)}
+.tb-btn svg{width:20px;height:20px}
+.tb-btn .badge{
+  position:absolute;top:6px;right:6px;
+  min-width:16px;height:16px;border-radius:999px;
+  background:var(--red);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9.5px;font-weight:700;border:2px solid var(--bg);
+  padding:0 4px;
+}
+
+/* ============ SCREENS ============ */
+.screen{display:none;animation:fadeIn .25s ease;padding:0 16px;max-width:100vw}
+.screen.on{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.screen-title{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin:18px 2px 14px;
+}
+.screen-title h2{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.screen-title small{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.06em;text-transform:uppercase}
+
+/* ============ HUB SCREEN ============ */
+.hub-welcome{
+  text-align:center;padding:18px 6px 14px;
+}
+.hub-welcome .eye{
+  display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;
+  background:var(--panel);border:1px solid var(--line);
+  font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);
+  font-family:'JetBrains Mono',monospace;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  margin-bottom:12px;
+}
+.hub-welcome .eye .dot{width:5px;height:5px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.hub-welcome h1{
+  font-size:clamp(22px,6.5vw,28px);font-weight:800;letter-spacing:-.025em;line-height:1.1;
+  background:linear-gradient(120deg,var(--ink) 20%,var(--ink2) 70%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  margin-bottom:6px;
+}
+html[data-theme="light"] .hub-welcome h1{
+  background:linear-gradient(120deg,#0F172A 20%,#1A56DB 70%,#7A3CFF 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hub-welcome p{color:var(--muted);font-size:13px;max-width:340px;margin:0 auto;line-height:1.55}
+
+/* Module grid 2 cols */
+.modgrid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:12px;
+  margin:18px 0 14px;max-width:100%;
+}
+.mod{
+  position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;
+  padding:18px 12px 16px;border-radius:20px;
+  background:linear-gradient(180deg,var(--panel) 0%,var(--panel2) 100%);
+  border:1px solid var(--line);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  cursor:pointer;text-align:center;min-height:155px;
+  transition:transform .15s,border-color .2s;
+}
+.mod:active{transform:scale(.97)}
+.mod::before{
+  content:"";position:absolute;inset:0;border-radius:20px;
+  background:radial-gradient(ellipse 80% 50% at 50% 0%, var(--mglow,transparent), transparent 70%);
+  pointer-events:none;
+}
+.mod-ic{
+  width:56px;height:56px;border-radius:16px;
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  position:relative;z-index:1;
+  box-shadow:0 12px 24px -10px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.18);
+}
+.mod-ic::before{
+  content:"";position:absolute;inset:0;border-radius:16px;
+  background:linear-gradient(180deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,0) 50%);
+  pointer-events:none;
+}
+.mod-ic svg{width:28px;height:28px;position:relative;z-index:1}
+.mod-name{font-size:13px;font-weight:700;letter-spacing:-.005em;position:relative;z-index:1}
+.mod-tag{
+  font-size:9.5px;color:var(--muted);font-family:'JetBrains Mono',monospace;
+  letter-spacing:.12em;text-transform:uppercase;position:relative;z-index:1;
+}
+.mod.active{--mglow:rgba(46,123,255,.18)}
+.mod.active .mod-tag{color:var(--lime)}
+.mod.active::after{
+  content:"";position:absolute;top:10px;right:10px;
+  width:9px;height:9px;border-radius:50%;background:var(--lime);
+  box-shadow:0 0 10px var(--lime);
+  animation:livePulse 1.4s ease-in-out infinite;
+}
+.mod.locked .mod-ic{filter:grayscale(.7) brightness(.65)}
+.mod.locked .lock-pill{
+  position:absolute;top:8px;right:8px;
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 7px;border-radius:999px;
+  background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);
+  font-size:8.5px;font-weight:700;letter-spacing:.08em;color:var(--ink2);
+  font-family:'JetBrains Mono',monospace;text-transform:uppercase;
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  z-index:2;
+}
+.mod.locked .lock-pill svg{width:9px;height:9px}
+.mod-price{
+  font-size:10.5px;color:var(--muted);font-weight:600;
+  position:relative;z-index:1;margin-top:-4px;
+}
+.mod.is-new::before{
+  background:radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,107,157,.18), transparent 70%);
+}
+.mod .new-pill{
+  position:absolute;top:8px;left:8px;
+  display:inline-flex;align-items:center;
+  padding:3px 7px;border-radius:999px;
+  background:linear-gradient(135deg,#FF6B9D,#F5C45E);
+  color:#fff;font-size:8.5px;font-weight:800;letter-spacing:.1em;
+  font-family:'JetBrains Mono',monospace;text-transform:uppercase;
+  box-shadow:0 4px 10px -3px rgba(255,107,157,.5);
+  z-index:2;
+}
+
+/* Module color glows */
+.mod.core .mod-ic{background:linear-gradient(135deg,#2E7BFF 0%,#8B5CFF 60%,#00E5FF 100%)}
+.mod.ledger .mod-ic{background:linear-gradient(135deg,#1EFF8E 0%,#00E5FF 100%)}
+.mod.rh .mod-ic{background:linear-gradient(135deg,#F5C45E 0%,#FF7B7B 100%)}
+.mod.voice .mod-ic{background:linear-gradient(135deg,#8B5CFF 0%,#FF7B7B 100%)}
+.mod.sales .mod-ic{background:linear-gradient(135deg,#FF6B9D 0%,#F5C45E 100%)}
+.mod.calendar .mod-ic{background:linear-gradient(135deg,#00E5FF 0%,#2E7BFF 100%)}
+.mod.boost .mod-ic{background:linear-gradient(135deg,#FF7B7B 0%,#8B5CFF 100%)}
+.mod.insights .mod-ic{background:linear-gradient(135deg,#1EFF8E 0%,#2E7BFF 100%)}
+
+.hub-cta{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:14px 16px;border-radius:14px;
+  background:var(--grad-core);color:#fff;font-weight:700;font-size:14px;
+  border:0;cursor:pointer;margin-top:4px;
+  box-shadow:0 12px 28px -10px rgba(46,123,255,.55);
+  min-height:48px;
+}
+.hub-cta:active{transform:scale(.98)}
+.hub-cta svg{width:16px;height:16px}
+
+/* ============ CORE SCREEN ============ */
+.company-band{
+  display:flex;align-items:center;gap:11px;
+  padding:10px 14px;border-radius:14px;
+  background:var(--panel);border:1px solid var(--line);
+  margin:6px 0 14px;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+.company-logo{
+  width:36px;height:36px;border-radius:10px;
+  background:linear-gradient(135deg,#F5C45E,#FF7B7B);
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
+  box-shadow:0 6px 14px -6px rgba(245,196,94,.5);
+}
+.company-info{min-width:0;flex:1}
+.company-info b{display:block;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.company-info small{display:block;font-size:11px;color:var(--muted);margin-top:1px}
+
+.hero-banner{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;border-radius:16px;
+  background:linear-gradient(120deg,rgba(30,255,142,.14),rgba(0,229,255,.07));
+  border:1px solid rgba(30,255,142,.25);
+  margin-bottom:18px;
+  position:relative;overflow:hidden;
+}
+.hero-banner::before{
+  content:"";position:absolute;top:-30%;right:-20%;
+  width:160px;height:160px;border-radius:50%;
+  background:radial-gradient(circle,rgba(30,255,142,.16),transparent 70%);
+  pointer-events:none;
+}
+.hero-banner-ic{
+  width:38px;height:38px;border-radius:11px;
+  background:var(--grad-cool);
+  display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;
+  box-shadow:0 6px 16px -6px rgba(0,229,255,.5);position:relative;z-index:1;
+}
+.hero-banner-ic svg{width:18px;height:18px}
+.hero-banner-text{flex:1;font-size:13px;color:var(--ink);line-height:1.5;position:relative;z-index:1}
+.hero-banner-text b{font-weight:700}
+.hero-banner-text .hl{
+  background:linear-gradient(135deg,var(--lime),var(--cyan));
+  -webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800;
+}
+
+/* Section header */
+.sect-head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin:6px 2px 12px;
+}
+.sect-head h3{font-size:14px;font-weight:700;letter-spacing:-.005em;display:flex;align-items:center;gap:8px}
+.sect-head h3 .star{color:var(--gold);font-size:13px}
+.sect-head a{font-size:12px;color:var(--cyan);font-weight:600;cursor:pointer}
+
+/* Stats horizontal carousel */
+.stats-track{
+  display:flex;gap:11px;overflow-x:auto;scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  padding:4px 0 8px;margin:0 -16px;padding-left:16px;padding-right:16px;
+}
+.stats-track::-webkit-scrollbar{display:none}
+.stat{
+  flex:0 0 78%;max-width:300px;scroll-snap-align:start;
+  padding:18px 16px;border-radius:18px;
+  background:linear-gradient(180deg,var(--panel) 0%,var(--panel2) 100%);
+  border:1px solid var(--line);
+  position:relative;overflow:hidden;cursor:pointer;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  transition:transform .15s,border-color .2s;
+}
+.stat:active{transform:scale(.98)}
+.stat::before{
+  content:"";position:absolute;top:-40%;right:-20%;
+  width:160px;height:160px;border-radius:50%;
+  background:var(--accent-glow);pointer-events:none;
+}
+.stat.s1{--accent-glow:radial-gradient(circle,rgba(30,255,142,.20),transparent 70%);--accent:#1EFF8E;--accent2:#00E5FF}
+.stat.s2{--accent-glow:radial-gradient(circle,rgba(46,123,255,.20),transparent 70%);--accent:#2E7BFF;--accent2:#8B5CFF}
+.stat.s3{--accent-glow:radial-gradient(circle,rgba(245,196,94,.20),transparent 70%);--accent:#F5C45E;--accent2:#FF7B7B}
+.stat.s4{--accent-glow:radial-gradient(circle,rgba(139,92,255,.20),transparent 70%);--accent:#8B5CFF;--accent2:#FF6B9D}
+.stat-head{display:flex;align-items:center;gap:9px;margin-bottom:10px;position:relative;z-index:1}
+.stat-ic{
+  width:30px;height:30px;border-radius:9px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  box-shadow:0 4px 12px -4px var(--accent);
+}
+.stat-ic svg{width:14px;height:14px}
+.stat-tag{
+  font-size:9.5px;color:var(--accent);font-weight:700;text-transform:uppercase;
+  letter-spacing:.10em;font-family:'JetBrains Mono',monospace;
+}
+.stat-headline{
+  font-size:clamp(14px,4vw,16px);font-weight:700;line-height:1.32;color:var(--ink);
+  margin-bottom:5px;position:relative;z-index:1;letter-spacing:-.005em;
+}
+.stat-headline b{
+  font-size:clamp(20px,6vw,26px);font-weight:800;letter-spacing:-.02em;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  display:inline-block;margin-right:2px;
+}
+.stat-detail{font-size:11.5px;color:var(--muted);position:relative;z-index:1;line-height:1.45}
+.stat-cta{
+  margin-top:10px;display:inline-flex;align-items:center;gap:5px;
+  font-size:11px;color:var(--accent);font-weight:700;
+  position:relative;z-index:1;
+}
+.stat-cta svg{width:11px;height:11px}
+
+/* Conseils carousel */
+.advice{
+  padding:18px 16px;border-radius:18px;
+  background:linear-gradient(180deg,var(--panel) 0%,var(--panel2) 100%);
+  border:1px solid var(--line);
+  margin:18px 0;position:relative;overflow:hidden;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+.advice::before{
+  content:"";position:absolute;top:-40%;left:-20%;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(139,92,255,.16),transparent 70%);
+  pointer-events:none;
+}
+.advice-head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin-bottom:14px;position:relative;z-index:1;
+}
+.advice-title{display:flex;align-items:center;gap:10px}
+.advice-title-ic{
+  width:30px;height:30px;border-radius:9px;
+  background:var(--grad-core);
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  box-shadow:0 4px 14px -5px rgba(139,92,255,.5);
+}
+.advice-title-ic svg{width:15px;height:15px}
+.advice-title b{font-size:13px;font-weight:700;display:block;letter-spacing:-.005em}
+.advice-title small{font-size:10.5px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.05em}
+.advice-counter{font-size:10.5px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.advice-body{position:relative;z-index:1;min-height:140px}
+.advice-card{display:none;animation:fadeSlide .3s ease}
+.advice-card.on{display:block}
+@keyframes fadeSlide{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}
+.advice-context{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 10px;border-radius:999px;
+  background:var(--panel2);border:1px solid var(--line);
+  font-size:10px;color:var(--ink2);font-weight:600;text-transform:uppercase;letter-spacing:.07em;
+  font-family:'JetBrains Mono',monospace;margin-bottom:10px;
+}
+.advice-context svg{width:10px;height:10px;color:var(--cyan)}
+.advice-text{
+  font-size:14px;line-height:1.5;color:var(--ink);font-weight:500;
+  margin-bottom:14px;letter-spacing:-.005em;
+}
+.advice-text b{font-weight:800}
+.advice-actions{display:flex;flex-wrap:wrap;gap:8px}
+.advice-act{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:9px 14px;border-radius:11px;
+  background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+  font-size:12px;font-weight:600;cursor:pointer;
+  min-height:36px;
+}
+.advice-act svg{width:11px;height:11px}
+.advice-act.primary{
+  background:var(--grad-core);color:#fff;border-color:transparent;
+  box-shadow:0 6px 14px -6px rgba(46,123,255,.5);
+}
+.advice-act:active{transform:scale(.97)}
+.advice-dots{display:flex;gap:6px;margin-top:14px;justify-content:center;position:relative;z-index:1}
+.adv-dot{width:6px;height:6px;border-radius:50%;background:var(--line);cursor:pointer;border:0;padding:0;transition:all .25s}
+.adv-dot.on{background:var(--cyan);width:20px;border-radius:999px;box-shadow:0 0 8px rgba(0,229,255,.45)}
+
+/* Brief audio + texte */
+.brief-card{
+  padding:18px 16px;border-radius:18px;
+  border:1px solid var(--line);position:relative;overflow:hidden;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  margin-bottom:14px;
+}
+.brief-card.audio{
+  background:linear-gradient(160deg,rgba(139,92,255,.14),rgba(46,123,255,.06));
+  border-color:rgba(139,92,255,.25);
+}
+.brief-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.brief-head h3{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}
+.brief-head h3 svg{width:14px;height:14px;color:var(--violet)}
+.mode-tabs{display:flex;gap:3px;padding:3px;background:var(--panel2);border:1px solid var(--line);border-radius:9px}
+.mode-tab{
+  border:0;background:transparent;color:var(--ink2);
+  padding:5px 10px;border-radius:7px;cursor:pointer;
+  font-size:10.5px;font-weight:600;
+}
+.mode-tab.on{background:var(--bg2);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.audio-body{display:flex;align-items:center;gap:14px}
+.voice-mic{
+  position:relative;width:64px;height:64px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#8B5CFF,#2E7BFF);
+  display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;
+  box-shadow:0 10px 24px -6px rgba(139,92,255,.55),inset 0 1px 0 rgba(255,255,255,.2);
+  border:0;
+}
+.voice-mic.playing{background:linear-gradient(135deg,#FF6B9D,#F5C45E)}
+.voice-mic::after{
+  content:"";position:absolute;inset:-6px;border-radius:50%;
+  border:2px solid rgba(139,92,255,.35);
+  animation:micPulse 2s ease-out infinite;
+}
+@keyframes micPulse{0%{transform:scale(.95);opacity:.7}100%{transform:scale(1.35);opacity:0}}
+.voice-mic svg{width:24px;height:24px}
+.audio-meta{flex:1;min-width:0}
+.audio-meta b{display:block;font-size:13px;font-weight:700;letter-spacing:-.005em}
+.audio-meta small{display:block;font-size:10.5px;color:var(--muted);margin-top:2px}
+.audio-progress{
+  margin-top:6px;width:100%;height:3px;border-radius:999px;background:var(--panel2);overflow:hidden;
+  position:relative;
+}
+.audio-progress-bar{
+  position:absolute;left:0;top:0;bottom:0;width:0%;
+  background:linear-gradient(90deg,var(--violet),var(--cyan));border-radius:999px;
+  transition:width .3s;
+}
+
+/* Brief texte */
+.brief-card.text{
+  background:linear-gradient(160deg,rgba(0,229,255,.10),rgba(30,255,142,.05));
+  border-color:rgba(0,229,255,.25);
+}
+.brief-card.text .brief-head h3 svg{color:var(--cyan)}
+.text-body{font-size:13px;line-height:1.6;color:var(--ink2);max-height:120px;overflow:hidden;position:relative;transition:max-height .3s}
+.text-body.expanded{max-height:1000px}
+.text-body p{margin-bottom:6px}
+.text-body p b{color:var(--ink);font-weight:700}
+.text-body::after{
+  content:"";position:absolute;bottom:0;left:0;right:0;height:50px;
+  background:linear-gradient(180deg,transparent,var(--bg2,#11172A) 90%);
+  pointer-events:none;transition:opacity .25s;
+}
+.text-body.expanded::after{opacity:0}
+.text-cta{
+  margin-top:8px;display:inline-flex;align-items:center;gap:5px;
+  font-size:11.5px;color:var(--cyan);background:transparent;border:0;cursor:pointer;font-weight:700;
+}
+.text-cta svg{width:11px;height:11px}
+
+/* Messages preview */
+.preview-section{
+  padding:16px;border-radius:18px;
+  background:linear-gradient(180deg,var(--panel) 0%,var(--panel2) 100%);
+  border:1px solid var(--line);
+  margin-bottom:18px;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+.msg-list{display:flex;flex-direction:column;gap:8px;position:relative}
+.msg{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:12px;
+  background:var(--panel2);border:1px solid var(--line2);
+  cursor:pointer;min-height:54px;
+}
+.msg:active{transform:scale(.99)}
+.msg-avatar{
+  width:34px;height:34px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#fff;
+  background:var(--av,linear-gradient(135deg,#2E7BFF,#8B5CFF));
+}
+.msg-meta{flex:1;min-width:0}
+.msg-name{font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:5px}
+.msg-name .star{color:var(--gold);font-size:10px}
+.msg-text{
+  font-size:11.5px;color:var(--muted);margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.msg-time{font-size:9.5px;color:var(--muted);font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.msg-unread{
+  width:7px;height:7px;border-radius:50%;background:var(--cyan);flex-shrink:0;
+  box-shadow:0 0 6px var(--cyan);
+}
+.msg.blur{filter:blur(2.5px);opacity:.5;pointer-events:none;user-select:none}
+
+/* ============ STATS SCREEN ============ */
+.stats-grid{display:flex;flex-direction:column;gap:12px;margin-bottom:14px}
+.stats-grid .stat{flex:1;max-width:none;width:100%}
+
+.mini-chart{
+  display:flex;align-items:flex-end;gap:6px;height:60px;margin-top:10px;
+  position:relative;z-index:1;
+}
+.mini-chart .bar{
+  flex:1;background:linear-gradient(180deg,var(--accent),var(--accent2));
+  border-radius:4px 4px 0 0;min-height:4px;
+  cursor:pointer;
+}
+
+/* ============ MESSAGES SCREEN ============ */
+.inbox-search{
+  position:relative;margin:6px 0 12px;
+}
+.inbox-search input{
+  width:100%;padding:11px 14px 11px 38px;border-radius:12px;
+  background:var(--panel);border:1px solid var(--line);color:var(--ink);
+  font-size:13px;font-family:inherit;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  min-height:44px;
+}
+.inbox-search input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,.12)}
+.inbox-search svg{
+  position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  width:16px;height:16px;color:var(--muted);pointer-events:none;
+}
+.inbox-list{display:flex;flex-direction:column;gap:8px}
+.inbox-item{
+  display:flex;align-items:flex-start;gap:11px;
+  padding:13px 12px;border-radius:14px;
+  background:var(--panel);border:1px solid var(--line);
+  cursor:pointer;min-height:60px;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+.inbox-item:active{transform:scale(.99)}
+.inbox-avatar{
+  width:42px;height:42px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;
+  background:var(--av,linear-gradient(135deg,#2E7BFF,#8B5CFF));
+}
+.inbox-meta{flex:1;min-width:0}
+.inbox-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.inbox-name{font-size:13px;font-weight:700;display:flex;align-items:center;gap:5px}
+.inbox-name .star{color:var(--gold);font-size:11px}
+.inbox-time{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.inbox-text{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.inbox-channel{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:9.5px;color:var(--cyan);font-weight:700;text-transform:uppercase;
+  font-family:'JetBrains Mono',monospace;letter-spacing:.05em;margin-top:4px;
+}
+.inbox-channel svg{width:9px;height:9px}
+.inbox-unread-dot{
+  width:8px;height:8px;border-radius:50%;background:var(--cyan);
+  box-shadow:0 0 8px var(--cyan);flex-shrink:0;align-self:center;
+}
+
+/* ============ MORE SCREEN ============ */
+.more-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.more-item{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 14px;border-radius:13px;
+  background:var(--panel);border:1px solid var(--line);
+  cursor:pointer;min-height:56px;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border:0;width:100%;text-align:left;font-family:inherit;color:var(--ink);
+}
+.more-item:active{transform:scale(.99)}
+.more-item-ic{
+  width:38px;height:38px;border-radius:11px;
+  background:var(--panel2);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--ink2);
+}
+.more-item-ic svg{width:16px;height:16px}
+.more-item-lbl{flex:1;font-size:13.5px;font-weight:600}
+.more-item-meta{font-size:10.5px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-weight:600}
+.more-item-chev{color:var(--muted);flex-shrink:0}
+.more-item-chev svg{width:14px;height:14px}
+.more-item.danger{color:var(--red)}
+.more-item.danger .more-item-ic{color:var(--red);background:rgba(255,107,107,.1);border-color:rgba(255,107,107,.25)}
+.more-item.cta-pc{
+  background:linear-gradient(120deg,rgba(46,123,255,.12),rgba(139,92,255,.08));
+  border-color:rgba(46,123,255,.30);
+}
+.more-item.cta-pc .more-item-ic{background:var(--grad-core);color:#fff;border-color:transparent}
+
+.more-section-title{
+  font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase;
+  letter-spacing:.12em;font-family:'JetBrains Mono',monospace;
+  margin:14px 4px 8px;
+}
+
+/* ============ BOTTOM NAV (sticky 64px) ============ */
+.bottom-nav{
+  position:fixed;left:0;right:0;bottom:0;z-index:200;
+  height:calc(64px + var(--safe-bot));padding-bottom:var(--safe-bot);
+  display:flex;align-items:stretch;
+  background:rgba(11,15,26,.85);
+  backdrop-filter:blur(18px) saturate(1.4);
+  -webkit-backdrop-filter:blur(18px) saturate(1.4);
+  border-top:1px solid var(--line);
+}
+html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
+.nav-tab{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  cursor:pointer;color:var(--muted);
+  background:transparent;border:0;padding:8px 4px;
+  font-family:inherit;font-size:9.5px;font-weight:600;
+  transition:color .2s;min-height:44px;
+}
+.nav-tab svg{width:21px;height:21px;transition:transform .2s}
+.nav-tab.active{color:var(--cyan)}
+.nav-tab.active svg{transform:translateY(-1px)}
+.nav-tab:active svg{transform:scale(.92)}
+.nav-tab .lbl{font-size:9.5px;letter-spacing:.02em}
+
+/* ============ DRAWER (vacances slide-up) ============ */
+.drawer-bg{
+  position:fixed;inset:0;z-index:300;
+  background:rgba(11,15,26,.55);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  display:none;
+}
+.drawer-bg.show{display:block;animation:fadeIn .2s ease}
+.drawer{
+  position:fixed;left:0;right:0;bottom:-100%;z-index:301;
+  background:var(--bg2);border-top:1px solid var(--line);
+  border-radius:22px 22px 0 0;
+  padding:20px 18px calc(24px + var(--safe-bot));
+  transition:bottom .35s cubic-bezier(.2,.8,.2,1);
+  max-height:90vh;overflow-y:auto;
+}
+.drawer.show{bottom:0}
+.drawer-grip{
+  width:38px;height:4px;border-radius:999px;background:var(--line);
+  margin:-4px auto 14px;
+}
+.drawer-head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px;
+}
+.drawer-head h3{font-size:16px;font-weight:800;letter-spacing:-.01em}
+.drawer-head h3 small{display:block;font-size:11px;color:var(--muted);font-weight:500;margin-top:2px;font-family:'JetBrains Mono',monospace;letter-spacing:.06em}
+.drawer-close{
+  width:36px;height:36px;border-radius:10px;
+  background:var(--panel);border:1px solid var(--line);color:var(--ink2);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+}
+.drawer-close svg{width:14px;height:14px}
+
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field label{font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-family:'JetBrains Mono',monospace}
+.field input,.field textarea,.field select{
+  padding:11px 14px;border-radius:11px;
+  background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+  font-size:13.5px;font-family:inherit;
+  min-height:44px;
+}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,.12)}
+.field textarea{resize:none;min-height:80px;line-height:1.5}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tone-pills{display:flex;gap:7px;flex-wrap:wrap}
+.tone-pill{
+  padding:7px 13px;border-radius:999px;
+  background:var(--panel2);border:1px solid var(--line);color:var(--ink2);
+  font-size:11.5px;font-weight:600;cursor:pointer;
+  font-family:inherit;min-height:32px;
+}
+.tone-pill.on{background:rgba(46,123,255,.16);border-color:var(--blue);color:var(--blue)}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:13px 18px;border-radius:12px;font-size:13.5px;font-weight:700;
+  border:0;cursor:pointer;font-family:inherit;
+  min-height:48px;width:100%;
+}
+.btn-primary{background:var(--grad-core);color:#fff;box-shadow:0 10px 22px -8px rgba(46,123,255,.55)}
+.btn-secondary{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
+.btn:active{transform:scale(.98)}
+.btn svg{width:14px;height:14px}
+.drawer-cta-row{display:flex;gap:10px;margin-top:8px}
+.drawer-cta-row .btn{flex:1}
+
+/* ============ MODAL (module locked + stat) ============ */
+.modal-bg{
+  position:fixed;inset:0;z-index:400;
+  background:rgba(11,15,26,.65);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  display:none;align-items:flex-end;justify-content:center;
+  padding:0;
+}
+.modal-bg.show{display:flex;animation:fadeIn .2s ease}
+.modal{
+  background:var(--bg2);border:1px solid var(--line);border-top-left-radius:22px;border-top-right-radius:22px;
+  width:100%;max-height:90vh;overflow-y:auto;
+  padding:22px 18px calc(20px + var(--safe-bot));
+  position:relative;
+  animation:slideModal .3s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes slideModal{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-grip{
+  width:38px;height:4px;border-radius:999px;background:var(--line);
+  margin:-4px auto 14px;
+}
+.modal-icon{
+  width:54px;height:54px;border-radius:15px;
+  display:flex;align-items:center;justify-content:center;color:#fff;margin-bottom:14px;
+  box-shadow:0 10px 24px -8px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.18);
+}
+.modal-icon svg{width:26px;height:26px}
+.modal-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);
+  margin-bottom:8px;
+}
+.modal-tag .pulse{width:5px;height:5px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.modal h2{font-size:21px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px}
+.modal h2 b{font-weight:800}
+.modal-desc{color:var(--ink2);font-size:13.5px;line-height:1.55;margin-bottom:16px}
+.modal-feats{list-style:none;display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
+.modal-feats li{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink2)}
+.modal-feats li::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--accent,var(--cyan));flex-shrink:0}
+.modal-price{
+  padding:14px;border-radius:13px;background:var(--panel);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;
+}
+.modal-price .l{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.modal-price .v{font-size:21px;font-weight:800;letter-spacing:-.02em;margin-top:2px}
+.modal-price .v small{font-size:11.5px;color:var(--muted);font-weight:500}
+.modal-cta{
+  padding:11px 16px;border-radius:11px;
+  background:var(--grad-core);
+  color:#fff;font-weight:700;font-size:12.5px;border:0;cursor:pointer;
+  min-height:42px;flex-shrink:0;
+}
+.modal-cta:active{transform:scale(.97)}
+.modal-foot-note{font-size:11px;color:var(--muted);text-align:center;margin-top:8px}
+
+/* Stat detail modal */
+.stat-modal-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px}
+.stat-modal-ic{
+  width:46px;height:46px;border-radius:13px;
+  background:linear-gradient(135deg,var(--accent,#2E7BFF),var(--accent2,#8B5CFF));
+  display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;
+  box-shadow:0 8px 18px -6px var(--accent,#2E7BFF);
+}
+.stat-modal-ic svg{width:20px;height:20px}
+.stat-modal-head h2{font-size:18px;font-weight:800;letter-spacing:-.01em;margin-bottom:3px}
+.stat-modal-head p{font-size:12.5px;color:var(--muted);line-height:1.5}
+.stat-big-num{
+  display:flex;align-items:flex-end;gap:12px;padding:12px 0;margin-bottom:14px;border-bottom:1px solid var(--line);
+}
+.stat-big-num .v{font-size:34px;font-weight:800;letter-spacing:-.02em;font-family:'JetBrains Mono',monospace;line-height:1}
+.stat-big-num .v b{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat-big-num .delta{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--lime);font-weight:700;padding-bottom:5px}
+.stat-big-num .delta svg{width:13px;height:13px}
+.bar-chart{display:flex;align-items:flex-end;gap:7px;height:120px;padding:0 4px;margin-bottom:18px}
+.bar{
+  flex:1;background:linear-gradient(180deg,var(--accent,#2E7BFF),var(--accent2,#8B5CFF));
+  border-radius:5px 5px 0 0;position:relative;min-height:4px;
+}
+.bar .lbl{
+  position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);
+  font-size:9.5px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-weight:600;
+}
+.chart-foot{display:flex;justify-content:space-between;align-items:center;margin-top:26px;padding-top:12px;border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+.chart-foot b{color:var(--ink)}
+.tip-bulb{
+  display:flex;gap:10px;padding:12px;
+  background:rgba(245,196,94,.08);border:1px solid rgba(245,196,94,.25);
+  border-radius:12px;margin-top:14px;
+}
+.tip-bulb-ic{
+  width:28px;height:28px;border-radius:8px;
+  background:var(--gold);color:#0F172A;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.tip-bulb-ic svg{width:13px;height:13px}
+.tip-bulb-text{font-size:12.5px;color:var(--ink);line-height:1.45}
+.tip-bulb-text b{color:var(--ink);font-weight:700}
+
+/* ============ ONBOARDING ============ */
+.onboard{
+  position:fixed;inset:0;z-index:600;
+  background:radial-gradient(ellipse 80% 50% at 50% 30%, rgba(46,123,255,.20), transparent 60%),var(--bg);
+  display:none;align-items:center;justify-content:center;padding:24px 18px;
+}
+.onboard.show{display:flex;animation:fadeIn .35s ease}
+.onboard-card{
+  width:100%;max-width:340px;
+  background:var(--bg2);border:1px solid var(--line);border-radius:24px;
+  padding:30px 22px 22px;text-align:center;
+  box-shadow:0 30px 70px -16px rgba(0,0,0,.6);
+  position:relative;overflow:hidden;
+}
+.onboard-card::before{
+  content:"";position:absolute;top:-30%;left:-10%;
+  width:240px;height:240px;border-radius:50%;
+  background:radial-gradient(circle,rgba(139,92,255,.16),transparent 70%);
+  pointer-events:none;
+}
+.ob-step{display:none;animation:fadeSlide .4s ease;position:relative;z-index:1}
+.ob-step.on{display:block}
+.ob-icon{
+  width:68px;height:68px;border-radius:18px;
+  background:var(--grad-core);color:#fff;
+  display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
+  box-shadow:0 12px 28px -8px rgba(46,123,255,.5),inset 0 1px 0 rgba(255,255,255,.18);
+}
+.ob-icon svg{width:32px;height:32px}
+.ob-step h2{font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px;line-height:1.2}
+.ob-step h2 b{background:var(--grad-core);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ob-step p{font-size:13.5px;color:var(--ink2);line-height:1.55}
+.ob-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:22px;position:relative;z-index:1}
+.ob-dots{display:flex;gap:6px}
+.ob-dot{width:7px;height:7px;border-radius:50%;background:var(--line);transition:all .25s}
+.ob-dot.on{background:var(--cyan);width:22px;border-radius:999px;box-shadow:0 0 8px rgba(0,229,255,.45)}
+.ob-foot .btn{flex:0 0 auto;width:auto;min-width:110px;padding:10px 16px;min-height:42px;font-size:12.5px}
+.ob-skip{
+  position:absolute;top:14px;right:14px;
+  background:transparent;border:0;color:var(--muted);cursor:pointer;font-size:11.5px;font-family:inherit;
+  padding:6px 8px;
+}
+
+/* ============ TOAST ============ */
+.toast{
+  position:fixed;left:50%;bottom:calc(80px + var(--safe-bot));
+  transform:translateX(-50%) translateY(20px);
+  background:rgba(11,15,26,.94);border:1px solid var(--line);
+  padding:11px 16px;border-radius:12px;
+  font-size:12.5px;color:var(--ink);
+  display:flex;align-items:center;gap:8px;
+  box-shadow:0 18px 40px -10px rgba(0,0,0,.5);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  opacity:0;visibility:hidden;transition:all .25s; z-index:500;
+  max-width:calc(100% - 32px);
+}
+.toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+.toast svg{width:14px;height:14px;color:var(--lime);flex-shrink:0}
+
+/* ============ Tiny phone ≤ 360 ============ */
+@media(max-width:360px){
+  .modgrid{gap:9px}
+  .mod{padding:14px 8px 12px;min-height:140px}
+  .mod-ic{width:48px;height:48px;border-radius:13px}
+  .mod-ic svg{width:24px;height:24px}
+  .stat{flex-basis:84%}
+  body{font-size:14.5px}
+  .screen-title h2{font-size:20px}
+}
+
+/* ============ Larger ≥ 480 (tablet portrait) ============ */
+@media(min-width:481px){
+  .screen{max-width:480px;margin:0 auto}
+  .topbar{max-width:100vw}
+  .bottom-nav{max-width:100vw}
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== BOOT SCREEN ===================== -->
+<div id="boot">
+  <div class="boot-logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+    </svg>
+  </div>
+  <div class="boot-title">N E X U S<span>// MOBILE</span></div>
+  <div class="boot-bar"></div>
+  <div class="boot-status"><span class="live"></span>Initialisation</div>
+</div>
+
+<!-- ===================== TOPBAR ===================== -->
+<header class="topbar" id="topbar">
+  <div class="tb-left">
+    <button class="tb-logo" id="tbLogo" aria-label="Hub">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
+      </svg>
+    </button>
+    <div class="tb-title">
+      <b id="tbTitle">Nexus</b>
+      <small id="tbSub">Hub des modules</small>
+    </div>
+  </div>
+  <div class="tb-right">
+    <button class="tb-btn" id="tbNotif" aria-label="Notifications">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="badge">3</span>
+    </button>
+    <button class="tb-btn" id="tbMenu" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ===================== HUB SCREEN ===================== -->
+<section class="screen" id="screen-hub">
+  <div class="hub-welcome">
+    <div class="eye"><span class="dot"></span>Hola Carlos · 8 modules · 1 actif</div>
+    <h1>Tes modules Nexus.</h1>
+    <p>Touche un module pour l'ouvrir. Les modules verrouillés s'activent en 1 clic.</p>
+  </div>
+
+  <div class="modgrid" id="modgrid">
+    <!-- Core (active) -->
+    <div class="mod core active" data-key="core" data-href="core">
+      <div class="mod-ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+        </svg>
+      </div>
+      <div class="mod-name">Core</div>
+      <div class="mod-tag">● Actif</div>
+    </div>
+
+    <div class="mod ledger locked" data-key="ledger">
+      <span class="lock-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Bientôt</span>
+      <div class="mod-ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <div class="mod-name">Ledger</div>
+      <div class="mod-price">19 €/mois</div>
+    </div>
+
+    <div class="mod rh locked" data-key="rh">
+      <span class="lock-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Bientôt</span>
+      <div class="mod-ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="mod-name">RH</div>
+      <div class="mod-price">24 €/mois</div>
+    </div>
+
+    <div class="mod voice locked" data-key="voice">
+      <span class="lock-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Bientôt</span>
+      <div class="mod-ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </div>
+      <div class="mod-name">Voice</div>
+      <div class="mod-price">29 €/mois</div>
+    </div>
+
+    <div class="mod sales locked is-new" data-key="sales">
+      <span class="new-pill">★ Nouveau</span>
+      <span class="lock-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Bientôt</span>
+      <div class="mod-ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      </div>
+      <div class="mod-name">Sales</div>
+      <div class="mod-price">19 €/mois</div>
+    </div>
+
+    <div class="mod calendar locked" data-key="calendar">
+      <span class="lock-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Bientôt</span>
+      <div class="mod-ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <div class="mod-name">Calendar</div>
+      <div class="mod-price">9 €/mois</div>
+    </div>
+
+    <div class="mod boost locked" data-key="boost">
+      <span class="lock-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Bientôt</span>
+      <div class="mod-ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8v18l-18-8v-2z"/><line x1="11.6" y1="11.6" x2="11.6" y2="20"/></svg>
+      </div>
+      <div class="mod-name">Boost</div>
+      <div class="mod-price">14 €/mois</div>
+    </div>
+
+    <div class="mod insights locked" data-key="insights">
+      <span class="lock-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Bientôt</span>
+      <div class="mod-ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </div>
+      <div class="mod-name">Insights</div>
+      <div class="mod-price">12 €/mois</div>
+    </div>
+  </div>
+
+  <button class="hub-cta" id="hubCtaCore">
+    Entrer dans Nexus Core
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+  </button>
+</section>
+
+<!-- ===================== CORE SCREEN ===================== -->
+<section class="screen" id="screen-core">
+  <!-- Company band -->
+  <div class="company-band">
+    <div class="company-logo">🥖</div>
+    <div class="company-info">
+      <b>Panadería Don Carlos</b>
+      <small>Las Condes · Santiago, CL</small>
+    </div>
+  </div>
+
+  <!-- Hero banner -->
+  <div class="hero-banner">
+    <div class="hero-banner-ic">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    </div>
+    <div class="hero-banner-text">
+      <b>Bonne journée, Carlos.</b> <span class="hl">Grâce à Nexus</span>, tu as <b>+28 % de ventes</b> cette semaine et <b>2 clients perdus récupérés</b>.
+    </div>
+  </div>
+
+  <!-- Stats horizontal swipe -->
+  <div class="sect-head"><h3><span class="star">★</span> Top du jour</h3><a id="seeAllStats">Voir tout →</a></div>
+  <div class="stats-track" id="statsTrack">
+    <article class="stat s1" data-stat="recovered">
+      <div class="stat-head">
+        <div class="stat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M21 11l-4-4-4 4M17 7v9"/></svg></div>
+        <span class="stat-tag">★ Top</span>
+      </div>
+      <div class="stat-headline"><b>5</b> clients perdus récupérés cette semaine.</div>
+      <div class="stat-detail">14 % de ta base inactive, réveillée par Nexus.</div>
+      <span class="stat-cta">Détail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+    </article>
+    <article class="stat s2" data-stat="newclients">
+      <div class="stat-head">
+        <div class="stat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg></div>
+        <span class="stat-tag">★ Top</span>
+      </div>
+      <div class="stat-headline"><b>3</b> nouveaux clients aujourd'hui.</div>
+      <div class="stat-detail">Tous via WhatsApp, conversion 38 %.</div>
+      <span class="stat-cta">Détail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+    </article>
+    <article class="stat s3" data-stat="sales">
+      <div class="stat-head">
+        <div class="stat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div>
+        <span class="stat-tag">★ Top</span>
+      </div>
+      <div class="stat-headline"><b>10</b> ventes — meilleur lundi du mois.</div>
+      <div class="stat-detail">Panier moyen $19.30 · top empanadas.</div>
+      <span class="stat-cta">Détail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+    </article>
+    <article class="stat s4" data-stat="response">
+      <div class="stat-head">
+        <div class="stat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <span class="stat-tag">Bonus</span>
+      </div>
+      <div class="stat-headline">L'IA répond en <b>1m12s</b> en moyenne.</div>
+      <div class="stat-detail">38 s plus rapide que la semaine dernière.</div>
+      <span class="stat-cta">Détail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+    </article>
+  </div>
+
+  <!-- Conseils Nexus carousel -->
+  <section class="advice">
+    <div class="advice-head">
+      <div class="advice-title">
+        <div class="advice-title-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h4M9 11V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6M9 11h6m0 0h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4m0-9v9m-6 0h6"/></svg></div>
+        <div>
+          <b>Conseil de Nexus</b>
+          <small>MAJ il y a 2 h · IA</small>
+        </div>
+      </div>
+      <span class="advice-counter" id="adviceCounter">1 / 5</span>
+    </div>
+    <div class="advice-body" id="adviceBody">
+      <div class="advice-card on">
+        <div class="advice-context"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Demain · Anniversaire client</div>
+        <p class="advice-text">Demain c'est l'anniversaire de <b>Raviella Mendoza</b>. Lui envoyer un <b>code promo −15 %</b> sur ses cookies préférés ?</p>
+        <div class="advice-actions">
+          <button class="advice-act primary" data-toast="Message envoyé à Raviella avec code promo −15 %.">Envoyer maintenant</button>
+          <button class="advice-act" data-toast="Programmé pour 9 h demain matin.">Programmer 9 h</button>
+          <button class="advice-act" data-toast="Conseil ignoré pour cette fois.">Pas cette fois</button>
+        </div>
+      </div>
+      <div class="advice-card">
+        <div class="advice-context"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Maintenant · 5 chats en attente</div>
+        <p class="advice-text">Répondre aux <b>5 chats</b> en attente ? L'IA a déjà préparé une réponse pour 4 d'entre eux.</p>
+        <div class="advice-actions">
+          <button class="advice-act primary" data-go="messages">Voir les 5 chats</button>
+          <button class="advice-act" data-toast="5 réponses validées et envoyées.">Tout valider</button>
+          <button class="advice-act" data-toast="On en reparle plus tard.">Plus tard</button>
+        </div>
+      </div>
+      <div class="advice-card">
+        <div class="advice-context"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18l-2 13H5L3 7z"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>Vendredi · Pic d'activité</div>
+        <p class="advice-text"><b>Vendredi 19h–21h</b> est ton créneau de pic. Programmer une story Insta à <b>18 h</b> ? +15 % de commandes.</p>
+        <div class="advice-actions">
+          <button class="advice-act primary" data-toast="Story Instagram programmée vendredi 18 h.">Programmer la story</button>
+          <button class="advice-act" data-go="stats">Voir l'historique</button>
+          <button class="advice-act" data-toast="Conseil reporté.">Pas maintenant</button>
+        </div>
+      </div>
+      <div class="advice-card">
+        <div class="advice-context"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg>Météo · Pluie samedi</div>
+        <p class="advice-text">Il va pleuvoir samedi. <b>Tes ventes de soupes augmentent de 40 %</b> les jours de pluie. Activer la <b>promo soupe maison</b> ?</p>
+        <div class="advice-actions">
+          <button class="advice-act primary" data-toast="Promo soupe activée pour samedi.">Activer la promo</button>
+          <button class="advice-act" data-toast="Détails enregistrés dans l'agenda IA.">Plus de détails</button>
+        </div>
+      </div>
+      <div class="advice-card">
+        <div class="advice-context"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Question récurrente · 3 clients</div>
+        <p class="advice-text">3 clients ont demandé : <b>« Vous livrez à Providencia ? »</b>. L'ajouter au <b>profil Nexus</b> pour réponse instantanée ?</p>
+        <div class="advice-actions">
+          <button class="advice-act primary" data-toast="Profil Nexus mis à jour : livraisons Providencia.">Modifier le profil</button>
+          <button class="advice-act" data-go="messages">Voir les 3 messages</button>
+        </div>
+      </div>
+    </div>
+    <div class="advice-dots" id="adviceDots">
+      <button class="adv-dot on" data-i="0"></button>
+      <button class="adv-dot" data-i="1"></button>
+      <button class="adv-dot" data-i="2"></button>
+      <button class="adv-dot" data-i="3"></button>
+      <button class="adv-dot" data-i="4"></button>
+    </div>
+  </section>
+
+  <!-- Brief audio compact -->
+  <div class="brief-card audio">
+    <div class="brief-head">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>Brief audio</h3>
+      <div class="mode-tabs" data-target="audio">
+        <button class="mode-tab on" data-mode="day">Jour</button>
+        <button class="mode-tab" data-mode="week">Semaine</button>
+      </div>
+    </div>
+    <div class="audio-body">
+      <button class="voice-mic" id="voiceMic" aria-label="Lancer le brief">
+        <svg id="voiceIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      </button>
+      <div class="audio-meta">
+        <b id="audioTitle">Récap du lundi matin</b>
+        <small id="audioDuration">2 min 18 s · prêt à écouter</small>
+        <div class="audio-progress"><div class="audio-progress-bar" id="audioBar"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Brief texte -->
+  <div class="brief-card text">
+    <div class="brief-head">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Brief écrit</h3>
+      <div class="mode-tabs" data-target="text">
+        <button class="mode-tab on" data-mode="day">Jour</button>
+        <button class="mode-tab" data-mode="week">Semaine</button>
+      </div>
+    </div>
+    <div class="text-body" id="textBody">
+      <div class="text-content" data-mode="day">
+        <p><b>Bonjour Carlos,</b> voici ton récap du jour.</p>
+        <p>Tu as fait <b>10 ventes</b> aujourd'hui — meilleur lundi du mois. Top produit : empanadas (5 ventes).</p>
+        <p>L'IA a répondu à <b>21 messages</b>, 19 sans ton intervention. <b>3 nouveaux clients</b> via WhatsApp.</p>
+        <p>Demain c'est l'anniversaire de Raviella Mendoza. Et il va pleuvoir samedi : promo soupe prête à activer.</p>
+        <p><b>Bonne soirée. Tu peux fermer la boutique tranquille.</b></p>
+      </div>
+      <div class="text-content" data-mode="week" style="display:none">
+        <p><b>Récap de ta semaine, Carlos.</b></p>
+        <p>Cette semaine : <b>+28 % de ventes</b> et <b>5 clients perdus récupérés</b>. Excellent.</p>
+        <p>Agenda : 3 RDV livraison cette semaine et anniv Raviella demain.</p>
+        <p>L'IA a géré <b>147 conversations</b>, 94 % en autonomie. Tu as économisé environ 6 h.</p>
+        <p>Pousser empanadas vendredi soir, activer promo soupe samedi (pluie), compléter profil Providencia.</p>
+        <p><b>Bon début de semaine. On garde le rythme.</b></p>
+      </div>
+    </div>
+    <button class="text-cta" id="textExpand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      Lire en entier
+    </button>
+  </div>
+
+  <!-- Messages preview -->
+  <div class="preview-section">
+    <div class="sect-head" style="margin:0 0 12px"><h3><span class="star">★</span> Messages importants</h3><a data-go="messages">Voir tout →</a></div>
+    <div class="msg-list">
+      <div class="msg" data-go="messages">
+        <div class="msg-avatar" style="--av:linear-gradient(135deg,#FF6B9D,#F5C45E)">MR</div>
+        <div class="msg-meta">
+          <div class="msg-name">María Rodríguez <span class="star">★</span></div>
+          <div class="msg-text">Hola Carlos ! Je veux confirmer ma commande de 12 empanadas pour samedi…</div>
+        </div>
+        <div class="msg-time">14:32</div>
+        <div class="msg-unread"></div>
+      </div>
+      <div class="msg" data-go="messages">
+        <div class="msg-avatar" style="--av:linear-gradient(135deg,#2E7BFF,#00E5FF)">DS</div>
+        <div class="msg-meta">
+          <div class="msg-name">Diego Salazar <span class="star">★</span></div>
+          <div class="msg-text">Tu fais des livraisons à Providencia ? Je voudrais commander pour samedi…</div>
+        </div>
+        <div class="msg-time">13:08</div>
+        <div class="msg-unread"></div>
+      </div>
+      <div class="msg" data-go="messages">
+        <div class="msg-avatar" style="--av:linear-gradient(135deg,#1EFF8E,#00E5FF)">AC</div>
+        <div class="msg-meta">
+          <div class="msg-name">Ana Castillo <span class="star">★</span></div>
+          <div class="msg-text">Merci pour les bolos d'anniversaire, ils étaient parfaits 🎂</div>
+        </div>
+        <div class="msg-time">11:47</div>
+      </div>
+      <div class="msg" data-go="messages">
+        <div class="msg-avatar" style="--av:linear-gradient(135deg,#8B5CFF,#FF6B9D)">JC</div>
+        <div class="msg-meta">
+          <div class="msg-name">Javier Carrasco <span class="star">★</span></div>
+          <div class="msg-text">Possible de réserver le pavé entier pour 25 personnes mercredi prochain ?</div>
+        </div>
+        <div class="msg-time">10:22</div>
+      </div>
+      <div class="msg" data-go="messages">
+        <div class="msg-avatar" style="--av:linear-gradient(135deg,#F5C45E,#1EFF8E)">RM</div>
+        <div class="msg-meta">
+          <div class="msg-name">Raviella Mendoza <span class="star">★</span></div>
+          <div class="msg-text">Vous avez encore les cookies aux figues ? Je passe demain matin…</div>
+        </div>
+        <div class="msg-time">09:14</div>
+      </div>
+      <div class="msg blur">
+        <div class="msg-avatar" style="--av:linear-gradient(135deg,#7A85A0,#C5CDE0)">??</div>
+        <div class="msg-meta">
+          <div class="msg-name">XXXX XXXXX</div>
+          <div class="msg-text">XXXXXX XX XXX XXXXX XX XXXXXX XX XXXX…</div>
+        </div>
+        <div class="msg-time">08:32</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== STATS SCREEN ===================== -->
+<section class="screen" id="screen-stats">
+  <div class="screen-title"><h2>Statistiques</h2><small>Cette semaine</small></div>
+
+  <div class="stats-grid">
+    <article class="stat s1" data-stat="recovered">
+      <div class="stat-head">
+        <div class="stat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M21 11l-4-4-4 4M17 7v9"/></svg></div>
+        <span class="stat-tag">★ Récupérés</span>
+      </div>
+      <div class="stat-headline"><b>5</b> clients perdus récupérés.</div>
+      <div class="stat-detail">14 % de ta base inactive cette semaine.</div>
+      <div class="mini-chart" data-bars="0,1,1,0,2,1,0"></div>
+    </article>
+    <article class="stat s2" data-stat="newclients">
+      <div class="stat-head">
+        <div class="stat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg></div>
+        <span class="stat-tag">★ Nouveaux</span>
+      </div>
+      <div class="stat-headline"><b>3</b> nouveaux clients aujourd'hui.</div>
+      <div class="stat-detail">Tous via WhatsApp · conversion 38 %.</div>
+      <div class="mini-chart" data-bars="1,0,1,0,0,1,0"></div>
+    </article>
+    <article class="stat s3" data-stat="sales">
+      <div class="stat-head">
+        <div class="stat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div>
+        <span class="stat-tag">★ Ventes</span>
+      </div>
+      <div class="stat-headline"><b>10</b> ventes aujourd'hui.</div>
+      <div class="stat-detail">Meilleur lundi du mois · panier moyen $19.30.</div>
+      <div class="mini-chart" data-bars="10,7,9,8,14,12,6"></div>
+    </article>
+    <article class="stat s4" data-stat="response">
+      <div class="stat-head">
+        <div class="stat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <span class="stat-tag">Bonus IA</span>
+      </div>
+      <div class="stat-headline">Temps réponse <b>1m12s</b>.</div>
+      <div class="stat-detail">38 s plus rapide que la semaine dernière.</div>
+      <div class="mini-chart" data-bars="80,75,90,70,65,72,60"></div>
+    </article>
+  </div>
+
+  <div class="more-section-title">Détails IA</div>
+  <button class="more-item" data-toast="L'IA a géré 147 conversations cette semaine, 94 % sans intervention.">
+    <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg></span>
+    <span class="more-item-lbl">147 conversations IA</span>
+    <span class="more-item-meta">94 %</span>
+    <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+  </button>
+  <button class="more-item" data-toast="Tu as économisé environ 6 h cette semaine grâce à l'IA.">
+    <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+    <span class="more-item-lbl">Temps économisé</span>
+    <span class="more-item-meta">~6 h</span>
+    <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+  </button>
+  <button class="more-item" data-toast="CA hebdo : $1,287. Objectif 30 jours : +12 %.">
+    <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+    <span class="more-item-lbl">CA semaine</span>
+    <span class="more-item-meta">$1 287</span>
+    <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+  </button>
+</section>
+
+<!-- ===================== MESSAGES SCREEN ===================== -->
+<section class="screen" id="screen-messages">
+  <div class="screen-title"><h2>Messages</h2><small>10 conversations</small></div>
+
+  <div class="inbox-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="search" placeholder="Rechercher un client, un produit..." id="inboxSearch">
+  </div>
+
+  <div class="inbox-list" id="inboxList">
+    <!-- Will be filled via JS -->
+  </div>
+</section>
+
+<!-- ===================== MORE SCREEN ===================== -->
+<section class="screen" id="screen-more">
+  <div class="screen-title"><h2>Plus</h2><small>Carlos Romero · CR</small></div>
+
+  <div class="more-section-title">Compte</div>
+  <div class="more-list">
+    <button class="more-item" data-toast="Profil entreprise · disponible en M2.">
+      <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+      <span class="more-item-lbl">Profil entreprise</span>
+      <span class="more-item-meta">80 %</span>
+      <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </button>
+    <button class="more-item" data-toast="CRM 147 clients · vue détaillée bientôt sur mobile.">
+      <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+      <span class="more-item-lbl">Clients CRM</span>
+      <span class="more-item-meta">147</span>
+      <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </button>
+    <button class="more-item" data-toast="Marketing · campagnes WhatsApp + Insta dispo en M2.">
+      <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8v18l-18-8v-2z"/></svg></span>
+      <span class="more-item-lbl">Marketing & campagnes</span>
+      <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </button>
+    <button class="more-item" data-toast="Tips IA · 12 conseils actifs cette semaine.">
+      <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h4M9 11V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6M9 11h6m0 0h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4m0-9v9m-6 0h6"/></svg></span>
+      <span class="more-item-lbl">Tips IA</span>
+      <span class="more-item-meta">12</span>
+      <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </button>
+  </div>
+
+  <div class="more-section-title">Outils</div>
+  <div class="more-list">
+    <button class="more-item" id="openVacances">
+      <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22a8 8 0 0 1 16 0"/><circle cx="10" cy="10" r="4"/><line x1="20" y1="2" x2="20" y2="22"/></svg></span>
+      <span class="more-item-lbl">Mode vacances</span>
+      <span class="more-item-meta" id="vacStatus">Inactif</span>
+      <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </button>
+    <button class="more-item" data-toast="Tutoriel relancé. 4 étapes.">
+      <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg></span>
+      <span class="more-item-lbl">Revoir le tutoriel</span>
+      <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </button>
+    <button class="more-item" id="themeToggleMore">
+      <span class="more-item-ic" id="themeIcMore"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span>
+      <span class="more-item-lbl">Thème</span>
+      <span class="more-item-meta" id="themeLabelMore">Sombre</span>
+      <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </button>
+  </div>
+
+  <div class="more-section-title">Réglages</div>
+  <div class="more-list">
+    <button class="more-item" data-toast="Paramètres avancés disponibles dans la version PC.">
+      <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+      <span class="more-item-lbl">Paramètres</span>
+      <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </button>
+    <button class="more-item" data-toast="Paiement géré dans la version PC pour l'instant.">
+      <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>
+      <span class="more-item-lbl">Méthode de paiement</span>
+      <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </button>
+    <button class="more-item" data-toast="🆘 SAV ouvert — un humain te répond sous 2 h.">
+      <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>
+      <span class="more-item-lbl">SAV — Aide humaine</span>
+      <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </button>
+  </div>
+
+  <div class="more-section-title">Bureau</div>
+  <div class="more-list">
+    <a class="more-item cta-pc" href="nexus-hub.html">
+      <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
+      <span class="more-item-lbl">Voir la version PC</span>
+      <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </a>
+  </div>
+
+  <div style="text-align:center;font-size:11px;color:var(--muted);margin:18px 0 6px;font-family:'JetBrains Mono',monospace;letter-spacing:.06em">
+    Nexus Mobile · v0.9 démo · 0B0F1A
+  </div>
+</section>
+
+<!-- ===================== BOTTOM NAV ===================== -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="nav-tab" data-view="hub">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    <span class="lbl">Hub</span>
+  </button>
+  <button class="nav-tab active" data-view="core">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+    <span class="lbl">Core</span>
+  </button>
+  <button class="nav-tab" data-view="stats">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <span class="lbl">Stats</span>
+  </button>
+  <button class="nav-tab" data-view="messages">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span class="lbl">Messages</span>
+  </button>
+  <button class="nav-tab" data-view="more">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+    <span class="lbl">Plus</span>
+  </button>
+</nav>
+
+<!-- ===================== DRAWER (vacances) ===================== -->
+<div class="drawer-bg" id="drawerBg"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-label="Mode vacances">
+  <div class="drawer-grip"></div>
+  <div class="drawer-head">
+    <h3>Mode vacances<small>L'IA gère pendant ton absence</small></h3>
+    <button class="drawer-close" id="drawerClose" aria-label="Fermer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="field-row">
+    <div class="field">
+      <label>Début</label>
+      <input type="datetime-local" id="vacStart" value="2026-05-10T18:00">
+    </div>
+    <div class="field">
+      <label>Fin</label>
+      <input type="datetime-local" id="vacEnd" value="2026-05-17T09:00">
+    </div>
+  </div>
+  <div class="field">
+    <label>Ton des réponses</label>
+    <div class="tone-pills" id="tonePills">
+      <button class="tone-pill on" data-tone="warm">Chaleureux</button>
+      <button class="tone-pill" data-tone="pro">Professionnel</button>
+      <button class="tone-pill" data-tone="friendly">Amical</button>
+      <button class="tone-pill" data-tone="short">Court & direct</button>
+    </div>
+  </div>
+  <div class="field">
+    <label>Message aux clients</label>
+    <textarea id="vacMsg">Hola ! La boulangerie est en pause jusqu'au 17 mai. Pour les commandes urgentes, je note ta demande et Carlos te recontacte dès le retour. Gracias por tu paciencia 🥖</textarea>
+  </div>
+  <div class="field">
+    <label>Permissions IA</label>
+    <div class="tone-pills" id="permPills">
+      <button class="tone-pill on" type="button">Répondre questions</button>
+      <button class="tone-pill on" type="button">Commandes urgentes</button>
+      <button class="tone-pill" type="button">Confirmer livraisons</button>
+      <button class="tone-pill" type="button">Promos auto</button>
+    </div>
+  </div>
+  <div class="drawer-cta-row">
+    <button class="btn btn-secondary" id="vacCancel">Annuler</button>
+    <button class="btn btn-primary" id="vacActivate">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Activer
+    </button>
+  </div>
+</aside>
+
+<!-- ===================== MODAL (module locked) ===================== -->
+<div class="modal-bg" id="moduleModalBg">
+  <div class="modal" role="dialog">
+    <div class="modal-grip"></div>
+    <div class="modal-icon" id="mmIcon"></div>
+    <div class="modal-tag"><span class="pulse"></span><span id="mmTag">Phase 2</span></div>
+    <h2 id="mmTitle"></h2>
+    <p class="modal-desc" id="mmDesc"></p>
+    <ul class="modal-feats" id="mmFeats"></ul>
+    <div class="modal-price">
+      <div>
+        <div class="l">À partir de</div>
+        <div class="v" id="mmPrice"></div>
+      </div>
+      <button class="modal-cta" id="mmCta">Me notifier</button>
+    </div>
+    <div class="modal-foot-note">Activable en 1 clic dans Nexus Core</div>
+    <button class="btn btn-secondary" id="mmClose" style="margin-top:12px">Fermer</button>
+  </div>
+</div>
+
+<!-- ===================== MODAL (stat detail) ===================== -->
+<div class="modal-bg" id="statModalBg">
+  <div class="modal" role="dialog">
+    <div class="modal-grip"></div>
+    <div class="stat-modal-head">
+      <div class="stat-modal-ic" id="smIc"></div>
+      <div>
+        <h2 id="smTitle"></h2>
+        <p id="smDesc"></p>
+      </div>
+    </div>
+    <div class="stat-big-num">
+      <div class="v"><b id="smValue"></b></div>
+      <div class="delta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        <span id="smDelta"></span>
+      </div>
+    </div>
+    <div class="bar-chart" id="smChart"></div>
+    <div class="chart-foot"><span id="smFootL"></span><span id="smFootR"></span></div>
+    <div class="tip-bulb">
+      <div class="tip-bulb-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6"/><path d="M12 17v4"/><path d="M12 3a7 7 0 0 0-4 12.74V17h8v-1.26A7 7 0 0 0 12 3z"/></svg></div>
+      <div class="tip-bulb-text" id="smTip"></div>
+    </div>
+    <button class="btn btn-secondary" id="smClose" style="margin-top:14px">Fermer</button>
+  </div>
+</div>
+
+<!-- ===================== ONBOARDING ===================== -->
+<div class="onboard" id="onboard">
+  <div class="onboard-card">
+    <button class="ob-skip" id="obSkip">Passer →</button>
+    <div class="ob-step on" data-step="0">
+      <div class="ob-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+      </div>
+      <h2>Bienvenue sur <b>Nexus</b></h2>
+      <p>Le centre de contrôle de ton business, dans ta poche. WhatsApp, CRM, IA — tout au même endroit.</p>
+    </div>
+    <div class="ob-step" data-step="1">
+      <div class="ob-icon" style="background:linear-gradient(135deg,#1EFF8E,#00E5FF)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </div>
+      <h2>Tes <b>3 chiffres clés</b> du jour</h2>
+      <p>Nexus te montre ce qui compte vraiment. Touche une stat pour voir le détail.</p>
+    </div>
+    <div class="ob-step" data-step="2">
+      <div class="ob-icon" style="background:linear-gradient(135deg,#8B5CFF,#FF6B9D)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h4M9 11V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6M9 11h6m0 0h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4m0-9v9m-6 0h6"/></svg>
+      </div>
+      <h2>Les <b>conseils Nexus</b></h2>
+      <p>Anniversaire client, météo, pic d'activité… Nexus te dit quoi faire, tu valides en un clic.</p>
+    </div>
+    <div class="ob-step" data-step="3">
+      <div class="ob-icon" style="background:linear-gradient(135deg,#F5C45E,#FF7B7B)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      </div>
+      <h2>Ton <b>brief audio</b></h2>
+      <p>Écoute ton récap en voiture, lis-le quand tu veux. Ton co-pilote IA.</p>
+    </div>
+    <div class="ob-foot">
+      <div class="ob-dots" id="obDots">
+        <span class="ob-dot on"></span><span class="ob-dot"></span><span class="ob-dot"></span><span class="ob-dot"></span>
+      </div>
+      <button class="btn btn-primary" id="obNext">
+        Suivant
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== TOAST ===================== -->
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  <span id="toastMsg">Action effectuée.</span>
+</div>
+
+<script>
+/* ============================================================
+   NEXUS MOBILE — JS (router + state + interactions)
+   ============================================================ */
+(() => {
+  'use strict';
+  const STORE_KEY = 'nexus_mobile_state_v1';
+  const THEME_KEY = 'nexus_mobile_theme';
+  const VIEWS = ['hub','core','stats','messages','more'];
+
+  // ---------- State ----------
+  const defaults = { onboarded:false, view:'core', vacances:false };
+  let state = { ...defaults };
+  try { const raw = localStorage.getItem(STORE_KEY); if (raw) state = { ...defaults, ...JSON.parse(raw) }; } catch(e){}
+  const saveState = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch(e){} };
+
+  // ---------- Theme ----------
+  const applyTheme = (theme) => {
+    if (theme === 'light') document.documentElement.setAttribute('data-theme','light');
+    else document.documentElement.removeAttribute('data-theme');
+    const lblEl = document.getElementById('themeLabelMore');
+    if (lblEl) lblEl.textContent = (theme === 'light' ? 'Clair' : 'Sombre');
+  };
+  applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
+
+  const toggleTheme = () => {
+    const cur = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    const nxt = cur === 'light' ? 'dark' : 'light';
+    localStorage.setItem(THEME_KEY, nxt);
+    applyTheme(nxt);
+    showToast('Thème ' + (nxt === 'light' ? 'clair' : 'sombre') + ' activé.');
+  };
+  document.getElementById('themeToggleMore').addEventListener('click', toggleTheme);
+
+  // ---------- Boot ----------
+  const boot = document.getElementById('boot');
+  setTimeout(() => {
+    boot.classList.add('gone');
+    if (!state.onboarded) showOnboarding();
+  }, 1500);
+
+  // ---------- Toast ----------
+  const toast = document.getElementById('toast');
+  const toastMsg = document.getElementById('toastMsg');
+  let toastT;
+  function showToast(msg){
+    toastMsg.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(() => toast.classList.remove('show'), 2400);
+  }
+
+  // ---------- Router ----------
+  const TITLES = {
+    hub:      { title:'Nexus',       sub:'Hub des modules' },
+    core:     { title:'Nexus Core',  sub:'Accueil · Don Carlos' },
+    stats:    { title:'Statistiques',sub:'Cette semaine' },
+    messages: { title:'Messages',    sub:'10 conversations' },
+    more:     { title:'Plus',        sub:'Carlos Romero · CR' },
+  };
+  function navigate(view){
+    if (!VIEWS.includes(view)) view = 'core';
+    state.view = view; saveState();
+    if (location.hash !== '#/'+view) location.hash = '#/'+view;
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+    document.getElementById('screen-' + view).classList.add('on');
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.view === view));
+    const t = TITLES[view];
+    document.getElementById('tbTitle').textContent = t.title;
+    document.getElementById('tbSub').textContent = t.sub;
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+  function routeFromHash(){
+    const raw = (location.hash || '').replace('#/','');
+    navigate(VIEWS.includes(raw) ? raw : (state.view || 'core'));
+  }
+  window.addEventListener('hashchange', routeFromHash);
+
+  // Bottom nav
+  document.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.addEventListener('click', () => navigate(tab.dataset.view));
+  });
+
+  // Topbar logo → hub
+  document.getElementById('tbLogo').addEventListener('click', () => navigate('hub'));
+  // Topbar notif
+  document.getElementById('tbNotif').addEventListener('click', () => showToast('3 nouvelles notifications · centre dispo en M2.'));
+  // Topbar menu → more
+  document.getElementById('tbMenu').addEventListener('click', () => navigate('more'));
+
+  // Hub CTA → core
+  document.getElementById('hubCtaCore').addEventListener('click', () => navigate('core'));
+
+  // ---------- Hub modules ----------
+  document.querySelectorAll('.mod').forEach(m => {
+    m.addEventListener('click', () => {
+      const key = m.dataset.key;
+      if (m.classList.contains('active')) { navigate('core'); return; }
+      openModuleModal(key);
+    });
+  });
+
+  // ---------- Module modal ----------
+  const CATALOG = {
+    ledger:   { title:'Nexus <b>Ledger</b>', tag:'Finance · Bientôt', desc:'Le compte de résultat de ton business, en live. Revenus, charges, marge nette, projections — sans Excel.', feats:['Revenus & dépenses synchronisés','Marge nette & cashflow projeté','Paiements 1 clic','Export comptable mensuel'], price:'19 €', acc:['#1EFF8E','#00E5FF'], ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>' },
+    rh:       { title:'Nexus <b>RH</b>', tag:'Équipe · Bientôt', desc:'Gestion humaine simplifiée : équipe, planning, paie, congés. Pour le patron qui passe à l\'échelle.', feats:['Fiches équipe & contrats','Planning & pointages','Paie mensuelle simplifiée','Onboarding nouveau collaborateur'], price:'24 €', acc:['#F5C45E','#FF7B7B'], ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
+    voice:    { title:'Nexus <b>Voice</b>', tag:'Agent vocal · Bientôt', desc:'Un agent qui répond au téléphone à ta place, en espagnol natif. Prend les RDV, qualifie, te pousse le résumé.', feats:['Voix naturelle ES, FR, EN','Prise de RDV automatique','Résumé d\'appel envoyé','Numéro dédié inclus'], price:'29 €', acc:['#8B5CFF','#FF7B7B'], ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>' },
+    sales:    { title:'Nexus <b>Sales</b>', tag:'Closer IA · Bientôt', desc:'Un closer IA qui pousse les bons clients au bon moment : relances chaudes, upsell, recovery panier.', feats:['Scoring chaud / froid','Relances déclenchées par signal','Upsell IA basé historique','Tableau de bord opportunités'], price:'19 €', acc:['#FF6B9D','#F5C45E'], ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>' },
+    calendar: { title:'Nexus <b>Calendar</b>', tag:'Agenda · Bientôt', desc:'Ton agenda piloté par l\'IA. Ouvre des créneaux, gère les annulations, relance les no-show.', feats:['Synchro Google / Apple / Outlook','Créneaux intelligents par service','Relances no-show auto','Vue équipe multi-agendas'], price:'9 €', acc:['#00E5FF','#2E7BFF'], ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' },
+    boost:    { title:'Nexus <b>Boost</b>', tag:'Campagnes · Bientôt', desc:'Crée et envoie des campagnes ciblées en 30 secondes. WhatsApp, Insta, Email — un seul écran.', feats:['Templates IA personnalisés','Ciblage par segment client','Réplication 1 clic','A/B test natif'], price:'14 €', acc:['#FF7B7B','#8B5CFF'], ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8v18l-18-8v-2z"/><line x1="11.6" y1="11.6" x2="11.6" y2="20"/></svg>' },
+    insights: { title:'Nexus <b>Insights</b>', tag:'Analytics IA · Bientôt', desc:'Lis ton business comme un livre. KPIs vivants, cohort analysis, prédictions IA.', feats:['Dashboard live KPIs','Analyse cohort & rétention','Prédictions revenus 90 jours','Alertes anomalies'], price:'12 €', acc:['#1EFF8E','#2E7BFF'], ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>' },
+  };
+
+  const mmBg = document.getElementById('moduleModalBg');
+  const mmIcon = document.getElementById('mmIcon');
+  const mmTag = document.getElementById('mmTag');
+  const mmTitle = document.getElementById('mmTitle');
+  const mmDesc = document.getElementById('mmDesc');
+  const mmFeats = document.getElementById('mmFeats');
+  const mmPrice = document.getElementById('mmPrice');
+  const mmCta = document.getElementById('mmCta');
+
+  function openModuleModal(key){
+    const m = CATALOG[key]; if (!m) return;
+    mmIcon.style.background = `linear-gradient(135deg,${m.acc[0]},${m.acc[1]})`;
+    mmIcon.innerHTML = m.ic;
+    mmTag.textContent = m.tag;
+    mmTitle.innerHTML = m.title;
+    mmTitle.style.background = `linear-gradient(135deg,${m.acc[0]},${m.acc[1]})`;
+    mmTitle.style.webkitBackgroundClip = 'text';
+    mmTitle.style.backgroundClip = 'text';
+    mmTitle.style.color = 'transparent';
+    mmDesc.textContent = m.desc;
+    mmFeats.style.setProperty('--accent', m.acc[0]);
+    mmFeats.innerHTML = m.feats.map(f => `<li style="--accent:${m.acc[0]}">${f}</li>`).join('');
+    mmPrice.innerHTML = `${m.price}<small> /mois</small>`;
+    mmCta.style.background = `linear-gradient(135deg,${m.acc[0]},${m.acc[1]})`;
+    mmCta.dataset.key = key;
+    mmBg.classList.add('show');
+  }
+  function closeModuleModal(){ mmBg.classList.remove('show'); }
+  document.getElementById('mmClose').addEventListener('click', closeModuleModal);
+  mmBg.addEventListener('click', (e) => { if (e.target === mmBg) closeModuleModal(); });
+  mmCta.addEventListener('click', () => {
+    const k = mmCta.dataset.key;
+    showToast('Tu seras notifié au lancement de Nexus ' + k.charAt(0).toUpperCase()+k.slice(1) + '.');
+    closeModuleModal();
+  });
+
+  // ---------- Stats carousel + detail modal ----------
+  const STAT_DATA = {
+    recovered: { title:'<b>Clients récupérés</b>', desc:'Inactifs +3 sem., réveillés par les rappels Nexus.', value:'5', delta:'+3 vs semaine dernière', chart:[{l:'Lun',v:0},{l:'Mar',v:1},{l:'Mer',v:1},{l:'Jeu',v:0},{l:'Ven',v:2},{l:'Sam',v:1},{l:'Dim',v:0}], footL:'Mois : <b>14</b>', footR:'Conversion <b>62 %</b>', tip:'Sur les 8 sans réponse, 6 hommes 35-50 ans. Tente un audio.', acc:['#1EFF8E','#00E5FF'], ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M21 11l-4-4-4 4M17 7v9"/></svg>' },
+    newclients:{ title:'<b>Nouveaux clients</b>', desc:'Premier contact aujourd\'hui via WhatsApp.', value:'3', delta:'+1 vs hier', chart:[{l:'9h',v:1},{l:'10h',v:0},{l:'11h',v:1},{l:'12h',v:0},{l:'13h',v:0},{l:'14h',v:1},{l:'15h',v:0}], footL:'Semaine : <b>12</b>', footR:'Coût/client <b>0 €</b>', tip:'2/3 femmes 25-40. Ton lead magnet empanada performe.', acc:['#2E7BFF','#8B5CFF'], ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>' },
+    sales:    { title:'<b>Ventes du jour</b>', desc:'Meilleur lundi du mois. Top : empanadas.', value:'10', delta:'+25 % vs lundi dernier', chart:[{l:'Lun',v:10},{l:'Mar',v:7},{l:'Mer',v:9},{l:'Jeu',v:8},{l:'Ven',v:14},{l:'Sam',v:12},{l:'Dim',v:6}], footL:'Panier : <b>$19.30</b>', footR:'CA sem : <b>$1 287</b>', tip:'Vendredi 19h-21h reste ton créneau roi. Pousse à 18h.', acc:['#F5C45E','#FF7B7B'], ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>' },
+    response: { title:'Temps de <b>réponse IA</b>', desc:'L\'IA répond en moins de 2 minutes en moyenne.', value:'1m 12s', delta:'−38 s vs semaine dernière', chart:[{l:'Lun',v:80},{l:'Mar',v:75},{l:'Mer',v:90},{l:'Jeu',v:70},{l:'Ven',v:65},{l:'Sam',v:72},{l:'Dim',v:60}], footL:'Plus rapide : <b>Dim 1m</b>', footR:'Objectif < 2 min ✓', tip:'3× plus rapide que la moyenne LATAM. Avantage compétitif.', acc:['#8B5CFF','#FF6B9D'], ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' },
+  };
+
+  const smBg = document.getElementById('statModalBg');
+  function openStatModal(key){
+    const d = STAT_DATA[key]; if (!d) return;
+    const root = smBg;
+    root.style.setProperty('--accent', d.acc[0]);
+    root.style.setProperty('--accent2', d.acc[1]);
+    const ic = document.getElementById('smIc');
+    ic.style.background = `linear-gradient(135deg,${d.acc[0]},${d.acc[1]})`;
+    ic.style.setProperty('--accent', d.acc[0]);
+    ic.style.setProperty('--accent2', d.acc[1]);
+    ic.innerHTML = d.ic;
+    document.getElementById('smTitle').innerHTML = d.title;
+    document.getElementById('smDesc').textContent = d.desc;
+    document.getElementById('smValue').textContent = d.value;
+    document.getElementById('smValue').style.background = `linear-gradient(135deg,${d.acc[0]},${d.acc[1]})`;
+    document.getElementById('smValue').style.webkitBackgroundClip = 'text';
+    document.getElementById('smValue').style.backgroundClip = 'text';
+    document.getElementById('smValue').style.color = 'transparent';
+    document.getElementById('smDelta').textContent = d.delta;
+    const chart = document.getElementById('smChart');
+    const max = Math.max(...d.chart.map(x => x.v), 1);
+    chart.innerHTML = d.chart.map(x => `<div class="bar" style="height:${(x.v/max)*100}%;--accent:${d.acc[0]};--accent2:${d.acc[1]}"><span class="lbl">${x.l}</span></div>`).join('');
+    document.getElementById('smFootL').innerHTML = d.footL;
+    document.getElementById('smFootR').innerHTML = d.footR;
+    document.getElementById('smTip').innerHTML = '<b>Astuce :</b> ' + d.tip;
+    smBg.classList.add('show');
+  }
+  function closeStatModal(){ smBg.classList.remove('show'); }
+  document.getElementById('smClose').addEventListener('click', closeStatModal);
+  smBg.addEventListener('click', (e) => { if (e.target === smBg) closeStatModal(); });
+
+  // Bind stat clicks across screens
+  document.querySelectorAll('.stat[data-stat]').forEach(s => {
+    s.addEventListener('click', () => openStatModal(s.dataset.stat));
+  });
+
+  // Mini-chart bars (stats screen)
+  document.querySelectorAll('.mini-chart').forEach(mc => {
+    const data = (mc.dataset.bars || '').split(',').map(n => +n);
+    const max = Math.max(...data, 1);
+    mc.innerHTML = data.map(v => `<div class="bar" style="height:${(v/max)*100}%"></div>`).join('');
+  });
+
+  // ---------- Conseils carousel (swipeable + dots) ----------
+  const adviceBody = document.getElementById('adviceBody');
+  const adviceCards = adviceBody ? [...adviceBody.querySelectorAll('.advice-card')] : [];
+  const adviceDots = [...document.querySelectorAll('.adv-dot')];
+  const adviceCounter = document.getElementById('adviceCounter');
+  let advIdx = 0;
+  function setAdvice(i){
+    advIdx = (i + adviceCards.length) % adviceCards.length;
+    adviceCards.forEach((c,k) => c.classList.toggle('on', k === advIdx));
+    adviceDots.forEach((d,k) => d.classList.toggle('on', k === advIdx));
+    if (adviceCounter) adviceCounter.textContent = (advIdx+1) + ' / ' + adviceCards.length;
+  }
+  adviceDots.forEach(d => d.addEventListener('click', () => setAdvice(+d.dataset.i)));
+
+  // Touch swipe on advice
+  if (adviceBody){
+    let sx = 0, dx = 0;
+    adviceBody.addEventListener('touchstart', e => { sx = e.touches[0].clientX; dx = 0; }, {passive:true});
+    adviceBody.addEventListener('touchmove', e => { dx = e.touches[0].clientX - sx; }, {passive:true});
+    adviceBody.addEventListener('touchend', () => {
+      if (Math.abs(dx) > 40) setAdvice(advIdx + (dx < 0 ? 1 : -1));
+    });
+  }
+
+  // Bind advice action toasts/navigations
+  document.querySelectorAll('.advice-act').forEach(b => {
+    b.addEventListener('click', e => {
+      e.stopPropagation();
+      const goto = b.dataset.go;
+      if (goto) navigate(goto);
+      else showToast(b.dataset.toast || 'Action enregistrée.');
+    });
+  });
+
+  // ---------- Brief audio + texte ----------
+  const voiceMic = document.getElementById('voiceMic');
+  const voiceIcon = document.getElementById('voiceIcon');
+  const audioBar = document.getElementById('audioBar');
+  let audioPlaying = false, audioT, audioPct = 0;
+  voiceMic.addEventListener('click', () => {
+    audioPlaying = !audioPlaying;
+    voiceMic.classList.toggle('playing', audioPlaying);
+    voiceIcon.innerHTML = audioPlaying
+      ? '<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>'
+      : '<polygon points="5 3 19 12 5 21 5 3"/>';
+    if (audioPlaying){
+      showToast('Brief audio en lecture · 2m 18s');
+      audioT = setInterval(() => {
+        audioPct += 1.2;
+        if (audioPct >= 100){ audioPct = 100; clearInterval(audioT); audioPlaying = false; voiceMic.classList.remove('playing'); voiceIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>'; showToast('Brief terminé.'); }
+        audioBar.style.width = audioPct + '%';
+      }, 80);
+    } else {
+      clearInterval(audioT);
+    }
+  });
+
+  // Mode tabs (audio/text day vs week)
+  document.querySelectorAll('.mode-tabs').forEach(group => {
+    group.querySelectorAll('.mode-tab').forEach(t => {
+      t.addEventListener('click', () => {
+        group.querySelectorAll('.mode-tab').forEach(x => x.classList.remove('on'));
+        t.classList.add('on');
+        const target = group.dataset.target;
+        const mode = t.dataset.mode;
+        if (target === 'audio'){
+          document.getElementById('audioTitle').textContent = mode === 'week' ? 'Récap de la semaine' : 'Récap du lundi matin';
+          document.getElementById('audioDuration').textContent = mode === 'week' ? '4 min 06 s · prêt à écouter' : '2 min 18 s · prêt à écouter';
+        } else {
+          document.querySelectorAll('.text-content').forEach(c => c.style.display = (c.dataset.mode === mode ? 'block' : 'none'));
+        }
+      });
+    });
+  });
+  // Text expand
+  const textBody = document.getElementById('textBody');
+  document.getElementById('textExpand').addEventListener('click', () => {
+    textBody.classList.toggle('expanded');
+    const btn = document.getElementById('textExpand');
+    btn.innerHTML = textBody.classList.contains('expanded')
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg> Réduire'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg> Lire en entier';
+  });
+
+  // ---------- Inbox (10 conversations mockées) ----------
+  const INBOX = [
+    { n:'María Rodríguez',  i:'MR', t:'14:32', star:true,  unread:true,  c:'WhatsApp',  txt:'Hola Carlos ! Je veux confirmer ma commande de 12 empanadas pour samedi à 11h. C\'est OK ?', av:'linear-gradient(135deg,#FF6B9D,#F5C45E)' },
+    { n:'Diego Salazar',    i:'DS', t:'13:08', star:true,  unread:true,  c:'WhatsApp',  txt:'Tu fais des livraisons à Providencia ? Je voudrais commander pour samedi.', av:'linear-gradient(135deg,#2E7BFF,#00E5FF)' },
+    { n:'Ana Castillo',     i:'AC', t:'11:47', star:true,  unread:false, c:'Instagram', txt:'Merci pour les bolos d\'anniversaire, ils étaient parfaits 🎂 — je recommande dans 2 sem.', av:'linear-gradient(135deg,#1EFF8E,#00E5FF)' },
+    { n:'Javier Carrasco',  i:'JC', t:'10:22', star:true,  unread:false, c:'WhatsApp',  txt:'Possible de réserver le pavé entier pour 25 personnes mercredi prochain ?', av:'linear-gradient(135deg,#8B5CFF,#FF6B9D)' },
+    { n:'Raviella Mendoza', i:'RM', t:'09:14', star:true,  unread:false, c:'WhatsApp',  txt:'Vous avez encore les cookies aux figues ? Je passe demain matin avant 10h.', av:'linear-gradient(135deg,#F5C45E,#1EFF8E)' },
+    { n:'Lucía Fernández',  i:'LF', t:'Hier',  star:false, unread:false, c:'Instagram', txt:'Magnífico ! Vous livrez en weekend aussi ? J\'organise un bautismo le 18 mai.', av:'linear-gradient(135deg,#00E5FF,#2E7BFF)' },
+    { n:'Pedro Castro',     i:'PC', t:'Hier',  star:false, unread:false, c:'WhatsApp',  txt:'Je cherche un gâteau gluten-free pour ma fille — vous pouvez ?', av:'linear-gradient(135deg,#FF6B9D,#8B5CFF)' },
+    { n:'Sofía Aravena',    i:'SA', t:'Lun',   star:false, unread:false, c:'Gmail',     txt:'Bonjour, je gère le restaurant Las Brasas, on souhaiterait fournisseur stable de pain frais.', av:'linear-gradient(135deg,#1EFF8E,#2E7BFF)' },
+    { n:'Tomás Rojas',      i:'TR', t:'Lun',   star:false, unread:false, c:'WhatsApp',  txt:'Salut Carlos ! Mes alfajores commandés mardi sont prêts ? Je passe vers 16h.', av:'linear-gradient(135deg,#F5C45E,#FF7B7B)' },
+    { n:'Camila Vidal',     i:'CV', t:'Dim',   star:false, unread:false, c:'Instagram', txt:'Hola, vu votre boulangerie sur Insta, j\'adore ! Vous faites des sucrés sans sucre ?', av:'linear-gradient(135deg,#8B5CFF,#00E5FF)' },
+  ];
+  const inboxList = document.getElementById('inboxList');
+  function renderInbox(filter=''){
+    const f = filter.trim().toLowerCase();
+    const list = INBOX.filter(m => !f || m.n.toLowerCase().includes(f) || m.txt.toLowerCase().includes(f));
+    if (!list.length){
+      inboxList.innerHTML = `<div style="text-align:center;color:var(--muted);font-size:13px;padding:30px 0">Aucun résultat pour "${filter}".</div>`;
+      return;
+    }
+    inboxList.innerHTML = list.map(m => `
+      <div class="inbox-item" data-name="${m.n}">
+        <div class="inbox-avatar" style="--av:${m.av}">${m.i}</div>
+        <div class="inbox-meta">
+          <div class="inbox-top">
+            <div class="inbox-name">${m.n}${m.star?' <span class="star">★</span>':''}</div>
+            <div class="inbox-time">${m.t}</div>
+          </div>
+          <div class="inbox-text">${m.txt}</div>
+          <div class="inbox-channel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/></svg>
+            ${m.c}
+          </div>
+        </div>
+        ${m.unread?'<div class="inbox-unread-dot"></div>':''}
+      </div>
+    `).join('');
+    inboxList.querySelectorAll('.inbox-item').forEach(it => {
+      it.addEventListener('click', () => showToast('Conversation ' + it.dataset.name + ' · vue détaillée en M2.'));
+    });
+  }
+  renderInbox();
+  document.getElementById('inboxSearch').addEventListener('input', e => renderInbox(e.target.value));
+
+  // ---------- Drawer (vacances) ----------
+  const drawer = document.getElementById('drawer');
+  const drawerBg = document.getElementById('drawerBg');
+  function openDrawer(){ drawer.classList.add('show'); drawerBg.classList.add('show'); document.body.style.overflow='hidden'; }
+  function closeDrawer(){ drawer.classList.remove('show'); drawerBg.classList.remove('show'); document.body.style.overflow=''; }
+  document.getElementById('openVacances').addEventListener('click', openDrawer);
+  document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+  document.getElementById('vacCancel').addEventListener('click', closeDrawer);
+  drawerBg.addEventListener('click', closeDrawer);
+
+  // Tone pills
+  document.getElementById('tonePills').querySelectorAll('.tone-pill').forEach(p => {
+    p.addEventListener('click', () => {
+      document.getElementById('tonePills').querySelectorAll('.tone-pill').forEach(x => x.classList.remove('on'));
+      p.classList.add('on');
+    });
+  });
+  document.getElementById('permPills').querySelectorAll('.tone-pill').forEach(p => {
+    p.addEventListener('click', () => p.classList.toggle('on'));
+  });
+  document.getElementById('vacActivate').addEventListener('click', () => {
+    state.vacances = true; saveState();
+    document.getElementById('vacStatus').textContent = 'Activé';
+    closeDrawer();
+    showToast('Mode vacances activé. L\'IA prend le relais.');
+  });
+
+  // ---------- Generic data-toast / data-go ----------
+  document.querySelectorAll('[data-toast]').forEach(el => {
+    if (el.matches('.advice-act')) return; // already bound
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      showToast(el.dataset.toast);
+    });
+  });
+  document.querySelectorAll('[data-go]').forEach(el => {
+    if (el.matches('.advice-act')) return;
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      navigate(el.dataset.go);
+    });
+  });
+
+  // ---------- Onboarding ----------
+  const ob = document.getElementById('onboard');
+  let obStep = 0;
+  const obSteps = [...ob.querySelectorAll('.ob-step')];
+  const obDots = [...document.getElementById('obDots').querySelectorAll('.ob-dot')];
+  function showOnboarding(){ ob.classList.add('show'); }
+  function setObStep(i){
+    obStep = i;
+    obSteps.forEach((s,k) => s.classList.toggle('on', k === i));
+    obDots.forEach((d,k) => d.classList.toggle('on', k === i));
+    document.getElementById('obNext').innerHTML = (i === obSteps.length-1)
+      ? 'Commencer <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>'
+      : 'Suivant <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>';
+  }
+  document.getElementById('obNext').addEventListener('click', () => {
+    if (obStep < obSteps.length-1) setObStep(obStep+1);
+    else { state.onboarded = true; saveState(); ob.classList.remove('show'); showToast('Bienvenue Carlos. Voici ton récap du jour.'); }
+  });
+  document.getElementById('obSkip').addEventListener('click', () => {
+    state.onboarded = true; saveState(); ob.classList.remove('show');
+  });
+
+  // ---------- Init route ----------
+  routeFromHash();
+  if (!location.hash) navigate(state.view || 'core');
+
+  // ---------- Live notif demo (subtle, every 30s) ----------
+  setTimeout(() => {
+    setInterval(() => {
+      const evs = ['📩 Nouveau WhatsApp de Diego Salazar','🎯 Conseil Nexus mis à jour','💰 Vente détectée · empanadas x6','📈 Réponse IA : 1m 02s'];
+      if (Math.random() < 0.4 && document.visibilityState === 'visible'){
+        showToast(evs[Math.floor(Math.random()*evs.length)]);
+      }
+    }, 30000);
+  }, 8000);
+})();
+</script>
+</body>
+</html>
