@@ -980,7 +980,7 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
 <!-- ===================== HUB SCREEN ===================== -->
 <section class="screen" id="screen-hub">
   <div class="hub-welcome">
-    <div class="eye"><span class="dot"></span>Hola Carlos · 8 modules · 1 actif</div>
+    <div class="eye" id="hubMeteo"><span class="dot"></span>📍 Las Condes · 18°C · ☀️ <span id="hubTime">14:32</span></div>
     <h1>Tes modules.</h1>
     <p>Glisse pour découvrir les autres modules.</p>
   </div>
@@ -1786,6 +1786,16 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
       openModuleModal(key);
     });
   });
+
+  // ---------- Hub time/météo live ----------
+  const updateHubTime = () => {
+    const el = document.getElementById('hubTime');
+    if (!el) return;
+    const d = new Date();
+    el.textContent = d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+  };
+  updateHubTime();
+  setInterval(updateHubTime, 30000);
 
   // ---------- Hub carousel : sync dots ↔ scroll, click dot → snap ----------
   const modgridEl = document.getElementById('modgrid');
