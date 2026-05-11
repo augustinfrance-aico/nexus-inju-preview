@@ -114,7 +114,6 @@ html[data-theme="light"] body{
   background:linear-gradient(135deg,#2E7BFF,#8B5CFF);
   display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;
   border:1px solid var(--line);transition:all .2s;
-  font-family:inherit;padding:0;outline:none;
 }
 .tb-avatar:hover{transform:scale(1.05);box-shadow:0 8px 20px -8px rgba(139,92,255,.6)}
 .tb-divider{width:1px;height:22px;background:var(--line);margin:0 4px}
@@ -149,13 +148,27 @@ html[data-theme="light"] .welcome h1{
   width:100%; max-width:980px;
   display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scroll-behavior:smooth;
   scrollbar-width:none; -webkit-overflow-scrolling:touch;
+  /* Padding pour que la page centrale soit centrée tout en laissant entrevoir les voisines */
+  padding:0 12%;
+  gap:18px;
 }
 .pages::-webkit-scrollbar{display:none}
 .page{
-  flex:0 0 100%; scroll-snap-align:center;
+  /* 76% pour entrevoir ~12% du voisin de chaque côté (effet peek/swipe McDo) */
+  flex:0 0 76%; scroll-snap-align:center;
   display:flex; align-items:center; justify-content:center;
-  padding:20px 16px;
+  padding:20px 8px;
   min-height:520px;
+  transition:transform .35s cubic-bezier(.2,.8,.2,1), opacity .35s ease, filter .35s ease;
+  opacity:.45; transform:scale(.88); filter:blur(2px);
+}
+/* Page "active" (la plus visible au centre) */
+.page.is-active{
+  opacity:1; transform:scale(1); filter:none;
+}
+@media(max-width:760px){
+  .pages{padding:0 8%; gap:12px}
+  .page{flex:0 0 84%}
 }
 
 /* APP CARD — single visible per slide (carousel) */
@@ -467,41 +480,20 @@ html[data-theme="light"] .welcome h1{
       <div class="brand-name">Ne<b>xus</b></div>
     </div>
     <div class="toolbar">
-      <button class="tb-btn" id="payBtn" title="Méthode de paiement" aria-label="Paiement">
+      <button class="tb-btn" title="Méthode de paiement" aria-label="Paiement">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
       </button>
-      <button class="tb-btn" id="cfgBtn" title="Configuration" aria-label="Configuration">
+      <button class="tb-btn" title="Configuration" aria-label="Configuration">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
       <button class="tb-btn" id="theme-btn" title="Thème clair / sombre" aria-label="Thème">
         <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
-      <button class="tb-btn sos" id="savBtn" title="SAV — Service Après-Vente" aria-label="SAV">
+      <button class="tb-btn sos" title="SAV — Service Après-Vente" aria-label="SAV">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       </button>
       <span class="tb-divider"></span>
-      <button class="tb-avatar" id="avatarBtn" title="Profil" aria-label="Profil">CR</button>
-    </div>
-
-    <!-- User dropdown -->
-    <div id="userDropdown" style="display:none;position:absolute;top:64px;right:28px;z-index:200;min-width:240px;background:var(--bg2);border:1px solid var(--line);border-radius:14px;box-shadow:0 24px 60px -16px rgba(0,0,0,.6);padding:14px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)">
-      <div id="userInfo" style="padding:8px 6px 14px;border-bottom:1px solid var(--line);margin-bottom:10px">
-        <div id="userName" style="font-size:14px;font-weight:700;color:var(--ink)">Carlos Romero</div>
-        <div id="userEmail" style="font-size:11px;color:var(--muted);margin-top:3px;font-family:'JetBrains Mono',monospace">demo@nexus.app</div>
-        <div id="userBiz" style="font-size:11px;color:var(--cyan);margin-top:6px">🥖 Panadería Don Carlos</div>
-      </div>
-      <button id="profileLink" style="width:100%;text-align:left;padding:9px 10px;border-radius:9px;background:transparent;border:0;color:var(--ink2);cursor:pointer;font-size:13px;font-family:inherit;display:flex;align-items:center;gap:10px">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Mon profil entreprise
-      </button>
-      <button id="switchLink" style="width:100%;text-align:left;padding:9px 10px;border-radius:9px;background:transparent;border:0;color:var(--ink2);cursor:pointer;font-size:13px;font-family:inherit;display:flex;align-items:center;gap:10px">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11l-3-3m0 6l3-3"/></svg>
-        Changer de compte
-      </button>
-      <button id="logoutLink" style="width:100%;text-align:left;padding:9px 10px;border-radius:9px;background:transparent;border:0;color:var(--red);cursor:pointer;font-size:13px;font-family:inherit;display:flex;align-items:center;gap:10px;margin-top:4px">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-        Se déconnecter
-      </button>
+      <div class="tb-avatar" title="Profil">CR</div>
     </div>
   </div>
 
@@ -522,7 +514,7 @@ html[data-theme="light"] .welcome h1{
     <div class="pages" id="pages">
 
       <div class="page">
-        <a class="app core" href="core.html">
+        <a class="app core" href="app.html">
           <div class="app-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="3"/>
@@ -741,14 +733,31 @@ html[data-theme="light"] .welcome h1{
   const carNext = document.getElementById('carNext');
   let curIdx = 0;
 
+  // Marque la page la plus proche du centre comme .is-active (effet peek = nette au centre, floues sur les côtés)
+  const updateActive = () => {
+    const center = pages.scrollLeft + pages.clientWidth / 2;
+    let bestIdx = 0;
+    let bestDist = Infinity;
+    pageEls.forEach((el, i) => {
+      const elCenter = el.offsetLeft + el.offsetWidth / 2;
+      const dist = Math.abs(elCenter - center);
+      if (dist < bestDist) { bestDist = dist; bestIdx = i; }
+    });
+    pageEls.forEach((el, i) => el.classList.toggle('is-active', i === bestIdx));
+    dots.forEach((d, i) => d.classList.toggle('on', i === bestIdx));
+    curIdx = bestIdx;
+    carPrev.disabled = bestIdx === 0;
+    carNext.disabled = bestIdx === pageEls.length - 1;
+  };
+
   const setPage = (i) => {
     curIdx = Math.max(0, Math.min(pageEls.length - 1, i));
     const target = pageEls[curIdx];
     if (!target) return;
-    pages.scrollTo({ left: target.offsetLeft, behavior: 'smooth' });
-    dots.forEach((d, k) => d.classList.toggle('on', k === curIdx));
-    carPrev.disabled = curIdx === 0;
-    carNext.disabled = curIdx === pageEls.length - 1;
+    // Centre la page dans le viewport du carousel (pas juste offsetLeft à cause du padding)
+    const targetScroll = target.offsetLeft - (pages.clientWidth - target.offsetWidth) / 2;
+    pages.scrollTo({ left: targetScroll, behavior: 'smooth' });
+    setTimeout(updateActive, 350);
   };
   dots.forEach(d => d.addEventListener('click', () => setPage(+d.dataset.idx)));
   carPrev.addEventListener('click', () => setPage(curIdx - 1));
@@ -757,14 +766,11 @@ html[data-theme="light"] .welcome h1{
   let scrollT;
   pages.addEventListener('scroll', () => {
     clearTimeout(scrollT);
-    scrollT = setTimeout(() => {
-      const idx = Math.round(pages.scrollLeft / pages.clientWidth);
-      curIdx = idx;
-      dots.forEach((d, i) => d.classList.toggle('on', i === idx));
-      carPrev.disabled = idx === 0;
-      carNext.disabled = idx === pageEls.length - 1;
-    }, 80);
+    scrollT = setTimeout(updateActive, 80);
   });
+
+  // Initial : marque la 1ère page (Nexus Core) comme active
+  requestAnimationFrame(() => { updateActive(); });
 
   // Keyboard nav
   document.addEventListener('keydown', (e) => {
@@ -930,70 +936,6 @@ html[data-theme="light"] .welcome h1{
     } else {
       navigator.clipboard?.writeText(location.href);
       showToast('Lien copié — partage-le où tu veux.');
-    }
-  });
-
-  // ===== Topbar handlers (Profil / Paiement / Configuration / SAV / Avatar)
-  document.getElementById('payBtn').addEventListener('click', () => {
-    location.href = 'app.html#/payments';
-  });
-  document.getElementById('cfgBtn').addEventListener('click', () => {
-    location.href = 'app.html#/settings';
-  });
-  document.getElementById('savBtn').addEventListener('click', () => {
-    showToast('🆘 SAV ouvert — un humain te répond sous 2 h ouvrées.');
-  });
-
-  // ===== Session / compte utilisateur =====
-  const ACCOUNTS_KEY = 'nexus_accounts';
-  const SESSION_KEY = 'nexus_session';
-  const getAccounts = () => { try { return JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || '{}'); } catch(e) { return {}; } };
-  const getSession = () => { try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch(e) { return null; } };
-
-  const session = getSession();
-  let currentAcc = null;
-  if (session && session.email) {
-    const accs = getAccounts();
-    currentAcc = accs[session.email];
-  }
-
-  const initials = (name) => name.split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase();
-
-  if (currentAcc) {
-    // Update topbar avatar + welcome
-    const avatar = document.getElementById('avatarBtn');
-    avatar.textContent = initials(currentAcc.owner || currentAcc.email);
-    avatar.title = `Profil — ${currentAcc.owner || currentAcc.email}`;
-    document.getElementById('userName').textContent = currentAcc.owner || currentAcc.email;
-    document.getElementById('userEmail').textContent = currentAcc.email;
-    document.getElementById('userBiz').textContent = `${currentAcc.business?.logo || '🏪'} ${currentAcc.business?.name || ''}`;
-    // Welcome eye chip
-    const eye = document.querySelector('.welcome .eye');
-    if (eye) eye.innerHTML = `<span class="dot"></span>Hola ${(currentAcc.owner||'').split(' ')[0] || 'toi'} · 8 modules · 1 actif`;
-  }
-
-  // Avatar dropdown toggle
-  const dropdown = document.getElementById('userDropdown');
-  document.getElementById('avatarBtn').addEventListener('click', (e) => {
-    e.stopPropagation();
-    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-  });
-  document.addEventListener('click', (e) => {
-    if (!dropdown.contains(e.target) && e.target.id !== 'avatarBtn') {
-      dropdown.style.display = 'none';
-    }
-  });
-
-  document.getElementById('profileLink').addEventListener('click', () => {
-    location.href = 'app.html#/profil';
-  });
-  document.getElementById('switchLink').addEventListener('click', () => {
-    location.href = 'signup.html';
-  });
-  document.getElementById('logoutLink').addEventListener('click', () => {
-    if (confirm('Te déconnecter de Nexus ?')) {
-      localStorage.removeItem(SESSION_KEY);
-      location.href = 'signup.html';
     }
   });
 })();

@@ -293,15 +293,23 @@ html[data-theme="light"] .hub-welcome h1{
 .mod.insights .mod-ic{background:linear-gradient(135deg,#1EFF8E 0%,#2E7BFF 100%)}
 
 .hub-cta{
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  width:100%;padding:14px 16px;border-radius:14px;
-  background:var(--grad-core);color:#fff;font-weight:700;font-size:14px;
-  border:0;cursor:pointer;margin-top:4px;
-  box-shadow:0 12px 28px -10px rgba(46,123,255,.55);
-  min-height:48px;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:20px 18px;border-radius:18px;
+  background:var(--grad-core);color:#fff;font-weight:800;font-size:16.5px;
+  letter-spacing:-.01em;
+  border:0;cursor:pointer;margin:8px 0 6px;
+  box-shadow:0 18px 38px -10px rgba(46,123,255,.65), 0 0 0 1px rgba(255,255,255,.06) inset;
+  min-height:62px;position:relative;overflow:hidden;
+  transition:transform .15s ease, box-shadow .2s ease;
 }
+.hub-cta::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%);
+  transform:translateX(-100%);transition:transform .8s ease;pointer-events:none;
+}
+.hub-cta:hover::before{transform:translateX(100%)}
 .hub-cta:active{transform:scale(.98)}
-.hub-cta svg{width:16px;height:16px}
+.hub-cta svg{width:20px;height:20px}
 
 /* ============ CORE SCREEN ============ */
 .company-band{
@@ -934,6 +942,687 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
 .toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
 .toast svg{width:14px;height:14px;color:var(--lime);flex-shrink:0}
 
+/* ============ NEXUS V2 PATCHES (call 09/05) ============ */
+
+/* Hub widgets cliquables */
+.hub-widgets{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 16px}
+.hub-widget{
+  display:flex;flex-direction:column;align-items:flex-start;gap:6px;
+  padding:14px 13px;border-radius:14px;
+  background:linear-gradient(180deg,var(--panel) 0%,var(--panel2) 100%);
+  border:1px solid var(--line);cursor:pointer;text-align:left;color:var(--ink);
+  font-family:inherit;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  position:relative;overflow:hidden;min-height:88px;
+  transition:transform .15s,border-color .2s,box-shadow .25s;
+}
+.hub-widget:active{transform:scale(.98)}
+.hub-widget:hover{border-color:rgba(0,229,255,.4);box-shadow:0 8px 22px -10px rgba(46,123,255,.4)}
+.hub-widget .hw-ic{
+  width:32px;height:32px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  background:var(--grad-core);box-shadow:0 4px 10px -4px rgba(46,123,255,.5);
+}
+.hub-widget .hw-ic svg{width:15px;height:15px}
+.hub-widget.w-stats .hw-ic{background:linear-gradient(135deg,#1EFF8E,#00E5FF)}
+.hub-widget.w-clients .hw-ic{background:linear-gradient(135deg,#2E7BFF,#8B5CFF)}
+.hub-widget.w-camp .hw-ic{background:linear-gradient(135deg,#FF6B9D,#F5C45E)}
+.hub-widget.w-msg .hw-ic{background:linear-gradient(135deg,#8B5CFF,#FF6B9D)}
+.hub-widget.w-billing .hw-ic{background:linear-gradient(135deg,#F5C45E,#FF7B7B)}
+.hub-widget.w-profil .hw-ic{background:linear-gradient(135deg,#00E5FF,#2E7BFF)}
+.hub-widget .hw-lbl{font-size:12.5px;font-weight:700;letter-spacing:-.005em}
+.hub-widget .hw-val{font-size:18px;font-weight:800;letter-spacing:-.02em;font-family:'JetBrains Mono',monospace;color:var(--ink)}
+.hub-widget .hw-sub{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
+
+/* Pop-up Interface principale (overlay sur le hub) */
+.iface-overlay{
+  position:fixed;inset:0;z-index:350;
+  background:rgba(11,15,26,.55);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  display:none;align-items:center;justify-content:center;padding:24px 18px;
+}
+.iface-overlay.show{display:flex;animation:fadeIn .25s ease}
+.iface-card{
+  width:100%;max-width:340px;background:var(--bg2);border:1px solid var(--line);
+  border-radius:22px;padding:22px 18px;
+  box-shadow:0 30px 70px -16px rgba(0,0,0,.55);
+  position:relative;animation:slideModal .3s cubic-bezier(.2,.8,.2,1);
+}
+.iface-card h3{font-size:17px;font-weight:800;letter-spacing:-.01em;margin-bottom:6px}
+.iface-card p{font-size:12.5px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+.iface-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.iface-tile{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  padding:14px 10px;border-radius:12px;
+  background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+  cursor:pointer;font-family:inherit;font-size:11.5px;font-weight:700;
+}
+.iface-tile:active{transform:scale(.97)}
+.iface-tile .ift-ic{
+  width:30px;height:30px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  background:var(--grad-core);
+}
+.iface-tile .ift-ic svg{width:14px;height:14px}
+.iface-tile.t-stats .ift-ic{background:linear-gradient(135deg,#1EFF8E,#00E5FF)}
+.iface-tile.t-msg .ift-ic{background:linear-gradient(135deg,#8B5CFF,#FF6B9D)}
+.iface-tile.t-camp .ift-ic{background:linear-gradient(135deg,#FF6B9D,#F5C45E)}
+.iface-tile.t-clients .ift-ic{background:linear-gradient(135deg,#2E7BFF,#8B5CFF)}
+.iface-tile.t-profil .ift-ic{background:linear-gradient(135deg,#00E5FF,#2E7BFF)}
+.iface-tile.t-billing .ift-ic{background:linear-gradient(135deg,#F5C45E,#FF7B7B)}
+.iface-tile.t-vac .ift-ic{background:linear-gradient(135deg,#1EFF8E,#00E5FF)}
+.iface-tile.t-tuto .ift-ic{background:linear-gradient(135deg,#8B5CFF,#F5C45E)}
+.iface-tile{position:relative}
+.iface-tile .ift-sub{
+  font-size:9.5px;font-weight:600;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;letter-spacing:.04em;
+  text-transform:uppercase;margin-top:2px;
+}
+.iface-close{
+  width:34px;height:34px;border-radius:10px;background:var(--panel);border:1px solid var(--line);
+  color:var(--ink2);position:absolute;top:12px;right:12px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+}
+.iface-close svg{width:14px;height:14px}
+
+/* ============ TUTORIEL VIEW ============ */
+.tuto-progress{
+  margin:8px 0 18px;padding:14px;border-radius:14px;
+  background:var(--panel);border:1px solid var(--line);
+}
+.tuto-progress-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.tuto-progress-head b{font-size:14px;font-weight:800}
+.tuto-progress-head .tpc{
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan);
+  letter-spacing:.06em;
+}
+.tuto-progress-bar{
+  height:8px;border-radius:999px;background:rgba(255,255,255,.06);
+  overflow:hidden;position:relative;
+}
+.tuto-progress-fill{
+  height:100%;border-radius:999px;
+  background:linear-gradient(90deg,#1EFF8E,#00E5FF,#2E7BFF);
+  width:0%;transition:width .5s cubic-bezier(.2,.8,.2,1);
+  box-shadow:0 0 12px rgba(0,229,255,.4);
+}
+.tuto-list{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.tuto-card{
+  border-radius:14px;background:var(--panel);border:1px solid var(--line);
+  overflow:hidden;transition:border-color .2s ease;
+}
+.tuto-card.done{border-color:rgba(30,255,142,.35)}
+.tuto-card.open{border-color:rgba(0,229,255,.4);box-shadow:0 8px 22px -10px rgba(46,123,255,.4)}
+.tuto-card-head{
+  display:flex;align-items:center;gap:12px;padding:14px;cursor:pointer;
+  user-select:none;
+}
+.tuto-card-num{
+  width:32px;height:32px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:800;
+  background:var(--grad-core);color:#fff;flex-shrink:0;
+}
+.tuto-card.done .tuto-card-num{background:linear-gradient(135deg,#1EFF8E,#00E5FF)}
+.tuto-card-body-text{flex:1;min-width:0}
+.tuto-card-title{font-size:13.5px;font-weight:800;letter-spacing:-.01em;margin-bottom:2px}
+.tuto-card-desc{font-size:11.5px;color:var(--muted);line-height:1.4}
+.tuto-card-chev{
+  width:24px;height:24px;color:var(--muted);
+  transition:transform .25s ease;flex-shrink:0;
+}
+.tuto-card.open .tuto-card-chev{transform:rotate(180deg)}
+.tuto-card-body{
+  max-height:0;overflow:hidden;transition:max-height .35s ease;
+}
+.tuto-card.open .tuto-card-body{max-height:400px}
+.tuto-card-body-inner{padding:0 14px 14px 58px}
+.tuto-checklist{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.tuto-check-item{
+  display:flex;align-items:center;gap:8px;
+  font-size:12px;color:var(--ink2);
+}
+.tuto-check-item svg{width:14px;height:14px;color:var(--cyan);flex-shrink:0}
+.tuto-card.done .tuto-check-item{color:var(--muted);text-decoration:line-through}
+.tuto-mark-btn{
+  width:100%;padding:10px 14px;border-radius:10px;
+  background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+  font-size:12px;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.tuto-mark-btn:hover{border-color:rgba(0,229,255,.4)}
+.tuto-card.done .tuto-mark-btn{
+  background:linear-gradient(135deg,rgba(30,255,142,.15),rgba(0,229,255,.1));
+  border-color:rgba(30,255,142,.4);color:#1EFF8E;
+}
+
+/* ============ VACANCES VIEW (pleine page) ============ */
+.vac-view-section{
+  margin-bottom:18px;padding:14px;border-radius:14px;
+  background:var(--panel);border:1px solid var(--line);
+}
+.vac-view-section h4{
+  font-size:13px;font-weight:800;letter-spacing:-.005em;margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.vac-view-section h4 .vvs-ic{
+  width:22px;height:22px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  background:linear-gradient(135deg,#1EFF8E,#00E5FF);
+}
+.vac-view-section h4 .vvs-ic svg{width:12px;height:12px}
+.vac-toggle-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 0;border-bottom:1px solid var(--line);
+}
+.vac-toggle-row:last-child{border-bottom:0;padding-bottom:0}
+.vac-toggle-row:first-child{padding-top:0}
+.vac-toggle-info{flex:1;min-width:0;padding-right:12px}
+.vac-toggle-info b{font-size:12.5px;font-weight:700;display:block;margin-bottom:2px}
+.vac-toggle-info small{font-size:11px;color:var(--muted);line-height:1.4}
+.vac-switch{
+  width:42px;height:24px;border-radius:999px;
+  background:rgba(255,255,255,.1);border:1px solid var(--line);
+  position:relative;cursor:pointer;flex-shrink:0;
+  transition:background .2s ease;
+}
+.vac-switch::after{
+  content:'';position:absolute;top:2px;left:2px;
+  width:18px;height:18px;border-radius:50%;
+  background:#fff;transition:transform .25s cubic-bezier(.2,.8,.2,1);
+}
+.vac-switch.on{background:var(--grad-core)}
+.vac-switch.on::after{transform:translateX(18px)}
+.vac-activate-btn{
+  width:100%;padding:16px;border-radius:14px;
+  background:var(--grad-core);color:#fff;font-size:14px;font-weight:800;
+  letter-spacing:-.01em;border:0;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 16px 32px -10px rgba(46,123,255,.55);
+  min-height:54px;margin:8px 0 24px;
+}
+.vac-activate-btn.is-on{
+  background:linear-gradient(135deg,#FF7B7B,#F5C45E);
+  box-shadow:0 16px 32px -10px rgba(255,123,123,.45);
+}
+.vac-activate-btn svg{width:18px;height:18px}
+
+/* Filtres dénominations chips */
+.deno-chips{display:flex;gap:7px;overflow-x:auto;padding:8px 0 6px;margin:0 -16px 8px;padding-left:16px;padding-right:16px;scrollbar-width:none}
+.deno-chips::-webkit-scrollbar{display:none}
+.deno-chip{
+  flex-shrink:0;padding:7px 13px;border-radius:999px;
+  background:var(--panel);border:1px solid var(--line);color:var(--ink2);
+  font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;
+  display:inline-flex;align-items:center;gap:5px;min-height:34px;
+  white-space:nowrap;
+}
+.deno-chip:active{transform:scale(.97)}
+.deno-chip.on{background:rgba(0,229,255,.16);border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 12px -4px rgba(0,229,255,.45)}
+.deno-chip .cnt{
+  font-size:10px;padding:1px 6px;border-radius:999px;background:rgba(255,255,255,.08);
+  font-family:'JetBrains Mono',monospace;color:var(--muted);
+}
+.deno-chip.on .cnt{background:rgba(0,229,255,.18);color:var(--cyan)}
+
+/* Tagline dénomination sur inbox-item */
+.inbox-deno{
+  display:inline-block;padding:1px 7px;border-radius:6px;
+  font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  font-family:'JetBrains Mono',monospace;margin-left:5px;
+}
+.inbox-deno.dn-vip{background:rgba(245,196,94,.18);color:#F5C45E;border:1px solid rgba(245,196,94,.35)}
+.inbox-deno.dn-new{background:rgba(46,123,255,.18);color:#2E7BFF;border:1px solid rgba(46,123,255,.35)}
+.inbox-deno.dn-biz{background:rgba(0,229,255,.18);color:#00E5FF;border:1px solid rgba(0,229,255,.35)}
+.inbox-deno.dn-rec{background:rgba(30,255,142,.16);color:#1EFF8E;border:1px solid rgba(30,255,142,.32)}
+.inbox-deno.dn-occ{background:rgba(139,92,255,.18);color:#8B5CFF;border:1px solid rgba(139,92,255,.35)}
+.inbox-deno.dn-lost{background:rgba(255,107,107,.18);color:#FF6B6B;border:1px solid rgba(255,107,107,.35)}
+
+/* Fiche client modal large */
+.client-card-modal{padding:20px 18px}
+.cli-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.cli-avatar{
+  width:54px;height:54px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:800;
+  flex-shrink:0;
+}
+.cli-id{flex:1;min-width:0}
+.cli-id .name-row{display:flex;align-items:center;gap:6px;font-size:16px;font-weight:800;letter-spacing:-.01em}
+.cli-id .name-row .star{color:var(--gold);font-size:13px}
+.cli-id .edit-btn{
+  width:26px;height:26px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);
+  color:var(--ink2);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
+}
+.cli-id .edit-btn svg{width:12px;height:12px}
+.cli-id small{display:block;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.04em;margin-top:2px}
+.cli-block{
+  padding:13px;border-radius:12px;background:var(--panel);border:1px solid var(--line);
+  margin-bottom:10px;
+}
+.cli-block .lbl{font-size:9.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.10em;font-family:'JetBrains Mono',monospace;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.cli-block .lbl svg{width:11px;height:11px;color:var(--cyan)}
+.cli-block .val{font-size:13px;color:var(--ink);line-height:1.5}
+.cli-block .val a{color:var(--cyan);font-weight:600}
+.cli-block textarea, .cli-block input[type="text"], .cli-block input[type="email"], .cli-block input[type="tel"]{
+  width:100%;padding:9px 11px;border-radius:9px;
+  background:var(--bg2);border:1px solid var(--line);color:var(--ink);
+  font-size:13px;font-family:inherit;min-height:38px;resize:none;
+}
+.cli-block textarea{min-height:60px;line-height:1.5}
+.cli-channels{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.cli-channel-pill{
+  display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;
+  background:var(--panel2);border:1px solid var(--line);font-size:10.5px;font-weight:700;
+  font-family:'JetBrains Mono',monospace;letter-spacing:.04em;
+}
+.cli-channel-pill svg{width:10px;height:10px}
+.cli-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+.cli-actions .btn{padding:10px 12px;font-size:12px;min-height:42px}
+
+/* Tab pills (used inside modals) */
+.tab-pills{display:flex;gap:5px;padding:3px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none}
+.tab-pills::-webkit-scrollbar{display:none}
+.tab-pill{
+  border:0;background:transparent;color:var(--ink2);
+  padding:7px 14px;border-radius:8px;cursor:pointer;
+  font-size:11.5px;font-weight:700;font-family:inherit;white-space:nowrap;flex-shrink:0;
+}
+.tab-pill.on{background:var(--bg2);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+
+/* Profile screen blocks */
+.prof-block{
+  padding:14px;border-radius:14px;background:var(--panel);border:1px solid var(--line);
+  margin-bottom:12px;
+}
+.prof-block h4{font-size:13.5px;font-weight:800;letter-spacing:-.005em;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.prof-block h4 .icbox{
+  width:28px;height:28px;border-radius:8px;background:var(--grad-core);color:#fff;
+  display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.prof-block h4 .icbox svg{width:13px;height:13px}
+.prof-block .hint{font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5}
+.prof-block textarea, .prof-block input{
+  width:100%;padding:10px 12px;border-radius:10px;
+  background:var(--bg2);border:1px solid var(--line);color:var(--ink);
+  font-size:13px;font-family:inherit;min-height:42px;
+}
+.prof-block textarea{min-height:80px;line-height:1.55;resize:none}
+.prof-block .row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:8px}
+
+/* Catalog product card */
+.prod-list{display:flex;flex-direction:column;gap:9px}
+.prod-card{
+  display:flex;gap:10px;padding:11px;border-radius:12px;
+  background:var(--bg2);border:1px solid var(--line);
+}
+.prod-photo{
+  width:60px;height:60px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,#F5C45E,#FF7B7B);
+  display:flex;align-items:center;justify-content:center;font-size:24px;
+  background-size:cover;background-position:center;
+}
+.prod-info{flex:1;min-width:0}
+.prod-info .top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.prod-info .nm{font-size:13px;font-weight:800;letter-spacing:-.005em}
+.prod-info .pr{font-size:12.5px;font-weight:800;color:var(--lime);font-family:'JetBrains Mono',monospace}
+.prod-info .ds{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.prod-info .meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.prod-info .meta span{
+  font-size:9.5px;color:var(--ink2);background:var(--panel2);border:1px solid var(--line);
+  padding:2px 7px;border-radius:999px;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;
+}
+.prod-info .meta span.nutri-A{background:rgba(30,255,142,.18);color:#1EFF8E;border-color:rgba(30,255,142,.35)}
+.prod-info .meta span.nutri-B{background:rgba(0,229,255,.16);color:#00E5FF;border-color:rgba(0,229,255,.32)}
+.prod-info .meta span.nutri-C{background:rgba(245,196,94,.16);color:#F5C45E;border-color:rgba(245,196,94,.35)}
+.prod-info .meta span.nutri-D{background:rgba(255,123,123,.16);color:#FF7B7B;border-color:rgba(255,123,123,.35)}
+.prod-actions{display:flex;flex-direction:column;gap:5px;align-items:flex-end}
+.prod-action-btn{
+  width:28px;height:28px;border-radius:7px;background:var(--panel2);border:1px solid var(--line);
+  color:var(--ink2);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
+}
+.prod-action-btn svg{width:12px;height:12px}
+.prod-action-btn.danger{color:var(--red)}
+
+/* CRM list */
+.crm-list{display:flex;flex-direction:column;gap:8px}
+.crm-card{
+  display:flex;align-items:center;gap:10px;padding:11px;border-radius:12px;
+  background:var(--panel);border:1px solid var(--line);cursor:pointer;
+}
+.crm-card:active{transform:scale(.99)}
+.crm-card .crm-av{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;color:#fff;font-weight:700;
+  display:flex;align-items:center;justify-content:center;font-size:12.5px;
+}
+.crm-card .crm-meta{flex:1;min-width:0}
+.crm-card .crm-name{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
+.crm-card .crm-meta .small{font-size:11px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:6px}
+.crm-card .crm-score{
+  font-size:14px;font-weight:800;font-family:'JetBrains Mono',monospace;
+  padding:5px 9px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);
+  flex-shrink:0;
+}
+.crm-card .crm-score.s-good{color:var(--lime)}
+.crm-card .crm-score.s-mid{color:var(--gold)}
+.crm-card .crm-score.s-low{color:var(--red)}
+
+/* Toolbar (top of section) */
+.section-toolbar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.section-toolbar .btn-tool{
+  display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:10px;
+  background:var(--panel);border:1px solid var(--line);color:var(--ink);
+  font-size:11.5px;font-weight:700;font-family:inherit;cursor:pointer;min-height:36px;
+}
+.section-toolbar .btn-tool:active{transform:scale(.97)}
+.section-toolbar .btn-tool svg{width:13px;height:13px}
+.section-toolbar .btn-tool.primary{background:var(--grad-core);color:#fff;border-color:transparent}
+
+/* Best hours card */
+.best-hours{
+  padding:16px;border-radius:14px;
+  background:linear-gradient(160deg,rgba(0,229,255,.10),rgba(30,255,142,.05));
+  border:1px solid rgba(0,229,255,.28);margin-bottom:14px;
+}
+.best-hours .bh-title{font-size:11px;color:var(--cyan);font-weight:700;text-transform:uppercase;letter-spacing:.10em;font-family:'JetBrains Mono',monospace;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.best-hours .bh-title svg{width:13px;height:13px}
+.best-hours .bh-insight{font-size:13.5px;line-height:1.55;color:var(--ink);margin-bottom:8px}
+.best-hours .bh-insight b{font-weight:800;color:var(--lime)}
+.best-hours .bh-toggle{display:inline-flex;gap:4px;margin-top:6px;padding:3px;background:var(--panel2);border:1px solid var(--line);border-radius:9px}
+.best-hours .bh-toggle button{
+  border:0;background:transparent;color:var(--ink2);padding:5px 12px;border-radius:7px;
+  font-size:10.5px;font-weight:700;font-family:inherit;cursor:pointer;
+}
+.best-hours .bh-toggle button.on{background:var(--bg2);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+
+/* Top questions card */
+.top-questions{
+  padding:14px;border-radius:14px;background:var(--panel);border:1px solid var(--line);
+  margin-bottom:14px;
+}
+.tq-row{
+  display:flex;align-items:center;gap:9px;padding:9px 0;
+  border-bottom:1px solid var(--line2);
+}
+.tq-row:last-child{border-bottom:0}
+.tq-rank{
+  width:24px;height:24px;border-radius:7px;background:var(--panel2);border:1px solid var(--line);
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--ink2);
+}
+.tq-q{flex:1;font-size:12.5px;line-height:1.4}
+.tq-q small{display:block;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px}
+.tq-trend{
+  display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:7px;
+  font-size:10px;font-weight:800;font-family:'JetBrains Mono',monospace;flex-shrink:0;
+}
+.tq-trend.up{color:var(--lime);background:rgba(30,255,142,.14)}
+.tq-trend.down{color:var(--red);background:rgba(255,107,107,.14)}
+.tq-trend.new{color:var(--cyan);background:rgba(0,229,255,.14)}
+.tq-trend svg{width:10px;height:10px}
+
+/* Repartition with delta */
+.rep-list{display:flex;flex-direction:column;gap:7px}
+.rep-row{
+  display:grid;grid-template-columns:80px 1fr auto auto;gap:9px;align-items:center;
+  padding:8px 10px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);
+}
+.rep-lbl{font-size:11.5px;font-weight:700}
+.rep-bar{
+  height:7px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;
+}
+.rep-bar-fill{height:100%;border-radius:999px;background:var(--grad-core);transition:width .3s}
+.rep-val{font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--ink2)}
+.rep-delta{font-size:10px;font-weight:800;font-family:'JetBrains Mono',monospace;display:inline-flex;align-items:center;gap:2px}
+.rep-delta.up{color:var(--lime)}
+.rep-delta.down{color:var(--red)}
+.rep-delta.flat{color:var(--muted)}
+.rep-delta svg{width:10px;height:10px}
+
+/* Audio brief speed selector */
+.audio-controls{display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap}
+.audio-controls .ac-btn{
+  width:32px;height:32px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);
+  color:var(--ink);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
+}
+.audio-controls .ac-btn svg{width:13px;height:13px}
+.audio-controls .ac-btn.danger{color:var(--red)}
+.audio-controls .speed-pills{
+  display:inline-flex;gap:3px;padding:3px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;
+}
+.audio-controls .speed-pill{
+  border:0;background:transparent;color:var(--ink2);
+  padding:5px 9px;border-radius:6px;cursor:pointer;
+  font-size:10.5px;font-weight:700;font-family:inherit;min-width:34px;
+}
+.audio-controls .speed-pill.on{background:var(--bg2);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+
+/* Campaign segment chips */
+.seg-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.seg-row{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:11px 13px;border-radius:11px;background:var(--panel);border:1px solid var(--line);
+}
+.seg-row .seg-l{flex:1;min-width:0}
+.seg-row .seg-l b{font-size:13px;font-weight:700;display:block}
+.seg-row .seg-l small{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.seg-row .seg-actions{display:flex;gap:5px;flex-shrink:0}
+.seg-row .mini-btn{
+  width:30px;height:30px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);
+  color:var(--ink2);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
+}
+.seg-row .mini-btn svg{width:12px;height:12px}
+.seg-row .mini-btn.danger{color:var(--red)}
+
+/* Campaign auto with controls */
+.auto-camp{
+  padding:13px;border-radius:12px;background:var(--panel);border:1px solid var(--line);
+  margin-bottom:10px;
+}
+.auto-camp .ac-head{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-bottom:6px}
+.auto-camp .ac-head b{font-size:13px;font-weight:800}
+.auto-camp .ac-head .status-pill{
+  font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  padding:2px 7px;border-radius:999px;font-family:'JetBrains Mono',monospace;
+}
+.auto-camp .status-pill.active{background:rgba(30,255,142,.16);color:#1EFF8E;border:1px solid rgba(30,255,142,.32)}
+.auto-camp .status-pill.paused{background:rgba(245,196,94,.16);color:#F5C45E;border:1px solid rgba(245,196,94,.32)}
+.auto-camp .ac-desc{font-size:11.5px;color:var(--muted);line-height:1.45;margin-bottom:9px}
+.auto-camp .ac-ctrl{display:flex;gap:6px;flex-wrap:wrap}
+.auto-camp .ac-ctrl button{
+  padding:7px 11px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);
+  font-size:10.5px;font-weight:700;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:5px;
+}
+.auto-camp .ac-ctrl button.primary{background:var(--grad-core);color:#fff;border-color:transparent}
+.auto-camp .ac-ctrl button.danger{color:var(--red)}
+.auto-camp .ac-ctrl button svg{width:11px;height:11px}
+
+/* Campaign sent history rows */
+.sent-camp{
+  display:flex;align-items:center;gap:10px;padding:11px;border-radius:11px;
+  background:var(--panel);border:1px solid var(--line);margin-bottom:7px;
+}
+.sent-camp .sc-meta{flex:1;min-width:0}
+.sent-camp .sc-meta b{font-size:12.5px;font-weight:700;display:block}
+.sent-camp .sc-meta small{font-size:10.5px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.sent-camp .sc-stat{
+  display:flex;flex-direction:column;align-items:flex-end;gap:1px;flex-shrink:0;
+}
+.sent-camp .sc-stat .v{font-size:13px;font-weight:800;color:var(--lime);font-family:'JetBrains Mono',monospace}
+.sent-camp .sc-stat .l{font-size:9.5px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
+.sent-camp .sc-actions{display:flex;gap:4px;flex-shrink:0}
+.sent-camp .sc-actions button{
+  width:28px;height:28px;border-radius:7px;background:var(--panel2);border:1px solid var(--line);
+  color:var(--ink2);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
+}
+.sent-camp .sc-actions button svg{width:11px;height:11px}
+
+/* Generic full-width modal action grid */
+.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+.modal-actions .btn{padding:11px;font-size:12.5px;min-height:42px}
+
+/* CSV / Filter modal options */
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.opt-tile{
+  padding:11px;border-radius:11px;background:var(--panel);border:1px solid var(--line);
+  cursor:pointer;font-family:inherit;color:var(--ink);text-align:left;
+}
+.opt-tile:active{transform:scale(.98)}
+.opt-tile.on{border-color:var(--cyan);background:rgba(0,229,255,.10);box-shadow:0 0 12px -4px rgba(0,229,255,.4)}
+.opt-tile b{font-size:12.5px;font-weight:800;display:block}
+.opt-tile small{font-size:10.5px;color:var(--muted);display:block;margin-top:2px;font-family:'JetBrains Mono',monospace}
+
+/* Vacances upgrade — duration tabs + presets */
+.vac-presets{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.vac-preset{
+  padding:8px 13px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);color:var(--ink2);
+  font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;
+}
+.vac-preset.on{background:rgba(46,123,255,.16);border-color:var(--blue);color:var(--blue)}
+
+.vac-mode-pill{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;
+  background:rgba(245,196,94,.16);border:1px solid rgba(245,196,94,.35);color:var(--gold);
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  font-family:'JetBrains Mono',monospace;margin-bottom:8px;
+}
+.vac-mode-pill svg{width:11px;height:11px}
+
+/* Billing — invoice list */
+.inv-list{display:flex;flex-direction:column;gap:8px}
+.inv-row{
+  display:flex;align-items:center;gap:11px;padding:12px 13px;border-radius:11px;
+  background:var(--panel);border:1px solid var(--line);
+}
+.inv-row .inv-meta{flex:1;min-width:0}
+.inv-row .inv-meta b{font-size:13px;font-weight:700;display:block}
+.inv-row .inv-meta small{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.inv-row .inv-amt{font-size:14px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--lime);flex-shrink:0}
+.inv-row .inv-dl{
+  width:34px;height:34px;border-radius:9px;background:var(--panel2);border:1px solid var(--line);
+  color:var(--ink);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+}
+.inv-row .inv-dl svg{width:13px;height:13px}
+
+/* Plan card */
+.plan-card{
+  padding:16px;border-radius:14px;
+  background:linear-gradient(160deg,rgba(46,123,255,.14),rgba(139,92,255,.06));
+  border:1px solid rgba(46,123,255,.30);margin-bottom:14px;
+}
+.plan-card .pc-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.plan-card .pc-name{font-size:15px;font-weight:800}
+.plan-card .pc-price{font-size:18px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--cyan)}
+.plan-card .pc-desc{font-size:11.5px;color:var(--muted);line-height:1.5;margin-bottom:10px}
+.plan-card .pc-cta{width:100%}
+
+/* API integrations cards */
+.api-card{
+  display:flex;align-items:center;gap:11px;padding:11px;border-radius:11px;
+  background:var(--panel);border:1px solid var(--line);margin-bottom:8px;
+}
+.api-card .api-ic{
+  width:36px;height:36px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  background:var(--grad-core);
+}
+.api-card .api-ic svg{width:16px;height:16px}
+.api-card .api-meta{flex:1;min-width:0}
+.api-card .api-meta b{font-size:13px;font-weight:700;display:block}
+.api-card .api-meta small{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:5px}
+.api-card .api-meta small .dot{width:6px;height:6px;border-radius:50%;background:var(--red)}
+.api-card .api-meta small .dot.ok{background:var(--lime);box-shadow:0 0 6px var(--lime)}
+.api-card .api-cta{
+  padding:7px 11px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+  font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;
+}
+.api-card .api-cta.connected{background:rgba(30,255,142,.14);color:var(--lime);border-color:rgba(30,255,142,.32)}
+
+/* Add-button floating */
+.add-fab{
+  position:absolute;right:8px;top:8px;
+  width:38px;height:38px;border-radius:11px;background:var(--grad-core);color:#fff;border:0;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 18px -6px rgba(46,123,255,.55);
+}
+.add-fab svg{width:16px;height:16px}
+
+/* Print styles for PDF export */
+@media print {
+  body{background:#fff;color:#000;padding:20px;font-size:12pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body > *{display:none !important}
+  body > #print-area{display:block !important;color:#000}
+  #print-area h1{font-size:22pt;margin-bottom:8px;color:#1F6FFF}
+  #print-area h2{font-size:14pt;margin:16px 0 8px;color:#0F172A;border-bottom:1px solid #e5e7eb;padding-bottom:4px}
+  #print-area h3{font-size:12pt;margin:10px 0 4px;color:#0F172A}
+  #print-area .pi-meta{color:#64748B;font-size:10pt;margin-bottom:14px}
+  #print-area .pi-section{margin-bottom:16px;page-break-inside:avoid}
+  #print-area .pi-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed #e5e7eb}
+  #print-area .pi-row b{color:#0F172A}
+  #print-area .pi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+  #print-area .pi-card{padding:10px;border:1px solid #e5e7eb;border-radius:6px}
+  #print-area .pi-card .v{font-size:18pt;font-weight:800;color:#1F6FFF;display:block;margin-bottom:2px}
+  #print-area .pi-card .l{font-size:10pt;color:#64748B}
+  #print-area table{width:100%;border-collapse:collapse;margin:6px 0}
+  #print-area th,#print-area td{text-align:left;padding:6px 8px;border-bottom:1px solid #e5e7eb;font-size:10pt}
+  #print-area th{background:#f8fafc;color:#0F172A;font-weight:700}
+  #print-area .pi-foot{margin-top:24px;padding-top:8px;border-top:1px solid #e5e7eb;color:#64748B;font-size:9pt;text-align:center}
+  .topbar, .bottom-nav, .toast, .modal-bg, .drawer, .drawer-bg, .iface-overlay, #boot, .onboard{display:none !important}
+}
+
+/* Chat IA panel (CRM Claude) */
+.ai-chat{
+  display:flex;flex-direction:column;gap:8px;padding:12px;
+  border-radius:12px;background:var(--panel);border:1px solid var(--line);
+  margin-bottom:12px;
+}
+.ai-chat .msg-l, .ai-chat .msg-r{
+  max-width:88%;padding:10px 12px;border-radius:13px;font-size:12.5px;line-height:1.45;
+}
+.ai-chat .msg-l{align-self:flex-start;background:var(--panel2);border:1px solid var(--line)}
+.ai-chat .msg-r{align-self:flex-end;background:linear-gradient(135deg,rgba(46,123,255,.18),rgba(139,92,255,.10));border:1px solid rgba(46,123,255,.30);color:var(--ink)}
+.ai-chat-input{display:flex;gap:7px;margin-top:6px}
+.ai-chat-input input{
+  flex:1;padding:10px 12px;border-radius:10px;background:var(--bg2);border:1px solid var(--line);
+  color:var(--ink);font-size:13px;font-family:inherit;min-height:42px;
+}
+.ai-chat-input button{
+  width:42px;height:42px;border-radius:10px;background:var(--grad-core);color:#fff;border:0;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.ai-chat-input button svg{width:14px;height:14px}
+
+/* Notification bell pop-up dropdown */
+.notif-pop{
+  position:fixed;top:calc(56px + var(--safe-top) + 6px);right:14px;z-index:250;
+  width:300px;max-width:calc(100vw - 28px);
+  background:var(--bg2);border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 22px 48px -16px rgba(0,0,0,.6);
+  display:none;animation:fadeSlide .2s ease;
+}
+.notif-pop.show{display:block}
+.notif-pop .np-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.notif-pop .np-head b{font-size:13px;font-weight:800}
+.notif-pop .np-head a{font-size:11px;color:var(--cyan);font-weight:700;cursor:pointer}
+.notif-pop .np-list{max-height:340px;overflow-y:auto}
+.notif-pop .np-item{
+  display:flex;align-items:flex-start;gap:9px;padding:10px 14px;
+  border-bottom:1px solid var(--line2);cursor:pointer;
+}
+.notif-pop .np-item:last-child{border-bottom:0}
+.notif-pop .np-item:active{background:var(--panel2)}
+.notif-pop .np-item .np-ic{
+  width:30px;height:30px;border-radius:9px;flex-shrink:0;color:#fff;
+  background:var(--grad-core);display:flex;align-items:center;justify-content:center;
+}
+.notif-pop .np-item .np-ic svg{width:13px;height:13px}
+.notif-pop .np-item.unread{background:rgba(0,229,255,.04)}
+.notif-pop .np-item .np-meta{flex:1;min-width:0}
+.notif-pop .np-item .np-title{font-size:12px;font-weight:700;line-height:1.35}
+.notif-pop .np-item .np-time{font-size:10px;color:var(--muted);margin-top:3px;font-family:'JetBrains Mono',monospace}
+.notif-pop .np-foot{padding:9px 14px;text-align:center;border-top:1px solid var(--line)}
+.notif-pop .np-foot button{
+  background:transparent;border:0;color:var(--ink2);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;
+}
+
 /* ============ Tiny phone ≤ 360 ============ */
 @media(max-width:360px){
   .modgrid{gap:9px}
@@ -1108,9 +1797,11 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
   </div>
 
   <button class="hub-cta" id="hubCtaCore">
-    Entrer dans Nexus Core
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    Interface principale
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
   </button>
+
+  <!-- Widgets raccourcis supprimés — Interface principale centralise l'accès (cf. schéma Augustin) -->
 </section>
 
 <!-- ===================== CORE SCREEN ===================== -->
@@ -1122,10 +1813,10 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
       <b>Panadería Don Carlos</b>
       <small>Las Condes · Santiago, CL</small>
     </div>
-    <a href="app.html#/dashboard" class="interface-cta" aria-label="Interface principale" style="display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:10px;background:linear-gradient(135deg,#2E7BFF,#8B5CFF);color:#fff;font-size:11.5px;font-weight:700;text-decoration:none;flex-shrink:0;box-shadow:0 6px 14px -4px rgba(46,123,255,.5)">
+    <button class="interface-cta" id="ifaceCtaCore" aria-label="Interface principale" style="display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:10px;background:linear-gradient(135deg,#2E7BFF,#8B5CFF);color:#fff;font-size:11.5px;font-weight:700;border:0;cursor:pointer;flex-shrink:0;box-shadow:0 6px 14px -4px rgba(46,123,255,.5)">
       <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
       Interface
-    </a>
+    </button>
   </div>
 
   <!-- Hero banner -->
@@ -1358,7 +2049,13 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
 
 <!-- ===================== STATS SCREEN ===================== -->
 <section class="screen" id="screen-stats">
-  <div class="screen-title"><h2>Statistiques</h2><small>Cette semaine</small></div>
+  <div class="screen-title"><h2>Statistiques</h2><small id="statsPeriodLabel">7 derniers jours</small></div>
+
+  <div class="tab-pills" id="periodTabs">
+    <button class="tab-pill on" data-period="7">7 jours</button>
+    <button class="tab-pill" data-period="30">30 jours</button>
+    <button class="tab-pill" data-period="all">Depuis toujours</button>
+  </div>
 
   <div class="stats-grid">
     <article class="stat s1" data-stat="recovered">
@@ -1379,14 +2076,14 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
       <div class="stat-detail">Tous via WhatsApp · conversion 38 %.</div>
       <div class="mini-chart" data-bars="1,0,1,0,0,1,0"></div>
     </article>
-    <article class="stat s3" data-stat="sales">
+    <article class="stat s3" data-stat="conv">
       <div class="stat-head">
-        <div class="stat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div>
-        <span class="stat-tag">★ Ventes</span>
+        <div class="stat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <span class="stat-tag">★ Conversations</span>
       </div>
-      <div class="stat-headline"><b>10</b> ventes aujourd'hui.</div>
-      <div class="stat-detail">Meilleur lundi du mois · panier moyen $19.30.</div>
-      <div class="mini-chart" data-bars="10,7,9,8,14,12,6"></div>
+      <div class="stat-headline"><b>147</b> conversations.</div>
+      <div class="stat-detail">94 % gérées par l'IA · 6 h économisées.</div>
+      <div class="mini-chart" data-bars="22,18,25,20,28,24,10"></div>
     </article>
     <article class="stat s4" data-stat="response">
       <div class="stat-head">
@@ -1399,35 +2096,143 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
     </article>
   </div>
 
+  <!-- Best hours (remplace heatmap) -->
+  <div class="best-hours">
+    <div class="bh-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Best hours · activité client
+    </div>
+    <div id="bhInsightArea">
+      <p class="bh-insight" id="bhInsight1">Tes clients répondent <b>3× plus</b> entre <b>13h–14h</b> et <b>19h–21h</b>. Évite les envois après 21h.</p>
+      <p class="bh-insight" id="bhInsight2">Le <b>vendredi soir</b> reste ton créneau roi : +27 % de réponses. Programme tes relances importantes ce jour-là.</p>
+      <p class="bh-insight" id="bhInsight3">Le <b>lundi matin</b> = creux total. N'envoie rien avant 11h sauf urgence.</p>
+    </div>
+    <div class="bh-toggle">
+      <button class="on" data-bh="7">7 jours</button>
+      <button data-bh="30">30 jours</button>
+    </div>
+  </div>
+
+  <!-- Top questions -->
+  <div class="more-section-title">Top questions de la semaine</div>
+  <div class="top-questions" id="topQuestions">
+    <div class="tq-row">
+      <span class="tq-rank">1</span>
+      <div class="tq-q">« Vous livrez à Providencia ? » <small>9 occurrences</small></div>
+      <span class="tq-trend up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>+2</span>
+    </div>
+    <div class="tq-row">
+      <span class="tq-rank">2</span>
+      <div class="tq-q">« Cookies aux figues dispo ? » <small>7 occurrences</small></div>
+      <span class="tq-trend down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>−1</span>
+    </div>
+    <div class="tq-row">
+      <span class="tq-rank">3</span>
+      <div class="tq-q">« Sucré sans sucre ? » <small>5 occurrences</small></div>
+      <span class="tq-trend new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>NEW</span>
+    </div>
+    <div class="tq-row">
+      <span class="tq-rank">4</span>
+      <div class="tq-q">« Horaires weekend ? » <small>4 occurrences</small></div>
+      <span class="tq-trend up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>+1</span>
+    </div>
+    <div class="tq-row">
+      <span class="tq-rank">5</span>
+      <div class="tq-q">« Commande pour 25 personnes ? » <small>3 occurrences</small></div>
+      <span class="tq-trend down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>−2</span>
+    </div>
+  </div>
+
+  <!-- Répartition clients -->
+  <div class="more-section-title">Répartition de ta base · évolution</div>
+  <div class="rep-list">
+    <div class="rep-row">
+      <span class="rep-lbl">Récurrent</span>
+      <div class="rep-bar"><div class="rep-bar-fill" style="width:42%"></div></div>
+      <span class="rep-val">61</span>
+      <span class="rep-delta up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>+50%</span>
+    </div>
+    <div class="rep-row">
+      <span class="rep-lbl">VIP</span>
+      <div class="rep-bar"><div class="rep-bar-fill" style="width:8%"></div></div>
+      <span class="rep-val">12</span>
+      <span class="rep-delta up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>+12%</span>
+    </div>
+    <div class="rep-row">
+      <span class="rep-lbl">Nouveau</span>
+      <div class="rep-bar"><div class="rep-bar-fill" style="width:6%"></div></div>
+      <span class="rep-val">8</span>
+      <span class="rep-delta up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>+33%</span>
+    </div>
+    <div class="rep-row">
+      <span class="rep-lbl">Occasionnel</span>
+      <div class="rep-bar"><div class="rep-bar-fill" style="width:23%"></div></div>
+      <span class="rep-val">34</span>
+      <span class="rep-delta flat">·  0%</span>
+    </div>
+    <div class="rep-row">
+      <span class="rep-lbl">Perdu</span>
+      <div class="rep-bar"><div class="rep-bar-fill" style="width:7%"></div></div>
+      <span class="rep-val">10</span>
+      <span class="rep-delta up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>+5%</span>
+    </div>
+  </div>
+  <p style="font-size:11px;color:var(--muted);margin:8px 4px 0;line-height:1.5">Les <b style="color:var(--lime)">récurrents +50%</b> = excellent. Les <b style="color:var(--red)">perdus +5%</b> = à surveiller, lance la campagne récup.</p>
+
+  <!-- Détails IA -->
   <div class="more-section-title">Détails IA</div>
-  <button class="more-item" data-toast="L'IA a géré 147 conversations cette semaine, 94 % sans intervention.">
+  <button class="more-item" data-detail="conv">
     <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg></span>
     <span class="more-item-lbl">147 conversations IA</span>
     <span class="more-item-meta">94 %</span>
     <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
   </button>
-  <button class="more-item" data-toast="Tu as économisé environ 6 h cette semaine grâce à l'IA.">
+  <button class="more-item" data-detail="time">
     <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
     <span class="more-item-lbl">Temps économisé</span>
     <span class="more-item-meta">~6 h</span>
     <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
   </button>
-  <button class="more-item" data-toast="CA hebdo : $1,287. Objectif 30 jours : +12 %.">
-    <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
-    <span class="more-item-lbl">CA semaine</span>
-    <span class="more-item-meta">$1 287</span>
-    <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
-  </button>
+
+  <!-- Boutons rapport / export -->
+  <div class="more-section-title">Rapport & export</div>
+  <div class="modal-actions">
+    <button class="btn btn-secondary" id="exportStatsBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export PDF stats
+    </button>
+    <button class="btn btn-primary" id="exportFullReportBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Rapport général PDF
+    </button>
+  </div>
 </section>
 
 <!-- ===================== MESSAGES SCREEN ===================== -->
 <section class="screen" id="screen-messages">
-  <div class="screen-title"><h2>Messages</h2><small>10 conversations</small></div>
+  <div class="screen-title"><h2>Messagerie</h2><small id="msgCountLabel">10 conversations</small></div>
 
   <div class="inbox-search">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <input type="search" placeholder="Rechercher un client, un produit..." id="inboxSearch">
   </div>
+
+  <!-- Filtres dénominations (chips cliquables) -->
+  <div class="deno-chips" id="msgDenoChips">
+    <button class="deno-chip on" data-deno="all">Tous <span class="cnt">10</span></button>
+    <button class="deno-chip" data-deno="vip">VIP <span class="cnt">5</span></button>
+    <button class="deno-chip" data-deno="new">New <span class="cnt">2</span></button>
+    <button class="deno-chip" data-deno="biz">Biz <span class="cnt">1</span></button>
+    <button class="deno-chip" data-deno="rec">Récurrent <span class="cnt">3</span></button>
+    <button class="deno-chip" data-deno="occ">Occasionnel <span class="cnt">2</span></button>
+    <button class="deno-chip" data-deno="lost">Perdu <span class="cnt">1</span></button>
+  </div>
+
+  <!-- 1 seul "Partage en 1 clic" — pas de doublon -->
+  <button class="btn btn-secondary" id="shareOneClickBtn" style="margin-bottom:10px">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+    Partage en 1 clic
+  </button>
 
   <div class="inbox-list" id="inboxList">
     <!-- Will be filled via JS -->
@@ -1473,7 +2278,7 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
       <span class="more-item-meta" id="vacStatus">Inactif</span>
       <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
     </button>
-    <button class="more-item" data-toast="Tutoriel relancé. 4 étapes.">
+    <button class="more-item" data-go="tutoriel">
       <span class="more-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg></span>
       <span class="more-item-lbl">Revoir le tutoriel</span>
       <span class="more-item-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
@@ -1538,6 +2343,541 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
   </div>
 </section>
 
+<!-- ===================== PROFIL ENTREPRISE SCREEN ===================== -->
+<section class="screen" id="screen-profil">
+  <div class="screen-title"><h2>Profil entreprise</h2><small id="profComplet">80% complété</small></div>
+
+  <div class="tab-pills" id="profTabs">
+    <button class="tab-pill on" data-tab="entreprise">Entreprise</button>
+    <button class="tab-pill" data-tab="catalogue">Catalogue</button>
+    <button class="tab-pill" data-tab="api">API & intégrations</button>
+  </div>
+
+  <!-- Tab Entreprise -->
+  <div class="prof-tab-pane" data-pane="entreprise">
+    <div class="prof-block">
+      <h4>
+        <span style="display:flex;align-items:center;gap:8px"><span class="icbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>Identité</span>
+      </h4>
+      <p class="hint">Le nom et l'adresse de ton entreprise.</p>
+      <input type="text" id="profName" placeholder="Nom de l'entreprise">
+      <div class="row">
+        <input type="text" id="profCity" placeholder="Ville">
+        <input type="text" id="profCountry" placeholder="Pays">
+      </div>
+    </div>
+
+    <div class="prof-block">
+      <h4>
+        <span style="display:flex;align-items:center;gap:8px"><span class="icbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>Description</span>
+      </h4>
+      <p class="hint">Raconte ton histoire. L'IA s'en sert pour répondre avec ta voix.</p>
+      <textarea id="profDesc" placeholder="Ex : Boulangerie familiale fondée en 2014, spécialité empanadas et pain au levain naturel. On livre Las Condes et Providencia."></textarea>
+    </div>
+
+    <div class="prof-block">
+      <h4>
+        <span style="display:flex;align-items:center;gap:8px"><span class="icbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>Data & archives</span>
+      </h4>
+      <p class="hint">Dates clés, historique, faits marquants.</p>
+      <textarea id="profData" placeholder="Ex : Fondation 2014 · Ouverture 2e local 2019 · Prix Empanada de Oro 2022 · 40 000 clients servis cumulés"></textarea>
+    </div>
+
+    <div class="prof-block">
+      <h4>
+        <span style="display:flex;align-items:center;gap:8px"><span class="icbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Composition</span>
+      </h4>
+      <p class="hint">Équipe, collaborateurs, organisation.</p>
+      <textarea id="profTeam" placeholder="Ex : Carlos (gérant) · Marta (boulangère cheffe) · Diego (livraisons) · 2 saisonniers été"></textarea>
+    </div>
+
+    <div class="prof-block">
+      <h4>
+        <span style="display:flex;align-items:center;gap:8px"><span class="icbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>Page web</span>
+      </h4>
+      <p class="hint">L'IA peut lire ton site pour s'auto-enrichir.</p>
+      <input type="url" id="profUrl" placeholder="https://maboulangerie.cl">
+      <button class="btn btn-secondary" id="profScrapeBtn" style="margin-top:8px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Scraper la page maintenant
+      </button>
+    </div>
+
+    <button class="btn btn-primary" id="profSaveBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Enregistrer le profil
+    </button>
+  </div>
+
+  <!-- Tab Catalogue -->
+  <div class="prof-tab-pane" data-pane="catalogue" style="display:none">
+    <div class="section-toolbar">
+      <button class="btn-tool primary" id="addProductBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Ajouter un produit
+      </button>
+      <button class="btn-tool" id="importCatalogBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Importer depuis URL
+      </button>
+    </div>
+    <div class="prod-list" id="prodList"><!-- Filled by JS --></div>
+  </div>
+
+  <!-- Tab API -->
+  <div class="prof-tab-pane" data-pane="api" style="display:none">
+    <div class="prof-block">
+      <h4>Plafond conso IA</h4>
+      <p class="hint">Limite mensuelle de dépense API IA pour ton compte.</p>
+      <div class="row">
+        <input type="number" id="apiBudget" placeholder="5" value="5">
+        <select id="apiBudgetCurr"><option>EUR</option><option>USD</option><option>CLP</option></select>
+      </div>
+      <small style="display:block;margin-top:6px;font-size:10.5px;color:var(--muted)">Au-delà : l'IA bascule sur réponses standard pour protéger ton compte.</small>
+    </div>
+
+    <div class="prof-block" style="background:rgba(255,107,107,.06);border-color:rgba(255,107,107,.30)">
+      <h4 style="color:var(--red)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Sécurité</h4>
+      <p class="hint" style="color:var(--ink2)">Tes clés API sont stockées chiffrées côté serveur. Elles ne sont JAMAIS visibles dans ton navigateur. Avec l'arrivée de Claude Mythos, on a renforcé les protections — fais attention aux extensions Chrome qui demandent ton storage.</p>
+    </div>
+
+    <div id="apiList"><!-- Filled by JS --></div>
+  </div>
+</section>
+
+<!-- ===================== CRM SCREEN ===================== -->
+<section class="screen" id="screen-crm">
+  <div class="screen-title"><h2>Clients CRM</h2><small id="crmCount">147 contacts</small></div>
+
+  <div class="section-toolbar">
+    <button class="btn-tool primary" id="addClientBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Ajouter
+    </button>
+    <button class="btn-tool" id="exportCsvBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export CSV
+    </button>
+    <button class="btn-tool" id="sortClientsBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+      Trier
+    </button>
+    <button class="btn-tool" id="aiCrmChatBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+      Demander à l'IA
+    </button>
+  </div>
+
+  <div class="deno-chips" id="crmDenoChips">
+    <button class="deno-chip on" data-deno="all">Tous <span class="cnt" id="cntAll">147</span></button>
+    <button class="deno-chip" data-deno="vip">VIP <span class="cnt" id="cntVip">12</span></button>
+    <button class="deno-chip" data-deno="new">New <span class="cnt" id="cntNew">8</span></button>
+    <button class="deno-chip" data-deno="biz">Biz <span class="cnt" id="cntBiz">22</span></button>
+    <button class="deno-chip" data-deno="rec">Récurrent <span class="cnt" id="cntRec">61</span></button>
+    <button class="deno-chip" data-deno="occ">Occasionnel <span class="cnt" id="cntOcc">34</span></button>
+    <button class="deno-chip" data-deno="lost">Perdu <span class="cnt" id="cntLost">10</span></button>
+  </div>
+
+  <div class="crm-list" id="crmList"><!-- Filled by JS --></div>
+  <button class="btn btn-secondary" id="crmLoadMoreBtn" style="margin-top:12px">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    Voir plus de clients
+  </button>
+</section>
+
+<!-- ===================== CAMPAGNES SCREEN ===================== -->
+<section class="screen" id="screen-camp">
+  <div class="screen-title"><h2>Campagnes</h2><small>Marketing</small></div>
+
+  <div class="tab-pills" id="campTabs">
+    <button class="tab-pill on" data-tab="create">Créer</button>
+    <button class="tab-pill" data-tab="auto">Auto</button>
+    <button class="tab-pill" data-tab="sent">Envoyées</button>
+    <button class="tab-pill" data-tab="templates">Templates</button>
+    <button class="tab-pill" data-tab="seg">Segments</button>
+  </div>
+
+  <!-- Pane Créer -->
+  <div class="camp-tab-pane" data-pane="create">
+    <div class="prof-block">
+      <h4>Nouvelle campagne</h4>
+      <input type="text" id="campName" placeholder="Nom de la campagne (ex : Saint-Valentin)">
+
+      <label style="display:block;font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;margin:12px 0 6px">Cible</label>
+      <select id="campTarget">
+        <option value="all">Tous les clients</option>
+        <option value="vip">VIP</option>
+        <option value="rec">Récurrent</option>
+        <option value="new">Nouveaux</option>
+        <option value="biz">Business</option>
+        <option value="occ">Occasionnel</option>
+        <option value="lost">Clients perdus</option>
+        <option value="custom">Personnalisé (sélection manuelle)</option>
+        <option value="seg-saved" id="campSavedSegOpt" disabled>— mes segments sauvegardés —</option>
+      </select>
+
+      <label style="display:block;font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;margin:12px 0 6px">Canal</label>
+      <select id="campChannel">
+        <option value="mail">Mail (recommandé · pas de risque ban)</option>
+        <option value="wa">WhatsApp (avec throttling)</option>
+        <option value="ig">Instagram DM</option>
+      </select>
+
+      <label style="display:block;font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;margin:12px 0 6px">Message</label>
+      <textarea id="campMsg" placeholder="Écris ton message ici..."></textarea>
+
+      <div class="section-toolbar" style="margin:10px 0 0">
+        <button class="btn-tool" id="campImportBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Importer
+        </button>
+        <button class="btn-tool" id="campCatalogBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h20v18H2z"/><path d="M2 9h20"/></svg>
+          Choisir du catalogue
+        </button>
+        <button class="btn-tool" id="campAi3VersionsBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+          Générer 3 versions IA
+        </button>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="campSaveDraftBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/></svg>
+        Sauver brouillon
+      </button>
+      <button class="btn btn-secondary" id="campSaveTemplateBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Sauver template
+      </button>
+    </div>
+    <button class="btn btn-primary" id="campSendBtn" style="margin-top:9px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      Envoyer maintenant
+    </button>
+  </div>
+
+  <!-- Pane Auto -->
+  <div class="camp-tab-pane" data-pane="auto" style="display:none">
+    <div class="auto-camp" data-id="lost">
+      <div class="ac-head">
+        <b>Récupération clients perdus</b>
+        <span class="status-pill paused">Pause</span>
+      </div>
+      <p class="ac-desc">Relance auto des clients sans achat depuis 30 jours. Message personnalisé, code promo si VIP.</p>
+      <div class="ac-ctrl">
+        <button class="primary" data-action="activate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Activer</button>
+        <button data-action="pause"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>Pause</button>
+        <button data-action="edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Modifier</button>
+        <button class="danger" data-action="delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>Supprimer</button>
+      </div>
+    </div>
+
+    <div class="auto-camp" data-id="bday">
+      <div class="ac-head">
+        <b>Anniversaire client</b>
+        <span class="status-pill active">Actif</span>
+      </div>
+      <p class="ac-desc">Message + code promo −15 % envoyé automatiquement le jour de l'anniversaire.</p>
+      <div class="ac-ctrl">
+        <button data-action="pause"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>Pause</button>
+        <button data-action="edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Modifier</button>
+        <button class="danger" data-action="delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>Supprimer</button>
+      </div>
+    </div>
+
+    <div class="auto-camp" data-id="weather">
+      <div class="ac-head">
+        <b>Promo météo (pluie)</b>
+        <span class="status-pill active">Actif</span>
+      </div>
+      <p class="ac-desc">Active la promo soupe quand la météo annonce de la pluie le lendemain.</p>
+      <div class="ac-ctrl">
+        <button data-action="pause"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>Pause</button>
+        <button data-action="edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Modifier</button>
+        <button class="danger" data-action="delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>Supprimer</button>
+      </div>
+    </div>
+
+    <button class="btn btn-secondary" id="addAutoCampBtn" style="margin-top:8px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nouvelle campagne auto
+    </button>
+  </div>
+
+  <!-- Pane Sent (history) -->
+  <div class="camp-tab-pane" data-pane="sent" style="display:none">
+    <div id="sentList"><!-- Filled by JS --></div>
+  </div>
+
+  <!-- Pane Templates -->
+  <div class="camp-tab-pane" data-pane="templates" style="display:none">
+    <div class="section-toolbar">
+      <button class="btn-tool primary" id="newTemplateBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nouveau template
+      </button>
+    </div>
+    <div id="templateList"><!-- Filled by JS --></div>
+  </div>
+
+  <!-- Pane Segments -->
+  <div class="camp-tab-pane" data-pane="seg" style="display:none">
+    <div class="section-toolbar">
+      <button class="btn-tool primary" id="newSegBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nouveau segment
+      </button>
+    </div>
+    <div class="seg-list" id="segList"><!-- Filled by JS --></div>
+  </div>
+</section>
+
+<!-- ===================== BILLING SCREEN ===================== -->
+<section class="screen" id="screen-billing">
+  <div class="screen-title"><h2>Facturation</h2><small>Plan & factures</small></div>
+
+  <div class="plan-card">
+    <div class="pc-head">
+      <span class="pc-name">Plan <b>Pro</b></span>
+      <span class="pc-price">19 €/mois</span>
+    </div>
+    <p class="pc-desc">Inbox unifiée · CRM 500 contacts · IA réponses · Stats avancées · Brief audio quotidien.</p>
+    <button class="btn btn-primary pc-cta" id="changePlanBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      Changer de plan
+    </button>
+  </div>
+
+  <div class="more-section-title">Historique des factures</div>
+  <div class="inv-list" id="invList"><!-- Filled by JS --></div>
+</section>
+
+<!-- ===================== VACANCES SCREEN (pleine page) ===================== -->
+<section class="screen" id="screen-vacances">
+  <div class="screen-title"><h2>Mode vacances</h2><small id="vacViewStatus">Inactif</small></div>
+
+  <div class="vac-view-section">
+    <h4>
+      <span class="vvs-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+      Configuration IA
+    </h4>
+    <div class="vac-toggle-row">
+      <div class="vac-toggle-info"><b>Quand répondre</b><small>L'IA répond automatiquement pendant l'absence</small></div>
+      <div class="vac-switch on" data-vac-toggle="when"></div>
+    </div>
+    <div class="vac-toggle-row">
+      <div class="vac-toggle-info"><b>Comment répondre</b><small>Ton chaleureux, message court ou long selon durée</small></div>
+      <div class="vac-switch on" data-vac-toggle="how"></div>
+    </div>
+    <div class="vac-toggle-row">
+      <div class="vac-toggle-info"><b>Quoi répondre</b><small>Réponses adaptées au type de demande (commande, info, urgence)</small></div>
+      <div class="vac-switch on" data-vac-toggle="what"></div>
+    </div>
+  </div>
+
+  <div class="vac-view-section">
+    <h4>
+      <span class="vvs-ic" style="background:linear-gradient(135deg,#8B5CFF,#00E5FF)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+      Durée
+    </h4>
+    <div class="vac-presets" id="vacViewPresets">
+      <button class="vac-preset" data-preset="afternoon">Aprem</button>
+      <button class="vac-preset" data-preset="day">1 jour</button>
+      <button class="vac-preset" data-preset="weekend">Weekend</button>
+      <button class="vac-preset" data-preset="week">1 semaine</button>
+      <button class="vac-preset" data-preset="2weeks">2 semaines</button>
+      <button class="vac-preset" data-preset="month">1 mois</button>
+      <button class="vac-preset on" data-preset="custom">Personnalisé</button>
+    </div>
+  </div>
+
+  <div class="vac-view-section">
+    <h4>
+      <span class="vvs-ic" style="background:linear-gradient(135deg,#FF6B9D,#F5C45E)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+      Messages
+    </h4>
+    <div class="field" style="margin-bottom:12px">
+      <label style="font-size:11.5px;color:var(--muted);display:block;margin-bottom:6px">Message court (≤ 7 jours)</label>
+      <textarea id="vacViewMsgShort" style="width:100%;min-height:60px;padding:10px;border-radius:10px;background:var(--bg2);border:1px solid var(--line);color:var(--ink);font-family:inherit;font-size:12.5px;resize:vertical">¡Hola! Estoy fuera por unos días. Te respondo enseguida al regresar. Gracias por tu paciencia 🥖</textarea>
+    </div>
+    <div class="field" style="margin-bottom:12px">
+      <label style="font-size:11.5px;color:var(--muted);display:block;margin-bottom:6px">Message long (> 7 jours)</label>
+      <textarea id="vacViewMsgLong" style="width:100%;min-height:80px;padding:10px;border-radius:10px;background:var(--bg2);border:1px solid var(--line);color:var(--ink);font-family:inherit;font-size:12.5px;resize:vertical">Bonjour, la boulangerie est en pause jusqu'au [DATE]. Je note votre demande et reviens vers vous dès le retour.</textarea>
+    </div>
+    <div class="field">
+      <label style="font-size:11.5px;color:var(--muted);display:block;margin-bottom:6px">Message d'urgence</label>
+      <textarea id="vacViewMsgUrgent" style="width:100%;min-height:60px;padding:10px;border-radius:10px;background:var(--bg2);border:1px solid var(--line);color:var(--ink);font-family:inherit;font-size:12.5px;resize:vertical">⚠️ Pour les commandes urgentes pendant mon absence, contactez Marta au +56 9 1234 5678.</textarea>
+    </div>
+  </div>
+
+  <div class="vac-view-section">
+    <h4>
+      <span class="vvs-ic" style="background:linear-gradient(135deg,#00E5FF,#2E7BFF)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
+      Langue
+    </h4>
+    <div class="tone-pills" id="vacViewLangPills">
+      <button class="tone-pill" data-lang="fr">FR</button>
+      <button class="tone-pill" data-lang="es">ES</button>
+      <button class="tone-pill" data-lang="en">EN</button>
+      <button class="tone-pill on" data-lang="auto">Auto</button>
+    </div>
+  </div>
+
+  <div class="vac-view-section">
+    <h4>
+      <span class="vvs-ic" style="background:linear-gradient(135deg,#FF7B7B,#8B5CFF)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+      Permissions IA
+    </h4>
+    <div class="vac-toggle-row">
+      <div class="vac-toggle-info"><b>Répondre aux questions</b><small>FAQ produits, horaires, prix</small></div>
+      <div class="vac-switch on" data-vac-perm="answer"></div>
+    </div>
+    <div class="vac-toggle-row">
+      <div class="vac-toggle-info"><b>Commandes urgentes</b><small>Transférer Marta + confirmer dispo</small></div>
+      <div class="vac-switch on" data-vac-perm="urgent"></div>
+    </div>
+    <div class="vac-toggle-row">
+      <div class="vac-toggle-info"><b>Confirmer livraisons</b><small>Confirmer les commandes déjà passées</small></div>
+      <div class="vac-switch" data-vac-perm="delivery"></div>
+    </div>
+    <div class="vac-toggle-row">
+      <div class="vac-toggle-info"><b>Promos auto</b><small>Envoyer offres aux clients VIP</small></div>
+      <div class="vac-switch" data-vac-perm="promo"></div>
+    </div>
+    <div class="vac-toggle-row">
+      <div class="vac-toggle-info"><b>Notifier l'équipe</b><small>Alerter Marta sur tout message urgent</small></div>
+      <div class="vac-switch on" data-vac-perm="notify"></div>
+    </div>
+  </div>
+
+  <button class="vac-activate-btn" id="vacViewActivate">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <span id="vacViewActivateLbl">Activer le mode vacances</span>
+  </button>
+</section>
+
+<!-- ===================== TUTORIEL SCREEN (5 étapes guidées) ===================== -->
+<section class="screen" id="screen-tutoriel">
+  <div class="screen-title"><h2>Tutoriel Nexus</h2><small>5 étapes pour démarrer</small></div>
+
+  <div class="tuto-progress">
+    <div class="tuto-progress-head">
+      <b>Ta progression</b>
+      <span class="tpc"><span id="tutoDone">0</span> / 5 étapes</span>
+    </div>
+    <div class="tuto-progress-bar"><div class="tuto-progress-fill" id="tutoFill"></div></div>
+  </div>
+
+  <div class="tuto-list" id="tutoList">
+    <article class="tuto-card" data-step="1">
+      <div class="tuto-card-head">
+        <div class="tuto-card-num">1</div>
+        <div class="tuto-card-body-text">
+          <div class="tuto-card-title">Configurer ton profil entreprise</div>
+          <div class="tuto-card-desc">Description, catalogue, page web — la base de l'IA Nexus</div>
+        </div>
+        <svg class="tuto-card-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="tuto-card-body">
+        <div class="tuto-card-body-inner">
+          <div class="tuto-checklist">
+            <div class="tuto-check-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/></svg>Renseigner nom + description courte</div>
+            <div class="tuto-check-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/></svg>Ajouter ton catalogue (min. 5 produits)</div>
+            <div class="tuto-check-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/></svg>Connecter ta page web (scraping auto)</div>
+          </div>
+          <button class="tuto-mark-btn" data-mark="1">Marquer comme fait</button>
+        </div>
+      </div>
+    </article>
+
+    <article class="tuto-card" data-step="2">
+      <div class="tuto-card-head">
+        <div class="tuto-card-num">2</div>
+        <div class="tuto-card-body-text">
+          <div class="tuto-card-title">Connecter tes intégrations</div>
+          <div class="tuto-card-desc">WhatsApp, Gmail, Calendar — Nexus centralise tout</div>
+        </div>
+        <svg class="tuto-card-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="tuto-card-body">
+        <div class="tuto-card-body-inner">
+          <div class="tuto-checklist">
+            <div class="tuto-check-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/></svg>Lier WhatsApp Business</div>
+            <div class="tuto-check-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/></svg>Autoriser Gmail (lecture + envoi)</div>
+            <div class="tuto-check-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/></svg>Synchroniser Google Calendar</div>
+          </div>
+          <button class="tuto-mark-btn" data-mark="2">Marquer comme fait</button>
+        </div>
+      </div>
+    </article>
+
+    <article class="tuto-card" data-step="3">
+      <div class="tuto-card-head">
+        <div class="tuto-card-num">3</div>
+        <div class="tuto-card-body-text">
+          <div class="tuto-card-title">Comprendre tes statistiques</div>
+          <div class="tuto-card-desc">Best hours, top questions, évolution semaine après semaine</div>
+        </div>
+        <svg class="tuto-card-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="tuto-card-body">
+        <div class="tuto-card-body-inner">
+          <div class="tuto-checklist">
+            <div class="tuto-check-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/></svg>Lire le Top du jour (3 chiffres clés)</div>
+            <div class="tuto-check-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/></svg>Identifier les meilleures heures (Best hours)</div>
+            <div class="tuto-check-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/></svg>Comparer semaine sur semaine</div>
+          </div>
+          <button class="tuto-mark-btn" data-mark="3">Marquer comme fait</button>
+        </div>
+      </div>
+    </article>
+
+    <article class="tuto-card" data-step="4">
+      <div class="tuto-card-head">
+        <div class="tuto-card-num">4</div>
+        <div class="tuto-card-body-text">
+          <div class="tuto-card-title">Créer ta première campagne</div>
+          <div class="tuto-card-desc">Segment, template, envoi mail — touche tes clients au bon moment</div>
+        </div>
+        <svg class="tuto-card-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="tuto-card-body">
+        <div class="tuto-card-body-inner">
+          <div class="tuto-checklist">
+            <div class="tuto-check-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/></svg>Choisir un segment (clients perdus, VIP, etc.)</div>
+            <div class="tuto-check-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/></svg>Sélectionner un template IA</div>
+            <div class="tuto-check-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/></svg>Programmer l'envoi mail</div>
+          </div>
+          <button class="tuto-mark-btn" data-mark="4">Marquer comme fait</button>
+        </div>
+      </div>
+    </article>
+
+    <article class="tuto-card" data-step="5">
+      <div class="tuto-card-head">
+        <div class="tuto-card-num">5</div>
+        <div class="tuto-card-body-text">
+          <div class="tuto-card-title">Gérer tes absences</div>
+          <div class="tuto-card-desc">Mode vacances — l'IA prend le relais à 100%</div>
+        </div>
+        <svg class="tuto-card-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="tuto-card-body">
+        <div class="tuto-card-body-inner">
+          <div class="tuto-checklist">
+            <div class="tuto-check-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/></svg>Choisir une durée (Aprem → 1 mois)</div>
+            <div class="tuto-check-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/></svg>Rédiger tes messages auto (court / long / urgence)</div>
+            <div class="tuto-check-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/></svg>Activer les permissions IA souhaitées</div>
+          </div>
+          <button class="tuto-mark-btn" data-mark="5">Marquer comme fait</button>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
 <!-- ===================== BOTTOM NAV ===================== -->
 <nav class="bottom-nav" id="bottomNav">
   <button class="nav-tab" data-view="hub">
@@ -1562,7 +2902,7 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
   </button>
 </nav>
 
-<!-- ===================== DRAWER (vacances) ===================== -->
+<!-- ===================== DRAWER (vacances — modulable) ===================== -->
 <div class="drawer-bg" id="drawerBg"></div>
 <aside class="drawer" id="drawer" role="dialog" aria-label="Mode vacances">
   <div class="drawer-grip"></div>
@@ -1572,6 +2912,25 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
+
+  <div class="vac-mode-pill" id="vacModeIndicator">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <span id="vacModeLabel">Mode court · &lt; 7 jours</span>
+  </div>
+
+  <div class="field">
+    <label>Durée prédéfinie</label>
+    <div class="vac-presets" id="vacPresets">
+      <button class="vac-preset" data-preset="afternoon">Aprem</button>
+      <button class="vac-preset" data-preset="day">1 jour</button>
+      <button class="vac-preset" data-preset="weekend">Weekend</button>
+      <button class="vac-preset" data-preset="week">1 semaine</button>
+      <button class="vac-preset" data-preset="2weeks">2 semaines</button>
+      <button class="vac-preset" data-preset="month">1 mois</button>
+      <button class="vac-preset on" data-preset="custom">Personnalisé</button>
+    </div>
+  </div>
+
   <div class="field-row">
     <div class="field">
       <label>Début</label>
@@ -1582,6 +2941,7 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
       <input type="datetime-local" id="vacEnd" value="2026-05-17T09:00">
     </div>
   </div>
+
   <div class="field">
     <label>Ton des réponses</label>
     <div class="tone-pills" id="tonePills">
@@ -1591,19 +2951,43 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
       <button class="tone-pill" data-tone="short">Court & direct</button>
     </div>
   </div>
+
   <div class="field">
-    <label>Message aux clients</label>
-    <textarea id="vacMsg">Hola ! La boulangerie est en pause jusqu'au 17 mai. Pour les commandes urgentes, je note ta demande et Carlos te recontacte dès le retour. Gracias por tu paciencia 🥖</textarea>
+    <label>Langue de la réponse auto</label>
+    <div class="tone-pills" id="vacLangPills">
+      <button class="tone-pill on" data-lang="es">Español</button>
+      <button class="tone-pill" data-lang="fr">Français</button>
+      <button class="tone-pill" data-lang="en">English</button>
+      <button class="tone-pill" data-lang="auto">Auto (détection)</button>
+    </div>
   </div>
+
   <div class="field">
-    <label>Permissions IA</label>
+    <label>Message court (≤ 7 jours)</label>
+    <textarea id="vacMsgShort">¡Hola! Estoy fuera por unos días. Te respondo enseguida al regresar. Gracias por tu paciencia 🥖</textarea>
+  </div>
+
+  <div class="field">
+    <label>Message long (> 7 jours)</label>
+    <textarea id="vacMsgLong">Bonjour, la boulangerie est en pause jusqu'au [DATE]. Je note votre demande et reviens vers vous dès le retour. Pour toute urgence, mon équipe peut être jointe sur ce même canal. Merci de votre compréhension.</textarea>
+  </div>
+
+  <div class="field">
+    <label>Message d'urgence</label>
+    <textarea id="vacMsgUrgent">⚠️ Pour les commandes urgentes pendant mon absence, contactez Marta au +56 9 1234 5678. Elle prend le relais.</textarea>
+  </div>
+
+  <div class="field">
+    <label>Permissions IA pendant l'absence</label>
     <div class="tone-pills" id="permPills">
       <button class="tone-pill on" type="button">Répondre questions</button>
       <button class="tone-pill on" type="button">Commandes urgentes</button>
       <button class="tone-pill" type="button">Confirmer livraisons</button>
       <button class="tone-pill" type="button">Promos auto</button>
+      <button class="tone-pill" type="button">Notifier équipe</button>
     </div>
   </div>
+
   <div class="drawer-cta-row">
     <button class="btn btn-secondary" id="vacCancel">Annuler</button>
     <button class="btn btn-primary" id="vacActivate">
@@ -1612,6 +2996,67 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
     </button>
   </div>
 </aside>
+
+<!-- ===================== INTERFACE OVERLAY (popup hub) ===================== -->
+<div class="iface-overlay" id="ifaceOverlay">
+  <div class="iface-card">
+    <button class="iface-close" id="ifaceClose" aria-label="Fermer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <h3>Interface principale</h3>
+    <p>Choisis la section où tu veux aller.</p>
+    <div class="iface-grid">
+      <button class="iface-tile t-stats" data-go="stats">
+        <div class="ift-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+        Statistiques
+      </button>
+      <button class="iface-tile t-msg" data-go="messages">
+        <div class="ift-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        Messagerie
+      </button>
+      <button class="iface-tile t-camp" data-go="camp">
+        <div class="ift-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8v18l-18-8v-2z"/></svg></div>
+        Campagnes
+        <div class="ift-sub">limited usage</div>
+      </button>
+      <button class="iface-tile t-clients" data-go="crm">
+        <div class="ift-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+        Clients CRM
+      </button>
+      <button class="iface-tile t-vac" data-go="vacances">
+        <div class="ift-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22a8 8 0 0 1 16 0"/><circle cx="10" cy="10" r="4"/><line x1="20" y1="2" x2="20" y2="22"/></svg></div>
+        Mode vacances
+      </button>
+      <button class="iface-tile t-tuto" data-go="tutoriel">
+        <div class="ift-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg></div>
+        Tutoriel
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== GENERIC MODAL (réutilisable) ===================== -->
+<div class="modal-bg" id="genericModalBg">
+  <div class="modal" role="dialog">
+    <div class="modal-grip"></div>
+    <h2 id="gmTitle" style="margin-bottom:14px"></h2>
+    <div id="gmBody"></div>
+    <div id="gmFoot" style="margin-top:14px"></div>
+  </div>
+</div>
+
+<!-- ===================== NOTIF DROPDOWN ===================== -->
+<div class="notif-pop" id="notifPop">
+  <div class="np-head">
+    <b>Notifications</b>
+    <a id="npMarkRead">Tout marquer lu</a>
+  </div>
+  <div class="np-list" id="npList"></div>
+  <div class="np-foot"><button id="npClose">Fermer</button></div>
+</div>
+
+<!-- ===================== PRINT AREA (PDF rapport) ===================== -->
+<div id="print-area" style="display:none"></div>
 
 <!-- ===================== MODAL (module locked) ===================== -->
 <div class="modal-bg" id="moduleModalBg">
@@ -1720,7 +3165,13 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
   'use strict';
   const STORE_KEY = 'nexus_mobile_state_v1';
   const THEME_KEY = 'nexus_mobile_theme';
-  const VIEWS = ['hub','core','stats','messages','more'];
+  const VIEWS = ['hub','core','stats','messages','more','profil','crm','camp','billing','vacances','tutoriel'];
+
+  // ===== Storage helpers (localStorage) =====
+  const ls = {
+    get(k, def){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch(e){ return def; } },
+    set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} },
+  };
 
   // ---------- State ----------
   const defaults = { onboarded:false, view:'hub', vacances:false };
@@ -1769,8 +3220,14 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
     hub:      { title:'Nexus',       sub:'Hub des modules' },
     core:     { title:'Nexus Core',  sub:'Accueil · Don Carlos' },
     stats:    { title:'Statistiques',sub:'Cette semaine' },
-    messages: { title:'Messages',    sub:'10 conversations' },
+    messages: { title:'Messagerie',  sub:'10 conversations' },
     more:     { title:'Plus',        sub:'Carlos Romero · CR' },
+    profil:   { title:'Profil',      sub:'Entreprise & catalogue' },
+    crm:      { title:'Clients CRM', sub:'147 contacts' },
+    camp:     { title:'Campagnes',   sub:'Marketing & relances' },
+    billing:  { title:'Facturation', sub:'Plan & factures' },
+    vacances: { title:'Mode vacances', sub:"L'IA gère pendant l'absence" },
+    tutoriel: { title:'Tutoriel',    sub:'5 étapes pour démarrer' },
   };
   function navigate(view){
     if (!VIEWS.includes(view)) view = 'core';
@@ -1806,8 +3263,18 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
   // Topbar menu → more
   document.getElementById('tbMenu').addEventListener('click', () => navigate('more'));
 
-  // Hub CTA → core
-  document.getElementById('hubCtaCore').addEventListener('click', () => navigate('core'));
+  // Hub CTA "Interface principale" → ouvre overlay (pas navigation directe)
+  const ifaceOverlay = document.getElementById('ifaceOverlay');
+  const openIface = () => { ifaceOverlay.classList.add('show'); };
+  const closeIface = () => { ifaceOverlay.classList.remove('show'); };
+  document.getElementById('hubCtaCore').addEventListener('click', openIface);
+  document.getElementById('ifaceCtaCore')?.addEventListener('click', openIface);
+  document.getElementById('ifaceClose').addEventListener('click', closeIface);
+  ifaceOverlay.addEventListener('click', (e) => { if (e.target === ifaceOverlay) closeIface(); });
+  // Tiles inside overlay = navigate
+  ifaceOverlay.querySelectorAll('.iface-tile').forEach(t => {
+    t.addEventListener('click', () => { closeIface(); navigate(t.dataset.go); });
+  });
 
   // ---------- Hub modules ----------
   document.querySelectorAll('.mod').forEach(m => {
@@ -2139,23 +3606,30 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
 
   // ---------- Inbox (10 conversations mockées) ----------
   const INBOX = [
-    { n:'María Rodríguez',  i:'MR', t:'14:32', star:true,  unread:true,  c:'WhatsApp',  txt:'Hola Carlos ! Je veux confirmer ma commande de 12 empanadas pour samedi à 11h. C\'est OK ?', av:'linear-gradient(135deg,#FF6B9D,#F5C45E)' },
-    { n:'Diego Salazar',    i:'DS', t:'13:08', star:true,  unread:true,  c:'WhatsApp',  txt:'Tu fais des livraisons à Providencia ? Je voudrais commander pour samedi.', av:'linear-gradient(135deg,#2E7BFF,#00E5FF)' },
-    { n:'Ana Castillo',     i:'AC', t:'11:47', star:true,  unread:false, c:'Instagram', txt:'Merci pour les bolos d\'anniversaire, ils étaient parfaits 🎂 — je recommande dans 2 sem.', av:'linear-gradient(135deg,#1EFF8E,#00E5FF)' },
-    { n:'Javier Carrasco',  i:'JC', t:'10:22', star:true,  unread:false, c:'WhatsApp',  txt:'Possible de réserver le pavé entier pour 25 personnes mercredi prochain ?', av:'linear-gradient(135deg,#8B5CFF,#FF6B9D)' },
-    { n:'Raviella Mendoza', i:'RM', t:'09:14', star:true,  unread:false, c:'WhatsApp',  txt:'Vous avez encore les cookies aux figues ? Je passe demain matin avant 10h.', av:'linear-gradient(135deg,#F5C45E,#1EFF8E)' },
-    { n:'Lucía Fernández',  i:'LF', t:'Hier',  star:false, unread:false, c:'Instagram', txt:'Magnífico ! Vous livrez en weekend aussi ? J\'organise un bautismo le 18 mai.', av:'linear-gradient(135deg,#00E5FF,#2E7BFF)' },
-    { n:'Pedro Castro',     i:'PC', t:'Hier',  star:false, unread:false, c:'WhatsApp',  txt:'Je cherche un gâteau gluten-free pour ma fille — vous pouvez ?', av:'linear-gradient(135deg,#FF6B9D,#8B5CFF)' },
-    { n:'Sofía Aravena',    i:'SA', t:'Lun',   star:false, unread:false, c:'Gmail',     txt:'Bonjour, je gère le restaurant Las Brasas, on souhaiterait fournisseur stable de pain frais.', av:'linear-gradient(135deg,#1EFF8E,#2E7BFF)' },
-    { n:'Tomás Rojas',      i:'TR', t:'Lun',   star:false, unread:false, c:'WhatsApp',  txt:'Salut Carlos ! Mes alfajores commandés mardi sont prêts ? Je passe vers 16h.', av:'linear-gradient(135deg,#F5C45E,#FF7B7B)' },
-    { n:'Camila Vidal',     i:'CV', t:'Dim',   star:false, unread:false, c:'Instagram', txt:'Hola, vu votre boulangerie sur Insta, j\'adore ! Vous faites des sucrés sans sucre ?', av:'linear-gradient(135deg,#8B5CFF,#00E5FF)' },
+    { n:'María Rodríguez',  i:'MR', t:'14:32', star:true,  unread:true,  c:'WhatsApp',  deno:'vip', email:'maria.r@gmail.com', phone:'+56 9 8765 4321', txt:'Hola Carlos ! Je veux confirmer ma commande de 12 empanadas pour samedi à 11h. C\'est OK ?', av:'linear-gradient(135deg,#FF6B9D,#F5C45E)' },
+    { n:'Diego Salazar',    i:'DS', t:'13:08', star:true,  unread:true,  c:'WhatsApp',  deno:'new', email:'diego.salazar@outlook.com', phone:'+56 9 1234 5678', txt:'Tu fais des livraisons à Providencia ? Je voudrais commander pour samedi.', av:'linear-gradient(135deg,#2E7BFF,#00E5FF)' },
+    { n:'Ana Castillo',     i:'AC', t:'11:47', star:true,  unread:false, c:'Instagram', deno:'rec', email:'ana.castillo@gmail.com', phone:'+56 9 2345 6789', txt:'Merci pour les bolos d\'anniversaire, ils étaient parfaits 🎂 — je recommande dans 2 sem.', av:'linear-gradient(135deg,#1EFF8E,#00E5FF)' },
+    { n:'Javier Carrasco',  i:'JC', t:'10:22', star:true,  unread:false, c:'WhatsApp',  deno:'biz', email:'javier@empresa.cl', phone:'+56 9 3456 7890', txt:'Possible de réserver le pavé entier pour 25 personnes mercredi prochain ?', av:'linear-gradient(135deg,#8B5CFF,#FF6B9D)' },
+    { n:'Raviella Mendoza', i:'RM', t:'09:14', star:true,  unread:false, c:'WhatsApp',  deno:'vip', email:'raviella.m@gmail.com', phone:'+56 9 4567 8901', txt:'Vous avez encore les cookies aux figues ? Je passe demain matin avant 10h.', av:'linear-gradient(135deg,#F5C45E,#1EFF8E)' },
+    { n:'Lucía Fernández',  i:'LF', t:'Hier',  star:false, unread:false, c:'Instagram', deno:'occ', email:'lucia.f@yahoo.com', phone:'+56 9 5678 9012', txt:'Magnífico ! Vous livrez en weekend aussi ? J\'organise un bautismo le 18 mai.', av:'linear-gradient(135deg,#00E5FF,#2E7BFF)' },
+    { n:'Pedro Castro',     i:'PC', t:'Hier',  star:false, unread:false, c:'WhatsApp',  deno:'new', email:'', phone:'+56 9 6789 0123', txt:'Je cherche un gâteau gluten-free pour ma fille — vous pouvez ?', av:'linear-gradient(135deg,#FF6B9D,#8B5CFF)' },
+    { n:'Sofía Aravena',    i:'SA', t:'Lun',   star:false, unread:false, c:'Gmail',     deno:'rec', email:'sofia@lasbrasas.cl', phone:'', txt:'Bonjour, je gère le restaurant Las Brasas, on souhaiterait fournisseur stable de pain frais.', av:'linear-gradient(135deg,#1EFF8E,#2E7BFF)' },
+    { n:'Tomás Rojas',      i:'TR', t:'Lun',   star:false, unread:false, c:'WhatsApp',  deno:'rec', email:'tomas.rojas@gmail.com', phone:'+56 9 7890 1234', txt:'Salut Carlos ! Mes alfajores commandés mardi sont prêts ? Je passe vers 16h.', av:'linear-gradient(135deg,#F5C45E,#FF7B7B)' },
+    { n:'Camila Vidal',     i:'CV', t:'Dim',   star:false, unread:false, c:'Instagram', deno:'occ', email:'camila.v@gmail.com', phone:'', txt:'Hola, vu votre boulangerie sur Insta, j\'adore ! Vous faites des sucrés sans sucre ?', av:'linear-gradient(135deg,#8B5CFF,#00E5FF)' },
+    { n:'Bruno Vargas',     i:'BV', t:'Sem.', star:false, unread:false, c:'WhatsApp',  deno:'lost', email:'bruno.vargas@hotmail.com', phone:'+56 9 8901 2345', txt:'Salut, ça fait longtemps. J\'aimerais reprendre les commandes du mercredi.', av:'linear-gradient(135deg,#7A85A0,#C5CDE0)' },
   ];
+  const DENO_LABELS = { vip:'VIP', new:'NEW', biz:'BIZ', rec:'RÉC', occ:'OCC', lost:'PERDU' };
+  let inboxFilter = 'all';
   const inboxList = document.getElementById('inboxList');
   function renderInbox(filter=''){
     const f = filter.trim().toLowerCase();
-    const list = INBOX.filter(m => !f || m.n.toLowerCase().includes(f) || m.txt.toLowerCase().includes(f));
+    const list = INBOX.filter(m =>
+      (inboxFilter === 'all' || m.deno === inboxFilter) &&
+      (!f || m.n.toLowerCase().includes(f) || m.txt.toLowerCase().includes(f))
+    );
+    document.getElementById('msgCountLabel').textContent = `${list.length} conversation${list.length>1?'s':''}`;
     if (!list.length){
-      inboxList.innerHTML = `<div style="text-align:center;color:var(--muted);font-size:13px;padding:30px 0">Aucun résultat pour "${filter}".</div>`;
+      inboxList.innerHTML = `<div style="text-align:center;color:var(--muted);font-size:13px;padding:30px 0">Aucun résultat${filter?' pour "'+filter+'"':''}.</div>`;
       return;
     }
     inboxList.innerHTML = list.map(m => `
@@ -2163,7 +3637,7 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
         <div class="inbox-avatar" style="--av:${m.av}">${m.i}</div>
         <div class="inbox-meta">
           <div class="inbox-top">
-            <div class="inbox-name">${m.n}${m.star?' <span class="star">★</span>':''}</div>
+            <div class="inbox-name">${m.n}${m.star?' <span class="star">★</span>':''}<span class="inbox-deno dn-${m.deno}">${DENO_LABELS[m.deno]||''}</span></div>
             <div class="inbox-time">${m.t}</div>
           </div>
           <div class="inbox-text">${m.txt}</div>
@@ -2176,7 +3650,7 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
       </div>
     `).join('');
     inboxList.querySelectorAll('.inbox-item').forEach(it => {
-      it.addEventListener('click', () => location.href = 'app.html#/inbox');
+      it.addEventListener('click', () => openClientCard(it.dataset.name));
     });
   }
   renderInbox();
@@ -2205,9 +3679,110 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
   document.getElementById('vacActivate').addEventListener('click', () => {
     state.vacances = true; saveState();
     document.getElementById('vacStatus').textContent = 'Activé';
+    const vvs = document.getElementById('vacViewStatus'); if (vvs) vvs.textContent = 'Activé';
+    syncVacViewBtn();
     closeDrawer();
     showToast('Mode vacances activé. L\'IA prend le relais.');
   });
+
+  // ---------- Vacances VIEW (pleine page) ----------
+  function syncVacViewBtn(){
+    const btn = document.getElementById('vacViewActivate');
+    const lbl = document.getElementById('vacViewActivateLbl');
+    if (!btn) return;
+    if (state.vacances){
+      btn.classList.add('is-on');
+      if (lbl) lbl.textContent = 'Désactiver le mode vacances';
+    } else {
+      btn.classList.remove('is-on');
+      if (lbl) lbl.textContent = 'Activer le mode vacances';
+    }
+  }
+  // Toggles (Configuration IA + Permissions IA)
+  document.querySelectorAll('#screen-vacances .vac-switch').forEach(sw => {
+    sw.addEventListener('click', () => sw.classList.toggle('on'));
+  });
+  // Presets dans la vue pleine page
+  const vacViewPresets = document.getElementById('vacViewPresets');
+  if (vacViewPresets){
+    vacViewPresets.querySelectorAll('.vac-preset').forEach(p => {
+      p.addEventListener('click', () => {
+        vacViewPresets.querySelectorAll('.vac-preset').forEach(x => x.classList.remove('on'));
+        p.classList.add('on');
+      });
+    });
+  }
+  // Langue pills
+  const vacViewLangPills = document.getElementById('vacViewLangPills');
+  if (vacViewLangPills){
+    vacViewLangPills.querySelectorAll('.tone-pill').forEach(p => {
+      p.addEventListener('click', () => {
+        vacViewLangPills.querySelectorAll('.tone-pill').forEach(x => x.classList.remove('on'));
+        p.classList.add('on');
+      });
+    });
+  }
+  // Bouton Activer / Désactiver
+  const vacViewActivateBtn = document.getElementById('vacViewActivate');
+  if (vacViewActivateBtn){
+    vacViewActivateBtn.addEventListener('click', () => {
+      state.vacances = !state.vacances; saveState();
+      const lblMore = document.getElementById('vacStatus');
+      const vvs = document.getElementById('vacViewStatus');
+      if (lblMore) lblMore.textContent = state.vacances ? 'Activé' : 'Inactif';
+      if (vvs) vvs.textContent = state.vacances ? 'Activé' : 'Inactif';
+      syncVacViewBtn();
+      showToast(state.vacances ? 'Mode vacances activé. L\'IA prend le relais.' : 'Mode vacances désactivé.');
+    });
+  }
+  syncVacViewBtn();
+
+  // ---------- Tutoriel VIEW ----------
+  const TUTO_KEY = 'nexus_tutorial_progress';
+  function loadTutoProgress(){
+    try { return JSON.parse(localStorage.getItem(TUTO_KEY) || '{}'); } catch(e){ return {}; }
+  }
+  function saveTutoProgress(p){
+    try { localStorage.setItem(TUTO_KEY, JSON.stringify(p)); } catch(e){}
+  }
+  function renderTutoProgress(){
+    const p = loadTutoProgress();
+    let done = 0;
+    document.querySelectorAll('#tutoList .tuto-card').forEach(card => {
+      const step = card.dataset.step;
+      const isDone = !!p[step];
+      card.classList.toggle('done', isDone);
+      const btn = card.querySelector('.tuto-mark-btn');
+      if (btn) btn.textContent = isDone ? 'Étape complétée ✓' : 'Marquer comme fait';
+      if (isDone) done++;
+    });
+    const doneEl = document.getElementById('tutoDone');
+    const fill = document.getElementById('tutoFill');
+    if (doneEl) doneEl.textContent = done;
+    if (fill) fill.style.width = (done / 5 * 100) + '%';
+  }
+  // Expand / collapse cards
+  document.querySelectorAll('#tutoList .tuto-card-head').forEach(head => {
+    head.addEventListener('click', (e) => {
+      // Ne pas re-déclencher si on a cliqué directement sur un bouton "Marquer"
+      if (e.target.closest('.tuto-mark-btn')) return;
+      const card = head.closest('.tuto-card');
+      card.classList.toggle('open');
+    });
+  });
+  // Marquer fait
+  document.querySelectorAll('#tutoList .tuto-mark-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const step = btn.dataset.mark;
+      const p = loadTutoProgress();
+      p[step] = !p[step];
+      saveTutoProgress(p);
+      renderTutoProgress();
+      if (p[step]) showToast('Étape ' + step + ' complétée. Bien joué.');
+    });
+  });
+  renderTutoProgress();
 
   // ---------- Session / compte utilisateur ----------
   const ACCOUNTS_KEY_M = 'nexus_accounts';
@@ -2238,11 +3813,24 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
   });
 
   // ---------- Generic data-toast / data-go / data-href ----------
+  // Reroute les data-href "app.html#/xxx" vers les écrans natifs mobile
+  const APP_TO_VIEW = {
+    'app.html#/profil':'profil',
+    'app.html#/crm':'crm',
+    'app.html#/marketing':'camp',
+    'app.html#/payments':'billing',
+    'app.html#/dashboard':'core',
+    'app.html#/settings':'profil',
+    'app.html#/tips':'core',
+    'app.html#/inbox':'messages',
+  };
   document.querySelectorAll('[data-href]').forEach(el => {
     el.addEventListener('click', e => {
       e.stopPropagation();
       e.preventDefault();
-      location.href = el.dataset.href;
+      const href = el.dataset.href;
+      if (APP_TO_VIEW[href]) navigate(APP_TO_VIEW[href]);
+      else location.href = href;
     });
   });
   document.querySelectorAll('[data-toast]').forEach(el => {
@@ -2297,6 +3885,1306 @@ html[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.85)}
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       document.querySelectorAll('.modal-bg.show, .drawer.show, .drawer-bg.show').forEach(m => m.classList.remove('show'));
+    }
+  });
+
+  /* ============================================================
+     NEXUS V2 (call 09/05) — toute la logique additionnelle
+     ============================================================ */
+
+  // ===== Generic modal helpers =====
+  const gmBg = document.getElementById('genericModalBg');
+  const gmTitle = document.getElementById('gmTitle');
+  const gmBody = document.getElementById('gmBody');
+  const gmFoot = document.getElementById('gmFoot');
+  function openModal(title, bodyHtml, footHtml){
+    gmTitle.innerHTML = title;
+    gmBody.innerHTML = bodyHtml || '';
+    gmFoot.innerHTML = footHtml || '<button class="btn btn-secondary" onclick="this.closest(\'.modal-bg\').classList.remove(\'show\')">Fermer</button>';
+    gmBg.classList.add('show');
+  }
+  function closeModal(){ gmBg.classList.remove('show'); }
+  gmBg.addEventListener('click', (e) => { if (e.target === gmBg) closeModal(); });
+  // Close on any [data-modal-close] inside
+  gmBg.addEventListener('click', (e) => {
+    const c = e.target.closest('[data-modal-close]');
+    if (c) closeModal();
+  });
+
+  // ===== Filtres dénominations Messages =====
+  document.querySelectorAll('#msgDenoChips .deno-chip').forEach(c => {
+    c.addEventListener('click', () => {
+      document.querySelectorAll('#msgDenoChips .deno-chip').forEach(x => x.classList.remove('on'));
+      c.classList.add('on');
+      inboxFilter = c.dataset.deno;
+      renderInbox(document.getElementById('inboxSearch').value);
+    });
+  });
+
+  // Partage 1 clic
+  document.getElementById('shareOneClickBtn')?.addEventListener('click', () => {
+    if (navigator.share){
+      navigator.share({title:'Nexus', text:'Découvre Nexus, l\'app qui gère mes clients à ma place.', url:location.href}).catch(()=>{});
+    } else {
+      navigator.clipboard?.writeText(location.href);
+      showToast('Lien copié. Partage-le où tu veux.');
+    }
+  });
+
+  // ===== Fiche client modal (depuis messagerie ou CRM) =====
+  function getClient(name){ return INBOX.find(m => m.n === name) || null; }
+
+  function openClientCard(name){
+    const c = getClient(name);
+    if (!c){ showToast('Client introuvable.'); return; }
+    // Notes IA stockées en localStorage par client
+    const notesKey = `nexus_client_notes_${name}`;
+    const aiKey = `nexus_client_ai_${name}`;
+    const notes = ls.get(notesKey, '');
+    const aiNotes = ls.get(aiKey, '');
+    const initials = c.i;
+    const channels = [c.c];
+    if (c.email) channels.push('Mail');
+    const denoLabel = DENO_LABELS[c.deno] || '';
+    const body = `
+      <div class="cli-head">
+        <div class="cli-avatar" style="background:${c.av}">${initials}</div>
+        <div class="cli-id">
+          <div class="name-row">${c.n} ${c.star?'<span class="star">★</span>':''} <button class="edit-btn" id="cliEditBtn" title="Modifier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button></div>
+          <small>${denoLabel} · Synthèse unifiée</small>
+        </div>
+      </div>
+
+      <div class="cli-block">
+        <div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Téléphone</div>
+        <input type="tel" id="cliPhone" value="${c.phone||''}" placeholder="Ajouter un numéro">
+      </div>
+
+      <div class="cli-block">
+        <div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Email</div>
+        <input type="email" id="cliEmail" value="${c.email||''}" placeholder="Ajouter un email">
+      </div>
+
+      <div class="cli-block">
+        <div class="lbl">Canaux unifiés</div>
+        <div class="cli-channels">
+          ${channels.map(ch => `<span class="cli-channel-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/></svg>${ch}</span>`).join('')}
+        </div>
+        <small style="display:block;margin-top:6px;font-size:10.5px;color:var(--muted)">Si même personne sur WhatsApp + mail, c'est unifié ici automatiquement.</small>
+      </div>
+
+      <div class="cli-block">
+        <div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>Notes pour l'IA</div>
+        <textarea id="cliAiNotes" placeholder="Ex : Marie aime qu'on lui parle avec un ton chaleureux. Ne lui propose jamais de gluten.">${aiNotes}</textarea>
+        <small style="display:block;margin-top:6px;font-size:10.5px;color:var(--muted)">L'IA utilise ces notes pour adapter ses réponses à ce client.</small>
+      </div>
+
+      <div class="cli-block">
+        <div class="lbl">Notes privées</div>
+        <textarea id="cliNotes" placeholder="Notes perso (jamais lues par l'IA)">${notes}</textarea>
+      </div>
+
+      <div class="cli-block">
+        <div class="lbl">Dernier message</div>
+        <div class="val">${c.txt}</div>
+        <small style="display:block;margin-top:6px;font-size:10.5px;color:var(--muted)">Reçu via ${c.c} · ${c.t}</small>
+      </div>
+
+      <div class="cli-actions">
+        <button class="btn btn-secondary" id="cliThanksBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          Envoyer un merci
+        </button>
+        <button class="btn btn-primary" id="cliReplyBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Répondre
+        </button>
+      </div>
+    `;
+    openModal(`<span style="font-size:14px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.06em;text-transform:uppercase">Fiche client</span>`, body);
+    // bind actions
+    document.getElementById('cliEditBtn')?.addEventListener('click', () => showToast('Mode édition activé. Modifie puis Enregistrer.'));
+    document.getElementById('cliThanksBtn')?.addEventListener('click', () => {
+      showToast(`Message de remerciement envoyé à ${c.n}. ✓`);
+      closeModal();
+    });
+    document.getElementById('cliReplyBtn')?.addEventListener('click', () => {
+      showToast('Brouillon de réponse pré-rempli par l\'IA.');
+      closeModal();
+      navigate('messages');
+    });
+    // auto-save notes
+    document.getElementById('cliAiNotes')?.addEventListener('input', e => ls.set(aiKey, e.target.value));
+    document.getElementById('cliNotes')?.addEventListener('input', e => ls.set(notesKey, e.target.value));
+    document.getElementById('cliPhone')?.addEventListener('change', e => { c.phone = e.target.value; ls.set('nexus_inbox_overrides', { phone:{ [c.n]: e.target.value } }); });
+    document.getElementById('cliEmail')?.addEventListener('change', e => { c.email = e.target.value; });
+  }
+  // expose for other handlers
+  window.openClientCard = openClientCard;
+
+  // ===== PROFIL ENTREPRISE =====
+  const PROFILE_KEY = 'nexus_profile';
+  const defaultProfile = { name:'Panadería Don Carlos', city:'Las Condes', country:'Chili', desc:'', data:'', team:'', url:'' };
+  const profile = { ...defaultProfile, ...ls.get(PROFILE_KEY, {}) };
+  function bindProfilField(id, key){
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = profile[key] || '';
+    el.addEventListener('input', () => { profile[key] = el.value; ls.set(PROFILE_KEY, profile); updateProfileCompletion(); });
+  }
+  bindProfilField('profName','name');
+  bindProfilField('profCity','city');
+  bindProfilField('profCountry','country');
+  bindProfilField('profDesc','desc');
+  bindProfilField('profData','data');
+  bindProfilField('profTeam','team');
+  bindProfilField('profUrl','url');
+
+  function updateProfileCompletion(){
+    const fields = ['name','city','country','desc','data','team','url'];
+    const filled = fields.filter(k => (profile[k]||'').trim().length > 5).length;
+    const pct = Math.round((filled / fields.length) * 100);
+    const el = document.getElementById('profComplet');
+    if (el) el.textContent = `${pct}% complété`;
+  }
+  updateProfileCompletion();
+
+  document.getElementById('profSaveBtn')?.addEventListener('click', () => {
+    ls.set(PROFILE_KEY, profile);
+    showToast('Profil enregistré. L\'IA va se servir de ces infos.');
+  });
+  document.getElementById('profScrapeBtn')?.addEventListener('click', () => {
+    if (!profile.url){ showToast('Renseigne d\'abord ton URL.'); return; }
+    showToast('Scraping en cours...');
+    setTimeout(() => showToast('Site lu : 42 pages, 18 produits, 1 page À propos. Profil pré-rempli.'), 1800);
+  });
+
+  // Profil tabs
+  document.querySelectorAll('#profTabs .tab-pill').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('#profTabs .tab-pill').forEach(x => x.classList.remove('on'));
+      t.classList.add('on');
+      const tab = t.dataset.tab;
+      document.querySelectorAll('#screen-profil .prof-tab-pane').forEach(p => p.style.display = (p.dataset.pane === tab ? '' : 'none'));
+    });
+  });
+
+  // ===== CATALOGUE =====
+  const CATALOG_KEY = 'nexus_catalog';
+  const defaultCatalog = [
+    { id:1, name:'Empanada de pino', price:'$ 2 800', desc:'Bœuf, oignon, olive, œuf dur. Recette familiale.', emoji:'🥟', nutri:'B', ingr:'Farine, bœuf, oignon, olive, œuf, épices', photo:'' },
+    { id:2, name:'Pan de campo', price:'$ 3 200', desc:'Pain au levain naturel, fermentation 24h.', emoji:'🍞', nutri:'A', ingr:'Farine T80, levain, sel, eau', photo:'' },
+    { id:3, name:'Cookie figue', price:'$ 1 500', desc:'Cookie maison aux figues séchées et amandes.', emoji:'🍪', nutri:'C', ingr:'Farine, beurre, sucre, figues, amandes', photo:'' },
+    { id:4, name:'Alfajor maicena', price:'$ 1 200', desc:'Sablés fondants, dulce de leche, noix de coco.', emoji:'🍰', nutri:'D', ingr:'Maïzena, beurre, sucre, dulce de leche, coco', photo:'' },
+  ];
+  const catalog = ls.get(CATALOG_KEY, defaultCatalog);
+  function renderCatalog(){
+    const list = document.getElementById('prodList');
+    if (!list) return;
+    list.innerHTML = catalog.map(p => `
+      <div class="prod-card" data-pid="${p.id}">
+        <div class="prod-photo" style="${p.photo?`background-image:url(${p.photo})`:''}">${p.photo?'':p.emoji}</div>
+        <div class="prod-info">
+          <div class="top"><div class="nm">${p.name}</div><div class="pr">${p.price}</div></div>
+          <div class="ds">${p.desc}</div>
+          <div class="meta">
+            <span class="nutri-${p.nutri}">Nutri ${p.nutri}</span>
+            <span>${p.ingr.slice(0,32)}${p.ingr.length>32?'…':''}</span>
+          </div>
+        </div>
+        <div class="prod-actions">
+          <button class="prod-action-btn" data-act="edit" title="Modifier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+          <button class="prod-action-btn danger" data-act="del" title="Supprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg></button>
+        </div>
+      </div>
+    `).join('') || '<p style="color:var(--muted);font-size:12.5px;text-align:center;padding:20px 0">Aucun produit. Ajoute le premier.</p>';
+    list.querySelectorAll('.prod-card').forEach(card => {
+      const id = +card.dataset.pid;
+      card.querySelector('[data-act="edit"]').addEventListener('click', e => { e.stopPropagation(); openProductModal(id); });
+      card.querySelector('[data-act="del"]').addEventListener('click', e => {
+        e.stopPropagation();
+        if (confirm('Supprimer ce produit ?')){
+          const i = catalog.findIndex(p => p.id === id);
+          if (i >= 0){ catalog.splice(i,1); ls.set(CATALOG_KEY, catalog); renderCatalog(); showToast('Produit supprimé.'); }
+        }
+      });
+      card.addEventListener('click', () => openProductModal(id));
+    });
+  }
+  function openProductModal(id){
+    const p = id ? catalog.find(x => x.id === id) : { id:Date.now(), name:'', price:'', desc:'', emoji:'🥖', nutri:'A', ingr:'', photo:'' };
+    if (!p){ showToast('Produit introuvable.'); return; }
+    const isNew = !id;
+    const body = `
+      <div class="cli-block">
+        <div class="lbl">Nom du produit</div>
+        <input type="text" id="pmName" value="${p.name||''}" placeholder="Ex : Empanada de pino">
+      </div>
+      <div class="cli-block">
+        <div class="lbl">Prix</div>
+        <input type="text" id="pmPrice" value="${p.price||''}" placeholder="$ 2 800">
+      </div>
+      <div class="cli-block">
+        <div class="lbl">Mini description</div>
+        <textarea id="pmDesc" placeholder="3-4 lignes max">${p.desc||''}</textarea>
+      </div>
+      <div class="cli-block">
+        <div class="lbl">Photo (URL ou emoji par défaut)</div>
+        <input type="text" id="pmPhoto" value="${p.photo||''}" placeholder="https://... (laisser vide = emoji)">
+      </div>
+      <div class="cli-block">
+        <div class="lbl">Nutri-score</div>
+        <select id="pmNutri" style="width:100%;padding:10px 12px;border-radius:10px;background:var(--bg2);border:1px solid var(--line);color:var(--ink);font-size:13px;font-family:inherit;min-height:42px">
+          <option value="A" ${p.nutri==='A'?'selected':''}>A — excellent</option>
+          <option value="B" ${p.nutri==='B'?'selected':''}>B — bon</option>
+          <option value="C" ${p.nutri==='C'?'selected':''}>C — moyen</option>
+          <option value="D" ${p.nutri==='D'?'selected':''}>D — à modérer</option>
+        </select>
+      </div>
+      <div class="cli-block">
+        <div class="lbl">Ingrédients / composition</div>
+        <textarea id="pmIngr" placeholder="Liste des ingrédients">${p.ingr||''}</textarea>
+      </div>
+    `;
+    const foot = `
+      <div class="modal-actions">
+        <button class="btn btn-secondary" data-modal-close>Annuler</button>
+        <button class="btn btn-primary" id="pmSaveBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Enregistrer</button>
+      </div>
+    `;
+    openModal(isNew ? '<span style="font-size:18px;font-weight:800">Nouveau produit</span>' : `<span style="font-size:18px;font-weight:800">${p.name}</span>`, body, foot);
+    document.getElementById('pmSaveBtn').addEventListener('click', () => {
+      p.name = document.getElementById('pmName').value;
+      p.price = document.getElementById('pmPrice').value;
+      p.desc = document.getElementById('pmDesc').value;
+      p.photo = document.getElementById('pmPhoto').value;
+      p.nutri = document.getElementById('pmNutri').value;
+      p.ingr = document.getElementById('pmIngr').value;
+      if (!p.name){ showToast('Donne au moins un nom.'); return; }
+      if (isNew) catalog.push(p);
+      ls.set(CATALOG_KEY, catalog);
+      renderCatalog();
+      closeModal();
+      showToast(isNew ? 'Produit ajouté.' : 'Produit modifié.');
+    });
+  }
+  renderCatalog();
+  document.getElementById('addProductBtn')?.addEventListener('click', () => openProductModal(null));
+  document.getElementById('importCatalogBtn')?.addEventListener('click', () => {
+    const url = prompt('Colle l\'URL de ton catalogue (Shopify, WooCommerce, etc.)');
+    if (url) showToast('Scraping de ' + url + '... 18 produits trouvés.');
+  });
+
+  // ===== API LIST =====
+  const API_KEY = 'nexus_apis';
+  const defaultApis = [
+    { k:'anthropic', n:'Anthropic Claude', d:'IA conversationnelle', conn:false, ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4"/></svg>' },
+    { k:'openai', n:'OpenAI', d:'Backup IA', conn:false, ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>' },
+    { k:'google', n:'Google OAuth', d:'Gmail + Calendar + Sheets', conn:true, ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/></svg>' },
+    { k:'whatsapp', n:'WhatsApp Business', d:'Inbox + campagnes', conn:true, ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>' },
+    { k:'instagram', n:'Instagram / Meta', d:'Inbox DM (futur)', conn:false, ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>' },
+    { k:'stripe', n:'Stripe', d:'Encaisse les paiements', conn:false, ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>' },
+    { k:'hubspot', n:'HubSpot', d:'Sync CRM externe (futur)', conn:false, ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="6" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/></svg>' },
+  ];
+  const apis = ls.get(API_KEY, defaultApis);
+  function renderApis(){
+    const list = document.getElementById('apiList');
+    if (!list) return;
+    list.innerHTML = apis.map(a => `
+      <div class="api-card">
+        <div class="api-ic">${a.ic}</div>
+        <div class="api-meta">
+          <b>${a.n}</b>
+          <small><span class="dot${a.conn?' ok':''}"></span>${a.conn?'Connecté':'Non connecté'} · ${a.d}</small>
+        </div>
+        <button class="api-cta${a.conn?' connected':''}" data-api="${a.k}">${a.conn?'Configurer':'Connecter'}</button>
+      </div>
+    `).join('');
+    list.querySelectorAll('[data-api]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const a = apis.find(x => x.k === btn.dataset.api);
+        const body = `
+          <div class="cli-block">
+            <div class="lbl">Clé API</div>
+            <input type="password" id="apiKeyInput" placeholder="sk-... ou colle ta clé ici">
+            <small style="display:block;margin-top:6px;font-size:10.5px;color:var(--muted)">⚠️ La clé est stockée chiffrée côté serveur. Jamais visible côté navigateur après sauvegarde.</small>
+          </div>
+        `;
+        const foot = `
+          <div class="modal-actions">
+            <button class="btn btn-secondary" data-modal-close>Annuler</button>
+            <button class="btn btn-primary" id="apiConnBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/></svg>Connecter</button>
+          </div>
+        `;
+        openModal(`<span style="font-size:18px">Connecter ${a.n}</span>`, body, foot);
+        document.getElementById('apiConnBtn').addEventListener('click', () => {
+          const k = document.getElementById('apiKeyInput').value;
+          if (!k){ showToast('Renseigne ta clé.'); return; }
+          a.conn = true;
+          ls.set(API_KEY, apis);
+          closeModal();
+          renderApis();
+          showToast(a.n + ' connecté ✓');
+        });
+      });
+    });
+  }
+  renderApis();
+
+  // ===== CRM CLIENTS =====
+  // On fabrique un dataset CRM enrichi à partir de INBOX + clients fictifs
+  const CRM_DATA = INBOX.map((m, i) => ({
+    name: m.n, initials: m.i, av: m.av,
+    deno: m.deno, score: 80 + (i % 20) - 10,
+    last: m.txt.slice(0, 50) + '...',
+    phone: m.phone, email: m.email,
+    spend: 25 + (i * 18) % 200,
+  }));
+  // Ajout faux clients pour faire 16 visibles
+  const FAUX_CRM_NAMES = ['Esteban Núñez','Valentina Soto','Renato Pinto','Catalina Aravena','Mateo Riquelme','Florencia Tapia'];
+  FAUX_CRM_NAMES.forEach((n, i) => {
+    const initials = n.split(' ').map(x => x[0]).join('').toUpperCase();
+    const denos = ['rec','vip','occ','rec','new','lost'];
+    CRM_DATA.push({
+      name:n, initials, av:`linear-gradient(135deg,#${(Math.random()*16777215|0).toString(16).padStart(6,'0')},#00E5FF)`,
+      deno:denos[i%denos.length], score:65 + (i*7)%30,
+      last:'Pas de message récent · profil créé manuellement.',
+      phone:'+56 9 ' + (1000+i*37) + ' ' + (4000+i*123),
+      email:n.toLowerCase().replace(' ','.')+'@gmail.com', spend:15 + i * 37,
+    });
+  });
+  let crmFilter = 'all';
+  let crmShowAll = false;
+  function renderCrm(){
+    const list = document.getElementById('crmList');
+    if (!list) return;
+    let data = CRM_DATA;
+    if (crmFilter !== 'all') data = data.filter(c => c.deno === crmFilter);
+    if (!crmShowAll && data.length > 8) data = data.slice(0, 8);
+    list.innerHTML = data.map(c => {
+      const cls = c.score >= 80 ? 's-good' : c.score >= 60 ? 's-mid' : 's-low';
+      return `
+      <div class="crm-card" data-name="${c.name}">
+        <div class="crm-av" style="background:${c.av}">${c.initials}</div>
+        <div class="crm-meta">
+          <div class="crm-name">${c.name}<span class="inbox-deno dn-${c.deno}">${DENO_LABELS[c.deno]||''}</span></div>
+          <div class="small">${c.phone||c.email||'—'} · $ ${c.spend}/mois</div>
+        </div>
+        <div class="crm-score ${cls}">${c.score}</div>
+      </div>
+      `;
+    }).join('');
+    document.getElementById('crmCount').textContent = `${CRM_DATA.length} contacts · ${crmFilter==='all'?'tous':DENO_LABELS[crmFilter]}`;
+    list.querySelectorAll('.crm-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const c = INBOX.find(m => m.n === card.dataset.name);
+        if (c) openClientCard(card.dataset.name);
+        else {
+          // Client custom (pas dans INBOX) — modal info simplifié
+          const data = CRM_DATA.find(x => x.name === card.dataset.name);
+          if (data) showToast(`${data.name} · ${data.phone||data.email||'pas de contact'} · score ${data.score}`);
+        }
+      });
+    });
+    document.getElementById('crmLoadMoreBtn').style.display = (CRM_DATA.length > 8 && !crmShowAll) ? '' : 'none';
+  }
+  document.getElementById('crmLoadMoreBtn')?.addEventListener('click', () => { crmShowAll = true; renderCrm(); showToast('Tous les clients affichés.'); });
+  document.querySelectorAll('#crmDenoChips .deno-chip').forEach(c => {
+    c.addEventListener('click', () => {
+      document.querySelectorAll('#crmDenoChips .deno-chip').forEach(x => x.classList.remove('on'));
+      c.classList.add('on');
+      crmFilter = c.dataset.deno;
+      crmShowAll = true;
+      renderCrm();
+    });
+  });
+  renderCrm();
+
+  // Add client
+  document.getElementById('addClientBtn')?.addEventListener('click', () => {
+    const body = `
+      <div class="cli-block"><div class="lbl">Nom complet</div><input type="text" id="acName" placeholder="Ex : María González"></div>
+      <div class="cli-block"><div class="lbl">Téléphone</div><input type="tel" id="acPhone" placeholder="+56 9 ..."></div>
+      <div class="cli-block"><div class="lbl">Email</div><input type="email" id="acEmail" placeholder="email@..."></div>
+      <div class="cli-block"><div class="lbl">Dénomination</div>
+        <select id="acDeno" style="width:100%;padding:10px;border-radius:10px;background:var(--bg2);border:1px solid var(--line);color:var(--ink);font-size:13px;font-family:inherit;min-height:42px">
+          <option value="new">Nouveau</option><option value="vip">VIP</option><option value="rec">Récurrent</option><option value="biz">Business</option><option value="occ">Occasionnel</option>
+        </select></div>
+      <div class="cli-block"><div class="lbl">Contexte spécifique (optionnel)</div>
+        <textarea id="acCtx" placeholder="Ex : aime être reçue avec un café · allergique gluten · paiement à 30 jours"></textarea>
+      </div>
+    `;
+    const foot = `<div class="modal-actions"><button class="btn btn-secondary" data-modal-close>Annuler</button><button class="btn btn-primary" id="acSaveBtn">Ajouter</button></div>`;
+    openModal('<span style="font-size:18px;font-weight:800">Nouveau client</span>', body, foot);
+    document.getElementById('acSaveBtn').addEventListener('click', () => {
+      const n = document.getElementById('acName').value.trim();
+      if (!n){ showToast('Donne au moins un nom.'); return; }
+      const init = n.split(' ').map(x => x[0]).join('').toUpperCase().slice(0,3);
+      CRM_DATA.unshift({
+        name:n, initials:init, av:'linear-gradient(135deg,#1EFF8E,#00E5FF)',
+        deno:document.getElementById('acDeno').value,
+        score:75, last:document.getElementById('acCtx').value.slice(0,50),
+        phone:document.getElementById('acPhone').value, email:document.getElementById('acEmail').value, spend:0,
+      });
+      closeModal();
+      renderCrm();
+      showToast(`${n} ajouté au CRM.`);
+    });
+  });
+
+  // Sort clients
+  document.getElementById('sortClientsBtn')?.addEventListener('click', () => {
+    const body = `
+      <div class="opt-grid">
+        <button class="opt-tile" data-sort="score">Par score IA<small>du meilleur au pire</small></button>
+        <button class="opt-tile" data-sort="name">Par nom A-Z<small>ordre alpha</small></button>
+        <button class="opt-tile" data-sort="spend">Par dépense<small>plus rentables</small></button>
+        <button class="opt-tile" data-sort="recent">Récents<small>activité dernière</small></button>
+      </div>
+    `;
+    openModal('<span style="font-size:18px;font-weight:800">Trier les clients</span>', body, '');
+    document.querySelectorAll('#gmBody [data-sort]').forEach(b => {
+      b.addEventListener('click', () => {
+        const k = b.dataset.sort;
+        if (k === 'score') CRM_DATA.sort((a,b) => b.score - a.score);
+        else if (k === 'name') CRM_DATA.sort((a,b) => a.name.localeCompare(b.name));
+        else if (k === 'spend') CRM_DATA.sort((a,b) => b.spend - a.spend);
+        closeModal();
+        renderCrm();
+        showToast('Tri appliqué : ' + k);
+      });
+    });
+  });
+
+  // Export CSV (avec modal de filtre)
+  document.getElementById('exportCsvBtn')?.addEventListener('click', () => {
+    const body = `
+      <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px">Quel type de CSV veux-tu exporter ?</p>
+      <div class="opt-grid">
+        <button class="opt-tile" data-csv="all"><b>Tous</b><small>${CRM_DATA.length} clients</small></button>
+        <button class="opt-tile" data-csv="vip"><b>VIP</b><small>${CRM_DATA.filter(c=>c.deno==='vip').length} clients</small></button>
+        <button class="opt-tile" data-csv="lost"><b>Perdus</b><small>${CRM_DATA.filter(c=>c.deno==='lost').length} clients</small></button>
+        <button class="opt-tile" data-csv="rec"><b>Récurrents</b><small>${CRM_DATA.filter(c=>c.deno==='rec').length} clients</small></button>
+        <button class="opt-tile" data-csv="biz"><b>Business</b><small>${CRM_DATA.filter(c=>c.deno==='biz').length} clients</small></button>
+        <button class="opt-tile" data-csv="new"><b>Nouveaux</b><small>${CRM_DATA.filter(c=>c.deno==='new').length} clients</small></button>
+        <button class="opt-tile" data-csv="occ"><b>Occasionnels</b><small>${CRM_DATA.filter(c=>c.deno==='occ').length} clients</small></button>
+      </div>
+      <div class="more-section-title" style="margin:14px 4px 6px">Format de sortie</div>
+      <div class="opt-grid">
+        <button class="opt-tile on" data-fmt="csv"><b>CSV / Excel</b><small>fichier téléchargeable</small></button>
+        <button class="opt-tile" data-fmt="gsheet"><b>Google Sheet</b><small>nouveau document</small></button>
+      </div>
+    `;
+    openModal('<span style="font-size:18px;font-weight:800">Export clients</span>', body, '');
+    let fmt = 'csv';
+    document.querySelectorAll('#gmBody [data-fmt]').forEach(b => {
+      b.addEventListener('click', () => {
+        document.querySelectorAll('#gmBody [data-fmt]').forEach(x => x.classList.remove('on'));
+        b.classList.add('on'); fmt = b.dataset.fmt;
+      });
+    });
+    document.querySelectorAll('#gmBody [data-csv]').forEach(b => {
+      b.addEventListener('click', () => {
+        const k = b.dataset.csv;
+        const data = (k === 'all') ? CRM_DATA : CRM_DATA.filter(c => c.deno === k);
+        if (fmt === 'gsheet'){
+          showToast(`Google Sheet en cours de création — ${data.length} clients exportés.`);
+          closeModal();
+          return;
+        }
+        // Génère un CSV téléchargeable
+        const header = 'Nom,Téléphone,Email,Dénomination,Score IA,Dépense (USD)\n';
+        const rows = data.map(c => `"${c.name}","${c.phone||''}","${c.email||''}","${DENO_LABELS[c.deno]||c.deno}",${c.score},${c.spend}`).join('\n');
+        const csv = header + rows;
+        const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `nexus_clients_${k}_${Date.now()}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        closeModal();
+        showToast(`${data.length} clients exportés en CSV.`);
+      });
+    });
+  });
+
+  // AI chat CRM (mock — Claude branché)
+  document.getElementById('aiCrmChatBtn')?.addEventListener('click', () => {
+    const aiMemKey = 'nexus_ai_memory';
+    const mem = ls.get(aiMemKey, []);
+    const body = `
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Demande à Claude n'importe quoi sur tes clients. Il apprend à chaque correction.</p>
+      <div class="ai-chat" id="aiChatLog">
+        ${mem.map(m => `<div class="${m.r==='u'?'msg-r':'msg-l'}">${m.t}</div>`).join('') || '<div class="msg-l">Hola Carlos. Pose-moi une question sur ta base CRM (ex : "qui sont mes 5 plus gros clients ?", "quels VIP n\'ont rien acheté ce mois ?")</div>'}
+      </div>
+      <div class="ai-chat-input">
+        <input type="text" id="aiChatInput" placeholder="Pose ta question...">
+        <button id="aiChatSend"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+      </div>
+    `;
+    openModal('<span style="font-size:18px;font-weight:800">Claude · CRM</span>', body, '');
+    function aiAnswer(q){
+      const ql = q.toLowerCase();
+      if (ql.includes('vip')) return `Tu as ${CRM_DATA.filter(c=>c.deno==='vip').length} VIP. Top : ${CRM_DATA.filter(c=>c.deno==='vip').sort((a,b)=>b.spend-a.spend).slice(0,3).map(c=>c.name).join(', ')}.`;
+      if (ql.includes('perdu') || ql.includes('lost')) return `Tu as ${CRM_DATA.filter(c=>c.deno==='lost').length} clients perdus. Je peux préparer une campagne de récup ?`;
+      if (ql.includes('plus gros') || ql.includes('top')) return `Tes 5 plus gros : ${CRM_DATA.sort((a,b)=>b.spend-a.spend).slice(0,5).map(c=>c.name+' ($'+c.spend+')').join(', ')}.`;
+      if (ql.includes('nouveau') || ql.includes('new')) return `${CRM_DATA.filter(c=>c.deno==='new').length} nouveaux ce mois. Veux-tu un message de bienvenue auto ?`;
+      return `Bonne question. Sur ${CRM_DATA.length} clients, je vois ${CRM_DATA.filter(c=>c.score>=80).length} avec un score >80. Donne-moi plus de précision pour affiner.`;
+    }
+    function send(){
+      const inp = document.getElementById('aiChatInput');
+      const q = inp.value.trim();
+      if (!q) return;
+      mem.push({r:'u', t:q});
+      const a = aiAnswer(q);
+      mem.push({r:'a', t:a});
+      ls.set(aiMemKey, mem.slice(-20));
+      const log = document.getElementById('aiChatLog');
+      log.insertAdjacentHTML('beforeend', `<div class="msg-r">${q}</div><div class="msg-l">${a}</div>`);
+      inp.value = '';
+      log.scrollTop = log.scrollHeight;
+    }
+    document.getElementById('aiChatSend').addEventListener('click', send);
+    document.getElementById('aiChatInput').addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+  });
+
+  // ===== CAMPAGNES =====
+  const SEGMENTS_KEY = 'nexus_segments';
+  const TEMPLATES_KEY = 'nexus_templates';
+  const SENT_KEY = 'nexus_sent_camps';
+  const segments = ls.get(SEGMENTS_KEY, [
+    { id:1, name:'Habitacula (quartier)', count:14, def:'Quartier = Habitacula' },
+    { id:2, name:'Allergiques gluten', count:7, def:'Tag = gluten-free' },
+  ]);
+  const templates = ls.get(TEMPLATES_KEY, [
+    { id:1, name:'Saint-Valentin', body:'¡Mi amor! 💖 Pour la Saint-Valentin, profite de notre menu spécial duo : 2 cookies + 1 boisson chaude pour $4 500.' },
+    { id:2, name:'Anniv client', body:'¡Feliz cumpleaños [PRENOM]! 🎂 Code promo BDAY15 = 15% sur tout ton anniversaire.' },
+    { id:3, name:'Récup client perdu', body:'¡Hola [PRENOM]! Ça fait un moment, tu nous manques. Reviens cette semaine = café offert avec ta commande.' },
+    { id:4, name:'Promo météo pluie', body:'Pluie aujourd\'hui ☔. Soupe maison + pain au levain à $3 800 livré chez toi.' },
+  ]);
+  const sentCamps = ls.get(SENT_KEY, [
+    { id:1, name:'Saint-Valentin 2026', date:'14/02', recipients:142, openRate:62, replyRate:18 },
+    { id:2, name:'Promo Empanadas Vendredi', date:'25/04', recipients:89, openRate:71, replyRate:22 },
+    { id:3, name:'Récup VIP Q1', date:'12/04', recipients:23, openRate:54, replyRate:34 },
+    { id:4, name:'Anniv Don Carlos 12 ans', date:'02/05', recipients:147, openRate:83, replyRate:41 },
+  ]);
+
+  function renderSegments(){
+    const list = document.getElementById('segList');
+    if (!list) return;
+    list.innerHTML = segments.map(s => `
+      <div class="seg-row" data-sid="${s.id}">
+        <div class="seg-l"><b>${s.name}</b><small>${s.count} clients · ${s.def}</small></div>
+        <div class="seg-actions">
+          <button class="mini-btn" data-act="edit" title="Modifier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+          <button class="mini-btn" data-act="use" title="Utiliser"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+          <button class="mini-btn danger" data-act="del" title="Supprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/></svg></button>
+        </div>
+      </div>
+    `).join('') || '<p style="color:var(--muted);font-size:12.5px;text-align:center;padding:20px 0">Aucun segment custom. Crée le premier.</p>';
+    list.querySelectorAll('.seg-row').forEach(row => {
+      const id = +row.dataset.sid;
+      row.querySelector('[data-act="del"]').addEventListener('click', () => {
+        const i = segments.findIndex(s => s.id === id);
+        if (i >= 0){ segments.splice(i,1); ls.set(SEGMENTS_KEY, segments); renderSegments(); showToast('Segment supprimé.'); }
+      });
+      row.querySelector('[data-act="use"]').addEventListener('click', () => {
+        showToast(`Segment "${segments.find(s=>s.id===id).name}" sélectionné. Va dans Créer.`);
+        document.querySelectorAll('#campTabs .tab-pill').forEach(x => x.classList.remove('on'));
+        document.querySelector('#campTabs .tab-pill[data-tab="create"]').classList.add('on');
+        document.querySelectorAll('#screen-camp .camp-tab-pane').forEach(p => p.style.display = (p.dataset.pane === 'create' ? '' : 'none'));
+      });
+      row.querySelector('[data-act="edit"]').addEventListener('click', () => {
+        const s = segments.find(x => x.id === id);
+        const newName = prompt('Nom du segment :', s.name);
+        if (newName){ s.name = newName; ls.set(SEGMENTS_KEY, segments); renderSegments(); showToast('Segment modifié.'); }
+      });
+    });
+  }
+  function renderTemplates(){
+    const list = document.getElementById('templateList');
+    if (!list) return;
+    list.innerHTML = templates.map(t => `
+      <div class="auto-camp" data-tid="${t.id}">
+        <div class="ac-head"><b>${t.name}</b></div>
+        <p class="ac-desc">${t.body.slice(0,120)}${t.body.length>120?'…':''}</p>
+        <div class="ac-ctrl">
+          <button class="primary" data-act="use"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Utiliser</button>
+          <button data-act="edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Modifier</button>
+          <button class="danger" data-act="del"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/></svg>Supprimer</button>
+        </div>
+      </div>
+    `).join('');
+    list.querySelectorAll('.auto-camp').forEach(card => {
+      const id = +card.dataset.tid;
+      card.querySelector('[data-act="use"]').addEventListener('click', () => {
+        const t = templates.find(x => x.id === id);
+        document.getElementById('campMsg').value = t.body;
+        document.getElementById('campName').value = t.name;
+        document.querySelectorAll('#campTabs .tab-pill').forEach(x => x.classList.remove('on'));
+        document.querySelector('#campTabs .tab-pill[data-tab="create"]').classList.add('on');
+        document.querySelectorAll('#screen-camp .camp-tab-pane').forEach(p => p.style.display = (p.dataset.pane === 'create' ? '' : 'none'));
+        showToast('Template chargé. Modifie puis envoie.');
+      });
+      card.querySelector('[data-act="edit"]').addEventListener('click', () => {
+        const t = templates.find(x => x.id === id);
+        const newBody = prompt('Modifier le template :', t.body);
+        if (newBody){ t.body = newBody; ls.set(TEMPLATES_KEY, templates); renderTemplates(); showToast('Template modifié.'); }
+      });
+      card.querySelector('[data-act="del"]').addEventListener('click', () => {
+        const i = templates.findIndex(x => x.id === id);
+        if (i >= 0){ templates.splice(i,1); ls.set(TEMPLATES_KEY, templates); renderTemplates(); showToast('Template supprimé.'); }
+      });
+    });
+  }
+  function renderSentCamps(){
+    const list = document.getElementById('sentList');
+    if (!list) return;
+    list.innerHTML = sentCamps.map(c => `
+      <div class="sent-camp" data-cid="${c.id}">
+        <div class="sc-meta"><b>${c.name}</b><small>${c.date} · ${c.recipients} destinataires</small></div>
+        <div class="sc-stat"><div class="v">${c.openRate}%</div><div class="l">ouvert</div></div>
+        <div class="sc-actions">
+          <button data-act="report" title="Rapport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></button>
+          <button data-act="resend" title="Renvoyer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/></svg></button>
+        </div>
+      </div>
+    `).join('');
+    list.querySelectorAll('.sent-camp').forEach(card => {
+      const id = +card.dataset.cid;
+      card.querySelector('[data-act="report"]').addEventListener('click', () => {
+        const c = sentCamps.find(x => x.id === id);
+        const body = `
+          <p style="margin-bottom:14px;color:var(--muted);font-size:12.5px">Campagne envoyée le ${c.date}</p>
+          <div class="rep-list">
+            <div class="rep-row"><span class="rep-lbl">Destinataires</span><div class="rep-bar"><div class="rep-bar-fill" style="width:100%"></div></div><span class="rep-val">${c.recipients}</span><span class="rep-delta flat">100%</span></div>
+            <div class="rep-row"><span class="rep-lbl">Ouverts</span><div class="rep-bar"><div class="rep-bar-fill" style="width:${c.openRate}%"></div></div><span class="rep-val">${Math.round(c.recipients*c.openRate/100)}</span><span class="rep-delta up">${c.openRate}%</span></div>
+            <div class="rep-row"><span class="rep-lbl">Réponses</span><div class="rep-bar"><div class="rep-bar-fill" style="width:${c.replyRate}%"></div></div><span class="rep-val">${Math.round(c.recipients*c.replyRate/100)}</span><span class="rep-delta up">${c.replyRate}%</span></div>
+          </div>
+          <p style="margin-top:14px;font-size:11.5px;color:var(--muted)">⓵ Données via Gmail API (mock front · API en cours d'intégration côté backend).</p>
+        `;
+        openModal(`<span style="font-size:18px;font-weight:800">Rapport · ${c.name}</span>`, body, '');
+      });
+      card.querySelector('[data-act="resend"]').addEventListener('click', () => {
+        if (confirm(`Renvoyer la campagne "${sentCamps.find(x=>x.id===id).name}" ?`)){
+          const original = sentCamps.find(x=>x.id===id);
+          const copy = { ...original, id:Date.now(), date:new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}) };
+          sentCamps.unshift(copy);
+          ls.set(SENT_KEY, sentCamps);
+          renderSentCamps();
+          showToast('Campagne renvoyée à ' + original.recipients + ' destinataires.');
+        }
+      });
+    });
+  }
+  renderSegments(); renderTemplates(); renderSentCamps();
+
+  document.getElementById('newSegBtn')?.addEventListener('click', () => {
+    const body = `
+      <div class="cli-block"><div class="lbl">Nom du segment</div><input type="text" id="nsName" placeholder="Ex : Clients de Las Condes"></div>
+      <div class="cli-block"><div class="lbl">Définition (filtre)</div><input type="text" id="nsDef" placeholder="Ex : ville = Las Condes ET récurrent"></div>
+      <div class="cli-block"><div class="lbl">Estimation</div><input type="number" id="nsCount" placeholder="0" value="0"></div>
+    `;
+    const foot = `<div class="modal-actions"><button class="btn btn-secondary" data-modal-close>Annuler</button><button class="btn btn-primary" id="nsSaveBtn">Créer</button></div>`;
+    openModal('<span style="font-size:18px;font-weight:800">Nouveau segment</span>', body, foot);
+    document.getElementById('nsSaveBtn').addEventListener('click', () => {
+      const name = document.getElementById('nsName').value.trim();
+      if (!name){ showToast('Donne un nom.'); return; }
+      segments.push({id:Date.now(), name, def:document.getElementById('nsDef').value, count:+document.getElementById('nsCount').value||0});
+      ls.set(SEGMENTS_KEY, segments);
+      renderSegments();
+      closeModal();
+      showToast('Segment créé · sauvegardé.');
+    });
+  });
+  document.getElementById('newTemplateBtn')?.addEventListener('click', () => {
+    const body = `
+      <div class="cli-block"><div class="lbl">Nom du template</div><input type="text" id="ntName" placeholder="Ex : Promo été"></div>
+      <div class="cli-block"><div class="lbl">Message</div><textarea id="ntBody" placeholder="Utilise [PRENOM] pour personnaliser"></textarea></div>
+    `;
+    const foot = `<div class="modal-actions"><button class="btn btn-secondary" data-modal-close>Annuler</button><button class="btn btn-primary" id="ntSaveBtn">Créer</button></div>`;
+    openModal('<span style="font-size:18px;font-weight:800">Nouveau template</span>', body, foot);
+    document.getElementById('ntSaveBtn').addEventListener('click', () => {
+      const name = document.getElementById('ntName').value.trim();
+      const body = document.getElementById('ntBody').value.trim();
+      if (!name || !body){ showToast('Nom et message obligatoires.'); return; }
+      templates.push({id:Date.now(), name, body});
+      ls.set(TEMPLATES_KEY, templates);
+      renderTemplates();
+      closeModal();
+      showToast('Template créé.');
+    });
+  });
+
+  // Camp tabs
+  document.querySelectorAll('#campTabs .tab-pill').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('#campTabs .tab-pill').forEach(x => x.classList.remove('on'));
+      t.classList.add('on');
+      const tab = t.dataset.tab;
+      document.querySelectorAll('#screen-camp .camp-tab-pane').forEach(p => p.style.display = (p.dataset.pane === tab ? '' : 'none'));
+    });
+  });
+
+  // Camp form buttons
+  document.getElementById('campImportBtn')?.addEventListener('click', () => {
+    const url = prompt('URL ou fichier .txt à importer comme contenu de campagne :');
+    if (url){ document.getElementById('campMsg').value = `[Importé depuis ${url}]\n\nLorem ipsum dolor sit amet...`; showToast('Contenu importé.'); }
+  });
+  document.getElementById('campCatalogBtn')?.addEventListener('click', () => {
+    const body = `<p style="font-size:12.5px;color:var(--muted);margin-bottom:10px">Choisis un produit à mettre en avant :</p>
+      <div class="opt-grid">
+        ${catalog.map(p => `<button class="opt-tile" data-prod="${p.id}"><b>${p.name}</b><small>${p.price}</small></button>`).join('')}
+      </div>`;
+    openModal('<span style="font-size:18px;font-weight:800">Choisir du catalogue</span>', body, '');
+    document.querySelectorAll('#gmBody [data-prod]').forEach(b => {
+      b.addEventListener('click', () => {
+        const p = catalog.find(x => x.id === +b.dataset.prod);
+        const cur = document.getElementById('campMsg').value;
+        document.getElementById('campMsg').value = cur + (cur?'\n\n':'') + `🥖 ${p.name} — ${p.price}\n${p.desc}`;
+        closeModal();
+        showToast(`${p.name} ajouté au message.`);
+      });
+    });
+  });
+  document.getElementById('campAi3VersionsBtn')?.addEventListener('click', () => {
+    const cur = document.getElementById('campMsg').value || 'Promo cette semaine';
+    const body = `
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Claude a généré 3 variantes :</p>
+      <div class="opt-grid" style="grid-template-columns:1fr">
+        <button class="opt-tile" data-v="1"><b>Version chaleureuse</b><small>${cur} — version 1 amicale et chaleureuse pour fidéliser.</small></button>
+        <button class="opt-tile" data-v="2"><b>Version directe</b><small>Court · efficace · call-to-action immédiat sur ${cur.slice(0,30)}…</small></button>
+        <button class="opt-tile" data-v="3"><b>Version FOMO</b><small>"Plus que 24h pour ${cur.slice(0,30)}…" — urgence et rareté.</small></button>
+      </div>
+    `;
+    openModal('<span style="font-size:18px;font-weight:800">3 variantes Claude</span>', body, '');
+    document.querySelectorAll('#gmBody [data-v]').forEach(b => {
+      b.addEventListener('click', () => {
+        const v = b.dataset.v;
+        const txt = b.querySelector('small').textContent;
+        document.getElementById('campMsg').value = txt;
+        closeModal();
+        showToast(`Version ${v} sélectionnée.`);
+      });
+    });
+  });
+  document.getElementById('campSaveDraftBtn')?.addEventListener('click', () => {
+    const draft = { name:document.getElementById('campName').value, msg:document.getElementById('campMsg').value, date:Date.now() };
+    const drafts = ls.get('nexus_drafts', []);
+    drafts.push(draft);
+    ls.set('nexus_drafts', drafts);
+    showToast('Brouillon sauvegardé.');
+  });
+  document.getElementById('campSaveTemplateBtn')?.addEventListener('click', () => {
+    const name = document.getElementById('campName').value || prompt('Nom du template :');
+    if (!name) return;
+    templates.push({id:Date.now(), name, body:document.getElementById('campMsg').value});
+    ls.set(TEMPLATES_KEY, templates);
+    renderTemplates();
+    showToast('Template sauvegardé.');
+  });
+  document.getElementById('campSendBtn')?.addEventListener('click', () => {
+    const name = document.getElementById('campName').value || 'Sans titre';
+    const target = document.getElementById('campTarget').value;
+    let count = CRM_DATA.length;
+    if (target !== 'all' && target !== 'custom') count = CRM_DATA.filter(c => c.deno === target).length;
+    if (target === 'custom') { showToast('Mode personnalisé : sélectionne les destinataires.'); return; }
+    if (!confirm(`Envoyer "${name}" à ${count} destinataires ?`)) return;
+    sentCamps.unshift({id:Date.now(), name, date:new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}), recipients:count, openRate:Math.round(40+Math.random()*40), replyRate:Math.round(10+Math.random()*25)});
+    ls.set(SENT_KEY, sentCamps);
+    renderSentCamps();
+    showToast(`Campagne "${name}" envoyée à ${count} clients.`);
+  });
+
+  // Adaptive trigger when target = custom
+  document.getElementById('campTarget')?.addEventListener('change', e => {
+    if (e.target.value === 'custom'){
+      showToast('Mode personnalisé activé : un sélecteur clients s\'affichera à l\'envoi.');
+    }
+  });
+
+  // Auto-camp controls
+  document.querySelectorAll('.auto-camp').forEach(card => {
+    card.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const act = btn.dataset.action;
+        const id = card.dataset.id;
+        const pill = card.querySelector('.status-pill');
+        if (act === 'activate'){ pill.className = 'status-pill active'; pill.textContent = 'Actif'; showToast('Campagne auto activée.'); }
+        else if (act === 'pause'){ pill.className = 'status-pill paused'; pill.textContent = 'Pause'; showToast('Campagne en pause.'); }
+        else if (act === 'edit'){ showToast('Édition du déclencheur · formulaire adaptatif s\'ouvre.'); openTriggerEditor(id); }
+        else if (act === 'delete'){ if (confirm('Supprimer cette campagne auto ?')){ card.remove(); showToast('Campagne supprimée.'); } }
+      });
+    });
+  });
+
+  function openTriggerEditor(id){
+    const triggers = {
+      lost:{ label:'Inactivité X jours', fields:['Jours d\'inactivité (ex: 30)','Code promo offert','Canal']},
+      bday:{ label:'Anniversaire client', fields:['Jours avant l\'anniv','Promo en %','Message custom']},
+      weather:{ label:'Météo (pluie/soleil)', fields:['Condition (pluie/chaud)','Produit à promouvoir','Message']},
+    };
+    const t = triggers[id] || triggers.lost;
+    const body = `
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Déclencheur : <b>${t.label}</b> · le formulaire s'adapte au type.</p>
+      ${t.fields.map(f => `<div class="cli-block"><div class="lbl">${f}</div><input type="text" placeholder="${f}"></div>`).join('')}
+    `;
+    const foot = `<div class="modal-actions"><button class="btn btn-secondary" data-modal-close>Annuler</button><button class="btn btn-primary" data-modal-close>Enregistrer</button></div>`;
+    openModal('<span style="font-size:18px;font-weight:800">Modifier le déclencheur</span>', body, foot);
+  }
+
+  document.getElementById('addAutoCampBtn')?.addEventListener('click', () => openTriggerEditor('lost'));
+
+  // ===== BILLING =====
+  const INVOICES = [
+    { id:'2026-04', date:'01/05/2026', amt:'19,00 €', plan:'Pro · Mensuel', period:'01/04/2026 - 30/04/2026', status:'paid' },
+    { id:'2026-03', date:'01/04/2026', amt:'19,00 €', plan:'Pro · Mensuel', period:'01/03/2026 - 31/03/2026', status:'paid' },
+    { id:'2026-02', date:'01/03/2026', amt:'19,00 €', plan:'Pro · Mensuel', period:'01/02/2026 - 28/02/2026', status:'paid' },
+    { id:'2026-01', date:'01/02/2026', amt:'19,00 €', plan:'Pro · Mensuel', period:'01/01/2026 - 31/01/2026', status:'paid' },
+  ];
+  function renderInvoices(){
+    const list = document.getElementById('invList');
+    if (!list) return;
+    list.innerHTML = INVOICES.map(i => `
+      <div class="inv-row" data-iid="${i.id}">
+        <div class="inv-meta"><b>Facture ${i.id}</b><small>${i.date} · ${i.plan}</small></div>
+        <div class="inv-amt">${i.amt}</div>
+        <button class="inv-dl" title="Télécharger PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+      </div>
+    `).join('');
+    list.querySelectorAll('.inv-row').forEach(row => {
+      const id = row.dataset.iid;
+      row.querySelector('.inv-dl').addEventListener('click', e => { e.stopPropagation(); downloadInvoicePdf(id); });
+    });
+  }
+  renderInvoices();
+
+  function downloadInvoicePdf(id){
+    const inv = INVOICES.find(i => i.id === id);
+    if (!inv) return;
+    const acc = accM || { owner:'Carlos Romero', email:'demo@nexus.app', business:{name:profile.name||'Panadería Don Carlos'} };
+    const html = `
+      <h1>Facture Nexus · ${id}</h1>
+      <p class="pi-meta">Émise le ${inv.date} · Statut : <b style="color:#1EFF8E">PAYÉE</b></p>
+
+      <h2>Émetteur</h2>
+      <div class="pi-row"><span>Nexus SAS</span><b>FR12 1234 5678 9012 345</b></div>
+      <div class="pi-row"><span>120 rue de Rivoli, 75001 Paris</span><b>SIREN 914 282 868</b></div>
+      <div class="pi-row"><span>billing@nexus.app</span><b>TVA FR42 914282868</b></div>
+
+      <h2>Destinataire</h2>
+      <div class="pi-row"><span>${acc.owner}</span><b>${acc.email}</b></div>
+      <div class="pi-row"><span>${acc.business.name}</span><b>${profile.city||'—'}, ${profile.country||'—'}</b></div>
+
+      <h2>Détail</h2>
+      <table>
+        <tr><th>Plan</th><th>Période</th><th>Montant HT</th><th>TVA 20%</th><th>Total</th></tr>
+        <tr><td>${inv.plan}</td><td>${inv.period}</td><td>15,83 €</td><td>3,17 €</td><td><b>${inv.amt}</b></td></tr>
+      </table>
+
+      <h2>Paiement</h2>
+      <div class="pi-row"><span>Méthode</span><b>Carte Visa •••• 4242</b></div>
+      <div class="pi-row"><span>Date de paiement</span><b>${inv.date}</b></div>
+      <div class="pi-row"><span>Référence transaction</span><b>txn_${id}_${Date.now().toString().slice(-6)}</b></div>
+
+      <p class="pi-foot">Nexus · L'OS de ton business · Facture générée automatiquement le ${new Date().toLocaleString('fr-FR')}</p>
+    `;
+    document.getElementById('print-area').innerHTML = html;
+    showToast('Préparation du PDF...');
+    setTimeout(() => window.print(), 500);
+  }
+
+  document.getElementById('changePlanBtn')?.addEventListener('click', () => {
+    const body = `
+      <div class="opt-grid" style="grid-template-columns:1fr">
+        <button class="opt-tile" data-plan="free"><b>Free</b><small>0 €/mois · 50 conversations IA · 1 canal</small></button>
+        <button class="opt-tile on" data-plan="pro"><b>Pro</b><small>19 €/mois · 500 conv IA · multi-canaux · brief audio</small></button>
+        <button class="opt-tile" data-plan="business"><b>Business</b><small>49 €/mois · illimité · multi-tenant · API publique</small></button>
+        <button class="opt-tile" data-plan="ent"><b>Enterprise</b><small>Sur devis · SSO · MCP Creative · support dédié</small></button>
+      </div>
+    `;
+    const foot = `<div class="modal-actions"><button class="btn btn-secondary" data-modal-close>Annuler</button><button class="btn btn-primary" id="planConfirmBtn">Confirmer</button></div>`;
+    openModal('<span style="font-size:18px;font-weight:800">Choisir un plan</span>', body, foot);
+    let chosen = 'pro';
+    document.querySelectorAll('#gmBody [data-plan]').forEach(b => {
+      b.addEventListener('click', () => {
+        document.querySelectorAll('#gmBody [data-plan]').forEach(x => x.classList.remove('on'));
+        b.classList.add('on'); chosen = b.dataset.plan;
+      });
+    });
+    document.getElementById('planConfirmBtn').addEventListener('click', () => {
+      closeModal();
+      showToast(`Plan ${chosen} sélectionné. Mise à jour à la prochaine facture.`);
+    });
+  });
+
+  // ===== STATS — Period tabs + click stat → modal détaillé avec lien vers section =====
+  document.querySelectorAll('#periodTabs .tab-pill').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('#periodTabs .tab-pill').forEach(x => x.classList.remove('on'));
+      t.classList.add('on');
+      const p = t.dataset.period;
+      document.getElementById('statsPeriodLabel').textContent = (p === '7' ? '7 derniers jours' : p === '30' ? '30 derniers jours' : 'Depuis toujours');
+      showToast('Données mises à jour : ' + (p === '7' ? '7 jours' : p === '30' ? '30 jours' : 'depuis toujours'));
+    });
+  });
+
+  // Best hours toggle 7/30
+  document.querySelectorAll('.bh-toggle button').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.bh-toggle button').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+      const range = b.dataset.bh;
+      // Update insights
+      if (range === '30'){
+        document.getElementById('bhInsight1').innerHTML = 'Sur 30 jours : tes <b>jeudis</b> performent mieux que tes vendredis. Réoriente le boost.';
+        document.getElementById('bhInsight2').innerHTML = 'Tes meilleurs créneaux : <b>13h–14h</b> et <b>20h–22h</b>, surtout en semaine.';
+        document.getElementById('bhInsight3').innerHTML = 'Le <b>dimanche après-midi</b> = nouveau pic émergent (+18% vs mois dernier).';
+      } else {
+        document.getElementById('bhInsight1').innerHTML = 'Tes clients répondent <b>3× plus</b> entre <b>13h–14h</b> et <b>19h–21h</b>. Évite les envois après 21h.';
+        document.getElementById('bhInsight2').innerHTML = 'Le <b>vendredi soir</b> reste ton créneau roi : +27 % de réponses. Programme tes relances importantes ce jour-là.';
+        document.getElementById('bhInsight3').innerHTML = 'Le <b>lundi matin</b> = creux total. N\'envoie rien avant 11h sauf urgence.';
+      }
+    });
+  });
+
+  // Stat detail modal — ajouter bouton "Voir la source"
+  const STAT_NAV = { recovered:'crm', newclients:'crm', sales:'core', conv:'messages', response:'messages' };
+  // Patch openStatModal pour ajouter un bouton CTA section
+  const origCloseStatBtn = document.getElementById('smClose');
+  if (origCloseStatBtn){
+    // On insère un bouton "voir la source" juste avant le close
+    const ctaSourceBtn = document.createElement('button');
+    ctaSourceBtn.className = 'btn btn-primary';
+    ctaSourceBtn.id = 'smSourceBtn';
+    ctaSourceBtn.style.marginTop = '8px';
+    ctaSourceBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg> Voir la section source';
+    origCloseStatBtn.parentNode.insertBefore(ctaSourceBtn, origCloseStatBtn);
+    let currentStatKey = null;
+    document.querySelectorAll('.stat[data-stat]').forEach(s => {
+      s.addEventListener('click', () => { currentStatKey = s.dataset.stat; });
+    });
+    ctaSourceBtn.addEventListener('click', () => {
+      const target = STAT_NAV[currentStatKey] || 'core';
+      smBg.classList.remove('show');
+      navigate(target);
+    });
+  }
+
+  // ===== EXPORT PDF (stats + rapport général) =====
+  function buildStatsReport(){
+    return `
+      <h1>Rapport Statistiques · Nexus</h1>
+      <p class="pi-meta">${profile.name||'Mon entreprise'} · Période : 7 derniers jours · Généré le ${new Date().toLocaleDateString('fr-FR')}</p>
+
+      <h2>Indicateurs clés</h2>
+      <div class="pi-grid">
+        <div class="pi-card"><span class="v">5</span><span class="l">Clients récupérés</span></div>
+        <div class="pi-card"><span class="v">3</span><span class="l">Nouveaux clients</span></div>
+        <div class="pi-card"><span class="v">147</span><span class="l">Conversations</span></div>
+        <div class="pi-card"><span class="v">1m 12s</span><span class="l">Temps réponse moyen</span></div>
+      </div>
+
+      <h2>Best Hours · activité client</h2>
+      <p>Tes clients répondent 3× plus entre <b>13h–14h</b> et <b>19h–21h</b>. Évite les envois après 21h.</p>
+      <p>Le <b>vendredi soir</b> reste ton créneau roi : +27 % de réponses.</p>
+      <p>Le <b>lundi matin</b> = creux total. N'envoie rien avant 11h sauf urgence.</p>
+
+      <h2>Top questions de la semaine</h2>
+      <table>
+        <tr><th>#</th><th>Question</th><th>Occurrences</th><th>Tendance</th></tr>
+        <tr><td>1</td><td>Vous livrez à Providencia ?</td><td>9</td><td>+2</td></tr>
+        <tr><td>2</td><td>Cookies aux figues dispo ?</td><td>7</td><td>−1</td></tr>
+        <tr><td>3</td><td>Sucré sans sucre ?</td><td>5</td><td>NEW</td></tr>
+        <tr><td>4</td><td>Horaires weekend ?</td><td>4</td><td>+1</td></tr>
+        <tr><td>5</td><td>Commande pour 25 personnes ?</td><td>3</td><td>−2</td></tr>
+      </table>
+
+      <h2>Répartition de la base</h2>
+      <table>
+        <tr><th>Segment</th><th>Clients</th><th>Évolution</th></tr>
+        <tr><td>Récurrent</td><td>61</td><td>+50%</td></tr>
+        <tr><td>VIP</td><td>12</td><td>+12%</td></tr>
+        <tr><td>Nouveau</td><td>8</td><td>+33%</td></tr>
+        <tr><td>Occasionnel</td><td>34</td><td>0%</td></tr>
+        <tr><td>Perdu</td><td>10</td><td>+5% (à surveiller)</td></tr>
+      </table>
+    `;
+  }
+  function buildFullReport(){
+    const stats = buildStatsReport().replace('<h1>Rapport Statistiques · Nexus</h1>','<h1>Rapport général · Nexus Core</h1>');
+    return stats + `
+      <h2>Clients · CRM</h2>
+      <p>Total contacts : <b>${CRM_DATA.length}</b></p>
+      <table>
+        <tr><th>Nom</th><th>Dénom.</th><th>Score</th><th>Dépense</th></tr>
+        ${CRM_DATA.slice(0,15).map(c => `<tr><td>${c.name}</td><td>${DENO_LABELS[c.deno]||c.deno}</td><td>${c.score}</td><td>$${c.spend}</td></tr>`).join('')}
+      </table>
+
+      <h2>Campagnes envoyées</h2>
+      <table>
+        <tr><th>Nom</th><th>Date</th><th>Destinataires</th><th>Ouvert</th><th>Réponse</th></tr>
+        ${sentCamps.map(c => `<tr><td>${c.name}</td><td>${c.date}</td><td>${c.recipients}</td><td>${c.openRate}%</td><td>${c.replyRate}%</td></tr>`).join('')}
+      </table>
+
+      <h2>Profil entreprise</h2>
+      <div class="pi-row"><span>Nom</span><b>${profile.name||'—'}</b></div>
+      <div class="pi-row"><span>Localisation</span><b>${profile.city||'—'}, ${profile.country||'—'}</b></div>
+      <div class="pi-row"><span>Catalogue</span><b>${catalog.length} produits</b></div>
+
+      <p class="pi-foot">Nexus · L'OS de ton business · Rapport généré le ${new Date().toLocaleString('fr-FR')}</p>
+    `;
+  }
+  document.getElementById('exportStatsBtn')?.addEventListener('click', () => {
+    document.getElementById('print-area').innerHTML = buildStatsReport();
+    showToast('Génération du PDF stats...');
+    setTimeout(() => window.print(), 400);
+  });
+  document.getElementById('exportFullReportBtn')?.addEventListener('click', () => {
+    document.getElementById('print-area').innerHTML = buildFullReport();
+    showToast('Génération du rapport général...');
+    setTimeout(() => window.print(), 400);
+  });
+
+  // ===== BRIEF AUDIO — pause/stop + speed selector =====
+  // On ajoute les contrôles dans le DOM si pas déjà présents
+  const audioBody = document.querySelector('.brief-card.audio .audio-body');
+  if (audioBody && !document.getElementById('audioControls')){
+    const ctrls = document.createElement('div');
+    ctrls.id = 'audioControls';
+    ctrls.className = 'audio-controls';
+    ctrls.style.width = '100%';
+    ctrls.style.marginTop = '10px';
+    ctrls.innerHTML = `
+      <button class="ac-btn danger" id="audioStopBtn" title="Stop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14"/></svg></button>
+      <div class="speed-pills">
+        <button class="speed-pill" data-speed="0.75">Lent</button>
+        <button class="speed-pill on" data-speed="1">×1</button>
+        <button class="speed-pill" data-speed="1.5">Rapide</button>
+      </div>
+      <span style="font-size:10.5px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-left:auto" id="audioSpeedLbl">×1</span>
+    `;
+    audioBody.parentNode.appendChild(ctrls);
+    document.getElementById('audioStopBtn').addEventListener('click', () => {
+      audioPlayer.pause();
+      audioPlayer.currentTime = 0;
+      voiceMic.classList.remove('playing');
+      voiceIcon.innerHTML = playSvg;
+      audioBar.style.width = '0%';
+      showToast('Brief stoppé.');
+    });
+    document.querySelectorAll('.speed-pill').forEach(p => {
+      p.addEventListener('click', () => {
+        document.querySelectorAll('.speed-pill').forEach(x => x.classList.remove('on'));
+        p.classList.add('on');
+        const sp = parseFloat(p.dataset.speed);
+        audioPlayer.playbackRate = sp;
+        document.getElementById('audioSpeedLbl').textContent = '×' + sp;
+      });
+    });
+  }
+
+  // ===== MODE VACANCES — modulable + presets =====
+  // Indicateur dynamique selon durée
+  function updateVacIndicator(){
+    const start = new Date(document.getElementById('vacStart').value);
+    const end = new Date(document.getElementById('vacEnd').value);
+    const days = Math.max(0, Math.round((end - start) / (1000*60*60*24)));
+    const isLong = days > 7;
+    const lbl = document.getElementById('vacModeLabel');
+    if (lbl) lbl.textContent = `Mode ${isLong?'long':'court'} · ${days} jour${days>1?'s':''}`;
+    // active le bon textarea
+    const short = document.getElementById('vacMsgShort');
+    const long = document.getElementById('vacMsgLong');
+    if (short && long){
+      short.parentElement.style.opacity = isLong ? '.4' : '1';
+      long.parentElement.style.opacity = isLong ? '1' : '.4';
+    }
+  }
+  document.getElementById('vacStart')?.addEventListener('change', updateVacIndicator);
+  document.getElementById('vacEnd')?.addEventListener('change', updateVacIndicator);
+
+  // Presets
+  document.querySelectorAll('#vacPresets .vac-preset').forEach(p => {
+    p.addEventListener('click', () => {
+      document.querySelectorAll('#vacPresets .vac-preset').forEach(x => x.classList.remove('on'));
+      p.classList.add('on');
+      const preset = p.dataset.preset;
+      const now = new Date();
+      const start = document.getElementById('vacStart');
+      const end = document.getElementById('vacEnd');
+      const fmt = (d) => d.toISOString().slice(0,16);
+      if (preset === 'afternoon'){ start.value = fmt(now); const e = new Date(now); e.setHours(now.getHours()+5); end.value = fmt(e); }
+      else if (preset === 'day'){ start.value = fmt(now); const e = new Date(now); e.setDate(now.getDate()+1); end.value = fmt(e); }
+      else if (preset === 'weekend'){ const e = new Date(now); e.setDate(now.getDate()+2); end.value = fmt(e); start.value = fmt(now); }
+      else if (preset === 'week'){ const e = new Date(now); e.setDate(now.getDate()+7); end.value = fmt(e); start.value = fmt(now); }
+      else if (preset === '2weeks'){ const e = new Date(now); e.setDate(now.getDate()+14); end.value = fmt(e); start.value = fmt(now); }
+      else if (preset === 'month'){ const e = new Date(now); e.setMonth(now.getMonth()+1); end.value = fmt(e); start.value = fmt(now); }
+      updateVacIndicator();
+    });
+  });
+  // Lang pills
+  document.getElementById('vacLangPills')?.querySelectorAll('.tone-pill').forEach(p => {
+    p.addEventListener('click', () => {
+      document.querySelectorAll('#vacLangPills .tone-pill').forEach(x => x.classList.remove('on'));
+      p.classList.add('on');
+      const lang = p.dataset.lang;
+      // Adapt textareas
+      const messages = {
+        es:{ s:'¡Hola! Estoy fuera por unos días. Te respondo enseguida al regresar. 🥖', l:'Hola, la panadería está en pausa hasta el [DATE]. Tomo nota de tu pedido y vuelvo contigo a la vuelta.', u:'⚠️ Para pedidos urgentes, contacta a Marta al +56 9 1234 5678.'},
+        fr:{ s:'Bonjour ! Je suis absent quelques jours, je reviens vers vous dès le retour. 🥖', l:'Bonjour, la boulangerie est en pause jusqu\'au [DATE]. Je note votre demande et reviens à mon retour.', u:'⚠️ Pour toute urgence, contactez Marta au +56 9 1234 5678.'},
+        en:{ s:'Hi! I\'m away for a few days, I\'ll get back to you as soon as I return. 🥖', l:'Hello, the bakery is on pause until [DATE]. I\'m noting your request and will get back to you upon my return.', u:'⚠️ For urgent orders, contact Marta at +56 9 1234 5678.'},
+        auto:null,
+      };
+      if (messages[lang]){
+        document.getElementById('vacMsgShort').value = messages[lang].s;
+        document.getElementById('vacMsgLong').value = messages[lang].l;
+        document.getElementById('vacMsgUrgent').value = messages[lang].u;
+        showToast('Messages traduits en ' + lang.toUpperCase());
+      } else {
+        showToast('Mode auto · l\'IA détecte la langue de chaque message reçu.');
+      }
+    });
+  });
+  updateVacIndicator();
+
+  // Override vacActivate to persist all settings
+  const vacActOriginal = document.getElementById('vacActivate');
+  if (vacActOriginal){
+    const newAct = vacActOriginal.cloneNode(true);
+    vacActOriginal.parentNode.replaceChild(newAct, vacActOriginal);
+    newAct.addEventListener('click', () => {
+      const cfg = {
+        active:true,
+        start:document.getElementById('vacStart').value,
+        end:document.getElementById('vacEnd').value,
+        msgShort:document.getElementById('vacMsgShort').value,
+        msgLong:document.getElementById('vacMsgLong').value,
+        msgUrgent:document.getElementById('vacMsgUrgent').value,
+        lang:document.querySelector('#vacLangPills .tone-pill.on')?.dataset.lang || 'es',
+        tone:document.querySelector('#tonePills .tone-pill.on')?.dataset.tone || 'warm',
+      };
+      ls.set('nexus_vacances', cfg);
+      state.vacances = true; saveState();
+      document.getElementById('vacStatus').textContent = 'Activé';
+      closeDrawer();
+      showToast('Mode vacances activé. L\'IA prend le relais (réponses adaptées).');
+    });
+  }
+
+  // Restore vacances state on load
+  const savedVac = ls.get('nexus_vacances', null);
+  if (savedVac && savedVac.active){
+    document.getElementById('vacStatus').textContent = 'Activé';
+    if (savedVac.start) document.getElementById('vacStart').value = savedVac.start;
+    if (savedVac.end) document.getElementById('vacEnd').value = savedVac.end;
+    if (savedVac.msgShort) document.getElementById('vacMsgShort').value = savedVac.msgShort;
+    if (savedVac.msgLong) document.getElementById('vacMsgLong').value = savedVac.msgLong;
+    if (savedVac.msgUrgent) document.getElementById('vacMsgUrgent').value = savedVac.msgUrgent;
+    updateVacIndicator();
+  }
+
+  // ===== Suggestion IA / Brouillon / Traduction (boutons messagerie) =====
+  // Ces boutons existaient avant en mock — on les rend fonctionnels via openModal
+  // Suggestions IA (depuis fiche client/messagerie)
+  function bindMessagingTools(){
+    // On peut ajouter des delegates pour des futurs boutons "Suggestion IA / Brouillon / Traduction"
+    document.body.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-msg-tool]');
+      if (!btn) return;
+      const tool = btn.dataset.msgTool;
+      if (tool === 'suggest'){
+        const body = `<div class="ai-chat">
+          <div class="msg-l">Voici 3 suggestions de réponse adaptées au contexte :</div>
+          <button class="opt-tile" style="text-align:left;width:100%;margin-top:6px"><b>Suggestion 1 — accueillant</b><small>Hola María ! Bien sûr, ta commande de 12 empanadas pour samedi 11h est confirmée. Je note. Une boisson en plus ?</small></button>
+          <button class="opt-tile" style="text-align:left;width:100%;margin-top:6px"><b>Suggestion 2 — direct</b><small>Confirmé pour 12 empanadas samedi 11h. À samedi !</small></button>
+          <button class="opt-tile" style="text-align:left;width:100%;margin-top:6px"><b>Suggestion 3 — upsell</b><small>Confirmé pour 12 empanadas samedi 11h ! Petite tentation : aujourd'hui les cookies aux figues sont à -20%, j'en ajoute 4 ?</small></button>
+        </div>`;
+        openModal('<span style="font-size:18px;font-weight:800">Suggestions IA</span>', body, '');
+      } else if (tool === 'draft'){
+        const body = `<div class="cli-block"><div class="lbl">Brouillon généré par Claude</div>
+          <textarea style="min-height:140px">Hola María ! Confirmé pour ta commande de 12 empanadas samedi à 11h. Tu veux ajouter une boisson ou un dessert ? Sinon je prépare tout pour 11h pile.</textarea></div>`;
+        const foot = `<div class="modal-actions"><button class="btn btn-secondary" data-modal-close>Annuler</button><button class="btn btn-primary" data-modal-close>Envoyer</button></div>`;
+        openModal('<span style="font-size:18px;font-weight:800">Brouillon</span>', body, foot);
+      } else if (tool === 'translate'){
+        const body = `<div class="cli-block"><div class="lbl">Texte original (FR)</div><div class="val">Bonjour María, je confirme votre commande de 12 empanadas pour samedi 11h.</div></div>
+          <div class="cli-block"><div class="lbl">Traduction (ES)</div><div class="val">Hola María, confirmo tu pedido de 12 empanadas para el sábado a las 11h.</div></div>
+          <div class="cli-block"><div class="lbl">Traduction (EN)</div><div class="val">Hi María, I confirm your order of 12 empanadas for Saturday at 11am.</div></div>`;
+        openModal('<span style="font-size:18px;font-weight:800">Traduction</span>', body, '');
+      }
+    });
+  }
+  bindMessagingTools();
+
+  // ===== Notifications dropdown =====
+  const NOTIFS = [
+    { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>', t:'María a confirmé sa commande de samedi.', tm:'il y a 2 min', unread:true, go:'messages' },
+    { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>', t:'Diego attend ta réponse depuis 1h.', tm:'il y a 1 h', unread:true, go:'messages' },
+    { ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/></svg>', t:'Stripe a reçu un paiement de 19,00 €.', tm:'aujourd\'hui', unread:true, go:'billing' },
+  ];
+  const notifPop = document.getElementById('notifPop');
+  function renderNotifs(){
+    const list = document.getElementById('npList');
+    list.innerHTML = NOTIFS.map((n, i) => `
+      <button class="np-item ${n.unread?'unread':''}" data-i="${i}">
+        <div class="np-ic">${n.ic}</div>
+        <div class="np-meta">
+          <div class="np-title">${n.t}</div>
+          <div class="np-time">${n.tm}</div>
+        </div>
+      </button>
+    `).join('');
+    list.querySelectorAll('[data-i]').forEach(b => {
+      b.addEventListener('click', () => {
+        const n = NOTIFS[+b.dataset.i];
+        n.unread = false;
+        notifPop.classList.remove('show');
+        if (n.go) navigate(n.go);
+      });
+    });
+  }
+  renderNotifs();
+  // Override topbar notif click
+  const tbNotif = document.getElementById('tbNotif');
+  // Remove previous listeners by cloning
+  const newNotif = tbNotif.cloneNode(true);
+  tbNotif.parentNode.replaceChild(newNotif, tbNotif);
+  newNotif.addEventListener('click', () => {
+    notifPop.classList.toggle('show');
+    if (notifPop.classList.contains('show')){
+      const badge = newNotif.querySelector('.badge');
+      if (badge) setTimeout(() => badge.style.display = 'none', 800);
+    }
+  });
+  document.getElementById('npClose').addEventListener('click', () => notifPop.classList.remove('show'));
+  document.getElementById('npMarkRead').addEventListener('click', () => {
+    NOTIFS.forEach(n => n.unread = false);
+    renderNotifs();
+    showToast('Toutes les notifications marquées comme lues.');
+  });
+
+  // ===== Stats period from "more-item data-detail" =====
+  document.querySelectorAll('[data-detail]').forEach(b => {
+    b.addEventListener('click', () => {
+      const k = b.dataset.detail;
+      const map = {
+        conv: { title:'147 conversations IA', body:'<p>L\'IA a géré 147 conversations cette semaine, 138 sans intervention humaine (94%). Tu as économisé environ 6h.</p><p style="margin-top:8px">Top canaux : WhatsApp (98), Instagram (32), Gmail (17).</p>' },
+        time: { title:'Temps économisé', body:'<p>≈ 6 heures cette semaine. Sur 30 jours : ≈ 24h. Cela équivaut à <b>3 jours de travail</b> récupérés par mois.</p>' },
+      };
+      if (map[k]){
+        openModal(`<span style="font-size:18px;font-weight:800">${map[k].title}</span>`, map[k].body, '');
+      }
+    });
+  });
+
+  // (Hub widgets sont déjà bindés via le binding générique [data-go])
+
+  // Esc closes generic modal too
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape'){
+      gmBg.classList.remove('show');
+      ifaceOverlay.classList.remove('show');
+      notifPop.classList.remove('show');
     }
   });
 
