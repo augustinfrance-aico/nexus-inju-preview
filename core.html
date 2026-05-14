@@ -1402,11 +1402,44 @@ body{
   // =========== Drawer
   const drawer = document.getElementById('drawer');
   const drawerBg = document.getElementById('drawerBg');
-  const openDrawer = () => { drawer.classList.add('show'); drawerBg.classList.add('show'); };
   const closeDrawer = () => { drawer.classList.remove('show'); drawerBg.classList.remove('show'); };
-  document.getElementById('menuBtn').addEventListener('click', openDrawer);
-  document.getElementById('drawerClose').addEventListener('click', closeDrawer);
-  drawerBg.addEventListener('click', closeDrawer);
+  // Pop-up Menus à la place du drawer latéral
+  const openMenusPopup = () => {
+    let ov = document.getElementById('menusPopup');
+    if (!ov) {
+      ov = document.createElement('div');
+      ov.id = 'menusPopup';
+      ov.style.cssText = 'position:fixed;inset:0;background:rgba(5,7,10,.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;cursor:pointer';
+      ov.innerHTML = `
+        <div style="background:linear-gradient(135deg,#0F1520 0%,#1A2335 100%);border:1px solid rgba(255,255,255,.1);border-radius:22px;max-width:780px;width:100%;padding:28px;color:#E8ECF3;cursor:default;box-shadow:0 30px 70px -16px rgba(0,0,0,.55)">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.08)">
+            <div>
+              <div style="font-size:11px;color:#00E5FF;font-weight:700;letter-spacing:.14em;text-transform:uppercase">Nexus Core · Menus</div>
+              <h2 style="font-size:22px;font-weight:800;margin-top:6px">Interface principale</h2>
+              <div style="font-size:12.5px;color:#B8C1CE;margin-top:4px">Choisis un module</div>
+            </div>
+            <button id="menusClose" style="background:rgba(255,255,255,.12);color:#fff;border:0;cursor:pointer;width:34px;height:34px;border-radius:10px;font-size:14px">✕</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+            ${[['📊','Statistiques','stats','#1EFF8E'],['📬','Messagerie','inbox','#8B5CFF'],['📢','Campagnes','campaigns','#F5C45E'],['👥','Clients CRM','crm','#2E7BFF'],['✈️','Mode vacances','vacances','#00E5FF'],['🎓','Tutoriel','tutorial','#FF6B9D']].map(([ic,lbl,route,col])=>`
+              <div data-route="${route}" style="cursor:pointer;padding:22px 16px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-top:3px solid ${col};text-align:center;transition:all .2s">
+                <div style="font-size:38px;margin-bottom:8px">${ic}</div>
+                <div style="font-weight:700;font-size:15px;color:#fff">${lbl}</div>
+              </div>`).join('')}
+          </div>
+        </div>
+      `;
+      document.body.appendChild(ov);
+      ov.querySelector('#menusClose').addEventListener('click',()=>ov.remove());
+      ov.addEventListener('click',(e)=>{ if(e.target===ov) ov.remove(); });
+      ov.querySelectorAll('[data-route]').forEach(c=>{
+        c.addEventListener('click',()=>{ location.href = 'app.html#/'+c.dataset.route; });
+      });
+    } else { ov.style.display='flex'; }
+  };
+  document.getElementById('menuBtn').addEventListener('click', openMenusPopup);
+  if (document.getElementById('drawerClose')) document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+  if (drawerBg) drawerBg.addEventListener('click', closeDrawer);
 
   // =========== Mode vacances
   const vacModal = document.getElementById('vacModal');
