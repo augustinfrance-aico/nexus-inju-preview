@@ -795,7 +795,7 @@ html[data-theme="dark"] .back-to-core-btn{color:#E8ECF3}
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>
       </button>
       <div class="breadcrumb">
-        <a href="#/dashboard" onclick="event.preventDefault();Nx.navigate('dashboard')" style="color:inherit;cursor:pointer;font-weight:600">Nexus</a> · <b id="breadcrumb">Tableau de bord</b>
+        <a href="core.html" style="color:inherit;cursor:pointer;font-weight:600">Nexus</a> · <b id="breadcrumb">Tableau de bord</b>
       </div>
       <button class="search-btn" onclick="Nx.openPalette()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
@@ -2241,7 +2241,7 @@ const Nx = {
     const vc = document.getElementById('viewContainer');
     const v = this.state.view;
     let html = '';
-    if (v === 'dashboard') { location.replace('core.html'); return; }
+    if (v === 'dashboard') html = this.viewDashboard();
     else if (v === 'profile') html = this.viewProfile();
     else if (v === 'inbox') html = this.viewInbox();
     else if (v === 'crm') html = this.viewCrm();
