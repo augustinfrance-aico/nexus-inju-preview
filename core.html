@@ -649,6 +649,111 @@ body{
   .voice-mic svg{width:30px;height:30px}
   .brief-card{padding:20px 22px}
 }
+
+/* ============ TOPBAR : sélecteur langue + bouton profil (Update 12 mai PDF) ============ */
+.lang-switcher{display:inline-flex;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:9px;padding:2px;gap:0}
+.lang-switcher .lang-btn{padding:5px 10px;border-radius:7px;border:0;background:transparent;color:var(--muted);font-size:11.5px;font-weight:700;letter-spacing:.05em;cursor:pointer;font-family:inherit;transition:all .15s}
+.lang-switcher .lang-btn:hover{color:var(--ink2)}
+.lang-switcher .lang-btn.on{background:linear-gradient(135deg,#2E7BFF,#8B5CFF);color:#fff;box-shadow:0 4px 10px -3px rgba(46,123,255,.5)}
+.profile-btn{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:rgba(255,255,255,.04);cursor:pointer;transition:all .18s;padding:0}
+.profile-btn:hover{border-color:var(--cyan);background:rgba(0,229,255,.08);transform:translateY(-1px)}
+.profile-avatar{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#F5C45E,#FF7B7B);color:#fff;font-weight:800;font-size:11px;letter-spacing:-.01em}
+
+/* Audio controls additionnels (vitesse + pause selon PDF) */
+.audio-controls{display:inline-flex;align-items:center;gap:6px;margin-left:auto}
+.audio-speed-btn{padding:4px 9px;border-radius:7px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink2);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s}
+.audio-speed-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+.audio-speed-btn.on{background:linear-gradient(135deg,#2E7BFF,#8B5CFF);color:#fff;border-color:transparent}
+
+/* ============ POP-UP MENUS (selon Smart bell PDF) ============ */
+.menus-iface-btn{background:linear-gradient(135deg,#2E7BFF,#8B5CFF) !important;color:#fff !important;border:0 !important;box-shadow:0 8px 22px -8px rgba(122,60,255,.5) !important}
+.menus-iface-btn:hover{transform:translateY(-1px);box-shadow:0 14px 28px -8px rgba(122,60,255,.7) !important;border-color:transparent !important}
+.menus-overlay{position:fixed;inset:0;background:rgba(5,7,10,.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
+.menus-overlay.show{opacity:1;visibility:visible}
+.menus-card{background:linear-gradient(135deg,#0F1520 0%,#1A2335 100%);border:1px solid rgba(255,255,255,.1);border-radius:22px;max-width:920px;width:100%;max-height:90vh;overflow-y:auto;padding:24px;box-shadow:0 30px 70px -16px rgba(0,0,0,.55);color:#E8ECF3;position:relative;transform:scale(.95);transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.menus-overlay.show .menus-card{transform:scale(1)}
+.menus-card::before{content:"";position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;background:linear-gradient(135deg,#7A3CFF,#00E5FF);border-radius:24px;z-index:-1;opacity:.35}
+.menus-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.08)}
+.menus-eyebrow{font-size:10.5px;color:#00E5FF;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.menus-title{font-size:22px;font-weight:800;letter-spacing:-.01em;color:#fff;margin-top:4px}
+.menus-sub{font-size:12.5px;color:#B8C1CE;margin-top:4px}
+.menus-close{background:rgba(255,255,255,.12);color:#fff;border:0;cursor:pointer;width:34px;height:34px;border-radius:10px;font-size:14px;flex-shrink:0;transition:background .15s}
+.menus-close:hover{background:rgba(255,255,255,.22)}
+.menus-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:720px){.menus-grid{grid-template-columns:1fr}}
+
+/* Version simplifiée — 6 cases visibles d'un coup, pas de scroll (selon Update 12 mai PDF Juan) */
+.menus-grid.simplified{grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:14px}
+@media(max-width:780px){.menus-grid.simplified{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(3,1fr)}}
+@media(max-width:480px){.menus-grid.simplified{grid-template-columns:1fr;grid-template-rows:repeat(6,1fr);gap:10px}}
+.menus-cell-v2{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding:22px 16px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);cursor:pointer;transition:all .25s cubic-bezier(.2,.8,.2,1);position:relative;overflow:hidden;min-height:170px;justify-content:center}
+.menus-cell-v2::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent,var(--cyan));opacity:.85}
+.menus-cell-v2.c-stats{--accent:#1EFF8E}
+.menus-cell-v2.c-msg{--accent:#8B5CFF}
+.menus-cell-v2.c-camp{--accent:#F5C45E}
+.menus-cell-v2.c-crm{--accent:#2E7BFF}
+.menus-cell-v2.c-vac{--accent:#00E5FF}
+.menus-cell-v2.c-tuto{--accent:#FF6B9D}
+.menus-cell-v2:hover{transform:translateY(-3px);background:rgba(255,255,255,.07);border-color:var(--accent);box-shadow:0 18px 40px -14px var(--accent)}
+.mcv-logo{width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(255,255,255,.10),rgba(255,255,255,.04));color:var(--accent);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 8px 24px -10px rgba(0,0,0,.4);transition:all .25s}
+.menus-cell-v2:hover .mcv-logo{transform:scale(1.08) rotate(-3deg);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 14px 32px -10px var(--accent)}
+.mcv-logo svg{width:34px;height:34px}
+.mcv-text{display:flex;flex-direction:column;gap:5px}
+.mcv-text b{font-size:16px;font-weight:800;color:#fff;letter-spacing:-.01em;line-height:1.2}
+.mcv-text small{font-size:12px;color:#8A94A6;line-height:1.45;display:block;max-width:200px;margin:0 auto}
+.mcv-badge{position:absolute;top:10px;right:10px;background:rgba(245,196,94,.20);color:#F5C45E;font-size:9.5px;font-weight:800;padding:3px 8px;border-radius:6px;letter-spacing:.10em;text-transform:uppercase;border:1px solid rgba(245,196,94,.32)}
+.menus-cell{display:flex;flex-direction:column;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px;transition:all .2s;min-height:200px;position:relative;cursor:pointer}
+.menus-cell:hover{border-color:rgba(0,229,255,.35);background:rgba(255,255,255,.06);transform:translateY(-2px)}
+.menus-cell.c-stats{border-top:3px solid #1EFF8E}
+.menus-cell.c-msg{border-top:3px solid #8B5CFF}
+.menus-cell.c-camp{border-top:3px solid #F5C45E}
+.menus-cell.c-crm{border-top:3px solid #2E7BFF}
+.menus-cell.c-vac{border-top:3px solid #00E5FF}
+.menus-cell.c-tuto{border-top:3px solid #FF6B9D}
+.mcell-hd{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.06);position:relative}
+.mcell-hd b{font-size:14px;font-weight:800;color:#fff;display:block}
+.mcell-hd small{font-size:10.5px;color:#8A94A6;display:block;margin-top:1px}
+.mcell-ic{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.mcell-badge{position:absolute;top:0;right:0;background:rgba(245,196,94,.22);color:#F5C45E;font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px;letter-spacing:.08em;text-transform:uppercase}
+.mcell-body{flex:1;display:flex;flex-direction:column;gap:7px;font-size:12px;color:#C5CDE0;margin-bottom:10px}
+.mcell-cta{margin-top:auto;padding:8px 12px;background:linear-gradient(135deg,rgba(46,123,255,.5),rgba(139,92,255,.5));color:#fff;border:0;border-radius:9px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .18s}
+.mcell-cta:hover{background:linear-gradient(135deg,#2E7BFF,#8B5CFF);transform:translateX(2px)}
+.mini-stat{display:flex;justify-content:space-between;align-items:baseline;font-size:11.5px;padding:4px 0}
+.mini-stat b{font-size:15px;font-weight:800;color:#fff;font-family:'JetBrains Mono',monospace}
+.mini-stat small{color:#8A94A6;font-size:10.5px}
+.mini-pending{padding:5px 10px;background:rgba(245,158,11,.14);color:#FCD34D;border-radius:7px;font-size:11px;font-weight:600;margin-top:2px}
+.mini-msg{display:flex;align-items:center;gap:8px;padding:6px 4px;border-radius:7px;cursor:pointer;transition:background .15s}
+.mini-msg:hover{background:rgba(255,255,255,.04)}
+.mini-msg.unread{background:rgba(46,123,255,.1)}
+.mm-av{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.mm-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;overflow:hidden}
+.mm-info b{font-size:11.5px;color:#fff;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mm-info small{font-size:10.5px;color:#8A94A6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-target{font-size:11.5px;color:#C5CDE0;padding:4px 0}
+.mini-toggle-row{display:flex;align-items:center;gap:8px;font-size:11px;color:#C5CDE0;padding:4px 0;cursor:pointer}
+.mini-switch{position:relative;display:inline-block;width:30px;height:16px;flex-shrink:0}
+.mini-switch input{opacity:0;width:0;height:0;position:absolute}
+.mini-switch>span{position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,.15);border-radius:999px;transition:.2s}
+.mini-switch>span::before{position:absolute;content:"";height:12px;width:12px;left:2px;top:2px;background:#fff;border-radius:50%;transition:.2s}
+.mini-switch input:checked+span{background:#22C55E}
+.mini-switch input:checked+span::before{transform:translateX(14px)}
+.mini-action{padding:6px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;font-family:inherit;text-align:left;transition:all .15s}
+.mini-action:hover{background:rgba(255,255,255,.12)}
+.mini-action.danger{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.3);color:#FCA5A5}
+.mini-action.danger:hover{background:rgba(239,68,68,.25)}
+.mini-action.primary{background:linear-gradient(135deg,#2E7BFF,#8B5CFF);border-color:transparent}
+.mini-podium-title{font-size:11px;color:#8A94A6;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
+.mini-podium-row{display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:6px;font-size:11.5px}
+.mini-podium-row:hover{background:rgba(255,255,255,.05)}
+.mp-rank{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#F5C45E,#FF7B7B);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:10px;flex-shrink:0}
+.mp-name{flex:1;color:#fff;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mp-score{color:#8A94A6;font-family:'JetBrains Mono',monospace;font-size:10.5px}
+.mini-config{font-size:11px;color:#00E5FF;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
+.mini-list{display:flex;flex-direction:column;gap:2px;font-size:11.5px;color:#C5CDE0;line-height:1.5}
+.mini-tuto-progress{display:flex;flex-direction:column;gap:4px;margin-bottom:4px}
+.mini-tuto-progress small{color:#8A94A6;font-size:10.5px}
+.mtp-bar{height:5px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}
+.mtp-bar span{display:block;height:100%;background:linear-gradient(90deg,#1EFF8E,#00E5FF);border-radius:999px}
 </style>
 </head>
 <body>
@@ -675,13 +780,28 @@ body{
     </div>
 
     <div class="top-actions">
+      <!-- Sélecteur de langue (selon Update 12 mai PDF) -->
+      <div class="lang-switcher" id="langSwitcher" title="Changer de langue">
+        <button class="lang-btn on" data-lang="fr">FR</button>
+        <button class="lang-btn" data-lang="es">ES</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+      </div>
       <button class="notif" title="Notifications" aria-label="Notifications">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         <span class="badge">3</span>
       </button>
-      <button class="menu-btn" id="menuBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        Menu
+      <!-- Bouton profil/config (manquait selon Update 12 mai PDF) -->
+      <button class="profile-btn" id="profileBtn" title="Profil & configuration" aria-label="Profil">
+        <span class="profile-avatar">CR</span>
+      </button>
+      <button class="menu-btn menus-iface-btn" id="menuBtn" title="Ouvrir les modules">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+          <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+          <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+          <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+        </svg>
+        Menus
       </button>
     </div>
   </header>
@@ -1399,47 +1519,286 @@ body{
     e.currentTarget.lastChild.textContent = tb.classList.contains('expanded') ? ' Réduire' : ' Lire en entier';
   });
 
-  // =========== Drawer
+  // =========== Sélecteur de langue (Update 12 mai PDF — fix boutons traduction)
+  const I18N_CORE = {
+    fr: {
+      'core.eyebrow':'Tableau de bord', 'core.menu':'Menus',
+      'hero.greeting':'Bonne journée, Carlos.', 'hero.text':'Grâce à Nexus, tu as +28 % de ventes cette semaine et 2 clients perdus récupérés. Continue, ça marche.',
+      'advice.title':'Conseil de Nexus',
+      'audio.day':'Ton récap du jour', 'audio.week':'Récap de la semaine',
+      'profile.tooltip':'Profil & configuration'
+    },
+    es: {
+      'core.eyebrow':'Tablero', 'core.menu':'Menús',
+      'hero.greeting':'Buen día, Carlos.', 'hero.text':'Gracias a Nexus, tienes +28 % de ventas esta semana y 2 clientes perdidos recuperados. Sigue así, funciona.',
+      'advice.title':'Consejo de Nexus',
+      'audio.day':'Tu resumen del día', 'audio.week':'Resumen de la semana',
+      'profile.tooltip':'Perfil y configuración'
+    },
+    en: {
+      'core.eyebrow':'Dashboard', 'core.menu':'Menus',
+      'hero.greeting':'Good day, Carlos.', 'hero.text':'Thanks to Nexus, you have +28 % sales this week and 2 lost clients recovered. Keep going, it works.',
+      'advice.title':'Nexus advice',
+      'audio.day':'Your daily recap', 'audio.week':'Weekly recap',
+      'profile.tooltip':'Profile & settings'
+    }
+  };
+  let curLang = localStorage.getItem('nexus_core_lang') || 'fr';
+  const applyLang = (lang) => {
+    curLang = lang;
+    localStorage.setItem('nexus_core_lang', lang);
+    document.documentElement.lang = lang;
+    // Highlight bouton actif
+    document.querySelectorAll('.lang-switcher .lang-btn').forEach(b => b.classList.toggle('on', b.dataset.lang === lang));
+    // Traduire les éléments principaux (hero banner + sections clés)
+    const dict = I18N_CORE[lang] || I18N_CORE.fr;
+    const heroText = document.querySelector('.hero-banner-text');
+    if (heroText) heroText.innerHTML = `<b>${dict['hero.greeting']}</b> ${dict['hero.text']}`;
+    const adviceH3 = document.querySelector('.advice h3, #adviceTitle');
+    if (adviceH3) adviceH3.textContent = dict['advice.title'];
+    // Audio title si visible
+    const audioTitle = document.getElementById('audioTitle');
+    if (audioTitle) audioTitle.textContent = (curMode.audio === 'day') ? dict['audio.day'] : dict['audio.week'];
+    // Toast confirmation
+    showToast({fr:'Langue : Français', es:'Idioma: Español', en:'Language: English'}[lang]);
+  };
+  document.querySelectorAll('.lang-switcher .lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => applyLang(btn.dataset.lang));
+  });
+  // Apply on load
+  setTimeout(() => applyLang(curLang), 100);
+
+  // =========== Bouton Profil (Update 12 mai PDF — manquait)
+  document.getElementById('profileBtn').addEventListener('click', () => {
+    location.href = 'app.html#/profile';
+  });
+
+  // =========== Audio : contrôles vitesse + toggle pause amélioré (Update 12 mai PDF)
+  // Ajoute des boutons vitesse à côté du mic existant
+  const audioCard = document.querySelector('.brief-card, .audio-card');
+  if (audioCard && !document.getElementById('audioControls')) {
+    const ctrl = document.createElement('div');
+    ctrl.id = 'audioControls';
+    ctrl.className = 'audio-controls';
+    ctrl.innerHTML = `
+      <button class="audio-speed-btn" data-speed="0.75" title="Ralentir">0.75×</button>
+      <button class="audio-speed-btn on" data-speed="1" title="Vitesse normale">1×</button>
+      <button class="audio-speed-btn" data-speed="1.5" title="Accélérer">1.5×</button>
+      <button class="audio-speed-btn" data-speed="2" title="Très rapide">2×</button>
+    `;
+    // Insère le contrôle dans la carte audio
+    audioCard.appendChild(ctrl);
+    let curSpeed = 1;
+    ctrl.querySelectorAll('.audio-speed-btn').forEach(b => {
+      b.addEventListener('click', () => {
+        curSpeed = parseFloat(b.dataset.speed);
+        ctrl.querySelectorAll('.audio-speed-btn').forEach(x => x.classList.remove('on'));
+        b.classList.add('on');
+        showToast(`Vitesse audio : ${curSpeed}×`);
+      });
+    });
+  }
+
+  // =========== Drawer (legacy)
   const drawer = document.getElementById('drawer');
   const drawerBg = document.getElementById('drawerBg');
+  const openDrawer = () => { drawer.classList.add('show'); drawerBg.classList.add('show'); };
   const closeDrawer = () => { drawer.classList.remove('show'); drawerBg.classList.remove('show'); };
-  // Pop-up Menus à la place du drawer latéral
+  document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+  drawerBg.addEventListener('click', closeDrawer);
+
+  // =========== POP-UP MENUS — grille 2×3 selon Smart bell PDF de Juan
+  // Remplace le drawer : le bouton "Menus" ouvre maintenant un pop-up superposé sur le Nexus Core
   const openMenusPopup = () => {
-    let ov = document.getElementById('menusPopup');
-    if (!ov) {
-      ov = document.createElement('div');
-      ov.id = 'menusPopup';
-      ov.style.cssText = 'position:fixed;inset:0;background:rgba(5,7,10,.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;cursor:pointer';
-      ov.innerHTML = `
-        <div style="background:linear-gradient(135deg,#0F1520 0%,#1A2335 100%);border:1px solid rgba(255,255,255,.1);border-radius:22px;max-width:780px;width:100%;padding:28px;color:#E8ECF3;cursor:default;box-shadow:0 30px 70px -16px rgba(0,0,0,.55)">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.08)">
+    let overlay = document.getElementById('menusOverlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'menusOverlay';
+      overlay.className = 'menus-overlay';
+      overlay.innerHTML = `
+        <div class="menus-card" role="dialog" aria-modal="true">
+          <div class="menus-hd">
             <div>
-              <div style="font-size:11px;color:#00E5FF;font-weight:700;letter-spacing:.14em;text-transform:uppercase">Nexus Core · Menus</div>
-              <h2 style="font-size:22px;font-weight:800;margin-top:6px">Interface principale</h2>
-              <div style="font-size:12.5px;color:#B8C1CE;margin-top:4px">Choisis un module</div>
+              <div class="menus-eyebrow">Nexus Core · Menus</div>
+              <h2 class="menus-title">Interface principale</h2>
+              <div class="menus-sub">Choisis un module · le tableau de bord reste accessible derrière</div>
             </div>
-            <button id="menusClose" style="background:rgba(255,255,255,.12);color:#fff;border:0;cursor:pointer;width:34px;height:34px;border-radius:10px;font-size:14px">✕</button>
+            <button class="menus-close" id="menusClose" aria-label="Fermer">✕</button>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
-            ${[['📊','Statistiques','stats','#1EFF8E'],['📬','Messagerie','inbox','#8B5CFF'],['📢','Campagnes','campaigns','#F5C45E'],['👥','Clients CRM','crm','#2E7BFF'],['✈️','Mode vacances','vacances','#00E5FF'],['🎓','Tutoriel','tutorial','#FF6B9D']].map(([ic,lbl,route,col])=>`
-              <div data-route="${route}" style="cursor:pointer;padding:22px 16px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-top:3px solid ${col};text-align:center;transition:all .2s">
-                <div style="font-size:38px;margin-bottom:8px">${ic}</div>
-                <div style="font-weight:700;font-size:15px;color:#fff">${lbl}</div>
-              </div>`).join('')}
+          <div class="menus-grid">
+
+            <!-- Statistiques -->
+            <div class="menus-cell c-stats" data-target="stats">
+              <div class="mcell-hd">
+                <span class="mcell-ic">📊</span>
+                <div><b>Statistiques</b><small>Tous les stats des agents</small></div>
+              </div>
+              <div class="mcell-body">
+                <div class="mini-stat"><b>47</b><small>Conversations · ▲18%</small></div>
+                <div class="mini-stat"><b>342</b><small>Clients actifs · ▲6%</small></div>
+                <div class="mini-stat"><b>94%</b><small>Réponse · ▲5%</small></div>
+                <div class="mini-pending">⏳ Pending : 5 messages à traiter</div>
+              </div>
+              <button class="mcell-cta">Ouvrir Statistiques →</button>
+            </div>
+
+            <!-- Messagerie -->
+            <div class="menus-cell c-msg" data-target="messages">
+              <div class="mcell-hd">
+                <span class="mcell-ic">📬</span>
+                <div><b>Messagerie</b><small>5 messages à répondre</small></div>
+              </div>
+              <div class="mcell-body">
+                <div class="mini-msg unread"><span class="mm-av" style="background:#1A56DB">MG</span><span class="mm-info"><b>María González</b><small>Hola Carlos, ¿tienes pan amasado…</small></span></div>
+                <div class="mini-msg unread"><span class="mm-av" style="background:#22C55E">DR</span><span class="mm-info"><b>Diego Ramírez</b><small>Gracias por la factura. ¿Aceptan…</small></span></div>
+                <div class="mini-msg"><span class="mm-av" style="background:#7A3CFF">AS</span><span class="mm-info"><b>Ana Silva</b><small>¿El delivery sigue gratis sobre…</small></span></div>
+              </div>
+              <button class="mcell-cta">Ouvrir Messagerie →</button>
+            </div>
+
+            <!-- Campagnes (limited usage) -->
+            <div class="menus-cell c-camp" data-target="campaigns">
+              <div class="mcell-hd">
+                <span class="mcell-ic">📢</span>
+                <div><b>Campagnes</b><small>Limited usage · 2 auto actives</small></div>
+                <span class="mcell-badge">Limited</span>
+              </div>
+              <div class="mcell-body">
+                <div class="mini-target">🎯 Cible : VIP · Récurrent · Nouveaux</div>
+                <label class="mini-toggle-row">
+                  <span class="mini-switch"><input type="checkbox" checked><span></span></span>
+                  <span>Activar/Desactivar mode automatique</span>
+                </label>
+                <button class="mini-action" data-toast="Brouillon de campagne sauvegardé">💾 Sauvegarder campagne</button>
+              </div>
+              <button class="mcell-cta">Ouvrir Campagnes →</button>
+            </div>
+
+            <!-- Clients CRM -->
+            <div class="menus-cell c-crm" data-target="crm">
+              <div class="mcell-hd">
+                <span class="mcell-ic">👥</span>
+                <div><b>Clients CRM</b><small>342 clients actifs</small></div>
+              </div>
+              <div class="mcell-body">
+                <div class="mini-podium-title">🏆 Podium top 3</div>
+                <div class="mini-podium-row"><span class="mp-rank">1</span><span class="mp-name">María González</span><span class="mp-score">94</span></div>
+                <div class="mini-podium-row"><span class="mp-rank">2</span><span class="mp-name">Diego Ramírez</span><span class="mp-score">87</span></div>
+                <div class="mini-podium-row"><span class="mp-rank">3</span><span class="mp-name">Ana Silva</span><span class="mp-score">82</span></div>
+                <button class="mini-action danger" data-toast="Sélectionne un client à éliminer dans la section CRM">🗑 Éliminer client</button>
+              </div>
+              <button class="mcell-cta">Ouvrir CRM →</button>
+            </div>
+
+            <!-- Mode vacances -->
+            <div class="menus-cell c-vac" data-target="vacances">
+              <div class="mcell-hd">
+                <span class="mcell-ic">✈️</span>
+                <div><b>Mode vacances</b><small>⚪ Désactivé</small></div>
+              </div>
+              <div class="mcell-body">
+                <div class="mini-config">⚙️ Configuration IA</div>
+                <div class="mini-list">
+                  <div>• Quand répondre</div>
+                  <div>• Comment répondre</div>
+                  <div>• Quoi répondre</div>
+                </div>
+                <button class="mini-action primary" data-toast="Mode vacances activé">✈️ Activer le mode vacances</button>
+              </div>
+              <button class="mcell-cta">Ouvrir Mode vacances →</button>
+            </div>
+
+            <!-- Tutoriel -->
+            <div class="menus-cell c-tuto" data-target="tutorial">
+              <div class="mcell-hd">
+                <span class="mcell-ic">🎓</span>
+                <div><b>Tutoriel</b><small>5 étapes pour démarrer</small></div>
+              </div>
+              <div class="mcell-body">
+                <div class="mini-tuto-progress"><div class="mtp-bar"><span style="width:60%"></span></div><small>3/5 étapes complétées</small></div>
+                <div class="mini-list">
+                  <div>✓ Configurer profil entreprise</div>
+                  <div>✓ Connecter intégrations</div>
+                  <div>✓ Comprendre les statistiques</div>
+                  <div>○ Créer première campagne</div>
+                  <div>○ Gérer les absences</div>
+                </div>
+              </div>
+              <button class="mcell-cta">Ouvrir Tutoriel →</button>
+            </div>
+
           </div>
         </div>
       `;
-      document.body.appendChild(ov);
-      ov.querySelector('#menusClose').addEventListener('click',()=>ov.remove());
-      ov.addEventListener('click',(e)=>{ if(e.target===ov) ov.remove(); });
-      ov.querySelectorAll('[data-route]').forEach(c=>{
-        c.addEventListener('click',()=>{ location.href = 'app.html#/'+c.dataset.route; });
+      document.body.appendChild(overlay);
+      // Fermeture
+      overlay.querySelector('#menusClose').addEventListener('click', closeMenusPopup);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeMenusPopup(); });
+      // Toast feedback sur boutons internes
+      overlay.querySelectorAll('[data-toast]').forEach(b => {
+        b.addEventListener('click', (e) => {
+          e.stopPropagation();
+          showToast(b.dataset.toast);
+        });
       });
-    } else { ov.style.display='flex'; }
+      // Mapping target → route app.html (où vivent les vraies sections)
+      const ROUTE_MAP = {
+        stats: 'app.html#/stats',
+        messages: 'app.html#/inbox',
+        campaigns: 'app.html#/campaigns',
+        crm: 'app.html#/crm',
+        vacances: 'app.html#/vacances',
+        tutorial: 'app.html#/tutorial'
+      };
+      const goTo = (target) => {
+        const url = ROUTE_MAP[target];
+        if (url) location.href = url;
+      };
+      // CTA → ouvrir la vraie section
+      overlay.querySelectorAll('.mcell-cta').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const cell = btn.closest('.menus-cell');
+          if (cell) goTo(cell.dataset.target);
+        });
+      });
+      // Clic sur la cellule = idem
+      overlay.querySelectorAll('.menus-cell').forEach(cell => {
+        cell.addEventListener('click', (e) => {
+          if (e.target.closest('button') || e.target.closest('input') || e.target.closest('label')) return;
+          goTo(cell.dataset.target);
+        });
+      });
+      // Esc ferme
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenusPopup(); });
+    }
+    requestAnimationFrame(() => overlay.classList.add('show'));
+  };
+  const closeMenusPopup = () => {
+    const ov = document.getElementById('menusOverlay');
+    if (ov) ov.classList.remove('show');
+  };
+  // Toast helper (compatible avec ce qui existe ou fallback)
+  const showToast = (msg) => {
+    let t = document.getElementById('coreToast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'coreToast';
+      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#2E7BFF,#8B5CFF);color:#fff;padding:12px 22px;border-radius:11px;font-weight:600;font-size:13px;box-shadow:0 18px 40px -10px rgba(46,123,255,.5);z-index:9999;opacity:0;transition:opacity .25s,transform .25s';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1';
+    t.style.transform = 'translateX(-50%) translateY(0)';
+    setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(10px)'; }, 2400);
   };
   document.getElementById('menuBtn').addEventListener('click', openMenusPopup);
-  if (document.getElementById('drawerClose')) document.getElementById('drawerClose').addEventListener('click', closeDrawer);
-  if (drawerBg) drawerBg.addEventListener('click', closeDrawer);
+  // Raccourci I = ouvre menus
+  document.addEventListener('keydown', (e) => {
+    const tag = (e.target.tagName||'').toLowerCase();
+    if (tag === 'input' || tag === 'textarea') return;
+    if (e.key === 'i' || e.key === 'I') { e.preventDefault(); openMenusPopup(); }
+  });
 
   // =========== Mode vacances
   const vacModal = document.getElementById('vacModal');
