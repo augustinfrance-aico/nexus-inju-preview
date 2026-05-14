@@ -2241,7 +2241,7 @@ const Nx = {
     const vc = document.getElementById('viewContainer');
     const v = this.state.view;
     let html = '';
-    if (v === 'dashboard') { location.replace('core.html'); return; }
+    if (v === 'dashboard') html = this.viewDashboard();
     else if (v === 'profile') html = this.viewProfile();
     else if (v === 'inbox') html = this.viewInbox();
     else if (v === 'crm') html = this.viewCrm();
