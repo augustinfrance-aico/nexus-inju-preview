@@ -747,7 +747,7 @@ html[data-theme="dark"] .back-to-core-btn{color:#E8ECF3}
   <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div class="side-hd">
-      <div class="brand" onclick="Nx.navigate('dashboard')" style="cursor:pointer" role="link" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();Nx.navigate('dashboard')}" aria-label="Retour au tableau de bord">
+      <div class="brand" onclick="location.href='core.html'" style="cursor:pointer" role="link" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();location.href='core.html'}" aria-label="Retour au tableau de bord">
         <svg class="logo" viewBox="0 0 32 32" fill="none" aria-hidden="true">
           <path d="M16 2L4 7v10c0 7.5 5.4 12.5 12 13 6.6-.5 12-5.5 12-13V7L16 2z" fill="#1A56DB"/>
           <path d="M11 22V10l4.5 7V10M21 10v12" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -791,7 +791,7 @@ html[data-theme="dark"] .back-to-core-btn{color:#E8ECF3}
       <button class="menu-toggle" onclick="Nx.toggleSidebar()" aria-label="Ouvrir le menu" title="Menu">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
-      <button class="icon-btn" onclick="Nx.navigate('dashboard')" title="Accueil" aria-label="Retour au tableau de bord" style="flex-shrink:0">
+      <button class="icon-btn" onclick="location.href='core.html'" title="Accueil" aria-label="Retour au tableau de bord" style="flex-shrink:0">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>
       </button>
       <div class="breadcrumb">
@@ -2241,7 +2241,7 @@ const Nx = {
     const vc = document.getElementById('viewContainer');
     const v = this.state.view;
     let html = '';
-    if (v === 'dashboard') html = this.viewDashboard();
+    if (v === 'dashboard') { location.replace('core.html'); return; }
     else if (v === 'profile') html = this.viewProfile();
     else if (v === 'inbox') html = this.viewInbox();
     else if (v === 'crm') html = this.viewCrm();
