@@ -768,7 +768,7 @@ body{
           <circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
         </svg>
       </div>
-      <div class="home-meta"><b>Nexus Core</b><span>Accueil</span></div>
+      <div class="home-meta"><b data-i18n="top.home.title">Nexus Core</b><span data-i18n="top.home.sub">Accueil</span></div>
     </a>
 
     <div class="company">
@@ -781,27 +781,27 @@ body{
 
     <div class="top-actions">
       <!-- Sélecteur de langue (selon Update 12 mai PDF) -->
-      <div class="lang-switcher" id="langSwitcher" title="Changer de langue">
+      <div class="lang-switcher" id="langSwitcher" data-i18n-title="top.lang.tooltip" title="Changer de langue">
         <button class="lang-btn on" data-lang="fr">FR</button>
         <button class="lang-btn" data-lang="es">ES</button>
         <button class="lang-btn" data-lang="en">EN</button>
       </div>
-      <button class="notif" title="Notifications" aria-label="Notifications">
+      <button class="notif" data-i18n-title="top.notif" data-i18n-aria="top.notif" title="Notifications" aria-label="Notifications">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         <span class="badge">3</span>
       </button>
       <!-- Bouton profil/config (manquait selon Update 12 mai PDF) -->
-      <button class="profile-btn" id="profileBtn" title="Profil & configuration" aria-label="Profil">
+      <button class="profile-btn" id="profileBtn" data-i18n-title="top.settings" data-i18n-aria="top.settings" title="Paramètres" aria-label="Paramètres">
         <span class="profile-avatar">CR</span>
       </button>
-      <button class="menu-btn menus-iface-btn" id="menuBtn" title="Ouvrir les modules">
+      <button class="menu-btn menus-iface-btn" id="menuBtn" data-i18n-title="top.menus" title="Ouvrir les modules">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="3" width="7" height="7" rx="1.5"/>
           <rect x="14" y="3" width="7" height="7" rx="1.5"/>
           <rect x="3" y="14" width="7" height="7" rx="1.5"/>
           <rect x="14" y="14" width="7" height="7" rx="1.5"/>
         </svg>
-        Menus
+        <span data-i18n="top.menus">Menus</span>
       </button>
     </div>
   </header>
@@ -818,7 +818,7 @@ body{
 
   <!-- STATS — top 3 du jour, cliquables → pop-up -->
   <section class="stats-section">
-    <button class="stats-arrow" id="statPrev" aria-label="Précédent">
+    <button class="stats-arrow" id="statPrev" data-i18n-aria="advice.prev" aria-label="Précédent">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
 
@@ -829,11 +829,11 @@ body{
           <div class="stat-ic">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M21 11l-4-4-4 4M17 7v9"/></svg>
           </div>
-          <span class="stat-tag">★ Top du jour</span>
+          <span class="stat-tag" data-i18n="stat.tag">★ Top du jour</span>
         </div>
-        <div class="stat-headline">Grâce à Nexus, tu as récupéré <b>5 clients perdus</b> cette semaine.</div>
-        <div class="stat-detail">Soit 14 % de ta base inactive, réveillée par les rappels auto.</div>
-        <span class="stat-cta">Voir le détail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+        <div class="stat-headline" data-i18n-html="stat1.headline">Grâce à Nexus, tu as récupéré <b>5 clients perdus</b> cette semaine.</div>
+        <div class="stat-detail" data-i18n="stat1.detail">Soit 14 % de ta base inactive, réveillée par les rappels auto.</div>
+        <span class="stat-cta"><span data-i18n="stat.cta">Voir le détail</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
       </article>
 
       <article class="stat s2" data-stat="newclients">
@@ -841,11 +841,11 @@ body{
           <div class="stat-ic">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
           </div>
-          <span class="stat-tag">★ Top du jour</span>
+          <span class="stat-tag" data-i18n="stat.tag">★ Top du jour</span>
         </div>
-        <div class="stat-headline">Tu as gagné <b>3 nouveaux clients</b> aujourd'hui.</div>
-        <div class="stat-detail">Tous via WhatsApp. Conversion 38 % depuis l'IA d'accueil.</div>
-        <span class="stat-cta">Voir le détail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+        <div class="stat-headline" data-i18n-html="stat2.headline">Tu as gagné <b>3 nouveaux clients</b> aujourd'hui.</div>
+        <div class="stat-detail" data-i18n="stat2.detail">Tous via WhatsApp. Conversion 38 % depuis l'IA d'accueil.</div>
+        <span class="stat-cta"><span data-i18n="stat.cta">Voir le détail</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
       </article>
 
       <article class="stat s3" data-stat="sales">
@@ -853,11 +853,11 @@ body{
           <div class="stat-ic">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
           </div>
-          <span class="stat-tag">★ Top du jour</span>
+          <span class="stat-tag" data-i18n="stat.tag">★ Top du jour</span>
         </div>
-        <div class="stat-headline">Tu as fait <b>10 ventes</b> aujourd'hui — meilleur lundi du mois.</div>
-        <div class="stat-detail">Panier moyen $19.30 · top produit empanadas (5 ventes).</div>
-        <span class="stat-cta">Voir le détail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+        <div class="stat-headline" data-i18n-html="stat3.headline">Tu as fait <b>10 ventes</b> aujourd'hui — meilleur lundi du mois.</div>
+        <div class="stat-detail" data-i18n="stat3.detail">Panier moyen $19.30 · top produit empanadas (5 ventes).</div>
+        <span class="stat-cta"><span data-i18n="stat.cta">Voir le détail</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
       </article>
 
       <article class="stat s4" data-stat="response">
@@ -865,16 +865,16 @@ body{
           <div class="stat-ic">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
-          <span class="stat-tag">★ Bonus</span>
+          <span class="stat-tag" data-i18n="stat.bonus">★ Bonus</span>
         </div>
-        <div class="stat-headline">L'IA répond en <b>1 min 12 s</b> en moyenne.</div>
-        <div class="stat-detail">38 s plus rapide que la semaine dernière. Clients ravis.</div>
-        <span class="stat-cta">Voir le détail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+        <div class="stat-headline" data-i18n-html="stat4.headline">L'IA répond en <b>1 min 12 s</b> en moyenne.</div>
+        <div class="stat-detail" data-i18n="stat4.detail">38 s plus rapide que la semaine dernière. Clients ravis.</div>
+        <span class="stat-cta"><span data-i18n="stat.cta">Voir le détail</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
       </article>
 
     </div>
 
-    <button class="stats-arrow" id="statNext" aria-label="Suivant">
+    <button class="stats-arrow" id="statNext" data-i18n-aria="advice.next" aria-label="Suivant">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
     </button>
   </section>
@@ -887,116 +887,116 @@ body{
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h4M9 11V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6M9 11h6m0 0h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4m0-9v9m-6 0h6"/></svg>
         </div>
         <div>
-          <h3>Conseil de Nexus</h3>
-          <small>Mis à jour il y a 2 h · IA</small>
+          <h3 data-i18n="advice.title">Conseil de Nexus</h3>
+          <small data-i18n="advice.meta">Mis à jour il y a 2 h · IA</small>
         </div>
       </div>
       <div class="advice-nav">
         <span class="advice-counter" id="adviceCounter">1 / 5</span>
-        <button class="advice-arrow" id="advicePrev" aria-label="Précédent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-        <button class="advice-arrow" id="adviceNext" aria-label="Suivant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+        <button class="advice-arrow" id="advicePrev" data-i18n-aria="advice.prev" aria-label="Précédent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <button class="advice-arrow" id="adviceNext" data-i18n-aria="advice.next" aria-label="Suivant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
       </div>
     </div>
     <div class="advice-body" id="adviceBody">
 
-      <div class="advice-card on">
+      <div class="advice-card on" data-card-id="c1">
         <div class="advice-context">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          Demain · Anniversaire client
+          <span data-i18n="advice.c1.ctx">Demain · Anniversaire client</span>
         </div>
-        <p class="advice-text">Demain c'est l'anniversaire de <b>Raviella Mendoza</b>. Voulez-vous lui envoyer un message avec un <b>code promo −15 %</b> sur ses cookies préférés ?</p>
+        <p class="advice-text" data-i18n-html="advice.c1.text">Demain c'est l'anniversaire de <b>Raviella Mendoza</b>. Voulez-vous lui envoyer un message avec un <b>code promo −15 %</b> sur ses cookies préférés ?</p>
         <div class="advice-actions">
-          <button class="advice-act primary">
+          <button class="advice-act primary" data-advice-action="send-birthday">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            Envoyer maintenant
+            <span data-i18n="advice.c1.btn1">Envoyer maintenant</span>
           </button>
-          <button class="advice-act">
+          <button class="advice-act" data-advice-action="schedule-birthday">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            Programmer 9 h
+            <span data-i18n="advice.c1.btn2">Programmer 9 h</span>
           </button>
-          <button class="advice-act">
+          <button class="advice-act" data-advice-action="skip-birthday">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            Pas cette fois
+            <span data-i18n="advice.c1.btn3">Pas cette fois</span>
           </button>
         </div>
       </div>
 
-      <div class="advice-card">
+      <div class="advice-card" data-card-id="c2">
         <div class="advice-context">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          Maintenant · 5 chats en attente
+          <span data-i18n="advice.c2.ctx">Maintenant · 5 chats en attente</span>
         </div>
-        <p class="advice-text">Voulez-vous répondre à <b>5 chats</b> qui attendent encore votre validation ? L'IA a déjà préparé une réponse pour 4 d'entre eux.</p>
+        <p class="advice-text" data-i18n-html="advice.c2.text">Voulez-vous répondre à <b>5 chats</b> qui attendent encore votre validation ? L'IA a déjà préparé une réponse pour 4 d'entre eux.</p>
         <div class="advice-actions">
-          <button class="advice-act primary">
+          <button class="advice-act primary" data-advice-action="see-chats">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-            Voir les 5 chats
+            <span data-i18n="advice.c2.btn1">Voir les 5 chats</span>
           </button>
-          <button class="advice-act">
+          <button class="advice-act" data-advice-action="validate-all">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            Tout valider
+            <span data-i18n="advice.c2.btn2">Tout valider</span>
           </button>
-          <button class="advice-act">
+          <button class="advice-act" data-advice-action="later-chats">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-            Plus tard
+            <span data-i18n="advice.c2.btn3">Plus tard</span>
           </button>
         </div>
       </div>
 
-      <div class="advice-card">
+      <div class="advice-card" data-card-id="c3">
         <div class="advice-context">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18l-2 13H5L3 7z"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>
-          Vendredi · Pic d'activité
+          <span data-i18n="advice.c3.ctx">Vendredi · Pic d'activité</span>
         </div>
-        <p class="advice-text">Le <b>vendredi 19 h–21 h</b> est ton créneau de pic. Programme une story Instagram à <b>18 h</b> pour capter +15 % de commandes.</p>
+        <p class="advice-text" data-i18n-html="advice.c3.text">Le <b>vendredi 19 h–21 h</b> est ton créneau de pic. Programme une story Instagram à <b>18 h</b> pour capter +15 % de commandes.</p>
         <div class="advice-actions">
-          <button class="advice-act primary">
+          <button class="advice-act primary" data-advice-action="schedule-story">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            Programmer la story
+            <span data-i18n="advice.c3.btn1">Programmer la story</span>
           </button>
-          <button class="advice-act">
+          <button class="advice-act" data-advice-action="see-history">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-            Voir l'historique
+            <span data-i18n="advice.c3.btn2">Voir l'historique</span>
           </button>
-          <button class="advice-act">
+          <button class="advice-act" data-advice-action="skip-story">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            Pas maintenant
+            <span data-i18n="advice.c3.btn3">Pas maintenant</span>
           </button>
         </div>
       </div>
 
-      <div class="advice-card">
+      <div class="advice-card" data-card-id="c4">
         <div class="advice-context">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg>
-          Météo · Pluie samedi
+          <span data-i18n="advice.c4.ctx">Météo · Pluie samedi</span>
         </div>
-        <p class="advice-text">Il va pleuvoir samedi. <b>Tes ventes de soupes augmentent de 40 %</b> les jours de pluie. Voulez-vous activer la <b>promo soupe maison</b> ?</p>
+        <p class="advice-text" data-i18n-html="advice.c4.text">Il va pleuvoir samedi. <b>Tes ventes de soupes augmentent de 40 %</b> les jours de pluie. Voulez-vous activer la <b>promo soupe maison</b> ?</p>
         <div class="advice-actions">
-          <button class="advice-act primary">
+          <button class="advice-act primary" data-advice-action="enable-soup-promo">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-            Activer la promo
+            <span data-i18n="advice.c4.btn1">Activer la promo</span>
           </button>
-          <button class="advice-act">
+          <button class="advice-act" data-advice-action="more-soup-info">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Plus de détails
+            <span data-i18n="advice.c4.btn2">Plus de détails</span>
           </button>
         </div>
       </div>
 
-      <div class="advice-card">
+      <div class="advice-card" data-card-id="c5">
         <div class="advice-context">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          Question récurrente · 3 clients
+          <span data-i18n="advice.c5.ctx">Question récurrente · 3 clients</span>
         </div>
-        <p class="advice-text">3 clients ont demandé cette semaine : <b>« Vous livrez à Providencia ? »</b>. Ajoutez-le à votre <b>profil Nexus</b> pour que l'IA réponde instantanément.</p>
+        <p class="advice-text" data-i18n-html="advice.c5.text">3 clients ont demandé cette semaine : <b>« Vous livrez à Providencia ? »</b>. Ajoutez-le à votre <b>profil Nexus</b> pour que l'IA réponde instantanément.</p>
         <div class="advice-actions">
-          <button class="advice-act primary">
+          <button class="advice-act primary" data-advice-action="edit-profile-faq">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-            Modifier le profil
+            <span data-i18n="advice.c5.btn1">Modifier le profil</span>
           </button>
-          <button class="advice-act">
+          <button class="advice-act" data-advice-action="see-3-messages">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            Voir les 3 messages
+            <span data-i18n="advice.c5.btn2">Voir les 3 messages</span>
           </button>
         </div>
       </div>
@@ -1011,20 +1011,20 @@ body{
       <div class="brief-head">
         <h3>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-          Brief audio
+          <span data-i18n="brief.audio.title">Brief audio</span>
         </h3>
         <div class="brief-mode-tabs" data-target="audio">
-          <button class="mode-tab on" data-mode="day">Du jour</button>
-          <button class="mode-tab" data-mode="week">De la semaine</button>
+          <button class="mode-tab on" data-mode="day" data-i18n="brief.tab.day">Du jour</button>
+          <button class="mode-tab" data-mode="week" data-i18n="brief.tab.week">De la semaine</button>
         </div>
       </div>
       <div class="audio-body">
-        <div class="voice-mic" id="voiceMic" title="Lancer le brief audio">
+        <div class="voice-mic" id="voiceMic" data-i18n-title="brief.audio.tip" title="Lancer le brief audio">
           <svg id="voiceIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
         </div>
         <div class="audio-meta">
           <b id="audioTitle">Ton récap du lundi matin</b>
-          <small id="audioDuration">2 min 18 s · prêt à écouter</small>
+          <small id="audioDuration" data-dur="2 min 18 s">2 min 18 s · prêt à écouter</small>
         </div>
         <div class="audio-progress"><div class="audio-progress-bar" id="audioBar"></div></div>
         <div class="audio-times"><span id="audioCur">0:00</span><span id="audioTot">2:18</span></div>
@@ -1035,22 +1035,22 @@ body{
       <div class="brief-head">
         <h3>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-          Brief écrit
+          <span data-i18n="brief.text.title">Brief écrit</span>
         </h3>
         <div class="brief-mode-tabs" data-target="text">
-          <button class="mode-tab on" data-mode="day">Du jour</button>
-          <button class="mode-tab" data-mode="week">De la semaine</button>
+          <button class="mode-tab on" data-mode="day" data-i18n="brief.tab.day">Du jour</button>
+          <button class="mode-tab" data-mode="week" data-i18n="brief.tab.week">De la semaine</button>
         </div>
       </div>
       <div class="text-body" id="textBody">
-        <div class="text-content" data-mode="day" style="display:block">
+        <div class="text-content" data-mode="day" data-i18n-html="text.day.html" style="display:block">
           <p><b>Bonjour Carlos,</b> voici ton récap du jour.</p>
           <p>Tu as fait <b>10 ventes</b> aujourd'hui — meilleur lundi du mois. Ton top produit reste les empanadas (5 ventes, +12 % vs hier).</p>
           <p>L'IA a répondu à <b>21 messages</b>, dont 19 sans ton intervention. <b>3 nouveaux clients</b> sont arrivés via WhatsApp et 2 d'entre eux ont déjà passé commande.</p>
           <p>Demain c'est l'anniversaire de Raviella Mendoza — Nexus suggère un code promo. Et il va pleuvoir samedi : ta promo soupe maison est prête à être activée.</p>
           <p><b>Bonne soirée. Tu peux fermer la boutique tranquille.</b></p>
         </div>
-        <div class="text-content" data-mode="week" style="display:none">
+        <div class="text-content" data-mode="week" data-i18n-html="text.week.html" style="display:none">
           <p><b>Récap de ta semaine, Carlos.</b></p>
           <p>Cette semaine tu as fait <b>+28 % de ventes</b> vs la semaine dernière, et <b>récupéré 5 clients perdus</b> grâce aux rappels Nexus. Excellent.</p>
           <p>Côté agenda : 3 RDV livraison cette semaine (mardi 14 h, jeudi 11 h, samedi 17 h) et anniversaire de Raviella demain.</p>
@@ -1061,7 +1061,7 @@ body{
       </div>
       <button class="text-cta" id="textExpand">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        Lire en entier
+        <span data-i18n="text.expand">Lire en entier</span>
       </button>
     </div>
 
@@ -1070,8 +1070,8 @@ body{
   <!-- MESSAGES PREVIEW — 5 + 6e flou -->
   <div class="preview-section">
     <div class="preview-head">
-      <h3><span class="star">★</span> Messages les plus importants</h3>
-      <a id="previewExpand">Voir tout →</a>
+      <h3><span class="star">★</span> <span data-i18n="msgs.title">Messages les plus importants</span></h3>
+      <a id="previewExpand" data-i18n="msgs.see_all">Voir tout →</a>
     </div>
     <div class="msg-list">
       <div class="msg">
@@ -1519,48 +1519,289 @@ body{
     e.currentTarget.lastChild.textContent = tb.classList.contains('expanded') ? ' Réduire' : ' Lire en entier';
   });
 
-  // =========== Sélecteur de langue (Update 12 mai PDF — fix boutons traduction)
+  // =========== Conseil Nexus : boutons fonctionnels (Point 3 PDF)
+  document.querySelectorAll('[data-advice-action]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const action = btn.dataset.adviceAction;
+      const handlers = {
+        // Card 1 : Anniversaire Raviella
+        'send-birthday': () => showToast({fr:'💌 Message anniversaire envoyé à Raviella Mendoza', es:'💌 Mensaje de cumpleaños enviado a Raviella Mendoza', en:'💌 Birthday message sent to Raviella Mendoza'}[curLang]),
+        'schedule-birthday': () => showToast({fr:'⏰ Message programmé pour demain 9 h', es:'⏰ Mensaje programado para mañana 9 h', en:'⏰ Message scheduled for tomorrow 9 am'}[curLang]),
+        'skip-birthday': () => { btn.closest('.advice-card').style.opacity = '0.4'; showToast({fr:'❌ Conseil ignoré', es:'❌ Consejo ignorado', en:'❌ Advice skipped'}[curLang]); },
+        // Card 2 : 5 chats en attente
+        'see-chats': () => location.href = 'app.html#/inbox',
+        'validate-all': () => showToast({fr:'✅ 4 chats validés par IA · 1 à vérifier', es:'✅ 4 chats validados por IA · 1 por verificar', en:'✅ 4 chats validated by AI · 1 to check'}[curLang]),
+        'later-chats': () => { btn.closest('.advice-card').style.opacity = '0.4'; showToast({fr:'⏳ Rappel programmé dans 2 h', es:'⏳ Recordatorio programado en 2 h', en:'⏳ Reminder scheduled in 2 h'}[curLang]); },
+        // Card 3 : Vendredi pic d'activité
+        'schedule-story': () => showToast({fr:'📸 Story Instagram programmée vendredi 18 h', es:'📸 Story Instagram programada viernes 18 h', en:'📸 Instagram story scheduled Friday 6 pm'}[curLang]),
+        'see-history': () => showToast({fr:'📊 Historique pic d\'activité ouvert', es:'📊 Historial pico de actividad abierto', en:'📊 Peak activity history opened'}[curLang]),
+        'skip-story': () => { btn.closest('.advice-card').style.opacity = '0.4'; showToast({fr:'❌ Conseil ignoré', es:'❌ Consejo ignorado', en:'❌ Advice skipped'}[curLang]); },
+        // Card 4 : Météo pluie samedi
+        'enable-soup-promo': () => showToast({fr:'🥣 Promo soupe maison activée pour samedi', es:'🥣 Promo sopa casera activada para sábado', en:'🥣 Homemade soup promo enabled for Saturday'}[curLang]),
+        'more-soup-info': () => showToast({fr:'☔ Stats météo & ventes affichées', es:'☔ Estadísticas clima & ventas mostradas', en:'☔ Weather & sales stats shown'}[curLang]),
+        // Card 5 : Question Providencia
+        'edit-profile-faq': () => location.href = 'app.html#/profile',
+        'see-3-messages': () => location.href = 'app.html#/inbox'
+      };
+      const fn = handlers[action];
+      if (fn) fn();
+      else showToast({fr:'Action : '+action, es:'Acción: '+action, en:'Action: '+action}[curLang]);
+    });
+  });
+
+  // =========== Sélecteur de langue (Point 1 PDF — TOUT doit être traduit)
   const I18N_CORE = {
     fr: {
-      'core.eyebrow':'Tableau de bord', 'core.menu':'Menus',
-      'hero.greeting':'Bonne journée, Carlos.', 'hero.text':'Grâce à Nexus, tu as +28 % de ventes cette semaine et 2 clients perdus récupérés. Continue, ça marche.',
+      // Topbar
+      'top.home.title':'Nexus Core', 'top.home.sub':'Accueil',
+      'top.notif':'Notifications', 'top.settings':'Paramètres', 'top.menus':'Menus',
+      'top.lang.tooltip':'Changer de langue', 'top.theme':'Basculer thème clair/sombre',
+      // Hero banner
+      'hero.greeting':'Bonne journée, Carlos.',
+      'hero.text':'Grâce à Nexus, tu as +28 % de ventes cette semaine et 2 clients perdus récupérés. Continue, ça marche.',
+      // Stats du jour (4 cards dans le carousel)
+      'stat.tag':'★ Top du jour', 'stat.bonus':'★ Bonus',
+      'stat1.headline':'Grâce à Nexus, tu as récupéré <b>5 clients perdus</b> cette semaine.',
+      'stat1.detail':'Soit 14 % de ta base inactive, réveillée par les rappels auto.',
+      'stat2.headline':'Tu as gagné <b>3 nouveaux clients</b> aujourd\'hui.',
+      'stat2.detail':'Tous via WhatsApp. Conversion 38 % depuis l\'IA d\'accueil.',
+      'stat3.headline':'Tu as fait <b>10 ventes</b> aujourd\'hui — meilleur lundi du mois.',
+      'stat3.detail':'Panier moyen $19.30 · top produit empanadas (5 ventes).',
+      'stat4.headline':'L\'IA répond en <b>1 min 12 s</b> en moyenne.',
+      'stat4.detail':'38 s plus rapide que la semaine dernière. Clients ravis.',
+      'stat.cta':'Voir le détail',
+      // Conseil de Nexus (5 cards dans le carousel)
       'advice.title':'Conseil de Nexus',
+      'advice.meta':'Mis à jour il y a 2 h · IA',
+      'advice.prev':'Précédent', 'advice.next':'Suivant',
+      // Card 1 : Anniversaire
+      'advice.c1.ctx':'Demain · Anniversaire client',
+      'advice.c1.text':'Demain c\'est l\'anniversaire de <b>Raviella Mendoza</b>. Voulez-vous lui envoyer un message avec un <b>code promo −15 %</b> sur ses cookies préférés ?',
+      'advice.c1.btn1':'Envoyer maintenant', 'advice.c1.btn2':'Programmer 9 h', 'advice.c1.btn3':'Pas cette fois',
+      // Card 2 : 5 chats en attente
+      'advice.c2.ctx':'Maintenant · 5 chats en attente',
+      'advice.c2.text':'Voulez-vous répondre à <b>5 chats</b> qui attendent encore votre validation ? L\'IA a déjà préparé une réponse pour 4 d\'entre eux.',
+      'advice.c2.btn1':'Voir les 5 chats', 'advice.c2.btn2':'Tout valider', 'advice.c2.btn3':'Plus tard',
+      // Card 3 : Vendredi pic d'activité
+      'advice.c3.ctx':'Vendredi · Pic d\'activité',
+      'advice.c3.text':'Le <b>vendredi 19 h–21 h</b> est ton créneau de pic. Programme une story Instagram à <b>18 h</b> pour capter +15 % de commandes.',
+      'advice.c3.btn1':'Programmer la story', 'advice.c3.btn2':'Voir l\'historique', 'advice.c3.btn3':'Pas maintenant',
+      // Card 4 : Météo pluie samedi
+      'advice.c4.ctx':'Météo · Pluie samedi',
+      'advice.c4.text':'Il va pleuvoir samedi. <b>Tes ventes de soupes augmentent de 40 %</b> les jours de pluie. Voulez-vous activer la <b>promo soupe maison</b> ?',
+      'advice.c4.btn1':'Activer la promo', 'advice.c4.btn2':'Plus de détails',
+      // Card 5 : Question récurrente
+      'advice.c5.ctx':'Question récurrente · 3 clients',
+      'advice.c5.text':'3 clients ont demandé cette semaine : <b>« Vous livrez à Providencia ? »</b>. Ajoutez-le à votre <b>profil Nexus</b> pour que l\'IA réponde instantanément.',
+      'advice.c5.btn1':'Modifier le profil', 'advice.c5.btn2':'Voir les 3 messages',
+      // Brief audio
+      'brief.audio.title':'Brief audio',
+      'brief.tab.day':'Du jour', 'brief.tab.week':'De la semaine',
+      'brief.audio.tip':'Lancer le brief audio',
       'audio.day':'Ton récap du jour', 'audio.week':'Récap de la semaine',
-      'profile.tooltip':'Profil & configuration'
+      'audio.ready':'prêt à écouter',
+      // Brief écrit (FR par défaut)
+      'brief.text.title':'Brief écrit',
+      'text.expand':'Lire en entier', 'text.collapse':'Réduire',
+      'text.day.html':'<p><b>Bonjour Carlos,</b> voici ton récap du jour.</p><p>Tu as fait <b>10 ventes</b> aujourd\'hui — meilleur lundi du mois. Ton top produit reste les empanadas (5 ventes, +12 % vs hier).</p><p>L\'IA a répondu à <b>21 messages</b>, dont 19 sans ton intervention. <b>3 nouveaux clients</b> sont arrivés via WhatsApp et 2 d\'entre eux ont déjà passé commande.</p><p>Demain c\'est l\'anniversaire de Raviella Mendoza — Nexus suggère un code promo. Et il va pleuvoir samedi : ta promo soupe maison est prête à être activée.</p><p><b>Bonne soirée. Tu peux fermer la boutique tranquille.</b></p>',
+      'text.week.html':'<p><b>Récap de ta semaine, Carlos.</b></p><p>Cette semaine tu as fait <b>+28 % de ventes</b> vs la semaine dernière, et <b>récupéré 5 clients perdus</b> grâce aux rappels Nexus. Excellent.</p><p>Côté agenda : 3 RDV livraison cette semaine (mardi 14 h, jeudi 11 h, samedi 17 h) et anniversaire de Raviella demain.</p><p>L\'IA a géré <b>147 conversations</b>, 94 % sans intervention. Tu as économisé environ 6 h de travail commercial.</p><p>Conseils pour la semaine : pousser les empanadas vendredi soir, activer la promo soupe samedi (pluie), et compléter le profil sur les livraisons Providencia.</p><p><b>Bon début de semaine. On garde le rythme.</b></p>',
+      // Messages les plus importants
+      'msgs.title':'Messages les plus importants',
+      'msgs.subtitle':'Les 5 conversations qui demandent ton attention',
+      'msgs.see_all':'Voir toute la messagerie',
+      'msgs.tag.new':'NEW', 'msgs.tag.rec':'REC', 'msgs.tag.vip':'VIP', 'msgs.tag.biz':'BIZ', 'msgs.tag.lost':'PERDU',
+      'msgs.time.minutes':'il y a {n} min', 'msgs.time.hours':'il y a {n} h', 'msgs.time.days':'il y a {n} j',
+      // Section bottom "Nexus, c'est…"
+      'nexus.is.title':'Nexus, c\'est…',
+      'nexus.recovered':'Clients récupérés',
+      'nexus.advice':'conseils de Nexus',
+      // Mode vacances modal (si ouvert)
+      'vac.start':'Date de début', 'vac.end':'Date de fin',
+      'vac.tone.friendly':'Amical', 'vac.tone.warm':'Chaleureux', 'vac.tone.short':'Court & direct',
+      'vac.cancel':'Annuler',
+      'vac.toggle.orders':'Confirmer livraisons',
+      'vac.toggle.promo':'Appliquer promos auto',
+      'vac.promo_code':'code promo −15 %',
+      // Pop-up Menus
+      'menus.title':'Menus', 'menus.subtitle':'Choisis un module · le tableau de bord reste accessible derrière',
+      'menus.close':'Fermer',
+      // Toast langue
+      'lang.toast':'Langue : Français'
     },
     es: {
-      'core.eyebrow':'Tablero', 'core.menu':'Menús',
-      'hero.greeting':'Buen día, Carlos.', 'hero.text':'Gracias a Nexus, tienes +28 % de ventas esta semana y 2 clientes perdidos recuperados. Sigue así, funciona.',
+      'top.home.title':'Nexus Core', 'top.home.sub':'Inicio',
+      'top.notif':'Notificaciones', 'top.settings':'Ajustes', 'top.menus':'Menús',
+      'top.lang.tooltip':'Cambiar idioma', 'top.theme':'Cambiar tema claro/oscuro',
+      'hero.greeting':'Buen día, Carlos.',
+      'hero.text':'Gracias a Nexus, tienes +28 % de ventas esta semana y 2 clientes perdidos recuperados. Sigue así, funciona.',
+      'stat.tag':'★ Top del día',
+      'stat.bonus':'★ Bonus',
+      'stat1.headline':'Gracias a Nexus, recuperaste <b>5 clientes perdidos</b> esta semana.',
+      'stat1.detail':'Es decir 14 % de tu base inactiva, despertada por los recordatorios auto.',
+      'stat2.headline':'Ganaste <b>3 nuevos clientes</b> hoy.',
+      'stat2.detail':'Todos vía WhatsApp. Conversión 38 % desde la IA de bienvenida.',
+      'stat3.headline':'Hiciste <b>10 ventas</b> hoy — mejor lunes del mes.',
+      'stat3.detail':'Ticket promedio $19.30 · top producto empanadas (5 ventas).',
+      'stat4.headline':'La IA responde en <b>1 min 12 s</b> en promedio.',
+      'stat4.detail':'38 s más rápido que la semana pasada. Clientes encantados.',
+      'stat.cta':'Ver el detalle',
       'advice.title':'Consejo de Nexus',
+      'advice.meta':'Actualizado hace 2 h · IA',
+      'advice.prev':'Anterior', 'advice.next':'Siguiente',
+      'advice.c1.ctx':'Mañana · Cumpleaños cliente',
+      'advice.c1.text':'Mañana es el cumpleaños de <b>Raviella Mendoza</b>. ¿Quieres enviarle un mensaje con un <b>código promo −15 %</b> sobre sus galletas favoritas?',
+      'advice.c1.btn1':'Enviar ahora', 'advice.c1.btn2':'Programar 9 h', 'advice.c1.btn3':'Esta vez no',
+      'advice.c2.ctx':'Ahora · 5 chats en espera',
+      'advice.c2.text':'¿Quieres responder a <b>5 chats</b> que aún esperan tu validación? La IA ya preparó una respuesta para 4 de ellos.',
+      'advice.c2.btn1':'Ver los 5 chats', 'advice.c2.btn2':'Validar todo', 'advice.c2.btn3':'Más tarde',
+      'advice.c3.ctx':'Viernes · Pico de actividad',
+      'advice.c3.text':'El <b>viernes 19 h–21 h</b> es tu franja pico. Programa una story Instagram a las <b>18 h</b> para captar +15 % de pedidos.',
+      'advice.c3.btn1':'Programar la story', 'advice.c3.btn2':'Ver el historial', 'advice.c3.btn3':'Ahora no',
+      'advice.c4.ctx':'Clima · Lluvia sábado',
+      'advice.c4.text':'Va a llover el sábado. <b>Tus ventas de sopas aumentan 40 %</b> los días de lluvia. ¿Quieres activar la <b>promo sopa casera</b>?',
+      'advice.c4.btn1':'Activar la promo', 'advice.c4.btn2':'Más detalles',
+      'advice.c5.ctx':'Pregunta recurrente · 3 clientes',
+      'advice.c5.text':'3 clientes preguntaron esta semana: <b>« ¿Reparten a Providencia? »</b>. Agrégalo a tu <b>perfil Nexus</b> para que la IA responda al instante.',
+      'advice.c5.btn1':'Modificar el perfil', 'advice.c5.btn2':'Ver los 3 mensajes',
+      'brief.audio.title':'Brief de audio',
+      'brief.tab.day':'Del día', 'brief.tab.week':'De la semana',
+      'brief.audio.tip':'Iniciar el brief de audio',
       'audio.day':'Tu resumen del día', 'audio.week':'Resumen de la semana',
-      'profile.tooltip':'Perfil y configuración'
+      'audio.ready':'listo para escuchar',
+      'brief.text.title':'Brief escrito',
+      'text.expand':'Leer todo', 'text.collapse':'Reducir',
+      'text.day.html':'<p><b>Buen día, Carlos,</b> aquí tu resumen del día.</p><p>Hiciste <b>10 ventas</b> hoy — mejor lunes del mes. Tu top producto sigue siendo las empanadas (5 ventas, +12 % vs ayer).</p><p>La IA respondió a <b>21 mensajes</b>, 19 sin tu intervención. <b>3 nuevos clientes</b> llegaron por WhatsApp y 2 ya hicieron un pedido.</p><p>Mañana es el cumpleaños de Raviella Mendoza — Nexus sugiere un código promo. Y va a llover el sábado: tu promo sopa casera está lista para activar.</p><p><b>Buenas noches. Puedes cerrar tranquilo.</b></p>',
+      'text.week.html':'<p><b>Resumen de tu semana, Carlos.</b></p><p>Esta semana hiciste <b>+28 % de ventas</b> vs la semana pasada, y <b>recuperaste 5 clientes perdidos</b> gracias a los recordatorios Nexus. Excelente.</p><p>Agenda: 3 citas de entrega esta semana (martes 14 h, jueves 11 h, sábado 17 h) y cumpleaños de Raviella mañana.</p><p>La IA gestionó <b>147 conversaciones</b>, 94 % sin intervención. Ahorraste unas 6 h de trabajo comercial.</p><p>Consejos de la semana: empujar las empanadas viernes noche, activar la promo sopa sábado (lluvia), y completar el perfil sobre las entregas a Providencia.</p><p><b>Buen comienzo de semana. Mantenemos el ritmo.</b></p>',
+      'msgs.title':'Mensajes más importantes',
+      'msgs.subtitle':'Las 5 conversaciones que requieren tu atención',
+      'msgs.see_all':'Ver toda la mensajería',
+      'msgs.tag.new':'NEW', 'msgs.tag.rec':'REC', 'msgs.tag.vip':'VIP', 'msgs.tag.biz':'BIZ', 'msgs.tag.lost':'PERDIDO',
+      'msgs.time.minutes':'hace {n} min', 'msgs.time.hours':'hace {n} h', 'msgs.time.days':'hace {n} d',
+      'nexus.is.title':'Nexus es…',
+      'nexus.recovered':'Clientes recuperados',
+      'nexus.advice':'consejos de Nexus',
+      'vac.start':'Fecha de inicio', 'vac.end':'Fecha de fin',
+      'vac.tone.friendly':'Amistoso', 'vac.tone.warm':'Cálido', 'vac.tone.short':'Corto y directo',
+      'vac.cancel':'Cancelar',
+      'vac.toggle.orders':'Confirmar entregas',
+      'vac.toggle.promo':'Aplicar promos auto',
+      'vac.promo_code':'código promo −15 %',
+      'menus.title':'Menús', 'menus.subtitle':'Elige un módulo · el tablero queda accesible detrás',
+      'menus.close':'Cerrar',
+      'lang.toast':'Idioma: Español'
     },
     en: {
-      'core.eyebrow':'Dashboard', 'core.menu':'Menus',
-      'hero.greeting':'Good day, Carlos.', 'hero.text':'Thanks to Nexus, you have +28 % sales this week and 2 lost clients recovered. Keep going, it works.',
+      'top.home.title':'Nexus Core', 'top.home.sub':'Home',
+      'top.notif':'Notifications', 'top.settings':'Settings', 'top.menus':'Menus',
+      'top.lang.tooltip':'Change language', 'top.theme':'Toggle light/dark theme',
+      'hero.greeting':'Good day, Carlos.',
+      'hero.text':'Thanks to Nexus, you have +28% sales this week and 2 lost clients recovered. Keep going, it works.',
+      'stat.tag':'★ Top of the day',
+      'stat.bonus':'★ Bonus',
+      'stat1.headline':'Thanks to Nexus, you recovered <b>5 lost clients</b> this week.',
+      'stat1.detail':'That\'s 14% of your inactive base, woken up by auto-reminders.',
+      'stat2.headline':'You gained <b>3 new clients</b> today.',
+      'stat2.detail':'All via WhatsApp. 38% conversion from welcome AI.',
+      'stat3.headline':'You made <b>10 sales</b> today — best Monday of the month.',
+      'stat3.detail':'Average ticket $19.30 · top product empanadas (5 sales).',
+      'stat4.headline':'AI replies in <b>1 min 12 s</b> on average.',
+      'stat4.detail':'38 s faster than last week. Happy clients.',
+      'stat.cta':'See details',
       'advice.title':'Nexus advice',
+      'advice.meta':'Updated 2 h ago · AI',
+      'advice.prev':'Previous', 'advice.next':'Next',
+      'advice.c1.ctx':'Tomorrow · Client birthday',
+      'advice.c1.text':'Tomorrow is <b>Raviella Mendoza</b>\'s birthday. Want to send her a message with a <b>−15 % promo code</b> on her favorite cookies?',
+      'advice.c1.btn1':'Send now', 'advice.c1.btn2':'Schedule 9 am', 'advice.c1.btn3':'Not this time',
+      'advice.c2.ctx':'Now · 5 chats waiting',
+      'advice.c2.text':'Want to reply to <b>5 chats</b> still waiting for your validation? AI already drafted a reply for 4 of them.',
+      'advice.c2.btn1':'See the 5 chats', 'advice.c2.btn2':'Validate all', 'advice.c2.btn3':'Later',
+      'advice.c3.ctx':'Friday · Peak activity',
+      'advice.c3.text':'<b>Friday 7–9 pm</b> is your peak slot. Schedule an Instagram story at <b>6 pm</b> to capture +15 % orders.',
+      'advice.c3.btn1':'Schedule the story', 'advice.c3.btn2':'See history', 'advice.c3.btn3':'Not now',
+      'advice.c4.ctx':'Weather · Rain Saturday',
+      'advice.c4.text':'It\'s going to rain Saturday. <b>Your soup sales rise 40 %</b> on rainy days. Want to enable the <b>homemade soup promo</b>?',
+      'advice.c4.btn1':'Enable promo', 'advice.c4.btn2':'More details',
+      'advice.c5.ctx':'Recurring question · 3 clients',
+      'advice.c5.text':'3 clients asked this week: <b>« Do you deliver to Providencia? »</b>. Add it to your <b>Nexus profile</b> so AI replies instantly.',
+      'advice.c5.btn1':'Edit profile', 'advice.c5.btn2':'See the 3 messages',
+      'brief.audio.title':'Audio brief',
+      'brief.tab.day':'Daily', 'brief.tab.week':'Weekly',
+      'brief.audio.tip':'Start audio brief',
       'audio.day':'Your daily recap', 'audio.week':'Weekly recap',
-      'profile.tooltip':'Profile & settings'
+      'audio.ready':'ready to listen',
+      'brief.text.title':'Written brief',
+      'text.expand':'Read all', 'text.collapse':'Collapse',
+      'text.day.html':'<p><b>Hi Carlos,</b> here\'s your daily recap.</p><p>You made <b>10 sales</b> today — best Monday of the month. Your top product is still empanadas (5 sales, +12% vs yesterday).</p><p>AI replied to <b>21 messages</b>, 19 without your intervention. <b>3 new clients</b> came via WhatsApp and 2 already placed an order.</p><p>Tomorrow is Raviella Mendoza\'s birthday — Nexus suggests a promo code. And it\'s going to rain Saturday: your homemade soup promo is ready to enable.</p><p><b>Good evening. You can close the shop quietly.</b></p>',
+      'text.week.html':'<p><b>Your weekly recap, Carlos.</b></p><p>This week you made <b>+28% sales</b> vs last week, and <b>recovered 5 lost clients</b> thanks to Nexus reminders. Excellent.</p><p>Agenda: 3 delivery appointments this week (Tuesday 2 pm, Thursday 11 am, Saturday 5 pm) and Raviella\'s birthday tomorrow.</p><p>AI handled <b>147 conversations</b>, 94% without intervention. You saved about 6 h of sales work.</p><p>Tips for the week: push empanadas Friday night, enable soup promo Saturday (rain), and complete profile about Providencia deliveries.</p><p><b>Good start of the week. Keep the rhythm.</b></p>',
+      'msgs.title':'Most important messages',
+      'msgs.subtitle':'The 5 conversations that need your attention',
+      'msgs.see_all':'See all messaging',
+      'msgs.tag.new':'NEW', 'msgs.tag.rec':'REC', 'msgs.tag.vip':'VIP', 'msgs.tag.biz':'BIZ', 'msgs.tag.lost':'LOST',
+      'msgs.time.minutes':'{n} min ago', 'msgs.time.hours':'{n} h ago', 'msgs.time.days':'{n} d ago',
+      'nexus.is.title':'Nexus is…',
+      'nexus.recovered':'Recovered clients',
+      'nexus.advice':'Nexus advice',
+      'vac.start':'Start date', 'vac.end':'End date',
+      'vac.tone.friendly':'Friendly', 'vac.tone.warm':'Warm', 'vac.tone.short':'Short & direct',
+      'vac.cancel':'Cancel',
+      'vac.toggle.orders':'Confirm deliveries',
+      'vac.toggle.promo':'Apply auto promos',
+      'vac.promo_code':'promo code −15 %',
+      'menus.title':'Menus', 'menus.subtitle':'Choose a module · the dashboard stays accessible behind',
+      'menus.close':'Close',
+      'lang.toast':'Language: English'
     }
   };
   let curLang = localStorage.getItem('nexus_core_lang') || 'fr';
+  // Helper accessible globalement
+  window.tNexus = (k) => (I18N_CORE[curLang] && I18N_CORE[curLang][k]) || (I18N_CORE.fr && I18N_CORE.fr[k]) || k;
   const applyLang = (lang) => {
     curLang = lang;
     localStorage.setItem('nexus_core_lang', lang);
     document.documentElement.lang = lang;
     // Highlight bouton actif
     document.querySelectorAll('.lang-switcher .lang-btn').forEach(b => b.classList.toggle('on', b.dataset.lang === lang));
-    // Traduire les éléments principaux (hero banner + sections clés)
     const dict = I18N_CORE[lang] || I18N_CORE.fr;
+    // 1. Parcours tous les éléments [data-i18n] = textContent
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[key] !== undefined) el.textContent = dict[key];
+    });
+    // 2. [data-i18n-html] = innerHTML (pour textes avec balises)
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      const key = el.getAttribute('data-i18n-html');
+      if (dict[key] !== undefined) el.innerHTML = dict[key];
+    });
+    // 3. [data-i18n-placeholder]
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const key = el.getAttribute('data-i18n-placeholder');
+      if (dict[key] !== undefined) el.placeholder = dict[key];
+    });
+    // 4. [data-i18n-title] = attribute title
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      const key = el.getAttribute('data-i18n-title');
+      if (dict[key] !== undefined) el.setAttribute('title', dict[key]);
+    });
+    // 5. [data-i18n-aria] = aria-label
+    document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+      const key = el.getAttribute('data-i18n-aria');
+      if (dict[key] !== undefined) el.setAttribute('aria-label', dict[key]);
+    });
+    // 6. Hero banner (composé)
     const heroText = document.querySelector('.hero-banner-text');
     if (heroText) heroText.innerHTML = `<b>${dict['hero.greeting']}</b> ${dict['hero.text']}`;
-    const adviceH3 = document.querySelector('.advice h3, #adviceTitle');
-    if (adviceH3) adviceH3.textContent = dict['advice.title'];
-    // Audio title si visible
+    // 7. Audio title dynamique selon curMode.audio
     const audioTitle = document.getElementById('audioTitle');
-    if (audioTitle) audioTitle.textContent = (curMode.audio === 'day') ? dict['audio.day'] : dict['audio.week'];
+    if (audioTitle) audioTitle.textContent = (typeof curMode !== 'undefined' && curMode.audio === 'day') ? dict['audio.day'] : dict['audio.week'];
+    // 8. Audio duration suffixe "prêt à écouter"
+    const audioDur = document.getElementById('audioDuration');
+    if (audioDur && audioDur.dataset.dur) {
+      audioDur.textContent = `${audioDur.dataset.dur} · ${dict['audio.ready']}`;
+    }
     // Toast confirmation
-    showToast({fr:'Langue : Français', es:'Idioma: Español', en:'Language: English'}[lang]);
+    showToast(dict['lang.toast'] || lang);
   };
   document.querySelectorAll('.lang-switcher .lang-btn').forEach(btn => {
     btn.addEventListener('click', () => applyLang(btn.dataset.lang));
