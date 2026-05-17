@@ -617,13 +617,25 @@ html[data-theme="dark"] .back-to-core-btn{color:#E8ECF3}
 
 /* CHIPS DÉNOMINATIONS */
 .deno-bar{display:flex;gap:6px;flex-wrap:wrap;padding:10px 18px;border-bottom:1px solid var(--line2);background:var(--bg2)}
-.deno-chip{padding:5px 11px;background:var(--panel);border:1px solid var(--line);border-radius:999px;font-size:11px;cursor:pointer;font-weight:600;transition:all .15s;color:var(--ink2)}
+.deno-chip{padding:5px 11px;background:var(--panel);border:1px solid var(--line);border-radius:999px;font-size:11px;cursor:pointer;font-weight:600;transition:all .15s;color:var(--ink2);display:inline-flex;align-items:center;gap:6px}
 .deno-chip:hover{border-color:var(--blue);color:var(--blue)}
 .deno-chip.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+/* Pastille couleur (toujours visible, même non-actif) selon palette Augustin */
+.deno-chip .seg-dot{display:inline-block;width:8px;height:8px;border-radius:50%;flex-shrink:0;background:#94A3B8}
+.deno-chip.new .seg-dot{background:#22C55E}
+.deno-chip.vip .seg-dot{background:#F5C45E}
+.deno-chip.biz .seg-dot{background:#7A3CFF}
+.deno-chip.rec .seg-dot{background:#1A56DB}
+.deno-chip.occ .seg-dot{background:#F59E0B}
+.deno-chip.lost .seg-dot{background:#EF4444}
+/* État sélectionné = fond plein de la couleur du segment (palette Augustin) */
+.deno-chip.new.on{background:#22C55E;border-color:#22C55E;color:#fff}
 .deno-chip.vip.on{background:#F5C45E;border-color:#F5C45E;color:#78350F}
-.deno-chip.lost.on{background:var(--red);border-color:var(--red)}
-.deno-chip.new.on{background:var(--green);border-color:var(--green)}
-.deno-chip.biz.on{background:var(--violet);border-color:var(--violet)}
+.deno-chip.biz.on{background:#7A3CFF;border-color:#7A3CFF;color:#fff}
+.deno-chip.rec.on{background:#1A56DB;border-color:#1A56DB;color:#fff}
+.deno-chip.occ.on{background:#F59E0B;border-color:#F59E0B;color:#fff}
+.deno-chip.lost.on{background:#EF4444;border-color:#EF4444;color:#fff}
+.deno-chip.on .seg-dot{background:#fff}
 
 /* BEST HOURS */
 .best-hours{padding:18px;background:linear-gradient(135deg,var(--blue-soft),var(--cyan-soft));border-radius:12px;border:1px solid var(--blue-ghost)}
@@ -3252,12 +3264,12 @@ const Nx = {
             </div>
             <div class="deno-bar">
               <button class="deno-chip ${denoFilter==='all'?'on':''}" onclick="Nx.setInboxDeno('all')">Tous</button>
-              <button class="deno-chip new ${denoFilter==='new'?'on':''}" onclick="Nx.setInboxDeno('new')">🌱 Nouveaux</button>
-              <button class="deno-chip vip ${denoFilter==='vip'?'on':''}" onclick="Nx.setInboxDeno('vip')">⭐ VIP</button>
-              <button class="deno-chip biz ${denoFilter==='biz'?'on':''}" onclick="Nx.setInboxDeno('biz')">💼 Biz</button>
-              <button class="deno-chip ${denoFilter==='rec'?'on':''}" onclick="Nx.setInboxDeno('rec')">🔁 Récurrent</button>
-              <button class="deno-chip ${denoFilter==='occ'?'on':''}" onclick="Nx.setInboxDeno('occ')">👥 Occasionnel</button>
-              <button class="deno-chip lost ${denoFilter==='lost'?'on':''}" onclick="Nx.setInboxDeno('lost')">💔 Perdu</button>
+              <button class="deno-chip new ${denoFilter==='new'?'on':''}" onclick="Nx.setInboxDeno('new')"><span class="seg-dot"></span>Nouveaux</button>
+              <button class="deno-chip vip ${denoFilter==='vip'?'on':''}" onclick="Nx.setInboxDeno('vip')"><span class="seg-dot"></span>VIP</button>
+              <button class="deno-chip biz ${denoFilter==='biz'?'on':''}" onclick="Nx.setInboxDeno('biz')"><span class="seg-dot"></span>Biz</button>
+              <button class="deno-chip rec ${denoFilter==='rec'?'on':''}" onclick="Nx.setInboxDeno('rec')"><span class="seg-dot"></span>Récurrent</button>
+              <button class="deno-chip occ ${denoFilter==='occ'?'on':''}" onclick="Nx.setInboxDeno('occ')"><span class="seg-dot"></span>Occasionnel</button>
+              <button class="deno-chip lost ${denoFilter==='lost'?'on':''}" onclick="Nx.setInboxDeno('lost')"><span class="seg-dot"></span>Perdu</button>
             </div>
             <div class="chat-messages-list">
               ${convs.map(conv=>{
