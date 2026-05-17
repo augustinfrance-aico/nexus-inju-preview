@@ -682,6 +682,26 @@ body{
 .menus-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:720px){.menus-grid{grid-template-columns:1fr}}
 
+/* Version simplifiée (Point 4 PDF) — 6 cases visibles d'un coup, gros logos, titre+sous-titre seulement */
+.menus-grid.simplified-v2{grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:14px}
+@media(max-width:780px){.menus-grid.simplified-v2{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(3,1fr)}}
+@media(max-width:480px){.menus-grid.simplified-v2{grid-template-columns:1fr;grid-template-rows:repeat(6,1fr);gap:10px}}
+.menus-grid.simplified-v2 .menus-cell{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding:24px 16px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);cursor:pointer;transition:all .25s cubic-bezier(.2,.8,.2,1);position:relative;overflow:hidden;justify-content:center;min-height:160px}
+.menus-grid.simplified-v2 .menus-cell::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent,var(--cyan));opacity:.85}
+.menus-grid.simplified-v2 .menus-cell.c-stats{--accent:#1EFF8E}
+.menus-grid.simplified-v2 .menus-cell.c-msg{--accent:#8B5CFF}
+.menus-grid.simplified-v2 .menus-cell.c-camp{--accent:#F5C45E}
+.menus-grid.simplified-v2 .menus-cell.c-crm{--accent:#2E7BFF}
+.menus-grid.simplified-v2 .menus-cell.c-vac{--accent:#00E5FF}
+.menus-grid.simplified-v2 .menus-cell.c-tuto{--accent:#FF6B9D}
+.menus-grid.simplified-v2 .menus-cell:hover{transform:translateY(-3px);background:rgba(255,255,255,.07);border-color:var(--accent);box-shadow:0 18px 40px -14px var(--accent)}
+.mcell-big-logo{font-size:54px;line-height:1;filter:drop-shadow(0 8px 24px rgba(0,0,0,.4));transition:transform .25s}
+.menus-grid.simplified-v2 .menus-cell:hover .mcell-big-logo{transform:scale(1.12) rotate(-3deg)}
+.mcell-text-only{display:flex;flex-direction:column;gap:6px;align-items:center}
+.mcell-text-only b{font-size:17px;font-weight:800;color:#fff;letter-spacing:-.01em;line-height:1.2}
+.mcell-text-only small{font-size:12.5px;color:#8A94A6;line-height:1.45;max-width:180px}
+.mcell-badge-mini{position:absolute;top:10px;right:10px;background:rgba(245,196,94,.22);color:#F5C45E;font-size:9.5px;font-weight:800;padding:3px 8px;border-radius:6px;letter-spacing:.10em;text-transform:uppercase;border:1px solid rgba(245,196,94,.32)}
+
 /* Version simplifiée — 6 cases visibles d'un coup, pas de scroll (selon Update 12 mai PDF Juan) */
 .menus-grid.simplified{grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:14px}
 @media(max-width:780px){.menus-grid.simplified{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(3,1fr)}}
@@ -1693,6 +1713,12 @@ body{
       // Pop-up Menus
       'menus.title':'Menus', 'menus.subtitle':'Choisis un module · le tableau de bord reste accessible derrière',
       'menus.close':'Fermer',
+      'menus.stats.title':'Statistiques', 'menus.stats.desc':'Performance, heatmap, top questions, évolution',
+      'menus.msg.title':'Messagerie', 'menus.msg.desc':'Inbox WhatsApp + Gmail unifiée, suggestions IA',
+      'menus.camp.title':'Campagnes', 'menus.camp.desc':'Promos, relances, segments cibles, automations', 'menus.camp.badge':'Limited',
+      'menus.crm.title':'Clients CRM', 'menus.crm.desc':'Fiches clients, podium top, segments, gestion',
+      'menus.vac.title':'Mode vacances', 'menus.vac.desc':'Configuration IA, plage horaire, réponses auto',
+      'menus.tuto.title':'Tutoriel', 'menus.tuto.desc':'5 étapes pour bien démarrer',
       // Toast langue
       'lang.toast':'Langue : Français'
     },
@@ -1756,6 +1782,12 @@ body{
       'vac.promo_code':'código promo −15 %',
       'menus.title':'Menús', 'menus.subtitle':'Elige un módulo · el tablero queda accesible detrás',
       'menus.close':'Cerrar',
+      'menus.stats.title':'Estadísticas', 'menus.stats.desc':'Rendimiento, heatmap, top preguntas, evolución',
+      'menus.msg.title':'Mensajería', 'menus.msg.desc':'Inbox WhatsApp + Gmail unificada, sugerencias IA',
+      'menus.camp.title':'Campañas', 'menus.camp.desc':'Promos, recuperación, segmentos, automatizaciones', 'menus.camp.badge':'Limited',
+      'menus.crm.title':'Clientes CRM', 'menus.crm.desc':'Fichas clientes, podium top, segmentos, gestión',
+      'menus.vac.title':'Modo vacaciones', 'menus.vac.desc':'Configuración IA, horario, respuestas auto',
+      'menus.tuto.title':'Tutorial', 'menus.tuto.desc':'5 pasos para empezar bien',
       'lang.toast':'Idioma: Español'
     },
     en: {
@@ -1818,6 +1850,12 @@ body{
       'vac.promo_code':'promo code −15 %',
       'menus.title':'Menus', 'menus.subtitle':'Choose a module · the dashboard stays accessible behind',
       'menus.close':'Close',
+      'menus.stats.title':'Statistics', 'menus.stats.desc':'Performance, heatmap, top questions, evolution',
+      'menus.msg.title':'Messaging', 'menus.msg.desc':'Unified WhatsApp + Gmail inbox, AI suggestions',
+      'menus.camp.title':'Campaigns', 'menus.camp.desc':'Promos, recovery, segments, automations', 'menus.camp.badge':'Limited',
+      'menus.crm.title':'CRM Clients', 'menus.crm.desc':'Client cards, top podium, segments, management',
+      'menus.vac.title':'Vacation mode', 'menus.vac.desc':'AI config, time range, auto replies',
+      'menus.tuto.title':'Tutorial', 'menus.tuto.desc':'5 steps to get started',
       'lang.toast':'Language: English'
     }
   };
@@ -1933,108 +1971,51 @@ body{
             </div>
             <button class="menus-close" id="menusClose" data-i18n-aria="menus.close" aria-label="Fermer">✕</button>
           </div>
-          <div class="menus-grid">
-
-            <!-- Statistiques -->
+          <!-- Point 4 PDF : cases simplifiées (titre + sous-titre + gros logo), 6 visibles sans scroll -->
+          <div class="menus-grid simplified-v2">
             <div class="menus-cell c-stats" data-target="stats">
-              <div class="mcell-hd">
-                <span class="mcell-ic">📊</span>
-                <div><b>Statistiques</b><small>Tous les stats des agents</small></div>
+              <div class="mcell-big-logo">📊</div>
+              <div class="mcell-text-only">
+                <b data-i18n="menus.stats.title">Statistiques</b>
+                <small data-i18n="menus.stats.desc">Performance, heatmap, top questions, évolution</small>
               </div>
-              <div class="mcell-body">
-                <div class="mini-stat"><b>47</b><small>Conversations · ▲18%</small></div>
-                <div class="mini-stat"><b>342</b><small>Clients actifs · ▲6%</small></div>
-                <div class="mini-stat"><b>94%</b><small>Réponse · ▲5%</small></div>
-                <div class="mini-pending">⏳ Pending : 5 messages à traiter</div>
-              </div>
-              <button class="mcell-cta">Ouvrir Statistiques →</button>
             </div>
-
-            <!-- Messagerie -->
             <div class="menus-cell c-msg" data-target="messages">
-              <div class="mcell-hd">
-                <span class="mcell-ic">📬</span>
-                <div><b>Messagerie</b><small>5 messages à répondre</small></div>
+              <div class="mcell-big-logo">📬</div>
+              <div class="mcell-text-only">
+                <b data-i18n="menus.msg.title">Messagerie</b>
+                <small data-i18n="menus.msg.desc">Inbox WhatsApp + Gmail unifiée, suggestions IA</small>
               </div>
-              <div class="mcell-body">
-                <div class="mini-msg unread"><span class="mm-av" style="background:#1A56DB">MG</span><span class="mm-info"><b>María González</b><small>Hola Carlos, ¿tienes pan amasado…</small></span></div>
-                <div class="mini-msg unread"><span class="mm-av" style="background:#22C55E">DR</span><span class="mm-info"><b>Diego Ramírez</b><small>Gracias por la factura. ¿Aceptan…</small></span></div>
-                <div class="mini-msg"><span class="mm-av" style="background:#7A3CFF">AS</span><span class="mm-info"><b>Ana Silva</b><small>¿El delivery sigue gratis sobre…</small></span></div>
-              </div>
-              <button class="mcell-cta">Ouvrir Messagerie →</button>
             </div>
-
-            <!-- Campagnes (limited usage) -->
             <div class="menus-cell c-camp" data-target="campaigns">
-              <div class="mcell-hd">
-                <span class="mcell-ic">📢</span>
-                <div><b>Campagnes</b><small>Limited usage · 2 auto actives</small></div>
-                <span class="mcell-badge">Limited</span>
+              <span class="mcell-badge-mini" data-i18n="menus.camp.badge">Limited</span>
+              <div class="mcell-big-logo">📢</div>
+              <div class="mcell-text-only">
+                <b data-i18n="menus.camp.title">Campagnes</b>
+                <small data-i18n="menus.camp.desc">Promos, relances, segments cibles, automations</small>
               </div>
-              <div class="mcell-body">
-                <div class="mini-target">🎯 Cible : VIP · Récurrent · Nouveaux</div>
-                <label class="mini-toggle-row">
-                  <span class="mini-switch"><input type="checkbox" checked><span></span></span>
-                  <span>Activar/Desactivar mode automatique</span>
-                </label>
-                <button class="mini-action" data-toast="Brouillon de campagne sauvegardé">💾 Sauvegarder campagne</button>
-              </div>
-              <button class="mcell-cta">Ouvrir Campagnes →</button>
             </div>
-
-            <!-- Clients CRM -->
             <div class="menus-cell c-crm" data-target="crm">
-              <div class="mcell-hd">
-                <span class="mcell-ic">👥</span>
-                <div><b>Clients CRM</b><small>342 clients actifs</small></div>
+              <div class="mcell-big-logo">👥</div>
+              <div class="mcell-text-only">
+                <b data-i18n="menus.crm.title">Clients CRM</b>
+                <small data-i18n="menus.crm.desc">Fiches clients, podium top, segments, gestion</small>
               </div>
-              <div class="mcell-body">
-                <div class="mini-podium-title">🏆 Podium top 3</div>
-                <div class="mini-podium-row"><span class="mp-rank">1</span><span class="mp-name">María González</span><span class="mp-score">94</span></div>
-                <div class="mini-podium-row"><span class="mp-rank">2</span><span class="mp-name">Diego Ramírez</span><span class="mp-score">87</span></div>
-                <div class="mini-podium-row"><span class="mp-rank">3</span><span class="mp-name">Ana Silva</span><span class="mp-score">82</span></div>
-                <button class="mini-action danger" data-toast="Sélectionne un client à éliminer dans la section CRM">🗑 Éliminer client</button>
-              </div>
-              <button class="mcell-cta">Ouvrir CRM →</button>
             </div>
-
-            <!-- Mode vacances -->
             <div class="menus-cell c-vac" data-target="vacances">
-              <div class="mcell-hd">
-                <span class="mcell-ic">✈️</span>
-                <div><b>Mode vacances</b><small>⚪ Désactivé</small></div>
+              <div class="mcell-big-logo">✈️</div>
+              <div class="mcell-text-only">
+                <b data-i18n="menus.vac.title">Mode vacances</b>
+                <small data-i18n="menus.vac.desc">Configuration IA, plage horaire, réponses auto</small>
               </div>
-              <div class="mcell-body">
-                <div class="mini-config">⚙️ Configuration IA</div>
-                <div class="mini-list">
-                  <div>• Quand répondre</div>
-                  <div>• Comment répondre</div>
-                  <div>• Quoi répondre</div>
-                </div>
-                <button class="mini-action primary" data-toast="Mode vacances activé">✈️ Activer le mode vacances</button>
-              </div>
-              <button class="mcell-cta">Ouvrir Mode vacances →</button>
             </div>
-
-            <!-- Tutoriel -->
             <div class="menus-cell c-tuto" data-target="tutorial">
-              <div class="mcell-hd">
-                <span class="mcell-ic">🎓</span>
-                <div><b>Tutoriel</b><small>5 étapes pour démarrer</small></div>
+              <div class="mcell-big-logo">🎓</div>
+              <div class="mcell-text-only">
+                <b data-i18n="menus.tuto.title">Tutoriel</b>
+                <small data-i18n="menus.tuto.desc">5 étapes pour bien démarrer</small>
               </div>
-              <div class="mcell-body">
-                <div class="mini-tuto-progress"><div class="mtp-bar"><span style="width:60%"></span></div><small>3/5 étapes complétées</small></div>
-                <div class="mini-list">
-                  <div>✓ Configurer profil entreprise</div>
-                  <div>✓ Connecter intégrations</div>
-                  <div>✓ Comprendre les statistiques</div>
-                  <div>○ Créer première campagne</div>
-                  <div>○ Gérer les absences</div>
-                </div>
-              </div>
-              <button class="mcell-cta">Ouvrir Tutoriel →</button>
             </div>
-
           </div>
         </div>
       `;
