@@ -1488,26 +1488,93 @@ body{
   const bar = document.getElementById('audioBar');
   const cur_ = document.getElementById('audioCur');
   const ico = document.getElementById('voiceIcon');
-  let playing = false, t0 = 0, raf = null;
+  let playing = false, t0 = 0, raf = null, currentUtterance = null, pausedAt = 0, audioRate = 1;
   const playIc = '<polygon points="5 3 19 12 5 21 5 3"/>';
   const pauseIc = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+
+  // Vitesse audio depuis les boutons existants (1x / 1.5x / 2x). Sélecteur sur les boutons frères avec data-mode ou class spd
+  const setAudioRate = (r) => {
+    audioRate = r;
+    if (currentUtterance && window.speechSynthesis.speaking) {
+      // Redémarrer avec la nouvelle vitesse
+      const txt = currentUtterance.text;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(txt);
+      u.rate = audioRate;
+      u.lang = ({fr:'fr-FR',es:'es-CL',en:'en-US'})[curLang] || 'fr-FR';
+      currentUtterance = u;
+      window.speechSynthesis.speak(u);
+    }
+  };
+  // Brancher les boutons 1x / 1.5x / 2x s'ils existent (cherche les boutons proches du voice-mic)
+  document.querySelectorAll('.audio-body button, .audio-speed-btn, [data-speed]').forEach(b => {
+    const lbl = (b.textContent||'').trim();
+    let r = null;
+    if (lbl === '0.75x' || lbl === '0.75×') r = 0.75;
+    else if (lbl === '1x' || lbl === '1×') r = 1;
+    else if (lbl === '1.5x' || lbl === '1.5×') r = 1.5;
+    else if (lbl === '2x' || lbl === '2×') r = 2;
+    if (b.dataset && b.dataset.speed) r = parseFloat(b.dataset.speed);
+    if (r) b.addEventListener('click', () => {
+      setAudioRate(r);
+      document.querySelectorAll('.audio-body button, .audio-speed-btn, [data-speed]').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+    });
+  });
+
+  // Récupère le texte du brief écrit selon le mode courant et la langue
+  const getBriefText = () => {
+    const mode = curMode.audio === 'day' ? 'day' : 'week';
+    const key = 'text.' + mode + '.html';
+    const dict = (typeof I18N_CORE !== 'undefined' && I18N_CORE[curLang]) || (I18N_CORE && I18N_CORE.fr) || {};
+    const html = dict[key] || '';
+    // Strip HTML tags + entités
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent.trim();
+  };
+
   mic.addEventListener('click', () => {
+    if (!('speechSynthesis' in window)) { showToast({fr:'Synthèse vocale non supportée',es:'Síntesis de voz no soportada',en:'Speech synthesis not supported'}[curLang]); return; }
     playing = !playing;
     mic.classList.toggle('playing', playing);
     ico.innerHTML = playing ? pauseIc : playIc;
     if (playing) {
+      const text = getBriefText();
+      if (!text) { playing = false; mic.classList.remove('playing'); ico.innerHTML = playIc; return; }
+      // Arrête toute lecture précédente
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = audioRate;
+      u.pitch = 1;
+      u.volume = 1;
+      u.lang = ({fr:'fr-FR',es:'es-CL',en:'en-US'})[curLang] || 'fr-FR';
+      // Tente d'utiliser une voix native pour la langue
+      const voices = window.speechSynthesis.getVoices();
+      const match = voices.find(v => v.lang && v.lang.startsWith(u.lang.split('-')[0]));
+      if (match) u.voice = match;
+      currentUtterance = u;
+      u.onend = () => {
+        playing = false; mic.classList.remove('playing'); ico.innerHTML = playIc;
+        bar.style.width = '100%'; cur_.textContent = (cur_.dataset && cur_.dataset.tot) || '2:18';
+      };
+      window.speechSynthesis.speak(u);
+      // Progression visuelle
       t0 = Date.now();
       const tick = () => {
         if (!playing) return;
         const dur = curMode.audio === 'day' ? dayDur : weekDur;
-        const elapsed = Math.min((Date.now() - t0) / 1000, dur);
+        const elapsed = Math.min((Date.now() - t0) / 1000 * audioRate, dur);
         bar.style.width = `${(elapsed / dur) * 100}%`;
         const m = Math.floor(elapsed / 60), s = Math.floor(elapsed % 60);
         cur_.textContent = `${m}:${String(s).padStart(2,'0')}`;
-        if (elapsed < dur) raf = requestAnimationFrame(tick);
-        else { playing = false; mic.classList.remove('playing'); ico.innerHTML = playIc; }
+        if (elapsed < dur && playing) raf = requestAnimationFrame(tick);
       };
       tick();
+    } else {
+      // Pause / stop
+      window.speechSynthesis.cancel();
+      currentUtterance = null;
     }
   });
 
@@ -1861,10 +1928,10 @@ body{
           <div class="menus-hd">
             <div>
               <div class="menus-eyebrow">Nexus Core · Menus</div>
-              <h2 class="menus-title">Interface principale</h2>
-              <div class="menus-sub">Choisis un module · le tableau de bord reste accessible derrière</div>
+              <h2 class="menus-title" data-i18n="menus.title">Menus</h2>
+              <div class="menus-sub" data-i18n="menus.subtitle">Choisis un module · le tableau de bord reste accessible derrière</div>
             </div>
-            <button class="menus-close" id="menusClose" aria-label="Fermer">✕</button>
+            <button class="menus-close" id="menusClose" data-i18n-aria="menus.close" aria-label="Fermer">✕</button>
           </div>
           <div class="menus-grid">
 
