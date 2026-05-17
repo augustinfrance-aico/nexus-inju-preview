@@ -703,6 +703,41 @@ html[data-theme="dark"] .back-to-core-btn{color:#E8ECF3}
 .widget-hub-title{font-weight:700;font-size:14px;margin-bottom:4px}
 .widget-hub-sub{font-size:12px;color:var(--muted);line-height:1.4}
 .widget-hub-meta{margin-top:10px;font-size:18px;font-weight:800;color:var(--blue);font-family:'JetBrains Mono',monospace}
+
+/* POINT 9 — Pastilles segments clients (inbox + listes) — palette unifiée */
+.seg-pastille{display:inline-block;width:12px;height:12px;border-radius:50%;flex-shrink:0;margin-right:8px;box-shadow:0 0 0 2px var(--panel) inset}
+.seg-pastille.seg-vip{background:#F5C45E}
+.seg-pastille.seg-rec{background:#1A56DB}
+.seg-pastille.seg-new{background:#22C55E}
+.seg-pastille.seg-occ{background:#F59E0B}
+.seg-pastille.seg-biz{background:#7A3CFF}
+.seg-pastille.seg-lost{background:#FF6B6B}
+
+/* Wrapper avatar (pastille + nom) dans inbox */
+.msg-pastille-wrap{display:flex;align-items:center;gap:0;flex-shrink:0;width:38px;height:38px;justify-content:center}
+
+/* POINT 10b — Mode sombre : inputs/textareas DE LA MESSAGERIE uniquement (chat-conv-body, chat-input) */
+html[data-theme="dark"] .chat-input input,
+html[data-theme="dark"] .chat-input textarea,
+html[data-theme="dark"] .chat-conv-body input,
+html[data-theme="dark"] .chat-conv-body textarea{color:#E8ECF3;background:var(--bg2)}
+html[data-theme="dark"] .chat-input input::placeholder,
+html[data-theme="dark"] .chat-input textarea::placeholder{color:#8A94A6}
+
+/* POINT CRM b — Filter pills CRM par segment (palette unifiée) */
+.filter-pill.seg-vip.on{background:#F5C45E;border-color:#F5C45E;color:#78350F}
+.filter-pill.seg-rec.on{background:#1A56DB;border-color:#1A56DB;color:#fff}
+.filter-pill.seg-new.on{background:#22C55E;border-color:#22C55E;color:#fff}
+.filter-pill.seg-occ.on{background:#F59E0B;border-color:#F59E0B;color:#fff}
+.filter-pill.seg-biz.on{background:#7A3CFF;border-color:#7A3CFF;color:#fff}
+.filter-pill.seg-lost.on{background:#FF6B6B;border-color:#FF6B6B;color:#fff}
+
+/* POINT 8c — Sélecteur graphique stats */
+.chart-selector{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chart-selector button{padding:4px 10px;font-size:11px;font-weight:600;background:var(--bg2);border:1px solid var(--line);border-radius:999px;cursor:pointer;color:var(--ink2);transition:all .15s}
+.chart-selector button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.chart-selector button:hover{border-color:var(--blue);color:var(--blue)}
+.chart-selector button.on:hover{color:#fff}
 </style>
 </head>
 <body>
@@ -803,14 +838,14 @@ html[data-theme="dark"] .back-to-core-btn{color:#E8ECF3}
         <span class="kbd">⌘K</span>
       </button>
       <!-- ICÔNE FENÊTRE — toujours visible dans la topbar, ouvre le pop-up des 6 modules superposé sur le Nexus Core -->
-      <button class="topbar-iface-btn" onclick="Nx.openHubOverlay()" title="Interface principale — accéder aux modules" data-i18n-title="iface.title" aria-label="Interface principale">
+      <button class="topbar-iface-btn" onclick="Nx.openHubOverlay()" title="Menus — accéder aux modules" data-i18n-title="iface.title" aria-label="Menus">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="3" width="7" height="7" rx="1.5"/>
           <rect x="14" y="3" width="7" height="7" rx="1.5"/>
           <rect x="3" y="14" width="7" height="7" rx="1.5"/>
           <rect x="14" y="14" width="7" height="7" rx="1.5"/>
         </svg>
-        <span class="tib-lbl" data-i18n="hub.cta.iface">Interface principale</span>
+        <span class="tib-lbl" data-i18n="hub.cta.iface">Menus</span>
       </button>
       <div class="lang-btn">
         <button onclick="Nx.setLang('fr')" id="lang-fr" class="on">FR</button>
@@ -877,12 +912,12 @@ const I18N = {
     'greet.morning':'Bonjour','greet.afternoon':'Bon après-midi','greet.evening':'Bonsoir',
     'ncd.eyebrow':'Nexus Core · Tableau de bord',
     'ncd.sub':'Ton espace est prêt. Clique sur l\'icône fenêtre pour explorer tes modules.',
-    'ncd.iface.title':'Interface principale','ncd.iface.sub':'Accéder à tes 6 modules',
+    'ncd.iface.title':'Menus','ncd.iface.sub':'Accéder à tes 6 modules',
     'ncd.hint':'↑ Statistiques · Messagerie · Campagnes · Clients CRM · Mode vacances · Tutoriel',
     'ncd.q.msg':'messages à répondre','ncd.q.cli':'clients actifs','ncd.q.streak':'jours sans oublier un client',
     'ncd.ai.note':'<b>Nexus IA :</b> 3 nouveaux clients depuis hier · 1 opportunité de relance à examiner.',
     'ncd.ai.cta':'Voir →',
-    'hub.cta.iface':'Interface principale','hub.cta.sub':'Accède à toutes tes sections',
+    'hub.cta.iface':'Menus','hub.cta.sub':'Accède à toutes tes sections',
     'hub.brief.title':'🎙 Brief audio du jour','hub.brief.play':'Écouter',
     'hub.streak':'jours consécutifs','hub.streak.sub':'Continue comme ça !',
     // STATS CARDS
@@ -949,8 +984,8 @@ const I18N = {
     'tuto.mark.done':'Marquer comme fait','tuto.go.section':'Aller à la section',
     'tuto.complete':'🎉 Bravo ! Tutoriel terminé',
     // POP-UP INTERFACE PRINCIPALE
-    'iface.title':'Interface principale','iface.subtitle':'Choisis la section où tu veux aller',
-    'iface.eyebrow':'Nexus Core · Interface principale',
+    'iface.title':'Menus','iface.subtitle':'Choisis la section où tu veux aller',
+    'iface.eyebrow':'Nexus Core · Menus',
     'iface.tile.stats':'Statistiques','iface.tile.stats.sub':'Tous les stats de tes agents',
     'iface.tile.msg':'Messagerie','iface.tile.msg.sub':'Inbox WhatsApp + Gmail unifiée',
     'iface.tile.camp':'Campagnes','iface.tile.camp.sub':'Usage limité',
@@ -1021,12 +1056,12 @@ const I18N = {
     'greet.morning':'Buenos días','greet.afternoon':'Buenas tardes','greet.evening':'Buenas noches',
     'ncd.eyebrow':'Nexus Core · Tablero',
     'ncd.sub':'Tu espacio está listo. Haz clic en el ícono ventana para explorar tus módulos.',
-    'ncd.iface.title':'Interfaz principal','ncd.iface.sub':'Acceder a tus 6 módulos',
+    'ncd.iface.title':'Menús','ncd.iface.sub':'Acceder a tus 6 módulos',
     'ncd.hint':'↑ Estadísticas · Mensajería · Campañas · Clientes CRM · Modo vacaciones · Tutorial',
     'ncd.q.msg':'mensajes por responder','ncd.q.cli':'clientes activos','ncd.q.streak':'días sin olvidar un cliente',
     'ncd.ai.note':'<b>Nexus IA:</b> 3 nuevos clientes desde ayer · 1 oportunidad de recuperación que revisar.',
     'ncd.ai.cta':'Ver →',
-    'hub.cta.iface':'Interfaz principal','hub.cta.sub':'Accede a todas tus secciones',
+    'hub.cta.iface':'Menús','hub.cta.sub':'Accede a todas tus secciones',
     'hub.brief.title':'🎙 Resumen audio del día','hub.brief.play':'Escuchar',
     'hub.streak':'días seguidos','hub.streak.sub':'¡Sigue así!',
     'stats.conv':'Conversaciones hoy','stats.clients':'Clientes activos',
@@ -1084,8 +1119,8 @@ const I18N = {
     'tuto.step5.desc':'Modo vacaciones modular — nunca pierdas un cliente más',
     'tuto.mark.done':'Marcar como hecho','tuto.go.section':'Ir a la sección',
     'tuto.complete':'🎉 ¡Felicitaciones! Tutorial completado',
-    'iface.title':'Interfaz principal','iface.subtitle':'Elige la sección a la que quieres ir',
-    'iface.eyebrow':'Nexus Core · Interfaz principal',
+    'iface.title':'Menús','iface.subtitle':'Elige la sección a la que quieres ir',
+    'iface.eyebrow':'Nexus Core · Menús',
     'iface.tile.stats':'Estadísticas','iface.tile.stats.sub':'Todas las stats de tus agentes',
     'iface.tile.msg':'Mensajería','iface.tile.msg.sub':'Inbox WhatsApp + Gmail unificada',
     'iface.tile.camp':'Campañas','iface.tile.camp.sub':'Uso limitado',
@@ -1149,12 +1184,12 @@ const I18N = {
     'greet.morning':'Good morning','greet.afternoon':'Good afternoon','greet.evening':'Good evening',
     'ncd.eyebrow':'Nexus Core · Dashboard',
     'ncd.sub':'Your space is ready. Click the window icon to explore your modules.',
-    'ncd.iface.title':'Main interface','ncd.iface.sub':'Access your 6 modules',
+    'ncd.iface.title':'Menus','ncd.iface.sub':'Access your 6 modules',
     'ncd.hint':'↑ Statistics · Inbox · Campaigns · CRM Clients · Vacation mode · Tutorial',
     'ncd.q.msg':'messages to answer','ncd.q.cli':'active clients','ncd.q.streak':'days without forgetting a client',
     'ncd.ai.note':'<b>Nexus AI:</b> 3 new clients since yesterday · 1 recovery opportunity to review.',
     'ncd.ai.cta':'View →',
-    'hub.cta.iface':'Main interface','hub.cta.sub':'Access all your sections',
+    'hub.cta.iface':'Menus','hub.cta.sub':'Access all your sections',
     'hub.brief.title':'🎙 Daily audio brief','hub.brief.play':'Listen',
     'hub.streak':'days in a row','hub.streak.sub':'Keep it up!',
     'stats.conv':'Conversations today','stats.clients':'Active clients',
@@ -1212,8 +1247,8 @@ const I18N = {
     'tuto.step5.desc':'Modular vacation mode — never lose a client again',
     'tuto.mark.done':'Mark as done','tuto.go.section':'Go to section',
     'tuto.complete':'🎉 Well done! Tutorial complete',
-    'iface.title':'Main interface','iface.subtitle':'Choose the section you want to access',
-    'iface.eyebrow':'Nexus Core · Main interface',
+    'iface.title':'Menus','iface.subtitle':'Choose the section you want to access',
+    'iface.eyebrow':'Nexus Core · Menus',
     'iface.tile.stats':'Statistics','iface.tile.stats.sub':'All your agents\' stats',
     'iface.tile.msg':'Messaging','iface.tile.msg.sub':'Unified WhatsApp + Gmail inbox',
     'iface.tile.camp':'Campaigns','iface.tile.camp.sub':'Limited usage',
@@ -2027,9 +2062,10 @@ const Nx = {
               ${editing ? `<input class="form-ctrl" id="editEmail" placeholder="email@…" value="${c.email||''}">` : `<div style="padding:8px 12px;background:var(--bg2);border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:12.5px">${c.email||'+ Ajouter un email'}</div>`}
             </div>
           </div>
-          <div style="padding:8px 12px;background:var(--green-soft);border-radius:6px;font-size:11px;color:var(--green);margin-bottom:14px">
+          <div style="padding:8px 12px;background:var(--green-soft);border-radius:6px;font-size:11px;color:var(--green);margin-bottom:8px">
             ✓ Fiche unifiée : ce client sera fusionné automatiquement entre WhatsApp et Email s'il utilise les deux canaux.
           </div>
+          <button class="btn btn-s" style="width:100%;margin-bottom:14px" onclick="Nx.unifyClientChannels(${c.id})">🔗 Unifier WhatsApp + Mail</button>
 
           <!-- STATS -->
           <div class="grid3" style="margin-bottom:14px">
@@ -2088,8 +2124,54 @@ const Nx = {
   },
 
   sendThankyou(clientId){
-    this.toast('💌 Merci envoyé','success','Message personnalisé envoyé via WhatsApp');
+    // POINT 10(f) — Envoyer un vrai message dans la conversation (3 versions ES aléatoires)
+    const c = this.state.clients.find(x => x.id === clientId);
+    const first = c ? c.name.split(' ')[0] : '';
+    const variants = [
+      `¡Mil gracias ${first}! 🙏 Aprecio mucho tu confianza. Cualquier cosa estoy aquí.`,
+      `${first}, gracias por tu apoyo 💛 Eres un cliente que vale oro. Hasta pronto.`,
+      `¡Gracias ${first}! 🙌 Por clientes como tú vale la pena cada día. Un abrazo.`
+    ];
+    const txt = variants[Math.floor(Math.random() * variants.length)];
+    let conv = this.state.conversations.find(x => x.clientId === clientId);
+    if (!conv) {
+      conv = { clientId, channel:'whatsapp', unread:false, messages:[] };
+      this.state.conversations.push(conv);
+    }
+    conv.messages.push({ from:'me', text: txt, time: 'À l\'instant' });
+    conv.unread = false;
+    this.save();
+    this.toast('💌 Merci envoyé','success', 'Message envoyé dans la conversation');
     this.closeModal();
+    if (this.state.view === 'inbox') this.renderView();
+  },
+
+  // POINT 10(d) — Unifier WhatsApp + Mail (modal de confirmation)
+  unifyClientChannels(clientId){
+    const c = this.state.clients.find(x => x.id === clientId);
+    if (!c) return;
+    const ov = document.getElementById('modal-overlay');
+    const mc = document.getElementById('modal-content');
+    ov.classList.remove('hidden');
+    const detectedEmail = c.email || (c.name.split(' ')[0].toLowerCase() + '@gmail.com');
+    mc.innerHTML = `
+      <div class="modal-hd"><h3>🔗 Unifier WhatsApp + Mail</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-body">
+        <p style="font-size:13px;line-height:1.6;color:var(--ink2)">L'IA détecte que <b>${c.name}</b> utilise WhatsApp <b>(${c.phone||'numéro inconnu'})</b> ET le mail <b>${detectedEmail}</b>.</p>
+        <p style="font-size:13px;line-height:1.6;color:var(--ink2);margin-top:10px">Voulez-vous unifier les 2 dans une seule fiche ? L'historique des deux canaux sera fusionné.</p>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-s" onclick="Nx.closeModal()">Non</button>
+        <button class="btn btn-p" onclick="Nx.confirmUnifyChannels(${c.id}, '${detectedEmail}')">Oui, unifier</button>
+      </div>`;
+  },
+  confirmUnifyChannels(clientId, email){
+    const c = this.state.clients.find(x => x.id === clientId);
+    if (c && email && !c.email) c.email = email;
+    if (c) c.unified = true;
+    this.save();
+    this.closeModal();
+    this.toast('✓ Fiche unifiée','success', 'WhatsApp + Mail fusionnés');
   },
 
   saveClientNotes(clientId){
@@ -2267,7 +2349,7 @@ const Nx = {
             <rect x="3" y="14" width="7" height="7" rx="1.5"/>
             <rect x="14" y="14" width="7" height="7" rx="1.5"/>
           </svg>
-          <span>Interface principale</span>
+          <span>Menus</span>
         </button>
       </div>` + html;
     }
@@ -2655,8 +2737,10 @@ const Nx = {
     if (!c) return '';
     const lastMsg = conv.messages[conv.messages.length-1];
     const chMap = {whatsapp:'📱 WhatsApp',instagram:'📸 Instagram',email:'✉️ Email'};
+    // POINT 9 — Pastille couleur segment au lieu d'avatar initiales
+    const segKey = this.segOf(c);
     return `<div class="msg ${conv.unread?'unread':''}" onclick="Nx.openConversation(${c.id})">
-      <div class="msg-av" style="background:${c.color}">${c.avatar}</div>
+      <div class="msg-pastille-wrap"><span class="seg-pastille seg-${segKey}" title="Segment ${segKey.toUpperCase()}"></span></div>
       <div class="msg-body">
         <div class="msg-row">
           <div><span class="msg-name">${c.name}</span><span class="ch">${chMap[conv.channel]}</span></div>
@@ -2666,6 +2750,17 @@ const Nx = {
         ${c.tag?`<span class="msg-tag ${c.tag}">${c.tag.toUpperCase()}</span>`:''}
       </div>
     </div>`;
+  },
+
+  // POINT 9 — Helper qui retourne la clé segment unifiée d'un client
+  segOf(c){
+    if (!c) return 'rec';
+    if (c.status === 'lost') return 'lost';
+    if (c.tags && c.tags.includes('VIP')) return 'vip';
+    if (c.tag === 'biz' || (c.tags && c.tags.includes('Business'))) return 'biz';
+    if (c.tag === 'new' || c.status === 'prospect') return 'new';
+    if (c.tag === 'occ') return 'occ';
+    return 'rec';
   },
 
   chartSvg(){
@@ -2790,6 +2885,46 @@ const Nx = {
               ${b.faq.map((f,i)=>this.faqRow(f,i)).join('')}
             </div>
             <button class="btn btn-s" onclick="Nx.addFaq()" style="margin-top:10px">+ Ajouter une FAQ</button>
+
+            <!-- POINT PROFIL PERSO (a) — Suggestions IA depuis Conseil Nexus -->
+            <h4 style="margin:22px 0 10px;font-size:13px">✨ Suggestions IA <span style="font-size:11px;color:var(--muted);font-weight:400">· depuis Conseil Nexus, prêtes à intégrer</span></h4>
+            <div id="faqSuggestionsList">
+              ${(this.state.faqSuggestions || [
+                {id:'s1', q:'¿Puedo hacer un pedido grande para una empresa?', a:'¡Por supuesto! Hacemos catering corporativo. Cuéntanos cuántas personas y la fecha, te preparamos un presupuesto.'},
+                {id:'s2', q:'¿Tienen opciones sin gluten?', a:'Sí, tenemos pan y empanadas sin gluten bajo pedido (24h de antelación).'},
+                {id:'s3', q:'¿Hacen entregas el domingo?', a:'Solo entregamos los sábados. El domingo estamos cerrados, pero puedes recoger el sábado en la tarde.'}
+              ]).map(s => `
+                <div style="padding:10px 12px;background:var(--violet-soft);border:1px solid var(--violet);border-radius:8px;margin-bottom:6px">
+                  <div style="display:flex;align-items:start;gap:10px">
+                    <div style="flex:1">
+                      <div style="font-weight:600;font-size:12.5px;color:var(--violet)">${s.q}</div>
+                      <div style="font-size:12px;color:var(--ink2);margin-top:4px">${s.a}</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
+                      <button class="btn-g" style="font-size:11px;padding:3px 8px" onclick="Nx.adoptFaqSuggestion('${s.id}')" title="Adopter">✓ Adopter</button>
+                      <button class="btn-g" style="font-size:11px;padding:3px 8px;color:var(--red)" onclick="Nx.dismissFaqSuggestion('${s.id}')" title="Éliminer">✕ Éliminer</button>
+                    </div>
+                  </div>
+                </div>`).join('')}
+            </div>
+          </div>
+
+          <!-- POINT PROFIL PERSO (b) — PDF/archives importables -->
+          <div class="card" style="padding:22px;grid-column:span 2">
+            <h3 style="margin-bottom:6px">📎 Documents & archives</h3>
+            <p style="color:var(--muted);font-size:12px;margin-bottom:14px">Importe les PDF, archives et documents que l'IA peut consulter (catalogue, conditions, historique).</p>
+            <button class="btn btn-s" onclick="Nx.uploadProfilePdf()">📎 Ajouter PDF/archives</button>
+            <div id="profilePdfList" style="margin-top:14px;display:flex;flex-direction:column;gap:6px">
+              ${(this.state.profilePdfs || []).map((pdf,i) => `
+                <div style="padding:10px 12px;background:var(--bg2);border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;gap:10px">
+                  <span style="font-size:18px">📄</span>
+                  <div style="flex:1">
+                    <div style="font-weight:600;font-size:13px">${pdf.name}</div>
+                    <div style="font-size:11px;color:var(--muted)">${pdf.size || '—'} · ajouté le ${pdf.date}</div>
+                  </div>
+                  <button class="btn-g" style="color:var(--red)" onclick="Nx.removeProfilePdf(${i})">🗑 Retirer</button>
+                </div>`).join('') || '<div style="font-size:12px;color:var(--muted);padding:10px;text-align:center;border:1px dashed var(--line);border-radius:8px">Aucun document importé pour l\'instant.</div>'}
+            </div>
           </div>
 
           <div class="card" style="padding:22px;grid-column:span 2">
@@ -2801,8 +2936,18 @@ const Nx = {
             </div>
           </div>
 
-          <!-- BLOC API INTÉGRATIONS -->
-          <div class="card" style="padding:22px;grid-column:span 2">
+          <!-- POINT PROFIL PERSO (c) — Bandeau remplaçant la section Intégrations API -->
+          <div class="card" style="padding:18px 22px;grid-column:span 2;background:linear-gradient(135deg,var(--blue-soft),var(--violet-soft));border:1px solid var(--blue-ghost);display:flex;align-items:center;gap:14px">
+            <div style="font-size:30px">🔐</div>
+            <div style="flex:1">
+              <div style="font-weight:700;font-size:14px;color:var(--blue-ink)">Intégrations API gérées par Nexus Admin</div>
+              <div style="font-size:12px;color:var(--ink2);margin-top:4px">Claude · Google · WhatsApp · Stripe — tout est configuré côté admin, inclus dans le fee d'installation. Tu n'as rien à faire.</div>
+            </div>
+            <span class="chip green" style="flex-shrink:0">✓ Inclus</span>
+          </div>
+
+          <!-- BLOC API INTÉGRATIONS — masqué (géré par Nexus Admin) -->
+          <div class="card" style="display:none;padding:22px;grid-column:span 2">
             <h3 style="margin-bottom:6px">🔌 Intégrations API <span style="font-size:11px;color:var(--muted);font-weight:400">· Claude Sonnet, Google, WhatsApp, Stripe</span></h3>
             <div style="padding:12px 14px;background:var(--red-soft);border-radius:8px;font-size:12px;color:#991B1B;margin-bottom:14px">
               ⚠️ <b>Sécurité critique :</b> tes clés API ne sont JAMAIS visibles côté client. Stockage backend chiffré (Supabase secrets). "Avec Claude Mythos qui sort, les gens vont se faire voler leurs clés — gros enjeu." — Augus
@@ -2929,6 +3074,62 @@ const Nx = {
     this.state.business.faq.push({q:'',a:''});
     this.save();
     this.renderView();
+  },
+
+  // POINT PROFIL PERSO (a) — Suggestions FAQ depuis Conseil Nexus
+  adoptFaqSuggestion(id){
+    const list = this.state.faqSuggestions || [
+      {id:'s1', q:'¿Puedo hacer un pedido grande para una empresa?', a:'¡Por supuesto! Hacemos catering corporativo. Cuéntanos cuántas personas y la fecha, te preparamos un presupuesto.'},
+      {id:'s2', q:'¿Tienen opciones sin gluten?', a:'Sí, tenemos pan y empanadas sin gluten bajo pedido (24h de antelación).'},
+      {id:'s3', q:'¿Hacen entregas el domingo?', a:'Solo entregamos los sábados. El domingo estamos cerrados, pero puedes recoger el sábado en la tarde.'}
+    ];
+    const s = list.find(x => x.id === id);
+    if (!s) return;
+    this.state.business.faq.push({ q: s.q, a: s.a });
+    this.state.faqSuggestions = list.filter(x => x.id !== id);
+    this.save();
+    this.renderView();
+    this.toast('✓ FAQ adoptée','success', s.q.slice(0,40));
+  },
+  dismissFaqSuggestion(id){
+    const list = this.state.faqSuggestions || [
+      {id:'s1', q:'¿Puedo hacer un pedido grande para una empresa?', a:'¡Por supuesto!'},
+      {id:'s2', q:'¿Tienen opciones sin gluten?', a:'Sí.'},
+      {id:'s3', q:'¿Hacen entregas el domingo?', a:'No.'}
+    ];
+    this.state.faqSuggestions = list.filter(x => x.id !== id);
+    this.save();
+    this.renderView();
+    this.toast('Suggestion éliminée','info');
+  },
+
+  // POINT PROFIL PERSO (b) — Upload PDF/archives + liste avec retrait
+  uploadProfilePdf(){
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.pdf,.doc,.docx,.zip,.txt';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (!this.state.profilePdfs) this.state.profilePdfs = [];
+      const sizeKb = Math.round(file.size / 1024);
+      this.state.profilePdfs.push({
+        name: file.name,
+        size: sizeKb < 1024 ? sizeKb + ' Ko' : (sizeKb/1024).toFixed(1) + ' Mo',
+        date: new Date().toLocaleDateString('fr-FR')
+      });
+      this.save();
+      this.renderView();
+      this.toast('📎 Document ajouté','success', file.name);
+    };
+    input.click();
+  },
+  removeProfilePdf(i){
+    if (!confirm('Retirer ce document ?')) return;
+    if (this.state.profilePdfs) this.state.profilePdfs.splice(i,1);
+    this.save();
+    this.renderView();
+    this.toast('Document retiré','success');
   },
   addProduct(){
     this.state.business.catalog.push({id:Date.now(),name:'Nouveau produit',price:1000,unit:'un',emoji:'📦',photo:'',miniDesc:'',nutriScore:'',ingredients:'',allergens:''});
@@ -3062,8 +3263,10 @@ const Nx = {
               ${convs.map(conv=>{
                 const c = this.state.clients.find(x=>x.id===conv.clientId);
                 if (!c) return '';
+                // POINT 9 — Pastille couleur segment
+                const segKey = this.segOf(c);
                 return `<div class="msg ${conv.unread?'unread':''} ${c.id===activeId?'active':''}" onclick="Nx.state.activeConv=${c.id};Nx.renderView()">
-                  <div class="msg-av" style="background:${c.color}">${c.avatar}</div>
+                  <div class="msg-pastille-wrap"><span class="seg-pastille seg-${segKey}" title="Segment ${segKey.toUpperCase()}"></span></div>
                   <div class="msg-body">
                     <div class="msg-row"><div><span class="msg-name">${c.name}</span></div>
                       <div class="msg-right">${conv.unread?'<span class="msg-unread-dot"></span>':''}<span class="msg-time">${conv.messages[conv.messages.length-1].time}</span></div></div>
@@ -3084,7 +3287,6 @@ const Nx = {
                 <div style="font-size:11px;color:var(--muted)">${activeClient.phone} · ${activeClient.lastSeen}</div>
               </div>
               <button class="icon-btn" onclick="Nx.openClientCard(${activeClient.id})" title="Fiche client">👤</button>
-              <button class="icon-btn" onclick="Nx.openModal('share-data')" title="Partager doc">🔌</button>
               <button class="icon-btn" onclick="Nx.translateConv(${activeClient.id})" title="Traduire FR ↔ ES">🌐</button>
             </div>
             <div class="chat-conv-body" id="chatBody">
@@ -3096,6 +3298,7 @@ const Nx = {
               <button class="btn-g" onclick="Nx.createDraft(${activeClient.id})">📝 Brouillon</button>
               <button class="btn-g" onclick="Nx.translateMsg(${activeClient.id})">🌐 Traduire</button>
               <button class="btn-g" onclick="Nx.sendThankyou(${activeClient.id})">🙏 Envoyer un merci</button>
+              <button class="btn-g" onclick="Nx.openModal('share-data')">🔌 Partage 1-clic</button>
             </div>
             <div class="chat-input">
               <button class="icon-btn" onclick="Nx.toast('Transcription vocale 🎙 (démo)','info')" title="Voice note">🎙</button>
@@ -3157,7 +3360,7 @@ const Nx = {
     setTimeout(() => {
       const mc = document.getElementById('modal-content');
       mc.innerHTML = `
-        <div class="modal-hd"><h3>🌐 Traduction du dernier message</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+        <div class="modal-hd"><h3>🌐 Traduction des derniers messages du client</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
         <div class="modal-body">
           <div style="margin-bottom:14px"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">🇨🇱 Espagnol (original)</div><div style="padding:12px 14px;background:var(--bg2);border-radius:8px;font-size:13.5px">${lastMsg.text}</div></div>
           <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">🇫🇷 Français (auto)</div><div style="padding:12px 14px;background:var(--blue-soft);border-radius:8px;font-size:13.5px;color:var(--blue-ink)">${fr}</div></div>
@@ -3241,6 +3444,33 @@ const Nx = {
     this.toast(`✓ ${c.name} retiré du CRM`, 'success', 'Tu peux le restaurer dans Paramètres > Corbeille pendant 30 jours');
   },
 
+  // POINT CRM (d) — Scroll vers le podium top 3 (ou ouvre la fiche du #1)
+  scrollToTopClients(){
+    const el = document.getElementById('crmPodium');
+    if (el) { el.scrollIntoView({behavior:'smooth', block:'start'}); el.style.outline='3px solid var(--blue)'; setTimeout(()=>{el.style.outline=''},1400); }
+    else {
+      const top = this.state.clients.filter(c=>c.status==='active').sort((a,b)=>b.score-a.score)[0];
+      if (top) this.openClientCard(top.id);
+    }
+  },
+
+  // POINT CRM (a) — Input debouncé (250ms) + restore focus + cursor
+  onCrmSearchInput(value){
+    this.state.crmSearch = value;
+    if (this._crmSearchTimer) clearTimeout(this._crmSearchTimer);
+    this._crmSearchTimer = setTimeout(() => {
+      this.renderView();
+      // Restore focus + cursor to the end after re-render
+      const input = document.getElementById('crmSearchInput');
+      if (input) {
+        input.focus();
+        const v = input.value;
+        input.value = '';
+        input.value = v;
+      }
+    }, 250);
+  },
+
   // ---------- CRM VIEW ----------
   viewCrm(){
     const filter = this.state.crmFilter || 'all';
@@ -3250,6 +3480,8 @@ const Nx = {
     else if (filter==='prospect') clients = clients.filter(c=>c.status==='prospect');
     else if (filter==='lost') clients = clients.filter(c=>c.status==='lost');
     else if (filter==='vip') clients = clients.filter(c=>c.tags.includes('VIP'));
+    else if (filter==='biz') clients = clients.filter(c=>c.tag==='biz'||(c.tags&&c.tags.includes('Business')));
+    else if (filter==='occ') clients = clients.filter(c=>c.tag==='occ');
     if (search) clients = clients.filter(c=>c.name.toLowerCase().includes(search) || c.notes.toLowerCase().includes(search));
 
     const sortMode = this.state.crmSort || 'score';
@@ -3265,24 +3497,31 @@ const Nx = {
         <div class="page-hd">
           <div><h1>👥 Clients & CRM</h1><div class="sub">${this.state.clients.length} clients · ${this.state.clients.filter(c=>c.status==='active').length} actifs · ${this.state.clients.filter(c=>c.status==='lost').length} perdus</div></div>
           <div class="flex">
-            <button class="btn btn-s" onclick="Nx.openCrmAiChat()">🤖 Chat Claude CRM</button>
+            <!-- POINT CRM (d) — Bouton Top client : scroll vers podium top 3 -->
+            <button class="btn btn-s" onclick="Nx.scrollToTopClients()">🏆 Top client</button>
             <button class="btn btn-s" onclick="Nx.openExportCsvModal()">📤 Exporter CSV</button>
             <button class="btn btn-p" onclick="Nx.openAddClientModal()">+ Ajouter un client</button>
           </div>
         </div>
+        <!-- POINT CRM (c) — Chat Claude CRM en floating button bas-droit (conseils IA) -->
+        <button onclick="Nx.openCrmAiChat()" title="Conseils IA · Chat Claude branché à ton CRM" aria-label="Chat Claude CRM" style="position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;border:0;cursor:pointer;font-size:24px;box-shadow:0 8px 24px -8px rgba(122,60,255,.5);z-index:80;transition:transform .2s" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">🤖</button>
 
         <div class="filter-bar">
           <div style="flex:1;max-width:320px">
-            <input class="form-ctrl" placeholder="${t('crm.search')}" value="${this.state.crmSearch||''}" oninput="Nx.state.crmSearch=this.value;Nx.renderView()">
+            <!-- POINT CRM (a) — input debouncé, ne re-render pas à chaque touche -->
+            <input id="crmSearchInput" class="form-ctrl" placeholder="${t('crm.search')}" value="${this.state.crmSearch||''}" oninput="Nx.onCrmSearchInput(this.value)">
           </div>
+          <!-- POINT CRM (b) — Filter pills couleurs unifiées par segment -->
           <button class="filter-pill ${filter==='all'?'on':''}" onclick="Nx.state.crmFilter='all';Nx.renderView()">Tous (${this.state.clients.length})</button>
-          <button class="filter-pill ${filter==='active'?'on':''}" onclick="Nx.state.crmFilter='active';Nx.renderView()">Actifs (${this.state.clients.filter(c=>c.status==='active').length})</button>
-          <button class="filter-pill ${filter==='prospect'?'on':''}" onclick="Nx.state.crmFilter='prospect';Nx.renderView()">Prospects (${this.state.clients.filter(c=>c.status==='prospect').length})</button>
-          <button class="filter-pill ${filter==='lost'?'on':''}" onclick="Nx.state.crmFilter='lost';Nx.renderView()">Perdus (${this.state.clients.filter(c=>c.status==='lost').length})</button>
-          <button class="filter-pill ${filter==='vip'?'on':''}" onclick="Nx.state.crmFilter='vip';Nx.renderView()">⭐ VIP</button>
+          <button class="filter-pill seg-rec ${filter==='active'?'on':''}" onclick="Nx.state.crmFilter='active';Nx.renderView()">🔁 Actifs (${this.state.clients.filter(c=>c.status==='active').length})</button>
+          <button class="filter-pill seg-new ${filter==='prospect'?'on':''}" onclick="Nx.state.crmFilter='prospect';Nx.renderView()">🌱 Prospects (${this.state.clients.filter(c=>c.status==='prospect').length})</button>
+          <button class="filter-pill seg-lost ${filter==='lost'?'on':''}" onclick="Nx.state.crmFilter='lost';Nx.renderView()">💔 Perdus (${this.state.clients.filter(c=>c.status==='lost').length})</button>
+          <button class="filter-pill seg-vip ${filter==='vip'?'on':''}" onclick="Nx.state.crmFilter='vip';Nx.renderView()">⭐ VIP</button>
+          <button class="filter-pill seg-biz ${filter==='biz'?'on':''}" onclick="Nx.state.crmFilter='biz';Nx.renderView()">💼 Business</button>
+          <button class="filter-pill seg-occ ${filter==='occ'?'on':''}" onclick="Nx.state.crmFilter='occ';Nx.renderView()">👥 Occasionnels</button>
         </div>
 
-        <div class="card" style="margin-bottom:14px;padding:24px;background:linear-gradient(135deg,#FFF7ED,#FEF3C7)">
+        <div class="card" id="crmPodium" style="margin-bottom:14px;padding:24px;background:linear-gradient(135deg,#FFF7ED,#FEF3C7);scroll-margin-top:80px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
             <h3 style="color:#78350F">🏆 Podium — Top 3 du mois</h3>
             <span style="font-size:11px;color:#92400E;background:#FCD34D;padding:4px 10px;border-radius:999px;font-weight:700">★ Tes meilleurs ambassadeurs</span>
@@ -3336,7 +3575,43 @@ const Nx = {
             </div>` : ''}
         <style>.crm-row:hover .crm-del{opacity:1}</style>
         </div>
+
+        <!-- POINT CRM (e) — Gestion réunions Google Calendar -->
+        <div class="card" style="margin-top:14px">
+          <div class="card-hd">
+            <h3>📅 Gestion réunions Google Calendar</h3>
+            <div class="actions">
+              <button class="btn btn-s" onclick="Nx.addMeeting()">+ Ajouter réunion</button>
+            </div>
+          </div>
+          <div class="card-body" style="padding:0">
+            ${[
+              {date:'Lun 19 mai', time:'10:00', client:'María González', place:'Visioconférence Google Meet', topic:'Présentation pack VIP 2026'},
+              {date:'Mar 20 mai', time:'14:30', client:'Pedro Soto',     place:'Boutique Don Carlos',         topic:'Devis Torte mariage juin'},
+              {date:'Jeu 22 mai', time:'09:00', client:'Carmen López',   place:'Café Providencia',            topic:'Reprise de contact (ex-VIP silencieuse)'},
+              {date:'Ven 23 mai', time:'16:00', client:'Don Roberto',    place:'Visioconférence',             topic:'Catering événement entreprise 80p'}
+            ].map(m => `
+              <div style="padding:14px 20px;border-top:1px solid var(--line2);display:flex;gap:14px;align-items:center">
+                <div style="width:60px;text-align:center"><div style="font-weight:700;font-size:13px">${m.date}</div><div style="font-size:11px;color:var(--muted)">${m.time}</div></div>
+                <div style="flex:1">
+                  <div style="font-weight:600;font-size:13.5px">👤 ${m.client}</div>
+                  <div style="font-size:11.5px;color:var(--muted);margin-top:2px">📍 ${m.place} · ${m.topic}</div>
+                </div>
+                <button class="btn-g" onclick="Nx.toast('Google Calendar ouvert','info','Détails de la réunion')">📅 Ouvrir</button>
+              </div>`).join('')}
+          </div>
+        </div>
       </div>`;
+  },
+
+  // POINT CRM (e) — Ajouter réunion (mock)
+  addMeeting(){
+    const client = prompt('Nom du client pour la réunion ?');
+    if (!client) return;
+    const when = prompt('Date et heure (ex : 25 mai 10:00) ?');
+    if (!when) return;
+    const topic = prompt('Sujet de la réunion ?', 'Discussion projet');
+    this.toast('✓ Réunion ajoutée','success', client + ' · ' + when + (topic ? ' · ' + topic : ''));
   },
 
   // CRM — Modal Ajouter client (très personnalisable)
@@ -3578,7 +3853,6 @@ const Nx = {
         <div class="page-hd">
           <div><h1>📊 Statistiques & santé business</h1><div class="sub">Toutes tes métriques en un coup d'œil. Compare, exporte, écoute.</div></div>
           <div class="flex">
-            <button class="btn btn-s" onclick="Nx.openVocalBriefV2()">🎙 Brief audio</button>
             <button class="btn btn-s" onclick="Nx.openExportPdfModal('stats')">📄 Exporter PDF</button>
           </div>
         </div>
@@ -3610,10 +3884,12 @@ const Nx = {
             <div style="font-size:11px;color:var(--muted)">Voix douce, agréable. Pause/stop possible.</div>
           </div>
           <div class="speed-btns" title="Vitesse de lecture (style WhatsApp)">
-            <button onclick="Nx.setAudioSpeed(0.75)" id="spd-slow" class="${(this.state.audioPlayState.speed||1)===0.75?'on':''}">Lent</button>
-            <button onclick="Nx.setAudioSpeed(1)" id="spd-norm" class="${(this.state.audioPlayState.speed||1)===1?'on':''}">Normal</button>
-            <button onclick="Nx.setAudioSpeed(1.5)" id="spd-fast" class="${(this.state.audioPlayState.speed||1)===1.5?'on':''}">Rapide</button>
+            <button onclick="Nx.setAudioSpeed(0.75)" id="spd-slow" class="${(this.state.audioPlayState.speed||1)===0.75?'on':''}">0.75×</button>
+            <button onclick="Nx.setAudioSpeed(1)" id="spd-norm" class="${(this.state.audioPlayState.speed||1)===1?'on':''}">1×</button>
+            <button onclick="Nx.setAudioSpeed(1.5)" id="spd-fast" class="${(this.state.audioPlayState.speed||1)===1.5?'on':''}">1.5×</button>
+            <button onclick="Nx.setAudioSpeed(2)" id="spd-2x" class="${(this.state.audioPlayState.speed||1)===2?'on':''}">2×</button>
           </div>
+          <button class="btn btn-s" onclick="Nx.openBriefTextModal()" title="Voir le texte du brief audio">📝 Voir le texte</button>
           <button class="icon-btn" onclick="Nx.stopBriefAudio()" title="Stop">⏹</button>
         </div>
 
@@ -3630,22 +3906,15 @@ const Nx = {
           </div>
 
           <div class="card">
-            <div class="card-hd"><h3>❓ Top questions — tendances</h3><span style="font-size:11px;color:var(--muted)">↑↓ = variation vs semaine précédente</span></div>
+            <div class="card-hd"><h3>❓ Top questions — tendances</h3>
+              <div class="actions">
+                <button class="btn-g" style="${(this.state.faqRange||'week')==='week'?'color:var(--blue);border-color:var(--blue);font-weight:700':''}" onclick="Nx.state.faqRange='week';Nx.renderView()">Semaine</button>
+                <button class="btn-g" style="${this.state.faqRange==='month'?'color:var(--blue);border-color:var(--blue);font-weight:700':''}" onclick="Nx.state.faqRange='month';Nx.renderView()">Mois</button>
+                <button class="btn-g" style="${this.state.faqRange==='all'?'color:var(--blue);border-color:var(--blue);font-weight:700':''}" onclick="Nx.state.faqRange='all';Nx.renderView()">Depuis toujours</button>
+              </div>
+            </div>
             <div class="card-body">
-              ${a.topQuestions.map((q,i)=>{
-                // Fake trend : alterne up/dn/eq
-                const trends = [{a:'▲',c:'trend-up',v:'+2'},{a:'▼',c:'trend-dn',v:'−1'},{a:'▲',c:'trend-up',v:'NEW'},{a:'–',c:'trend-eq',v:'='},{a:'▼',c:'trend-dn',v:'−3'}];
-                const tr = trends[i] || trends[0];
-                return `
-                <div style="padding:10px 0;border-bottom:1px dashed var(--line);display:flex;align-items:center;gap:10px">
-                  <div style="width:24px;height:24px;border-radius:50%;background:var(--blue-soft);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px">${i+1}</div>
-                  <div style="flex:1;font-size:13px">${q}</div>
-                  <span class="${tr.c}" style="font-size:13px">${tr.a}</span>
-                  <span class="chip ${tr.c==='trend-up'?'green':tr.c==='trend-dn'?'red':''}" style="font-size:10px">${tr.v}</span>
-                  <span class="chip">${Math.round(40-i*6)}×</span>
-                </div>`;
-              }).join('')}
-              <div style="padding:14px;background:var(--green-soft);border-radius:10px;margin-top:10px;font-size:12px">💡 <b>Insight tendance :</b> "Hacen tortas por encargo" est passée de #5 à #2 cette semaine — pense à booster la production.</div>
+              ${this.renderTopQuestions()}
             </div>
           </div>
         </div>
@@ -3653,31 +3922,44 @@ const Nx = {
         <div class="grid2">
           <div class="card">
             <div class="card-hd"><h3>📈 Évolution sur la période</h3>
-              <div class="actions"><span style="font-size:11px;color:var(--muted)">Bleu = conv · Vert = clients · Orange = messages auto</span></div>
+              <div class="actions"><span style="font-size:11px;color:var(--muted)" id="chartLegend">Bleu = conv · Vert = clients · Orange = messages auto</span></div>
             </div>
-            <div class="card-body">${this.chartSvg()}</div>
+            <div class="card-body">
+              <!-- POINT 8(c) — Sélecteur de graphique -->
+              <div class="chart-selector">
+                ${[
+                  {k:'conv',  l:'Conversations'},
+                  {k:'seg',   l:'Segments clients'},
+                  {k:'resp',  l:'Taux de réponse'},
+                  {k:'hours', l:'Best hours'},
+                  {k:'camp',  l:'Campagnes (ouvertures)'},
+                  {k:'newlost', l:'Nouveaux vs perdus'}
+                ].map(opt => `<button class="${(this.state.chartType||'conv')===opt.k?'on':''}" onclick="Nx.state.chartType='${opt.k}';Nx.renderView()">${opt.l}</button>`).join('')}
+              </div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:8px"><b>${({conv:'📊 Conversations · 30j', seg:'👥 Segments clients · 30j', resp:'✓ Taux de réponse · 30j', hours:'⏰ Best hours · semaine', camp:'📢 Campagnes — ouvertures · 30j', newlost:'🔁 Nouveaux vs perdus · 30j'})[this.state.chartType||'conv']}</b></div>
+              ${this.chartSvg()}
+            </div>
           </div>
 
           <div class="card">
-            <div class="card-hd"><h3>📊 Répartition clients · indicateurs delta</h3></div>
+            <div class="card-hd"><h3>📊 Répartition clients · indicateurs delta</h3>
+              <div class="actions">
+                <button class="btn-g" style="${(this.state.repRange||'month')==='month'?'color:var(--blue);border-color:var(--blue);font-weight:700':''}" onclick="Nx.state.repRange='month';Nx.renderView()">Mois</button>
+                <button class="btn-g" style="${this.state.repRange==='quarter'?'color:var(--blue);border-color:var(--blue);font-weight:700':''}" onclick="Nx.state.repRange='quarter';Nx.renderView()">Trimestre</button>
+                <button class="btn-g" style="${this.state.repRange==='all'?'color:var(--blue);border-color:var(--blue);font-weight:700':''}" onclick="Nx.state.repRange='all';Nx.renderView()">Depuis le début</button>
+              </div>
+            </div>
             <div class="card-body">
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
                 <div style="text-align:center;padding:20px">
                   ${this.donutSvg()}
                 </div>
                 <div>
-                  ${[
-                    {c:'#1A56DB',l:'Récurrents',v:'68%',n:232,delta:'+50%',cls:'trend-up'},
-                    {c:'#22C55E',l:'Nouveaux',v:'18%',n:62,delta:'+8%',cls:'trend-up'},
-                    {c:'#F59E0B',l:'Occasionnels',v:'10%',n:34,delta:'−2%',cls:'trend-dn'},
-                    {c:'#EF4444',l:'Perdus',v:'4%',n:14,delta:'+5%',cls:'trend-dn'}
-                  ].map(x=>`
-                    <div class="flex" style="padding:6px 0;gap:8px"><span style="width:10px;height:10px;background:${x.c};border-radius:2px"></span><span style="font-size:12px">${x.l}</span><span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">${x.n}</span><b style="font-size:12px">${x.v}</b><span class="chip ${x.cls==='trend-up'?'green':'red'}" style="font-size:10px">${x.delta}</span></div>
-                  `).join('')}
+                  ${this.renderRepartition()}
                 </div>
               </div>
               <div style="padding:12px;background:var(--bg2);border-radius:8px;margin-top:12px;font-size:12px">
-                <b>📊 Évolution stockée :</b> tu peux comparer ton état "il y a 3 semaines". <button class="btn-g" style="margin-left:6px" onclick="Nx.toast('Historique chargé','info','Données du 20 avril 2026')">📜 Voir snapshot</button>
+                <b>📊 Évolution stockée :</b> tu peux comparer ton état "il y a 1 semaine / 1 mois / 3 mois". <button class="btn-g" style="margin-left:6px" onclick="Nx.openSnapshotsModal()">📜 Voir snapshot</button>
               </div>
               <div style="padding:12px;background:var(--green-soft);border-radius:8px;margin-top:8px;font-size:12px;color:var(--green)">
                 💡 <b>Tes récurrents +50%</b> ce mois → cool, ta stratégie de relance fonctionne.
@@ -3695,31 +3977,196 @@ const Nx = {
 
   setStatsRange(r){ this.state.statsRange = r; this.save(); this.renderView(); },
 
+  // POINT 8(a) — Répartition clients selon range (mois/trimestre/depuis le début)
+  renderRepartition(){
+    const range = this.state.repRange || 'month';
+    const data = {
+      month: [
+        {c:'#1A56DB',l:'Récurrents',v:'68%',n:232,delta:'+50%',cls:'trend-up'},
+        {c:'#22C55E',l:'Nouveaux',v:'18%',n:62,delta:'+8%',cls:'trend-up'},
+        {c:'#F59E0B',l:'Occasionnels',v:'10%',n:34,delta:'−2%',cls:'trend-dn'},
+        {c:'#FF6B6B',l:'Perdus',v:'4%',n:14,delta:'+5%',cls:'trend-dn'}
+      ],
+      quarter: [
+        {c:'#1A56DB',l:'Récurrents',v:'62%',n:680,delta:'+32%',cls:'trend-up'},
+        {c:'#22C55E',l:'Nouveaux',v:'22%',n:241,delta:'+18%',cls:'trend-up'},
+        {c:'#F59E0B',l:'Occasionnels',v:'11%',n:120,delta:'+4%',cls:'trend-up'},
+        {c:'#FF6B6B',l:'Perdus',v:'5%',n:55,delta:'+2%',cls:'trend-dn'}
+      ],
+      all: [
+        {c:'#1A56DB',l:'Récurrents',v:'58%',n:1980,delta:'—',cls:'trend-eq'},
+        {c:'#22C55E',l:'Nouveaux',v:'24%',n:820,delta:'—',cls:'trend-eq'},
+        {c:'#F59E0B',l:'Occasionnels',v:'12%',n:410,delta:'—',cls:'trend-eq'},
+        {c:'#FF6B6B',l:'Perdus',v:'6%',n:205,delta:'—',cls:'trend-eq'}
+      ]
+    };
+    return (data[range]||data.month).map(x=>`
+      <div class="flex" style="padding:6px 0;gap:8px"><span style="width:10px;height:10px;background:${x.c};border-radius:2px"></span><span style="font-size:12px">${x.l}</span><span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">${x.n}</span><b style="font-size:12px">${x.v}</b><span class="chip ${x.cls==='trend-up'?'green':x.cls==='trend-dn'?'red':''}" style="font-size:10px">${x.delta}</span></div>
+    `).join('');
+  },
+
+  // POINT 8(b) — Modal snapshots historiques (1 sem / 1 mois / 3 mois)
+  openSnapshotsModal(){
+    const ov = document.getElementById('modal-overlay');
+    const mc = document.getElementById('modal-content');
+    ov.classList.remove('hidden');
+    const snaps = [
+      { period:'Il y a 1 semaine', date:'10 mai 2026', rec:{v:64,d:'+4%'}, neu:{v:19,d:'−1%'}, occ:{v:11,d:'+1%'}, lost:{v:6,d:'−2%'} },
+      { period:'Il y a 1 mois',    date:'17 avr. 2026', rec:{v:58,d:'+10%'}, neu:{v:21,d:'−3%'}, occ:{v:13,d:'−3%'}, lost:{v:8,d:'−4%'} },
+      { period:'Il y a 3 mois',    date:'17 fév. 2026', rec:{v:45,d:'+23%'}, neu:{v:30,d:'−12%'}, occ:{v:15,d:'−5%'}, lost:{v:10,d:'−6%'} }
+    ];
+    mc.innerHTML = `
+      <div class="modal-hd"><h3>📜 Snapshots historiques — répartition clients</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-body">
+        <p style="color:var(--muted);font-size:12.5px;margin-bottom:14px">Compare ta photo client à 3 moments du passé (delta vs aujourd'hui).</p>
+        ${snaps.map(s => `
+          <div style="padding:14px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;margin-bottom:10px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+              <b style="font-size:13px">${s.period}</b>
+              <span style="font-size:11px;color:var(--muted)">${s.date}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+              <div style="text-align:center;padding:8px;background:var(--panel);border-radius:6px"><div style="font-size:11px;color:var(--muted)">🔁 Récurrents</div><div style="font-weight:800;color:#1A56DB" class="mono">${s.rec.v}%</div><div style="font-size:10px;color:${s.rec.d.startsWith('+')?'var(--green)':'var(--red)'}">${s.rec.d}</div></div>
+              <div style="text-align:center;padding:8px;background:var(--panel);border-radius:6px"><div style="font-size:11px;color:var(--muted)">🌱 Nouveaux</div><div style="font-weight:800;color:#22C55E" class="mono">${s.neu.v}%</div><div style="font-size:10px;color:${s.neu.d.startsWith('+')?'var(--green)':'var(--red)'}">${s.neu.d}</div></div>
+              <div style="text-align:center;padding:8px;background:var(--panel);border-radius:6px"><div style="font-size:11px;color:var(--muted)">👥 Occas.</div><div style="font-weight:800;color:#F59E0B" class="mono">${s.occ.v}%</div><div style="font-size:10px;color:${s.occ.d.startsWith('+')?'var(--green)':'var(--red)'}">${s.occ.d}</div></div>
+              <div style="text-align:center;padding:8px;background:var(--panel);border-radius:6px"><div style="font-size:11px;color:var(--muted)">💔 Perdus</div><div style="font-weight:800;color:#FF6B6B" class="mono">${s.lost.v}%</div><div style="font-size:10px;color:${s.lost.d.startsWith('+')?'var(--green)':'var(--red)'}">${s.lost.d}</div></div>
+            </div>
+          </div>`).join('')}
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-p" onclick="Nx.closeModal()">OK</button>
+      </div>`;
+  },
+
   renderBestHours(){
+    // POINT 7(a) — Le contenu varie selon heatRange (7j / 30j)
+    const range = this.state.heatRange || '30d';
+    const insightsByRange = {
+      '7d': [
+        { title:'<b>Vendredi 17h–19h</b> = pic semaine (52% du volume). Réponds vite ou programme auto.', cta:{label:'Activer auto vendredi soir', fn:'Nx.openAutoMessagingSpace()'} },
+        { title:'<b>Samedi 10h–12h</b> = 2e pic (28%). Mets en avant le pan frais.', cta:{label:'Créer campagne samedi 10h', fn:"Nx.openCampaignBuilder('Promo samedi 10h')"} },
+        { title:'Creux : <b>lundi avant 11h</b> et <b>mardi 14h–16h</b>. Pas de promo à ces moments.', cta:null }
+      ],
+      '30d': [
+        { title:'<b>Vendredi 17h–19h</b> = pic absolu (60% du volume hebdo). Sois disponible ou prépare des réponses auto.', cta:{label:'Activer auto vendredi soir', fn:'Nx.openAutoMessagingSpace()'} },
+        { title:'<b>Tes clients ne répondent JAMAIS le lundi</b> avant 11h. → Écris le <b>vendredi 13h</b> pour campagnes week-end.', cta:{label:'Créer campagne vendredi 13h', fn:"Nx.openCampaignBuilder('Promo week-end vendredi 13h')"} },
+        { title:'Trous dans la semaine : <b>mardi 14h–16h</b> (silence total). Ne lance pas de promo à ce moment.', cta:null }
+      ]
+    };
+    const insights = insightsByRange[range] || insightsByRange['30d'];
     return `
       <div class="best-hours">
-        <h4>💡 Best hours — insights actionnables</h4>
+        <h4>💡 Best hours — insights actionnables <span style="font-size:11px;font-weight:500;color:var(--muted);margin-left:6px">· période ${range==='7d'?'7 jours':'30 jours'}</span></h4>
+        ${insights.map((ins,i)=>`
         <div class="insight">
-          <div class="badge">1</div>
+          <div class="badge">${i+1}</div>
           <div style="flex:1">
-            <b>Vendredi 17h–19h</b> = pic absolu (60% du volume hebdo). Sois disponible ou prépare des réponses auto.
-            <div class="act"><button onclick="Nx.toast('Réponse auto programmée vendredi 17-19h','success')">Activer auto vendredi soir</button></div>
+            ${ins.title}
+            ${ins.cta?`<div class="act"><button onclick="${ins.cta.fn}">${ins.cta.label}</button></div>`:''}
           </div>
-        </div>
-        <div class="insight">
-          <div class="badge">2</div>
-          <div style="flex:1">
-            <b>Tes clients ne répondent JAMAIS le lundi</b> avant 11h. → Écris le <b>vendredi 13h</b> pour campagnes week-end.
-            <div class="act"><button onclick="Nx.openCampaignBuilder('Promo week-end vendredi 13h')">Créer campagne vendredi 13h</button></div>
-          </div>
-        </div>
-        <div class="insight">
-          <div class="badge">3</div>
-          <div style="flex:1">
-            Trous dans la semaine : <b>mardi 14h–16h</b> (silence total). Ne lance pas de promo à ce moment.
-          </div>
-        </div>
+        </div>`).join('')}
       </div>`;
+  },
+
+  // POINT 6 — Top questions filtré par range (week/month/all)
+  renderTopQuestions(){
+    const range = this.state.faqRange || 'week';
+    const dataByRange = {
+      week: [
+        {q:'¿Hacen delivery?', count:40, trend:{a:'▲',c:'trend-up',v:'+2'}},
+        {q:'¿Cuáles son los horarios?', count:34, trend:{a:'▼',c:'trend-dn',v:'−1'}},
+        {q:'¿Aceptan transferencia?', count:28, trend:{a:'▲',c:'trend-up',v:'NEW'}},
+        {q:'¿Tienen pan amasado?', count:22, trend:{a:'–',c:'trend-eq',v:'='}},
+        {q:'¿Hacen tortas por encargo?', count:16, trend:{a:'▼',c:'trend-dn',v:'−3'}}
+      ],
+      month: [
+        {q:'¿Cuáles son los horarios?', count:142, trend:{a:'▲',c:'trend-up',v:'+12'}},
+        {q:'¿Hacen delivery?', count:128, trend:{a:'▲',c:'trend-up',v:'+8'}},
+        {q:'¿Hacen tortas por encargo?', count:96, trend:{a:'▲',c:'trend-up',v:'+22'}},
+        {q:'¿Aceptan transferencia?', count:71, trend:{a:'–',c:'trend-eq',v:'='}},
+        {q:'¿Tienen pan amasado?', count:58, trend:{a:'▼',c:'trend-dn',v:'−4'}}
+      ],
+      all: [
+        {q:'¿Cuáles son los horarios?', count:1820, trend:{a:'–',c:'trend-eq',v:'='}},
+        {q:'¿Hacen delivery?', count:1640, trend:{a:'▲',c:'trend-up',v:'+5%'}},
+        {q:'¿Aceptan transferencia?', count:1208, trend:{a:'▲',c:'trend-up',v:'+9%'}},
+        {q:'¿Hacen tortas por encargo?', count:984, trend:{a:'▲',c:'trend-up',v:'+18%'}},
+        {q:'¿Tienen pan amasado?', count:760, trend:{a:'▼',c:'trend-dn',v:'−6%'}}
+      ]
+    };
+    const list = dataByRange[range] || dataByRange.week;
+    const subLabel = {week:'cette semaine', month:'ce mois', all:'historique complet'}[range];
+    return `${list.map((item,i)=>`
+      <div style="padding:10px 0;border-bottom:1px dashed var(--line);display:flex;align-items:center;gap:10px">
+        <div style="width:24px;height:24px;border-radius:50%;background:var(--blue-soft);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px">${i+1}</div>
+        <div style="flex:1;font-size:13px">${item.q}</div>
+        <span class="${item.trend.c}" style="font-size:13px">${item.trend.a}</span>
+        <span class="chip ${item.trend.c==='trend-up'?'green':item.trend.c==='trend-dn'?'red':''}" style="font-size:10px">${item.trend.v}</span>
+        <span class="chip">${item.count}×</span>
+      </div>`).join('')}
+      <div style="padding:14px;background:var(--green-soft);border-radius:10px;margin-top:10px;font-size:12px">💡 <b>Insight ${subLabel} :</b> ${range==='week'?'"Hacen tortas por encargo" est passée de #5 à #2 cette semaine — pense à booster la production.':range==='month'?'Forte hausse sur les tortas (+22%) ce mois — la demande grimpe.':'Sur l\'historique complet, les horaires restent la question #1 depuis le début.'}</div>`;
+  },
+
+  // POINT 7(b) — Espace gestion messages auto (créneaux automatiques)
+  openAutoMessagingSpace(){
+    const ov = document.getElementById('modal-overlay');
+    const mc = document.getElementById('modal-content');
+    ov.classList.remove('hidden');
+    if (!this.state.autoSlots) {
+      this.state.autoSlots = [
+        {id:1, label:'Vendredi 17h–19h', day:'vendredi', start:'17:00', end:'19:00', active:true, message:'Hola! Estoy con clientes ahora. Te respondo apenas pueda 🙏'},
+        {id:2, label:'Hors horaires (22h–7h)', day:'tous les jours', start:'22:00', end:'07:00', active:true, message:'Estamos cerrados. Volvemos a las 7h ☀️'}
+      ];
+      this.save();
+    }
+    const slots = this.state.autoSlots;
+    mc.innerHTML = `
+      <div class="modal-hd"><h3>🤖 Espace gestion messages auto</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-body">
+        <p style="color:var(--muted);font-size:12.5px;margin-bottom:14px">Active des créneaux où Nexus répond automatiquement à ta place (best hours, hors horaires, week-end…).</p>
+        <div id="autoSlotsList">
+          ${slots.map(s => `
+            <div style="padding:14px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;margin-bottom:10px">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+                <span style="font-size:18px">${s.active?'🟢':'⚪'}</span>
+                <div style="flex:1">
+                  <div style="font-weight:700;font-size:13.5px">${s.label}</div>
+                  <div style="font-size:11.5px;color:var(--muted)">${s.day} · ${s.start} → ${s.end}</div>
+                </div>
+                <button class="btn-g" onclick="Nx.toggleAutoSlot(${s.id})">${s.active?'⏸ Désactiver':'▶ Activer'}</button>
+                <button class="btn-g" style="color:var(--red)" onclick="Nx.deleteAutoSlot(${s.id})" title="Supprimer">🗑</button>
+              </div>
+              <div style="padding:8px 10px;background:var(--panel);border-radius:6px;font-size:12px;color:var(--ink2);font-style:italic">"${s.message}"</div>
+            </div>`).join('')}
+        </div>
+        <button class="btn btn-s" style="width:100%;margin-top:8px" onclick="Nx.addAutoSlot()">+ Ajouter un créneau auto</button>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-p" onclick="Nx.closeModal()">OK</button>
+      </div>`;
+  },
+
+  toggleAutoSlot(id){
+    const s = this.state.autoSlots.find(x => x.id === id);
+    if (s) { s.active = !s.active; this.save(); this.openAutoMessagingSpace(); this.toast(s.active?'✓ Créneau activé':'⏸ Créneau désactivé','success', s.label); }
+  },
+  deleteAutoSlot(id){
+    if (!confirm('Supprimer ce créneau auto ?')) return;
+    this.state.autoSlots = this.state.autoSlots.filter(x => x.id !== id);
+    this.save();
+    this.openAutoMessagingSpace();
+    this.toast('Créneau supprimé','success');
+  },
+  addAutoSlot(){
+    const label = prompt('Nom du créneau (ex : Samedi matin) ?');
+    if (!label) return;
+    const start = prompt('Heure de début (HH:MM) ?', '09:00');
+    const end = prompt('Heure de fin (HH:MM) ?', '12:00');
+    const message = prompt('Message auto à envoyer ?', 'Hola! Te respondo apenas pueda 🙏');
+    this.state.autoSlots.push({ id: Date.now(), label, day:'à définir', start: start||'09:00', end: end||'12:00', active: true, message: message||'…' });
+    this.save();
+    this.openAutoMessagingSpace();
+    this.toast('✓ Créneau ajouté','success', label);
   },
 
   // BRIEF AUDIO V2
@@ -3770,10 +4217,42 @@ const Nx = {
   setAudioSpeed(s){
     this.state.audioPlayState.speed = s;
     this.save();
-    ['spd-slow','spd-norm','spd-fast'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('on'); });
-    const map = {0.75:'spd-slow', 1:'spd-norm', 1.5:'spd-fast'};
+    ['spd-slow','spd-norm','spd-fast','spd-2x'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('on'); });
+    const map = {0.75:'spd-slow', 1:'spd-norm', 1.5:'spd-fast', 2:'spd-2x'};
     const el = document.getElementById(map[s]); if (el) el.classList.add('on');
     this.toast('🎙 Vitesse : '+s+'×','info');
+  },
+
+  // POINT 5(b) — Modal "Voir le texte" du brief audio (FR/ES/EN selon langue active)
+  openBriefTextModal(){
+    const ov = document.getElementById('modal-overlay');
+    const mc = document.getElementById('modal-content');
+    ov.classList.remove('hidden');
+    const briefByLang = {
+      fr: "Salut Carlos, voici ton brief Nexus du jour. 47 conversations aujourd'hui, dont 12 automatisées. María González, ta cliente VIP, attend ta réponse. 3 clients à relancer cette semaine. Streak à 12 jours. Bonne journée !",
+      es: "Hola Carlos, aquí tu brief Nexus del día. 47 conversaciones hoy, 12 automatizadas. María González, tu cliente VIP, espera tu respuesta. 3 clientes para reactivar esta semana. Racha de 12 días. ¡Buen día!",
+      en: "Hi Carlos, here's your Nexus brief for today. 47 conversations today, 12 of them automated. María González, your VIP client, is waiting for your reply. 3 clients to reach out to this week. 12-day streak. Have a great day!"
+    };
+    const lang = (this.state.lang || 'fr');
+    const txt = briefByLang[lang] || briefByLang.fr;
+    const langLabel = {fr:'🇫🇷 Français', es:'🇪🇸 Español', en:'🇬🇧 English'}[lang] || '🇫🇷 Français';
+    // Store brief in a dataset so the copy button can read it safely
+    this._currentBriefText = txt;
+    mc.innerHTML = `
+      <div class="modal-hd"><h3>📝 Brief audio — transcription</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-body">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">${langLabel} · texte du brief audio</div>
+        <div style="padding:16px;background:var(--bg2);border-radius:10px;font-size:13.5px;line-height:1.7;color:var(--ink2)" id="briefTextContent">${txt}</div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-s" onclick="Nx.copyBriefText()">📋 Copier</button>
+        <button class="btn btn-p" onclick="Nx.closeModal()">OK</button>
+      </div>`;
+  },
+  copyBriefText(){
+    const txt = this._currentBriefText || '';
+    if (navigator.clipboard) navigator.clipboard.writeText(txt).then(() => this.toast('Texte copié','success'));
+    else this.toast('Copie non supportée','warn');
   },
 
   // EXPORT PDF V2 — vrai rapport stylé, pas screenshot
@@ -3878,7 +4357,7 @@ const Nx = {
       <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#1A56DB" stroke-width="4" stroke-dasharray="68 32" stroke-dashoffset="25" transform="rotate(-90 21 21)"/>
       <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#22C55E" stroke-width="4" stroke-dasharray="18 82" stroke-dashoffset="-43" transform="rotate(-90 21 21)"/>
       <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#F59E0B" stroke-width="4" stroke-dasharray="10 90" stroke-dashoffset="-61" transform="rotate(-90 21 21)"/>
-      <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#EF4444" stroke-width="4" stroke-dasharray="4 96" stroke-dashoffset="-71" transform="rotate(-90 21 21)"/>
+      <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#FF6B6B" stroke-width="4" stroke-dasharray="4 96" stroke-dashoffset="-71" transform="rotate(-90 21 21)"/>
       <text x="21" y="22" text-anchor="middle" dominant-baseline="middle" font-size="5" font-weight="800" fill="currentColor">342</text>
       <text x="21" y="28" text-anchor="middle" dominant-baseline="middle" font-size="2.5" fill="#8A94A6">clients</text>
     </svg>`;
@@ -4043,6 +4522,10 @@ const Nx = {
 
   // RENDER CAMPAGNE AUTO avec contrôles Activer/Pause/Supprimer/Modifier
   renderAutoCampaign(id, ic, color, title, desc, status){
+    // POINT CAMPAGNES (e) — Statut depuis state.autoCampaignStatus si présent, sinon fallback
+    const stored = (this.state.autoCampaignStatus||{})[id];
+    if (stored === 'deleted') return '';
+    const realStatus = stored || status;
     return `
       <div style="padding:14px 16px;background:var(--bg2);border:1px solid var(--line);border-radius:11px;display:flex;align-items:center;gap:14px;margin-bottom:8px">
         <div style="width:42px;height:42px;border-radius:11px;background:${color}22;color:${color};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${ic}</div>
@@ -4050,33 +4533,48 @@ const Nx = {
           <div style="font-weight:700;font-size:13.5px">${title}</div>
           <div style="font-size:11.5px;color:var(--muted);margin-top:2px">${desc}</div>
         </div>
-        <span class="chip ${status==='active'?'green':''}" style="font-size:11px;${status!=='active'?'background:#94A3B822;color:#475569':''}">${status==='active'?'● Active':'○ Pause'}</span>
-        <button class="btn-g" onclick="Nx.toggleAutoStatus('${id}')" title="${status==='active'?'Mettre en pause':'Activer'}">${status==='active'?'⏸ Pause':'▶ Activer'}</button>
+        <span class="chip ${realStatus==='active'?'green':''}" style="font-size:11px;${realStatus!=='active'?'background:#94A3B822;color:#475569':''}">${realStatus==='active'?'● Active':'○ Pause'}</span>
+        <button class="btn-g" onclick="Nx.toggleAutoStatus('${id}')" title="${realStatus==='active'?'Mettre en pause':'Activer'}">${realStatus==='active'?'⏸ Pause':'▶ Activer'}</button>
         <button class="btn-g" onclick="Nx.editAutoCampaign('${id}')" title="Modifier">✏️</button>
         <button class="btn-g" style="color:var(--red)" onclick="Nx.deleteAutoCampaign('${id}')" title="Supprimer">🗑</button>
       </div>`;
   },
 
   toggleAutoStatus(id){
+    // POINT CAMPAGNES (e) — Activer/Pause fonctionnel pour les 3 auto-campagnes
+    if (!this.state.autoCampaignStatus) this.state.autoCampaignStatus = {};
+    const labelMap = {'recovery-lost':'Récupération clients perdus','anniv-clients':'Anniversaires clients','promo-fin-mois':'Promo fin de mois'};
     if (id === 'recovery-lost') {
       this.state.recoveryStatus = (this.state.recoveryStatus === 'active') ? 'paused' : 'active';
-      this.save();
-      this.renderView();
-      this.toast(this.state.recoveryStatus==='active'?'✓ Récupération clients perdus ACTIVÉE':'⏸ Mise en pause','success');
+      this.state.autoCampaignStatus[id] = this.state.recoveryStatus;
     } else {
-      this.toast('Statut basculé','success', id);
+      const cur = this.state.autoCampaignStatus[id] || 'active';
+      this.state.autoCampaignStatus[id] = (cur === 'active') ? 'paused' : 'active';
     }
+    this.save();
+    this.renderView();
+    const newState = this.state.autoCampaignStatus[id] || (id==='recovery-lost'?this.state.recoveryStatus:'active');
+    this.toast(newState==='active'?'✓ '+(labelMap[id]||id)+' ACTIVÉE':'⏸ '+(labelMap[id]||id)+' mise en pause','success');
   },
   editAutoCampaign(id){
+    // POINT CAMPAGNES (e) — Modifier ouvre le builder pré-rempli
     this.openAutoCampaign();
     setTimeout(() => {
       const nameInput = document.getElementById('autoName');
-      if (nameInput && id === 'recovery-lost') nameInput.value = 'Récupération clients perdus −10%';
-      else if (nameInput && id === 'anniv-clients') nameInput.value = 'Anniversaires clients';
+      if (nameInput) {
+        if (id === 'recovery-lost') nameInput.value = 'Récupération clients perdus −10%';
+        else if (id === 'anniv-clients') nameInput.value = 'Anniversaires clients';
+        else if (id === 'promo-fin-mois') nameInput.value = 'Promo fin de mois −15%';
+      }
+      this.toast('✏️ Édition de l\'automatisation','info', id);
     }, 50);
   },
   deleteAutoCampaign(id){
+    // POINT CAMPAGNES (e) — Suppression réelle (marque l'auto comme deleted)
     if (!confirm('Supprimer cette automatisation ?\n\nElle ne sera plus jamais déclenchée.')) return;
+    if (!this.state.autoCampaignStatus) this.state.autoCampaignStatus = {};
+    this.state.autoCampaignStatus[id] = 'deleted';
+    this.save();
     this.toast('🗑 Automatisation supprimée','success', id);
     this.renderView();
   },
@@ -4095,11 +4593,13 @@ const Nx = {
         <div class="form-row"><label class="form-lbl">Critère (texte libre)</label>
           <input class="form-ctrl" id="segCriteria" placeholder="Ex : Tous les clients VIP commandant chaque semaine"></div>
         <div class="form-row"><label class="form-lbl">Sélection clients (à la pince)</label>
+          <!-- POINT CAMPAGNES (h) — barre de recherche par prénom -->
+          <input type="text" class="form-ctrl" id="segClientSearch" placeholder="🔍 Rechercher par prénom…" style="margin-bottom:8px" oninput="Nx.filterSegClients(this.value)">
           <div style="max-height:300px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;padding:10px">
             ${this.state.clients.map(c => `
-              <label style="display:flex;align-items:center;gap:10px;padding:6px;border-radius:6px;cursor:pointer" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''">
+              <label class="seg-client-item" data-name="${c.name.toLowerCase()}" style="display:flex;align-items:center;gap:10px;padding:6px;border-radius:6px;cursor:pointer" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''">
                 <input type="checkbox" class="seg-client-check" data-id="${c.id}">
-                <div class="msg-av" style="background:${c.color};width:30px;height:30px;font-size:11px">${c.avatar}</div>
+                <span class="seg-pastille seg-${this.segOf(c)}"></span>
                 <div style="flex:1"><div style="font-size:13px;font-weight:600">${c.name}</div><div style="font-size:11px;color:var(--muted)">Score ${c.score} · ${c.tags.join(', ')||'standard'}</div></div>
               </label>
             `).join('')}
@@ -4110,6 +4610,15 @@ const Nx = {
         <button class="btn btn-s" onclick="Nx.closeModal()">Annuler</button>
         <button class="btn btn-p" onclick="Nx.saveCustomSegment()">📌 Créer le segment</button>
       </div>`;
+  },
+
+  // POINT CAMPAGNES (h) — Filtre live de la sélection client
+  filterSegClients(query){
+    const q = (query || '').trim().toLowerCase();
+    document.querySelectorAll('.seg-client-item').forEach(el => {
+      const name = (el.dataset.name || '');
+      el.style.display = (!q || name.includes(q)) ? '' : 'none';
+    });
   },
 
   saveCustomSegment(){
@@ -4239,20 +4748,28 @@ const Nx = {
           <select class="form-ctrl" id="campTarget" onchange="Nx.onCampTargetChange(this.value)">
             ${segOpts.map((s,i)=>`<option value="${s.k}" ${i===(presetIdx>=0?presetIdx:1)?'selected':''}>${s.e} ${s.n} ${s.c!=='sélection'?'('+s.c+')':''}</option>`).join('')}
           </select>
-          <div id="customClientPicker" class="hidden" style="margin-top:10px;max-height:200px;overflow-y:auto;border:1px solid var(--violet);border-radius:8px;padding:10px;background:var(--violet-soft)">
+          <div id="customClientPicker" class="hidden" style="margin-top:10px;border:1px solid var(--violet);border-radius:8px;padding:10px;background:var(--violet-soft)">
             <div style="font-size:11px;font-weight:700;color:var(--violet);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">📌 Sélection à la pince</div>
+            <!-- POINT CAMPAGNES (a) — barre de recherche par prénom -->
+            <input type="text" class="form-ctrl" id="campClientSearch" placeholder="🔍 Rechercher par prénom…" style="margin-bottom:8px" oninput="Nx.filterCampClients(this.value)">
+            <div id="campClientList" style="max-height:200px;overflow-y:auto">
             ${this.state.clients.map(c => `
-              <label style="display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:4px;cursor:pointer;font-size:12px">
+              <label class="camp-client-item" data-name="${c.name.toLowerCase()}" style="display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:4px;cursor:pointer;font-size:12px">
                 <input type="checkbox" class="camp-client-pick" data-id="${c.id}">
-                <span class="msg-av" style="background:${c.color};width:24px;height:24px;font-size:10px">${c.avatar}</span>
+                <span class="seg-pastille seg-${this.segOf(c)}"></span>
                 ${c.name}
               </label>
             `).join('')}
+            </div>
           </div>
         </div>
         <div class="form-row"><label class="form-lbl">Message</label>
           <textarea class="form-ctrl" id="campMsg" rows="4">Hola 👋 Este fin de semana en Don Carlos: 3kg de pan amasado por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! 🥖</textarea>
           <div class="flex mt8"><button class="btn-g" onclick="Nx.generateCampMsg()">✨ Générer 3 versions IA</button></div></div>
+        <!-- POINT CAMPAGNES (g) — Warning anti-BAN WhatsApp -->
+        <div style="padding:10px 14px;background:var(--amber-soft);border-left:3px solid #F59E0B;border-radius:6px;font-size:12px;color:#B45309;margin-bottom:14px">
+          ⚠️ <b>WhatsApp limite à 250 envois/jour</b> pour éviter le ban. Privilégie le mail pour les gros volumes (> 200).
+        </div>
         <div class="form-row"><label class="form-lbl">Photo / Produit (optionnel)</label>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn btn-s" onclick="Nx.importCampPhoto()">📎 Importer photo</button>
@@ -4265,7 +4782,7 @@ const Nx = {
             <option value="now">Maintenant</option>
             <option value="dimanche19" selected>Dimanche 19h (heure de lecture max)</option>
             <option value="demain9">Demain 9h</option>
-            <option value="custom">Planifier une date précise…</option>
+            <option value="custom">📅 Date/heure précise (datetime-local)</option>
             <option value="recurring">🔁 Récurrente (chaque semaine, mois…)</option>
           </select>
           <div id="campScheduleExtra" class="hidden" style="margin-top:8px"></div>
@@ -4294,6 +4811,15 @@ const Nx = {
   onCampTargetChange(value){
     const picker = document.getElementById('customClientPicker');
     if (picker) picker.classList.toggle('hidden', value !== 'custom');
+  },
+
+  // POINT CAMPAGNES (a) — Filtre live des clients par prénom
+  filterCampClients(query){
+    const q = (query || '').trim().toLowerCase();
+    document.querySelectorAll('.camp-client-item').forEach(el => {
+      const name = (el.dataset.name || '');
+      el.style.display = (!q || name.includes(q)) ? '' : 'none';
+    });
   },
 
   onCampScheduleChange(value){
@@ -4327,7 +4853,13 @@ const Nx = {
       const reader = new FileReader();
       reader.onload = (ev) => {
         const preview = document.getElementById('campPhotoPreview');
-        if (preview) preview.innerHTML = `<img src="${ev.target.result}" style="max-width:100%;max-height:150px;border-radius:8px;border:1px solid var(--line)">`;
+        // POINT CAMPAGNES (b) — boutons Changer / Retirer en dessous de la preview
+        if (preview) preview.innerHTML = `
+          <img src="${ev.target.result}" style="max-width:100%;max-height:150px;border-radius:8px;border:1px solid var(--line);display:block">
+          <div style="display:flex;gap:6px;margin-top:6px">
+            <button class="btn-g" onclick="Nx.importCampPhoto()">🔄 Changer</button>
+            <button class="btn-g" style="color:var(--red)" onclick="Nx.removeCampPhoto()">🗑 Retirer</button>
+          </div>`;
         this.toast('📎 Photo ajoutée','success', file.name);
       };
       reader.readAsDataURL(file);
@@ -4335,25 +4867,43 @@ const Nx = {
     input.click();
   },
 
+  removeCampPhoto(){
+    const preview = document.getElementById('campPhotoPreview');
+    if (preview) preview.innerHTML = '';
+    this.toast('🗑 Photo retirée','success');
+  },
+
   pickCatalogProduct(){
-    const ov = document.getElementById('modal-overlay');
-    // Crée un sub-modal au-dessus
+    // POINT CAMPAGNES (c) — Refactor : id unique au lieu d'un selector CSS complexe
     const sub = document.createElement('div');
+    sub.id = 'catalogPickerOverlay';
     sub.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px';
     sub.innerHTML = `
       <div style="background:var(--panel);border-radius:14px;max-width:600px;width:100%;max-height:80vh;overflow-y:auto;padding:20px">
         <h3 style="margin-bottom:14px">🖼 Choisir un produit du catalogue</h3>
         <div class="grid3">
-          ${this.state.business.catalog.map(p => `
-            <div style="padding:12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;text-align:center" onclick="Nx.selectCampProduct('${p.name.replace(/'/g,'\\\'')}',${p.price});this.closest('div[style*=\\'position:fixed\\']').remove()" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--line)'">
+          ${this.state.business.catalog.map((p,idx) => `
+            <div style="padding:12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;text-align:center" onclick="Nx.selectCatalogProductByIndex(${idx})" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--line)'">
               <div style="font-size:36px">${p.emoji||'📦'}</div>
               <div style="font-weight:700;font-size:13px;margin-top:6px">${p.name}</div>
               <div style="font-size:11px;color:var(--muted)">${p.price} CLP / ${p.unit}</div>
             </div>`).join('')}
         </div>
-        <button class="btn btn-s" style="margin-top:14px;width:100%" onclick="this.closest('div[style*=\\'position:fixed\\']').remove()">Annuler</button>
+        <button class="btn btn-s" style="margin-top:14px;width:100%" onclick="Nx.closeCatalogPicker()">Annuler</button>
       </div>`;
     document.body.appendChild(sub);
+  },
+
+  selectCatalogProductByIndex(idx){
+    const p = this.state.business.catalog[idx];
+    if (!p) return;
+    this.selectCampProduct(p.name, p.price);
+    this.closeCatalogPicker();
+  },
+
+  closeCatalogPicker(){
+    const el = document.getElementById('catalogPickerOverlay');
+    if (el && el.parentNode) el.parentNode.removeChild(el);
   },
 
   selectCampProduct(name, price){
@@ -4575,6 +5125,26 @@ const Nx = {
           </div>
         </div>
 
+        <!-- POINT CAMPAGNES (f) — Achat crédits supplémentaires -->
+        <div class="card" style="margin-top:14px;padding:22px">
+          <h3 style="margin-bottom:6px">⚡ Acheter des crédits supplémentaires</h3>
+          <p style="color:var(--muted);font-size:12.5px;margin-bottom:14px">Les crédits servent à envoyer des campagnes WhatsApp/mail au-delà de ton quota hebdo de 500.</p>
+          <div class="grid3">
+            ${[
+              {n:'100 crédits', sub:'idéal pour une campagne ponctuelle', price:'5 €', best:false},
+              {n:'500 crédits', sub:'le pack le plus choisi', price:'19 €', best:true},
+              {n:'2000 crédits', sub:'pour les gros volumes', price:'59 €', best:false}
+            ].map(pack => `
+              <div style="padding:18px;border:2px solid ${pack.best?'var(--blue)':'var(--line)'};border-radius:12px;background:${pack.best?'var(--blue-soft)':'var(--bg2)'};position:relative">
+                ${pack.best?'<span style="position:absolute;top:-10px;left:14px;padding:2px 10px;background:var(--blue);color:#fff;border-radius:999px;font-size:10px;font-weight:700">★ POPULAIRE</span>':''}
+                <div style="font-weight:700;font-size:15px">${pack.n}</div>
+                <div style="font-size:11.5px;color:var(--muted);margin-top:2px">${pack.sub}</div>
+                <div style="font-size:22px;font-weight:800;margin:10px 0;color:${pack.best?'var(--blue-ink)':'var(--ink)'}" class="mono">${pack.price}</div>
+                <button class="btn ${pack.best?'btn-p':'btn-s'}" style="width:100%" onclick="Nx.buyCredits('${pack.n}','${pack.price}')">Acheter</button>
+              </div>`).join('')}
+          </div>
+        </div>
+
         <div class="card" style="margin-top:14px">
           <div class="card-hd"><h3>📄 Historique factures</h3>
             <div class="actions"><button class="btn-g" onclick="Nx.downloadAllInvoices()">⬇ Télécharger tout (ZIP)</button></div></div>
@@ -4590,6 +5160,12 @@ const Nx = {
             </div>`).join('')}
         </div>
       </div>`;
+  },
+
+  // POINT CAMPAGNES (f) — Acheter des crédits supplémentaires
+  buyCredits(pack, price){
+    if (!confirm('Confirmer l\'achat du pack ' + pack + ' pour ' + price + ' ?')) return;
+    this.toast('✓ Pack ' + pack + ' acheté','success', 'Crédits crédités sur ton compte ('+price+')');
   },
 
   downloadAllInvoices(){
@@ -4751,21 +5327,30 @@ const Nx = {
           </div>
         </div>
 
+        <!-- POINT MODE VACANCES (b) — Note explicative en haut -->
+        <div style="padding:14px 18px;background:var(--blue-soft);border-left:3px solid var(--blue);border-radius:8px;margin-bottom:14px;font-size:12.5px;color:var(--blue-ink);line-height:1.6">
+          💡 <b>Comment ça marche :</b> Le premier message auto utilise les modèles ci-dessous. Les réponses suivantes sont générées par l'IA à partir de ton profil entreprise + catalogue + horaires.
+        </div>
         <div class="grid2">
           <div class="vac-card">
-            <h3>🤖 Configuration IA</h3>
-            <div class="sub">Comment l'IA se comporte pendant ton absence.</div>
-            <div class="vac-toggle-row">
-              <div class="lbl"><b>Quand répondre</b><small>Répondre immédiatement à tous les messages entrants (au lieu d'attendre 5 min comme d'habitude).</small></div>
-              <label class="switch"><input type="checkbox" ${v.cfg_when?'checked':''} onchange="Nx.updateVac('cfg_when',this.checked)"><span class="slider"></span></label>
+            <h3>🤖 Configuration IA — personnalisable</h3>
+            <div class="sub">Définis précisément QUAND, COMMENT et QUOI répondre.</div>
+            <!-- POINT MODE VACANCES (a) — Champs personnalisables au lieu de toggles -->
+            <div class="form-row">
+              <label class="form-lbl">📅 Quand répondre (créneau actif)</label>
+              <div class="grid2" style="gap:8px">
+                <input type="datetime-local" class="form-ctrl" value="${v.cfg_when_start||''}" oninput="Nx.updateVac('cfg_when_start',this.value)">
+                <input type="datetime-local" class="form-ctrl" value="${v.cfg_when_end||''}" oninput="Nx.updateVac('cfg_when_end',this.value)">
+              </div>
+              <small style="color:var(--muted);font-size:11px;display:block;margin-top:4px">Début → Fin de la période où l'IA répond à ta place.</small>
             </div>
-            <div class="vac-toggle-row">
-              <div class="lbl"><b>Comment répondre</b><small>Ton décontracté et chaleureux avec emojis, comme toi. Sinon, ton plus formel et sobre.</small></div>
-              <label class="switch"><input type="checkbox" ${v.cfg_how?'checked':''} onchange="Nx.updateVac('cfg_how',this.checked)"><span class="slider"></span></label>
+            <div class="form-row">
+              <label class="form-lbl">🎨 Comment répondre (ton souhaité)</label>
+              <textarea class="form-ctrl" rows="3" placeholder="Ex : Décontracté et chaleureux avec emojis, comme moi. Tutoiement, phrases courtes." oninput="Nx.updateVac('cfg_how_text',this.value)">${v.cfg_how_text||''}</textarea>
             </div>
-            <div class="vac-toggle-row">
-              <div class="lbl"><b>Quoi répondre</b><small>L'IA répond aux questions clients (prix, horaires, dispo) à partir de ton catalogue et FAQ.</small></div>
-              <label class="switch"><input type="checkbox" ${v.cfg_what?'checked':''} onchange="Nx.updateVac('cfg_what',this.checked)"><span class="slider"></span></label>
+            <div class="form-row" style="margin-bottom:0">
+              <label class="form-lbl">💬 Quoi répondre (sujets autorisés)</label>
+              <textarea class="form-ctrl" rows="3" placeholder="Ex : Horaires, prix du catalogue, disponibilité produits, commandes simples. Ne PAS donner d'engagement sur les gros événements." oninput="Nx.updateVac('cfg_what_text',this.value)">${v.cfg_what_text||''}</textarea>
             </div>
           </div>
 
@@ -4853,6 +5438,11 @@ const Nx = {
   defaultVacances(){
     return {
       active:false,
+      // POINT MODE VACANCES (a) — Champs personnalisables au lieu de toggles
+      cfg_when_start:'', cfg_when_end:'',
+      cfg_how_text:'Décontracté et chaleureux avec emojis, comme moi. Tutoiement, phrases courtes.',
+      cfg_what_text:'Horaires, prix du catalogue, disponibilité produits, commandes simples. Ne pas s\'engager sur les gros événements.',
+      // Legacy (gardé pour compat) :
       cfg_when:true, cfg_how:true, cfg_what:true,
       preset:'we',
       startDate:'', endDate:'',
