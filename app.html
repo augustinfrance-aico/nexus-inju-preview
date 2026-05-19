@@ -3571,8 +3571,8 @@ const Nx = {
     const nutriColors = {A:'A',B:'B',C:'C',D:'D',E:'E'};
     return `
       <div class="cat-prod">
-        <div class="cat-prod-photo" onclick="Nx.uploadProductPhoto(${i})" title="Cliquer pour ajouter une photo">
-          ${p.photo ? `<img src="${p.photo}" alt="${p.name}">` : `<span>${p.emoji||'📦'}</span>`}
+        <div class="cat-prod-photo" style="position:relative" onclick="Nx.uploadProductPhoto(${i})" title="Cliquer pour ajouter une photo">
+          ${p.photo ? `<img src="${p.photo}" alt="${p.name}"><button onclick="event.stopPropagation();Nx.removeProductPhoto(${i})" title="Retirer la photo" style="position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;background:rgba(15,23,42,.8);border:0;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">✕</button>` : `<span>${p.emoji||'📦'}</span>`}
         </div>
         <input class="form-ctrl" style="margin-bottom:6px;font-weight:600" value="${p.name}" onchange="Nx.state.business.catalog[${i}].name=this.value;Nx.save()">
         <textarea class="form-ctrl" rows="2" style="margin-bottom:6px;font-size:11.5px" placeholder="Mini description (1 ligne)" onchange="Nx.state.business.catalog[${i}].miniDesc=this.value;Nx.save()">${p.miniDesc||''}</textarea>
@@ -3689,6 +3689,13 @@ const Nx = {
       reader.readAsDataURL(file);
     };
     input.click();
+  },
+  removeProductPhoto(i){
+    if (!this.state.business.catalog[i]) return;
+    this.state.business.catalog[i].photo = '';
+    this.save();
+    this.renderView();
+    this.toast('🗑 Photo retirée','success');
   },
   scrapeWebPage(){
     const url = this.state.business.webPage;
@@ -5725,62 +5732,119 @@ const Nx = {
     this.toast('📄 Facture PDF en téléchargement','success', invoiceId);
   },
 
-  openAutoCampaign(){
+  // Defaults par auto-campagne (utilisés si pas encore édités)
+  _autoCampDefaults: {
+    'promo-fin-mois': { name:'Promo fin de mois −15 %', trigger:'monthly', target:'rec', message:"Hola {prenom} 👋 Petit clin d'œil de Don Carlos : −15 % sur ta prochaine commande jusqu'au 30. À très vite !", cfg:{day:28, time:'09:00'}, antiAbusWeek:true, antiAbusCredits:true },
+    'anniv-clients':  { name:'Anniversaires clients', trigger:'birthday', target:'all', message:'¡Feliz cumpleaños {prenom}! 🎂 Te regalamos un {promo} para tu pedido de la semana. Disfruta!', cfg:{time:'09:00', promoCode:'HBD-{NOM}-15'}, antiAbusWeek:false, antiAbusCredits:true },
+    'recovery-lost':  { name:'Récupération clients perdus −10 %', trigger:'silence', target:'lost', message:'Hola {prenom}, hace tiempo que no nos vemos 😊 Don Carlos te extraña — −10 % en tu próxima compra, código {promo}.', cfg:{silenceDays:45, promoCode:'MISS-YOU-10'}, antiAbusWeek:true, antiAbusCredits:true }
+  },
+
+  // openAutoCampaign(editingId?) — si editingId fourni, pré-remplit avec les valeurs existantes
+  openAutoCampaign(editingId){
+    this.state.editingAutoCampaign = editingId || null;
+    if (!this.state.autoCampaignDetails) this.state.autoCampaignDetails = {};
+    // Source : details persistés > defaults > formulaire vierge
+    const det = editingId
+      ? (this.state.autoCampaignDetails[editingId] || this._autoCampDefaults[editingId] || {})
+      : { name:'', trigger:'monthly', target:'rec', message:'', cfg:{day:28, time:'09:00'}, antiAbusWeek:true, antiAbusCredits:true };
     this.openModal('ai-chat');
     const mc = document.getElementById('modal-content');
+    const triggerOptions = [
+      {k:'monthly',  l:'📅 Le X de chaque mois (ex : 28)'},
+      {k:'weekly',   l:'🔁 Tous les Y (ex : tous les vendredis 17h)'},
+      {k:'birthday', l:'🎂 La veille de chaque anniversaire client'},
+      {k:'silence',  l:"💔 Quand un client n'a pas commandé depuis N jours"},
+      {k:'weather',  l:'☔ Selon météo (ex : pluie → promo soupe)'},
+      {k:'stat',     l:'📈 Selon stat (ex : si CA semaine < seuil)'}
+    ].map(o => `<option value="${o.k}" ${det.trigger===o.k?'selected':''}>${o.l}</option>`).join('');
+    const targetOptions = [
+      {k:'vip',  l:'⭐ VIP'},{k:'rec',  l:'🔁 Récurrents'},{k:'new',  l:'🌱 Nouveaux'},
+      {k:'norm', l:'👥 Normaux'},{k:'lost', l:'💔 Perdus'},{k:'all',  l:'👤 Tous'}
+    ].map(o => `<option value="${o.k}" ${det.target===o.k?'selected':''}>${o.l}</option>`).join('');
     mc.innerHTML = `
-      <div class="modal-hd"><h3>🤖 Nouvelle campagne automatique</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-hd"><h3>🤖 ${editingId?'Modifier l\\'automatisation':'Nouvelle campagne automatique'}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
       <div class="modal-body">
         <div style="padding:14px;background:var(--blue-soft);border-radius:10px;margin-bottom:14px;font-size:13px;color:#1E40AF">
           💡 <b>Mode auto :</b> tu programmes une fois, Nexus envoie tout seul. Le formulaire s'<b>adapte selon le déclencheur choisi</b>.
         </div>
         <div class="form-row"><label class="form-lbl">Nom de l'automatisation</label>
-          <input class="form-ctrl" id="autoName" value="Promo fin de mois −15 %"></div>
+          <input class="form-ctrl" id="autoName" value="${(det.name||'').replace(/"/g,'&quot;')}"></div>
         <div class="form-row"><label class="form-lbl">Déclencheur</label>
-          <select class="form-ctrl" id="autoTrigger" onchange="Nx.onAutoTriggerChange(this.value)">
-            <option value="monthly">📅 Le X de chaque mois (ex : 28)</option>
-            <option value="weekly">🔁 Tous les Y (ex : tous les vendredis 17h)</option>
-            <option value="birthday">🎂 La veille de chaque anniversaire client</option>
-            <option value="silence">💔 Quand un client n'a pas commandé depuis N jours</option>
-            <option value="weather">☔ Selon météo (ex : pluie → promo soupe)</option>
-            <option value="stat">📈 Selon stat (ex : si CA semaine &lt; seuil)</option>
-          </select></div>
+          <select class="form-ctrl" id="autoTrigger" onchange="Nx.onAutoTriggerChange(this.value)">${triggerOptions}</select></div>
         <div id="autoTriggerForm" class="form-row">
           <label class="form-lbl">Configuration du déclencheur</label>
-          <div id="autoTriggerFields" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <div><label style="font-size:11px;color:var(--muted)">Jour du mois</label><input class="form-ctrl" type="number" min="1" max="31" value="28"></div>
-            <div><label style="font-size:11px;color:var(--muted)">Heure</label><input class="form-ctrl" type="time" value="09:00"></div>
-          </div>
+          <div id="autoTriggerFields" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
         </div>
         <div class="form-row"><label class="form-lbl">Cible</label>
-          <select class="form-ctrl">
-            <option>⭐ VIP</option>
-            <option selected>🔁 Récurrents</option>
-            <option>🌱 Nouveaux</option>
-            <option>👥 Normaux</option>
-            <option>💔 Perdus</option>
-          </select></div>
+          <select class="form-ctrl" id="autoTarget">${targetOptions}</select></div>
         <div class="form-row"><label class="form-lbl">Message</label>
-          <textarea class="form-ctrl" rows="3">Hola {prenom} 👋 Petit clin d'œil de Don Carlos : −15 % sur ta prochaine commande jusqu'au 30. À très vite !</textarea>
-          <div class="flex mt8"><button class="btn-g">✨ Suggérer un message IA</button></div>
+          <textarea class="form-ctrl" id="autoMessage" rows="3">${det.message||''}</textarea>
+          <div class="flex mt8"><button class="btn-g" onclick="Nx.suggestAutoMessage()">✨ Suggérer un message IA</button></div>
         </div>
         <div class="form-row"><label class="form-lbl">Limite anti-abus</label>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px"><input type="checkbox" checked> Max 1 fois / client / semaine</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px"><input type="checkbox" checked> Pause si crédits &lt; 50</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px"><input type="checkbox" id="autoAntiAbusWeek" ${det.antiAbusWeek?'checked':''}> Max 1 fois / client / semaine</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px"><input type="checkbox" id="autoAntiAbusCredits" ${det.antiAbusCredits?'checked':''}> Pause si crédits &lt; 50</label>
           </div>
         </div>
       </div>
       <div class="modal-foot">
         <button class="btn btn-s" onclick="Nx.closeModal()">Annuler</button>
-        <button class="btn btn-s" onclick="Nx.toast('Test envoyé sur ton numéro','info')">🧪 Tester sur moi</button>
-        <button class="btn btn-p" onclick="Nx.activateAutoCampaign()">🤖 Activer l'automatisation</button>
+        <button class="btn btn-s" onclick="Nx.testAutoCampaign()">🧪 Tester sur moi</button>
+        <button class="btn btn-p" onclick="Nx.activateAutoCampaign()">${editingId?'💾 Enregistrer les changements':"🤖 Activer l'automatisation"}</button>
       </div>`;
+    // Initialise les champs de config selon le déclencheur, pré-rempli depuis det.cfg
+    this.onAutoTriggerChange(det.trigger || 'monthly', det.cfg || {});
   },
 
+  // Lit les valeurs du formulaire + sauve dans state.autoCampaignDetails[id]
   activateAutoCampaign(){
+    if (!this.state.autoCampaignDetails) this.state.autoCampaignDetails = {};
+    if (!this.state.autoCampaignStatus)  this.state.autoCampaignStatus = {};
+    // Récupère les champs
+    const name    = (document.getElementById('autoName')||{}).value || '';
+    const trigger = (document.getElementById('autoTrigger')||{}).value || 'monthly';
+    const target  = (document.getElementById('autoTarget')||{}).value || 'rec';
+    const message = (document.getElementById('autoMessage')||{}).value || '';
+    const antiAbusWeek    = ((document.getElementById('autoAntiAbusWeek')||{}).checked) || false;
+    const antiAbusCredits = ((document.getElementById('autoAntiAbusCredits')||{}).checked) || false;
+    // Lit les inputs dynamiques du déclencheur (data-cfg-key)
+    const cfg = {};
+    document.querySelectorAll('#autoTriggerFields [data-cfg-key]').forEach(el => {
+      cfg[el.dataset.cfgKey] = el.value;
+    });
+    // ID : si édition → garde le même, sinon nouveau
+    const id = this.state.editingAutoCampaign || ('custom-' + Date.now());
+    this.state.autoCampaignDetails[id] = { name, trigger, target, message, cfg, antiAbusWeek, antiAbusCredits, updatedAt: new Date().toISOString() };
+    this.state.autoCampaignStatus[id] = 'active';
+    this.state.editingAutoCampaign = null;
+    this.save();
     this.closeModal();
-    this.toast('🤖 Campagne auto activée', 'success', 'Prochaine exécution : 28 du mois à 09:00');
+    // Calcule un sub utile pour le toast
+    let nextRun = '';
+    if (trigger === 'monthly') nextRun = `Prochaine exécution : ${cfg.day||'28'} du mois à ${cfg.time||'09:00'}`;
+    else if (trigger === 'weekly') nextRun = `Prochaine exécution : ${cfg.weekday||'Vendredi'} à ${cfg.time||'17:00'}`;
+    else if (trigger === 'birthday') nextRun = `Déclenchée la veille de chaque anniversaire à ${cfg.time||'09:00'}`;
+    else if (trigger === 'silence') nextRun = `Déclenchée si silence > ${cfg.silenceDays||'45'} jours`;
+    else nextRun = 'Déclenchement automatique configuré';
+    this.toast(this.state.editingAutoCampaign?'✏️ Automatisation mise à jour':'🤖 Campagne auto activée', 'success', nextRun);
+    this.renderView();
+  },
+
+  testAutoCampaign(){
+    const name = (document.getElementById('autoName')||{}).value || 'Automatisation';
+    this.toast(`🧪 Test envoyé sur ton numéro`, 'info', name);
+  },
+
+  suggestAutoMessage(){
+    const opts = [
+      "Hola {prenom} 👋 Petit clin d'œil de Don Carlos : −15 % sur ta prochaine commande jusqu'au 30. À très vite !",
+      "¿Cómo estás {prenom}? Don Carlos te invita con −15 % sobre tu próxima compra. Válido hasta fin de mes 🥖",
+      "Hey {prenom}! Te dejamos un −15 % de regalo pour cette semaine. Pasa cuando quieras, te esperamos 💛"
+    ];
+    const ta = document.getElementById('autoMessage');
+    if (ta) ta.value = opts[Math.floor(Math.random()*opts.length)];
+    this.toast('✨ Message suggéré','success');
   },
 
   onAutoTriggerChange(trigger){
