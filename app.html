@@ -1953,14 +1953,19 @@ const Nx = {
 
     // Live counters simulation
     this.startLive();
-    // Boot screen fade out (1.5s show + 0.5s fade)
-    setTimeout(() => {
-      const boot = document.getElementById('boot-screen');
-      if (boot) {
+    // Boot screen : si déjà chargé dans cette session, skip direct (Augus 19/05 : "loading en boucle")
+    const boot = document.getElementById('boot-screen');
+    if (boot) {
+      const alreadyBooted = sessionStorage.getItem('nx_booted_v1') === '1';
+      const fadeDelay = alreadyBooted ? 0 : 800;
+      setTimeout(() => {
         boot.classList.add('fade-out');
-        setTimeout(() => { boot.style.display = 'none'; }, 600);
-      }
-    }, 1500);
+        setTimeout(() => {
+          boot.style.display = 'none';
+          try { sessionStorage.setItem('nx_booted_v1', '1'); } catch(e){}
+        }, alreadyBooted ? 100 : 500);
+      }, fadeDelay);
+    }
     // Welcome toast — après le boot
     setTimeout(() => this.toast('Bienvenue sur Nexus, Carlos ☀️', 'success', 'Ton agent IA veille sur tes conversations.'), 2200);
   },
@@ -2746,18 +2751,24 @@ const Nx = {
     const vc = document.getElementById('viewContainer');
     const v = this.state.view;
     let html = '';
-    if (v === 'dashboard') html = this.viewDashboard();
-    else if (v === 'profile') html = this.viewProfile();
-    else if (v === 'inbox') html = this.viewInbox();
-    else if (v === 'crm') html = this.viewCrm();
-    else if (v === 'stats') html = this.viewStats();
-    else if (v === 'campaigns') html = this.viewCampaigns();
-    else if (v === 'pilotage') html = this.viewPilotage();
-    else if (v === 'payments') html = this.viewPayments();
-    else if (v === 'tutorial') html = this.viewTutorial();
-    else if (v === 'vacances') html = this.viewVacances();
-    else if (v === 'settings') html = this.viewSettings();
-    else html = '<div class="view"><h1>Page introuvable</h1><p>Retourner au <a href="#/dashboard" style="color:var(--blue)">tableau de bord</a>.</p></div>';
+    // try/catch défensif : si une vue plante, on affiche une page d'erreur au lieu de crasher (Augus 19/05 : "loading en boucle")
+    try {
+      if (v === 'dashboard') html = this.viewDashboard();
+      else if (v === 'profile') html = this.viewProfile();
+      else if (v === 'inbox') html = this.viewInbox();
+      else if (v === 'crm') html = this.viewCrm();
+      else if (v === 'stats') html = this.viewStats();
+      else if (v === 'campaigns') html = this.viewCampaigns();
+      else if (v === 'pilotage') html = this.viewPilotage();
+      else if (v === 'payments') html = this.viewPayments();
+      else if (v === 'tutorial') html = this.viewTutorial();
+      else if (v === 'vacances') html = this.viewVacances();
+      else if (v === 'settings') html = this.viewSettings();
+      else html = '<div class="view"><h1>Page introuvable</h1><p>Retourner au <a href="#/dashboard" style="color:var(--blue)">tableau de bord</a>.</p></div>';
+    } catch(err) {
+      console.error('[renderView crash] view='+v, err);
+      html = `<div class="view"><div class="card" style="padding:20px"><h2>⚠️ Erreur de rendu</h2><p>Vue : <code>${v}</code></p><pre style="font-size:11px;color:var(--red);background:#FEE;padding:10px;border-radius:6px;overflow:auto">${String(err.stack || err).slice(0,500)}</pre><button class="btn btn-p" onclick="Nx.navigate('dashboard')">← Retour au tableau de bord</button></div></div>`;
+    }
     // Barre top sur toutes les sections sauf dashboard :
     // 1) Bouton "← Retour Nexus Core"  2) Icône fenêtre = ouvre pop-up pour basculer entre modules
     if (v !== 'dashboard') {
