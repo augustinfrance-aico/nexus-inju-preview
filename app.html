@@ -225,7 +225,7 @@ html[data-theme="dark"] .bubble.me{background:#056162;color:#E8ECF3}
 .bubble .t{font-size:10px;color:var(--muted);margin-top:4px;text-align:right}
 .bubble.voice::before{content:"🎙";margin-right:6px}
 .chat-draft{background:var(--blue-soft);border:1px dashed var(--blue-ghost);padding:10px 14px;border-radius:10px;font-size:13px;color:var(--blue-ink);margin-bottom:8px;position:relative}
-.chat-draft::before{content:"🤖 Brouillon IA — ";font-weight:600}
+.chat-draft .chat-draft-label{font-weight:600;display:inline-block;margin-right:4px}
 .chat-draft-actions{display:flex;gap:6px;margin-top:8px}
 .chat-input{display:flex;gap:8px;padding:14px 18px;border-top:1px solid var(--line2);background:var(--panel)}
 .chat-input input{flex:1;padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:var(--bg2);font-size:13px}
@@ -907,17 +907,18 @@ html[data-theme="dark"] .chat-input textarea::placeholder{color:#8A94A6}
 // Cache localStorage par hash, restore originals quand on revient en FR
 // ====================================================
 window.NexusDynTranslate = (function(){
-  const CACHE_KEY = 'nexus_dyn_translations_v2';
-  const ORIG_PREFIX = 'data-dyn-orig';        // text content
+  const CACHE_KEY = 'nexus_dyn_translations_v3';  // bumped: scanner refactor TextNode
   const ORIG_PH = 'data-dyn-orig-ph';         // placeholder
   const ORIG_TITLE = 'data-dyn-orig-title';   // title attribute
   const ORIG_ARIA = 'data-dyn-orig-aria';     // aria-label
   const ORIG_ALT = 'data-dyn-orig-alt';       // image alt
   const SKIP_SELECTOR = '[data-dyn-skip],[data-i18n],[data-i18n-html],[data-i18n-ph],[data-i18n-placeholder],[data-i18n-aria],[data-i18n-title]';
-  const TEXTUAL_TAGS = 'h1,h2,h3,h4,h5,h6,p,span,button,a,label,td,th,li,option,small,b,i,em,strong,div,figcaption,summary,legend';
+  const SKIP_PARENT_SELECTOR = SKIP_SELECTOR + ',script,style,code,pre,svg';
   const SKIP_TEXT = /^(\s*[\d.,%€$£+\-×\/]+\s*[mhskg]?\w{0,3}\s*)$/i;
   const ONLY_EMOJI = /^[\s\p{Extended_Pictographic}‍️\d:.]+$/u;
   const PRESERVE = /^(Nexus|Carlos|María|Maria|Diego|Ana|Javier|Raviella|WhatsApp|Gmail|Calendar|Google|Claude|Stripe|Loom|Vercel|VIP|CRM|SOS|FAQ|API|PDF|CSV|empanadas|pan amasado|bolos|panadería|Providencia|Las Condes|Santiago|Pro|Business|Enterprise|Free|Chile|Chili)$/i;
+  // Map global pour stocker les TextNode originaux (pas d'attribut possible sur TextNode)
+  const textNodeOrigs = new Map();  // Node -> original string
 
   let cache = {};
   try { cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch(e){ cache = {}; }
@@ -942,21 +943,32 @@ window.NexusDynTranslate = (function(){
     return true;
   }
 
-  // Collecte exhaustive : textContent + placeholder + title + aria-label + alt
-  // Chaque item : { el, attr, orig } où attr = 'text' | 'placeholder' | 'title' | 'aria-label' | 'alt'
+  // === COLLECTE EXHAUSTIVE via TreeWalker sur TextNodes + attributs ===
+  // Capture TOUT le texte visible, y compris dans les <div> non-leaf (ex: "Insight ... — texte")
+  // Chaque item : { node?, el?, attr, orig }
   function collectAll(){
     const items = [];
-    // 1) Text content sur tags textuels (leaf nodes)
-    document.body.querySelectorAll(TEXTUAL_TAGS).forEach(el => {
-      if (el.children.length > 0) return;
-      if (el.matches(SKIP_SELECTOR)) return;
-      if (el.closest(SKIP_SELECTOR + ',script,style,code,pre')) return;
-      const stored = el.getAttribute(ORIG_PREFIX);
-      const orig = stored != null ? stored : el.textContent.trim();
-      if (!shouldTranslate(orig)) return;
-      items.push({ el, attr: 'text', orig });
+    // 1) TextNodes (walker)
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode(node){
+        const raw = node.nodeValue;
+        if (!raw || !raw.trim()) return NodeFilter.FILTER_REJECT;
+        const parent = node.parentElement;
+        if (!parent) return NodeFilter.FILTER_REJECT;
+        if (parent.closest(SKIP_PARENT_SELECTOR)) return NodeFilter.FILTER_REJECT;
+        // Stocker l'original au 1er passage
+        if (!textNodeOrigs.has(node)) textNodeOrigs.set(node, raw);
+        const orig = textNodeOrigs.get(node).trim();
+        if (!shouldTranslate(orig)) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
     });
-    // 2) Placeholders (input, textarea)
+    let n;
+    while ((n = walker.nextNode())) {
+      const orig = textNodeOrigs.get(n).trim();
+      items.push({ node: n, attr: 'textNode', orig });
+    }
+    // 2) Placeholders
     document.body.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el => {
       if (el.matches(SKIP_SELECTOR)) return;
       const stored = el.getAttribute(ORIG_PH);
@@ -964,7 +976,7 @@ window.NexusDynTranslate = (function(){
       if (!shouldTranslate(orig)) return;
       items.push({ el, attr: 'placeholder', orig });
     });
-    // 3) Title attributes (tooltips)
+    // 3) Title (tooltips)
     document.body.querySelectorAll('[title]').forEach(el => {
       if (el.matches(SKIP_SELECTOR)) return;
       const stored = el.getAttribute(ORIG_TITLE);
@@ -992,31 +1004,34 @@ window.NexusDynTranslate = (function(){
   }
 
   function setOrig(item){
-    if (item.attr === 'text') {
-      if (!item.el.hasAttribute(ORIG_PREFIX)) item.el.setAttribute(ORIG_PREFIX, item.orig);
-    } else if (item.attr === 'placeholder') {
-      if (!item.el.hasAttribute(ORIG_PH)) item.el.setAttribute(ORIG_PH, item.orig);
-    } else if (item.attr === 'title') {
-      if (!item.el.hasAttribute(ORIG_TITLE)) item.el.setAttribute(ORIG_TITLE, item.orig);
-    } else if (item.attr === 'aria-label') {
-      if (!item.el.hasAttribute(ORIG_ARIA)) item.el.setAttribute(ORIG_ARIA, item.orig);
-    } else if (item.attr === 'alt') {
-      if (!item.el.hasAttribute(ORIG_ALT)) item.el.setAttribute(ORIG_ALT, item.orig);
-    }
+    if (item.attr === 'textNode') return;  // déjà stocké dans textNodeOrigs Map
+    if (item.attr === 'placeholder') { if (!item.el.hasAttribute(ORIG_PH)) item.el.setAttribute(ORIG_PH, item.orig); }
+    else if (item.attr === 'title')      { if (!item.el.hasAttribute(ORIG_TITLE)) item.el.setAttribute(ORIG_TITLE, item.orig); }
+    else if (item.attr === 'aria-label') { if (!item.el.hasAttribute(ORIG_ARIA)) item.el.setAttribute(ORIG_ARIA, item.orig); }
+    else if (item.attr === 'alt')        { if (!item.el.hasAttribute(ORIG_ALT)) item.el.setAttribute(ORIG_ALT, item.orig); }
   }
   function setTranslated(item, value){
-    if (!document.body.contains(item.el)) return;
-    if (item.attr === 'text') item.el.textContent = value;
-    else if (item.attr === 'placeholder') item.el.setAttribute('placeholder', value);
+    if (item.attr === 'textNode') {
+      if (!item.node || !item.node.parentNode) return;
+      // Préserve les espaces leading/trailing pour ne pas casser la mise en page
+      const raw = textNodeOrigs.get(item.node) || item.node.nodeValue;
+      const leading = (raw.match(/^\s*/) || [''])[0];
+      const trailing = (raw.match(/\s*$/) || [''])[0];
+      item.node.nodeValue = leading + value + trailing;
+      return;
+    }
+    if (!item.el || !document.body.contains(item.el)) return;
+    if (item.attr === 'placeholder') item.el.setAttribute('placeholder', value);
     else if (item.attr === 'title') item.el.setAttribute('title', value);
     else if (item.attr === 'aria-label') item.el.setAttribute('aria-label', value);
     else if (item.attr === 'alt') item.el.setAttribute('alt', value);
   }
   function restoreOrig(){
-    document.querySelectorAll('[' + ORIG_PREFIX + ']').forEach(el => {
-      el.textContent = el.getAttribute(ORIG_PREFIX);
-      el.removeAttribute(ORIG_PREFIX);
+    // 1) TextNodes : restore via Map
+    textNodeOrigs.forEach((orig, node) => {
+      if (node.parentNode) node.nodeValue = orig;
     });
+    // 2) Placeholders/title/aria/alt
     document.querySelectorAll('[' + ORIG_PH + ']').forEach(el => {
       el.setAttribute('placeholder', el.getAttribute(ORIG_PH));
       el.removeAttribute(ORIG_PH);
@@ -1102,9 +1117,29 @@ window.NexusDynTranslate = (function(){
 
   // applyNew(lang) — variante post-render : applique cache uniquement (zero API call)
   // si nouveaux nœuds DOM non couverts par le cache, ils restent en FR jusqu'au prochain switch
-  function applyNew(lang){ return apply(lang, { silent: true }); }
+  // Wrapper public qui tracke la langue courante
+  let currentLang = 'fr';
+  async function publicApply(lang, opts){
+    currentLang = lang || currentLang;
+    return apply(lang, opts);
+  }
+  function publicApplyNew(lang){ return publicApply(lang, { silent: true }); }
 
-  return { apply, applyNew, clearCache(){ cache = {}; saveCache(); } };
+  // === MutationObserver : retraduit auto les nouveaux DOM (draft IA, modals, etc.) — debounced 300ms
+  let mutTimer = null;
+  function startObserver(){
+    if (window._dynObs) return;
+    window._dynObs = new MutationObserver(() => {
+      if (currentLang === 'fr') return;
+      clearTimeout(mutTimer);
+      mutTimer = setTimeout(() => { try { apply(currentLang); } catch(e){} }, 300);
+    });
+    window._dynObs.observe(document.body, { childList: true, subtree: true, characterData: false });
+  }
+  if (document.body) startObserver();
+  else document.addEventListener('DOMContentLoaded', startObserver);
+
+  return { apply: publicApply, applyNew: publicApplyNew, clearCache(){ cache = {}; saveCache(); textNodeOrigs.clear(); } };
 })();
 
 // -------- I18N DICTIONARY (complet FR/ES/EN) --------
@@ -3653,7 +3688,7 @@ const Nx = {
             </div>
             <div class="chat-conv-body" id="chatBody">
               ${activeConv.messages.map(m=>`<div class="bubble ${m.from}">${m.text}<div class="t">${m.time}</div></div>`).join('')}
-              ${activeConv.draft ? `<div class="chat-draft">${activeConv.draft}<div class="chat-draft-actions"><button class="btn-g" onclick="Nx.sendDraft(${activeClient.id})">✓ Envoyer tel quel</button><button class="btn-g" onclick="Nx.editDraft(${activeClient.id})">✏️ Modifier</button><button class="btn-g" onclick="Nx.regenDraft(${activeClient.id})">🔄 Reformuler</button></div></div>` : ''}
+              ${activeConv.draft ? `<div class="chat-draft"><span class="chat-draft-label">🤖 Brouillon IA — </span><span>${activeConv.draft}</span><div class="chat-draft-actions"><button class="btn-g" onclick="Nx.sendDraft(${activeClient.id})">✓ Envoyer tel quel</button><button class="btn-g" onclick="Nx.editDraft(${activeClient.id})">✏️ Modifier</button><button class="btn-g" onclick="Nx.regenDraft(${activeClient.id})">🔄 Reformuler</button></div></div>` : ''}
             </div>
             <div style="padding:8px 14px;display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--line2);background:var(--bg2)">
               <button class="btn-g" onclick="Nx.suggestAiReply(${activeClient.id})">✨ Suggestion IA</button>

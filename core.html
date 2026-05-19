@@ -1640,19 +1640,19 @@ body{
     });
   });
 
-  // =========== DYNAMIC TRANSLATE — couvre le DOM non-i18n via /api/translate (Groq priorité)
+  // =========== DYNAMIC TRANSLATE — TextNode walker + MutationObserver (Groq priorité)
   window.NexusDynTranslate = (function(){
-    const CACHE_KEY = 'nexus_dyn_translations_v2';
-    const ORIG_PREFIX = 'data-dyn-orig';
+    const CACHE_KEY = 'nexus_dyn_translations_v3';  // bumped: scanner refactor TextNode
     const ORIG_PH = 'data-dyn-orig-ph';
     const ORIG_TITLE = 'data-dyn-orig-title';
     const ORIG_ARIA = 'data-dyn-orig-aria';
     const ORIG_ALT = 'data-dyn-orig-alt';
     const SKIP_SELECTOR = '[data-dyn-skip],[data-i18n],[data-i18n-html],[data-i18n-ph],[data-i18n-placeholder],[data-i18n-aria],[data-i18n-title]';
-    const TEXTUAL_TAGS = 'h1,h2,h3,h4,h5,h6,p,span,button,a,label,td,th,li,option,small,b,i,em,strong,div,figcaption,summary,legend';
+    const SKIP_PARENT_SELECTOR = SKIP_SELECTOR + ',script,style,code,pre,svg';
     const SKIP_TEXT = /^(\s*[\d.,%€$£+\-×\/]+\s*[mhskg]?\w{0,3}\s*)$/i;
     const ONLY_EMOJI = /^[\s\p{Extended_Pictographic}‍️\d:.]+$/u;
     const PRESERVE = /^(Nexus|Carlos|María|Maria|Diego|Ana|Javier|Raviella|WhatsApp|Gmail|Calendar|Google|Claude|Stripe|Loom|Vercel|VIP|CRM|SOS|FAQ|API|PDF|CSV|empanadas|pan amasado|bolos|panadería|Providencia|Las Condes|Santiago|Pro|Business|Enterprise|Free|Chile|Chili)$/i;
+    const textNodeOrigs = new Map();
     let cache = {};
     try { cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch(e){ cache = {}; }
     let inFlight = false;
@@ -1674,15 +1674,25 @@ body{
     }
     function collectAll(){
       const items = [];
-      document.body.querySelectorAll(TEXTUAL_TAGS).forEach(el => {
-        if (el.children.length > 0) return;
-        if (el.matches(SKIP_SELECTOR)) return;
-        if (el.closest(SKIP_SELECTOR + ',script,style,code,pre')) return;
-        const stored = el.getAttribute(ORIG_PREFIX);
-        const orig = stored != null ? stored : el.textContent.trim();
-        if (!shouldTranslate(orig)) return;
-        items.push({ el, attr: 'text', orig });
+      // 1) TextNodes walker — capture le texte au milieu des éléments non-leaf
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+        acceptNode(node){
+          const raw = node.nodeValue;
+          if (!raw || !raw.trim()) return NodeFilter.FILTER_REJECT;
+          const parent = node.parentElement;
+          if (!parent) return NodeFilter.FILTER_REJECT;
+          if (parent.closest(SKIP_PARENT_SELECTOR)) return NodeFilter.FILTER_REJECT;
+          if (!textNodeOrigs.has(node)) textNodeOrigs.set(node, raw);
+          const orig = textNodeOrigs.get(node).trim();
+          if (!shouldTranslate(orig)) return NodeFilter.FILTER_REJECT;
+          return NodeFilter.FILTER_ACCEPT;
+        }
       });
+      let n;
+      while ((n = walker.nextNode())) {
+        items.push({ node: n, attr: 'textNode', orig: textNodeOrigs.get(n).trim() });
+      }
+      // 2) Placeholders
       document.body.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el => {
         if (el.matches(SKIP_SELECTOR)) return;
         const stored = el.getAttribute(ORIG_PH);
@@ -1714,36 +1724,33 @@ body{
       return items;
     }
     function setOrig(it){
-      if (it.attr === 'text')        { if (!it.el.hasAttribute(ORIG_PREFIX)) it.el.setAttribute(ORIG_PREFIX, it.orig); }
-      else if (it.attr === 'placeholder') { if (!it.el.hasAttribute(ORIG_PH)) it.el.setAttribute(ORIG_PH, it.orig); }
-      else if (it.attr === 'title')       { if (!it.el.hasAttribute(ORIG_TITLE)) it.el.setAttribute(ORIG_TITLE, it.orig); }
-      else if (it.attr === 'aria-label')  { if (!it.el.hasAttribute(ORIG_ARIA)) it.el.setAttribute(ORIG_ARIA, it.orig); }
-      else if (it.attr === 'alt')         { if (!it.el.hasAttribute(ORIG_ALT)) it.el.setAttribute(ORIG_ALT, it.orig); }
+      if (it.attr === 'textNode') return;
+      if (it.attr === 'placeholder') { if (!it.el.hasAttribute(ORIG_PH)) it.el.setAttribute(ORIG_PH, it.orig); }
+      else if (it.attr === 'title')      { if (!it.el.hasAttribute(ORIG_TITLE)) it.el.setAttribute(ORIG_TITLE, it.orig); }
+      else if (it.attr === 'aria-label') { if (!it.el.hasAttribute(ORIG_ARIA)) it.el.setAttribute(ORIG_ARIA, it.orig); }
+      else if (it.attr === 'alt')        { if (!it.el.hasAttribute(ORIG_ALT)) it.el.setAttribute(ORIG_ALT, it.orig); }
     }
     function setTranslated(it, value){
-      if (!document.body.contains(it.el)) return;
-      if (it.attr === 'text') it.el.textContent = value;
-      else if (it.attr === 'placeholder') it.el.setAttribute('placeholder', value);
+      if (it.attr === 'textNode') {
+        if (!it.node || !it.node.parentNode) return;
+        const raw = textNodeOrigs.get(it.node) || it.node.nodeValue;
+        const leading = (raw.match(/^\s*/) || [''])[0];
+        const trailing = (raw.match(/\s*$/) || [''])[0];
+        it.node.nodeValue = leading + value + trailing;
+        return;
+      }
+      if (!it.el || !document.body.contains(it.el)) return;
+      if (it.attr === 'placeholder') it.el.setAttribute('placeholder', value);
       else if (it.attr === 'title') it.el.setAttribute('title', value);
       else if (it.attr === 'aria-label') it.el.setAttribute('aria-label', value);
       else if (it.attr === 'alt') it.el.setAttribute('alt', value);
     }
     function restoreOrig(){
-      document.querySelectorAll('[' + ORIG_PREFIX + ']').forEach(el => {
-        el.textContent = el.getAttribute(ORIG_PREFIX); el.removeAttribute(ORIG_PREFIX);
-      });
-      document.querySelectorAll('[' + ORIG_PH + ']').forEach(el => {
-        el.setAttribute('placeholder', el.getAttribute(ORIG_PH)); el.removeAttribute(ORIG_PH);
-      });
-      document.querySelectorAll('[' + ORIG_TITLE + ']').forEach(el => {
-        el.setAttribute('title', el.getAttribute(ORIG_TITLE)); el.removeAttribute(ORIG_TITLE);
-      });
-      document.querySelectorAll('[' + ORIG_ARIA + ']').forEach(el => {
-        el.setAttribute('aria-label', el.getAttribute(ORIG_ARIA)); el.removeAttribute(ORIG_ARIA);
-      });
-      document.querySelectorAll('[' + ORIG_ALT + ']').forEach(el => {
-        el.setAttribute('alt', el.getAttribute(ORIG_ALT)); el.removeAttribute(ORIG_ALT);
-      });
+      textNodeOrigs.forEach((orig, node) => { if (node.parentNode) node.nodeValue = orig; });
+      document.querySelectorAll('[' + ORIG_PH + ']').forEach(el => { el.setAttribute('placeholder', el.getAttribute(ORIG_PH)); el.removeAttribute(ORIG_PH); });
+      document.querySelectorAll('[' + ORIG_TITLE + ']').forEach(el => { el.setAttribute('title', el.getAttribute(ORIG_TITLE)); el.removeAttribute(ORIG_TITLE); });
+      document.querySelectorAll('[' + ORIG_ARIA + ']').forEach(el => { el.setAttribute('aria-label', el.getAttribute(ORIG_ARIA)); el.removeAttribute(ORIG_ARIA); });
+      document.querySelectorAll('[' + ORIG_ALT + ']').forEach(el => { el.setAttribute('alt', el.getAttribute(ORIG_ALT)); el.removeAttribute(ORIG_ALT); });
     }
     async function translateBatch(texts, target){
       try {
@@ -1794,12 +1801,26 @@ body{
       } finally {
         inFlight = false;
         if (pendingLang && pendingLang !== lang) {
-          const next = pendingLang; pendingLang = null; apply(next);
+          const next = pendingLang; pendingLang = null; publicApply(next);
         } else { pendingLang = null; }
       }
     }
-    function applyNew(lang){ return apply(lang, { silent: true }); }
-    return { apply, applyNew, clearCache(){ cache = {}; saveCache(); } };
+    let currentLang = 'fr';
+    async function publicApply(lang, opts){ currentLang = lang || currentLang; return apply(lang, opts); }
+    function publicApplyNew(lang){ return publicApply(lang, { silent: true }); }
+    let mutTimer = null;
+    function startObserver(){
+      if (window._dynObsCore) return;
+      window._dynObsCore = new MutationObserver(() => {
+        if (currentLang === 'fr') return;
+        clearTimeout(mutTimer);
+        mutTimer = setTimeout(() => { try { apply(currentLang); } catch(e){} }, 300);
+      });
+      window._dynObsCore.observe(document.body, { childList: true, subtree: true, characterData: false });
+    }
+    if (document.body) startObserver();
+    else document.addEventListener('DOMContentLoaded', startObserver);
+    return { apply: publicApply, applyNew: publicApplyNew, clearCache(){ cache = {}; saveCache(); textNodeOrigs.clear(); } };
   })();
 
   // =========== Sélecteur de langue (Point 1 PDF — TOUT doit être traduit)
