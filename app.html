@@ -3584,13 +3584,55 @@ const Nx = {
           </div>
           <div class="form-row">
             <label class="form-lbl">📋 Lien catalogue (PDF, Google Sheet, page produits)</label>
-            <div class="flex">
-              <input class="form-ctrl" placeholder="https://… (l'IA pré-remplira ton catalogue)" value="${b.catalogUrl||''}" oninput="Nx.updateBiz('catalogUrl',this.value)">
+            <div class="flex" style="flex-wrap:wrap;gap:6px">
+              <input class="form-ctrl" style="min-width:200px;flex:1" placeholder="https://… (l'IA pré-remplira ton catalogue)" value="${b.catalogUrl||''}" oninput="Nx.updateBiz('catalogUrl',this.value)">
               <button class="btn btn-s" onclick="Nx.scrapeCatalog()">✨ Pré-remplir</button>
+              <button class="btn btn-s" onclick="Nx.addCatalogArchive()">📎 Ajouter archive</button>
+              ${b.catalogUrl ? `<button class="btn btn-s" onclick="window.open('${b.catalogUrl}','_blank','noopener')">👁 Consulter</button>` : ''}
             </div>
+            ${(b.catalogArchives||[]).length > 0 ? `
+              <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
+                ${b.catalogArchives.map((a, idx) => `
+                  <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border:1px solid var(--line);border-radius:8px">
+                    <span style="font-size:18px">${/pdf/i.test(a.name)?'📄':/(jpg|jpeg|png|webp|gif)/i.test(a.name)?'🖼️':/zip/i.test(a.name)?'🗜️':'📎'}</span>
+                    <div style="flex:1;min-width:0">
+                      <div style="font-weight:600;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.name}</div>
+                      <div style="font-size:10.5px;color:var(--muted)">${a.size||''} · ${a.date||''}</div>
+                    </div>
+                    ${a.dataUrl ? `<button class="btn-g" onclick="Nx.viewCatalogArchive(${idx})" title="Consulter">👁 Voir</button>` : ''}
+                    <button class="btn-g" style="color:var(--red)" onclick="Nx.removeCatalogArchive(${idx})" title="Retirer">🗑</button>
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
           </div>
+
+          <!-- ARCHIVES (PDF, DOC, images, ZIP) — Augustin 19/05 : "rajoute option ajouter archive" -->
+          <div class="form-row">
+            <label class="form-lbl">📎 Archives & documents <span style="color:var(--muted);font-weight:400">(PDF, DOC, images, ZIP)</span></label>
+            <div class="flex">
+              <button class="btn btn-s" onclick="Nx.addBizArchive()">📎 Ajouter une archive</button>
+              <span style="font-size:11px;color:var(--muted);align-self:center">L'IA s'en sert pour répondre aux clients (specs produits, fiches techniques…)</span>
+            </div>
+            ${(b.archives||[]).length > 0 ? `
+              <div style="margin-top:10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px">
+                ${b.archives.map((a, idx) => `
+                  <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border:1px solid var(--line);border-radius:10px">
+                    <div style="font-size:22px;flex-shrink:0">${/pdf/i.test(a.name)?'📄':/(jpg|jpeg|png|gif|webp)/i.test(a.name)?'🖼️':/zip|rar/i.test(a.name)?'🗜️':/(doc|docx)/i.test(a.name)?'📝':/(xls|xlsx|csv)/i.test(a.name)?'📊':'📎'}</div>
+                    <div style="flex:1;min-width:0">
+                      <div style="font-weight:600;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.name}</div>
+                      <div style="font-size:10.5px;color:var(--muted);margin-top:1px">${a.size||''} · ${new Date(a.addedAt).toLocaleDateString('fr-FR')}</div>
+                    </div>
+                    <button style="background:transparent;border:0;cursor:pointer;color:var(--red);font-size:14px;padding:2px 6px" onclick="Nx.removeBizArchive(${idx})" title="Retirer">✕</button>
+                  </div>
+                `).join('')}
+              </div>
+              <div style="margin-top:6px;font-size:11px;color:var(--green);font-weight:600">✓ ${b.archives.length} archive${b.archives.length>1?'s':''} chargée${b.archives.length>1?'s':''} · disponible${b.archives.length>1?'s':''} pour l'IA</div>
+            ` : ''}
+          </div>
+
           <div style="padding:12px 14px;background:var(--blue-soft);border-radius:8px;font-size:12px;color:var(--blue-ink)">
-            💡 Plus ces 4 champs sont remplis, plus Claude répond avec ton vrai ton, ton vraie histoire, ton vrai contexte. Pas un ton générique.
+            💡 Plus ces champs sont remplis (description, archives, page web, catalogue), plus Claude répond avec ton vrai ton, ton vraie histoire, ton vrai contexte. Pas un ton générique.
           </div>
         </div>
 
@@ -3677,12 +3719,13 @@ const Nx = {
             <div id="profilePdfList" style="margin-top:14px;display:flex;flex-direction:column;gap:6px">
               ${(this.state.profilePdfs || []).map((pdf,i) => `
                 <div style="padding:10px 12px;background:var(--bg2);border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;gap:10px">
-                  <span style="font-size:18px">📄</span>
-                  <div style="flex:1">
-                    <div style="font-weight:600;font-size:13px">${pdf.name}</div>
+                  <span style="font-size:18px">${/pdf/i.test(pdf.name)?'📄':/(jpg|jpeg|png|webp|gif)/i.test(pdf.name)?'🖼️':/zip/i.test(pdf.name)?'🗜️':/(doc|docx)/i.test(pdf.name)?'📝':/(xls|xlsx)/i.test(pdf.name)?'📊':'📎'}</span>
+                  <div style="flex:1;min-width:0">
+                    <div style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${pdf.name}</div>
                     <div style="font-size:11px;color:var(--muted)">${pdf.size || '—'} · ajouté le ${pdf.date}</div>
                   </div>
-                  <button class="btn-g" style="color:var(--red)" onclick="Nx.removeProfilePdf(${i})">🗑 Retirer</button>
+                  ${pdf.dataUrl ? `<button class="btn-g" onclick="Nx.viewProfilePdf(${i})" title="Visualiser">👁 Voir</button>` : '<span style="font-size:10px;color:var(--muted);padding:0 8px" title="Ré-importe le fichier pour visualiser">non visualisable</span>'}
+                  <button class="btn-g" style="color:var(--red)" onclick="Nx.removeProfilePdf(${i})" title="Retirer">🗑</button>
                 </div>`).join('') || '<div style="font-size:12px;color:var(--muted);padding:10px;text-align:center;border:1px dashed var(--line);border-radius:8px">Aucun document importé pour l\'instant.</div>'}
             </div>
           </div>
@@ -3865,26 +3908,94 @@ const Nx = {
   },
 
   // POINT PROFIL PERSO (b) — Upload PDF/archives + liste avec retrait
+  // Fix Augustin 19/05 : "il faut pouvoir visualiser les pdf"
+  // Lit le file en base64 + stocke dans state.profilePdfs[i].dataUrl
   uploadProfilePdf(){
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.pdf,.doc,.docx,.zip,.txt';
+    input.accept = '.pdf,.doc,.docx,.zip,.txt,.xls,.xlsx,.png,.jpg,.jpeg';
+    input.multiple = true;
     input.onchange = (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+      const files = Array.from(e.target.files || []);
+      if (!files.length) return;
       if (!this.state.profilePdfs) this.state.profilePdfs = [];
-      const sizeKb = Math.round(file.size / 1024);
-      this.state.profilePdfs.push({
-        name: file.name,
-        size: sizeKb < 1024 ? sizeKb + ' Ko' : (sizeKb/1024).toFixed(1) + ' Mo',
-        date: new Date().toLocaleDateString('fr-FR')
+      let processed = 0, tooBig = 0;
+      files.forEach(file => {
+        // Limite 4 Mo par fichier (localStorage ~5-10 Mo total)
+        if (file.size > 4 * 1024 * 1024) {
+          tooBig++;
+          processed++;
+          if (processed === files.length) {
+            this.save(); this.renderView();
+            if (tooBig === files.length) this.toast('⚠️ Tous les fichiers > 4 Mo','warn','Compresse-les avant');
+            else this.toast(`📎 ${files.length-tooBig} ajouté(s)`,'success',`${tooBig} ignoré(s) (> 4 Mo)`);
+          }
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const sizeKb = Math.round(file.size / 1024);
+          this.state.profilePdfs.push({
+            id: Date.now() + Math.random(),
+            name: file.name,
+            type: file.type,
+            size: sizeKb < 1024 ? sizeKb + ' Ko' : (sizeKb/1024).toFixed(1) + ' Mo',
+            date: new Date().toLocaleDateString('fr-FR'),
+            dataUrl: ev.target.result // base64 pour visualisation
+          });
+          processed++;
+          if (processed === files.length) {
+            try {
+              this.save();
+            } catch(err) {
+              // localStorage plein : retire les data et garde juste métadonnées
+              this.state.profilePdfs.forEach(p => { if (p.dataUrl) delete p.dataUrl; });
+              this.save();
+              this.toast('⚠️ Stockage plein','warn','Métadonnées gardées, visualisation indisponible');
+              this.renderView();
+              return;
+            }
+            this.renderView();
+            this.toast(`📎 ${files.length-tooBig} document(s) ajouté(s)`,'success', files.map(f=>f.name).join(', ').slice(0,80));
+          }
+        };
+        reader.readAsDataURL(file);
       });
-      this.save();
-      this.renderView();
-      this.toast('📎 Document ajouté','success', file.name);
     };
     input.click();
   },
+
+  // Ouvre le PDF/image dans un nouvel onglet (utilise le dataUrl base64)
+  viewProfilePdf(i){
+    const pdf = (this.state.profilePdfs||[])[i];
+    if (!pdf) return;
+    if (!pdf.dataUrl) {
+      this.toast('Visualisation indisponible','warn','Ce fichier n\'a pas de contenu stocké (ré-importe-le)');
+      return;
+    }
+    // PDF et images : ouvrir dans nouvel onglet
+    const win = window.open();
+    if (!win) {
+      this.toast('Popup bloquée','warn','Autorise les popups pour visualiser');
+      return;
+    }
+    const isImg = /^image\//.test(pdf.type) || /\.(png|jpg|jpeg|gif|webp)$/i.test(pdf.name);
+    const isPdf = pdf.type === 'application/pdf' || /\.pdf$/i.test(pdf.name);
+    if (isImg) {
+      win.document.write(`<!DOCTYPE html><html><head><title>${pdf.name}</title><style>body{margin:0;background:#0F172A;display:flex;align-items:center;justify-content:center;min-height:100vh}img{max-width:100%;max-height:100vh;object-fit:contain}</style></head><body><img src="${pdf.dataUrl}" alt="${pdf.name}"></body></html>`);
+    } else if (isPdf) {
+      win.document.write(`<!DOCTYPE html><html><head><title>${pdf.name}</title><style>body,html{margin:0;height:100%}iframe{width:100%;height:100vh;border:0}</style></head><body><iframe src="${pdf.dataUrl}"></iframe></body></html>`);
+    } else {
+      // Téléchargement direct pour autres formats
+      const a = document.createElement('a');
+      a.href = pdf.dataUrl;
+      a.download = pdf.name;
+      a.click();
+      win.close();
+      this.toast('💾 Téléchargement lancé','success',pdf.name);
+    }
+  },
+
   removeProfilePdf(i){
     if (!confirm('Retirer ce document ?')) return;
     if (this.state.profilePdfs) this.state.profilePdfs.splice(i,1);
@@ -5964,6 +6075,102 @@ const Nx = {
     this.save();
     this.renderView();
     this.toast('Segment supprimé','success');
+  },
+
+  // Archives catalogue : upload + visualisation (sous le champ Lien catalogue)
+  addCatalogArchive(){
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.zip,.png,.jpg,.jpeg,.webp,.gif';
+    input.multiple = true;
+    input.onchange = (e) => {
+      const files = Array.from(e.target.files || []);
+      if (!files.length) return;
+      if (!this.state.business.catalogArchives) this.state.business.catalogArchives = [];
+      let done = 0, tooBig = 0;
+      files.forEach(file => {
+        if (file.size > 4 * 1024 * 1024) {
+          tooBig++; done++;
+          if (done === files.length) { this.save(); this.renderView(); this.toast(`📎 ${files.length-tooBig} ajouté(s)`,'success', tooBig ? `${tooBig} ignoré(s) (> 4 Mo)` : ''); }
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const sizeKb = Math.round(file.size / 1024);
+          this.state.business.catalogArchives.push({
+            id: Date.now() + Math.random(),
+            name: file.name,
+            type: file.type,
+            size: sizeKb < 1024 ? sizeKb + ' Ko' : (sizeKb/1024).toFixed(1) + ' Mo',
+            date: new Date().toLocaleDateString('fr-FR'),
+            dataUrl: ev.target.result
+          });
+          done++;
+          if (done === files.length) {
+            try { this.save(); } catch(err) {
+              this.state.business.catalogArchives.forEach(a => { if (a.dataUrl) delete a.dataUrl; });
+              this.save(); this.toast('⚠️ Stockage plein','warn','Visualisation indisponible'); this.renderView(); return;
+            }
+            this.renderView();
+            this.toast(`📎 ${files.length-tooBig} archive(s) catalogue`,'success', files.map(f=>f.name).join(', ').slice(0,80));
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    };
+    input.click();
+  },
+  viewCatalogArchive(i){
+    const a = (this.state.business.catalogArchives||[])[i];
+    if (!a || !a.dataUrl) { this.toast('Visualisation indisponible','warn'); return; }
+    const win = window.open();
+    if (!win) { this.toast('Popup bloquée','warn','Autorise les popups'); return; }
+    const isImg = /^image\//.test(a.type) || /\.(png|jpg|jpeg|gif|webp)$/i.test(a.name);
+    const isPdf = a.type === 'application/pdf' || /\.pdf$/i.test(a.name);
+    if (isImg) win.document.write(`<!DOCTYPE html><html><head><title>${a.name}</title><style>body{margin:0;background:#0F172A;display:flex;align-items:center;justify-content:center;min-height:100vh}img{max-width:100%;max-height:100vh;object-fit:contain}</style></head><body><img src="${a.dataUrl}"></body></html>`);
+    else if (isPdf) win.document.write(`<!DOCTYPE html><html><head><title>${a.name}</title><style>body,html{margin:0;height:100%}iframe{width:100%;height:100vh;border:0}</style></head><body><iframe src="${a.dataUrl}"></iframe></body></html>`);
+    else { const link = document.createElement('a'); link.href = a.dataUrl; link.download = a.name; link.click(); win.close(); this.toast('💾 Téléchargement','success', a.name); }
+  },
+  removeCatalogArchive(i){
+    if (!confirm('Retirer cette archive ?')) return;
+    if (this.state.business.catalogArchives) this.state.business.catalogArchives.splice(i,1);
+    this.save();
+    this.renderView();
+    this.toast('🗑 Archive retirée','info');
+  },
+
+  // Archives biz : upload + stockage métadonnées (Augustin 19/05 : "rajoute option ajouter archive")
+  addBizArchive(){
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.zip,.rar,.png,.jpg,.jpeg,.gif,.webp';
+    input.multiple = true;
+    input.onchange = (e) => {
+      const files = Array.from(e.target.files || []);
+      if (!files.length) return;
+      if (!this.state.business.archives) this.state.business.archives = [];
+      files.forEach(file => {
+        this.state.business.archives.push({
+          id: Date.now() + Math.random(),
+          name: file.name,
+          type: file.type || 'file',
+          size: file.size < 1024 ? file.size + ' B' : file.size < 1024*1024 ? Math.round(file.size/1024) + ' KB' : (file.size/(1024*1024)).toFixed(1) + ' MB',
+          addedAt: new Date().toISOString()
+        });
+      });
+      this.save();
+      this.renderView();
+      this.toast('✓ ' + files.length + ' archive' + (files.length>1?'s':'') + ' ajoutée' + (files.length>1?'s':''), 'success', 'L\'IA peut maintenant s\'en servir');
+    };
+    input.click();
+  },
+  removeBizArchive(idx){
+    if (!this.state.business.archives) return;
+    if (!confirm('Retirer cette archive ?')) return;
+    this.state.business.archives.splice(idx, 1);
+    this.save();
+    this.renderView();
+    this.toast('🗑 Archive retirée','info');
   },
 
   // 'voir tous' → modal grand format avec recherche + grid (Augustin 19/05 : "scroll c'est nul")
