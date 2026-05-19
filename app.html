@@ -1953,18 +1953,23 @@ const Nx = {
 
     // Live counters simulation
     this.startLive();
-    // Boot screen : si déjà chargé dans cette session, skip direct (Augus 19/05 : "loading en boucle")
+    // Boot screen : si déjà chargé une fois (sessionStorage), on cache IMMÉDIATEMENT
+    // Sinon (1ère fois user), petit fade 800ms+500ms. Augus 19/05 : "loading en boucle"
     const boot = document.getElementById('boot-screen');
     if (boot) {
       const alreadyBooted = sessionStorage.getItem('nx_booted_v1') === '1';
-      const fadeDelay = alreadyBooted ? 0 : 800;
-      setTimeout(() => {
-        boot.classList.add('fade-out');
+      if (alreadyBooted) {
+        // Skip total : aucun délai visible
+        boot.style.display = 'none';
+      } else {
         setTimeout(() => {
-          boot.style.display = 'none';
-          try { sessionStorage.setItem('nx_booted_v1', '1'); } catch(e){}
-        }, alreadyBooted ? 100 : 500);
-      }, fadeDelay);
+          boot.classList.add('fade-out');
+          setTimeout(() => {
+            boot.style.display = 'none';
+            try { sessionStorage.setItem('nx_booted_v1', '1'); } catch(e){}
+          }, 500);
+        }, 800);
+      }
     }
     // Welcome toast — après le boot
     setTimeout(() => this.toast('Bienvenue sur Nexus, Carlos ☀️', 'success', 'Ton agent IA veille sur tes conversations.'), 2200);
