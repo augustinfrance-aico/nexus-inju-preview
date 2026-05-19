@@ -7010,37 +7010,137 @@ const Nx = {
 
           <div class="vac-card">
             <h3>⏱ Durée d'absence</h3>
-            <div class="sub">Choisis une durée rapide ou définis des dates précises.</div>
+            <div class="sub">Choisis un raccourci rapide OU définis date + heure précises ci-dessous (les deux fonctionnent ensemble).</div>
             <div class="vac-presets">
               ${presets.map(p => `
-                <div class="vac-preset ${v.preset===p.id?'on':''}" onclick="Nx.updateVac('preset','${p.id}')">
+                <div class="vac-preset ${v.preset===p.id?'on':''}" onclick="Nx.applyVacPreset('${p.id}')">
                   <span class="em">${p.em}</span>
                   ${p.label}
                 </div>`).join('')}
             </div>
-            ${v.preset === 'custom' ? `
-            <div class="grid2" style="margin-top:12px">
-              <div class="form-row"><label class="form-lbl">Date de début</label><input type="date" class="form-ctrl" value="${v.startDate||''}" oninput="Nx.updateVac('startDate',this.value)"></div>
-              <div class="form-row"><label class="form-lbl">Date de fin</label><input type="date" class="form-ctrl" value="${v.endDate||''}" oninput="Nx.updateVac('endDate',this.value)"></div>
-            </div>` : `<div style="margin-top:12px;font-size:12px;color:var(--muted)">Durée sélectionnée : <b style="color:var(--ink)">${presets.find(p=>p.id===v.preset)?.label || '—'}</b></div>`}
+
+            <!-- DATES + HEURES précises (toujours visibles, Augustin 19/05) -->
+            <div style="margin-top:18px;padding:14px;background:var(--bg2);border-radius:12px;border:1px solid var(--line)">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px">📅 Dates & heures précises</div>
+              <div class="grid2" style="gap:10px;margin-bottom:10px">
+                <div class="form-row">
+                  <label class="form-lbl">🛫 Début · date</label>
+                  <input type="date" class="form-ctrl" id="vacStartDate" value="${v.startDate||''}" min="${new Date().toISOString().slice(0,10)}" oninput="Nx.updateVac('startDate',this.value)">
+                </div>
+                <div class="form-row">
+                  <label class="form-lbl">⏰ Début · heure</label>
+                  <input type="time" class="form-ctrl" id="vacStartTime" value="${v.startTime||'18:00'}" oninput="Nx.updateVac('startTime',this.value)">
+                </div>
+              </div>
+              <div class="grid2" style="gap:10px">
+                <div class="form-row">
+                  <label class="form-lbl">🛬 Retour · date</label>
+                  <input type="date" class="form-ctrl" id="vacEndDate" value="${v.endDate||''}" min="${v.startDate || new Date().toISOString().slice(0,10)}" oninput="Nx.updateVac('endDate',this.value)">
+                </div>
+                <div class="form-row">
+                  <label class="form-lbl">⏰ Retour · heure</label>
+                  <input type="time" class="form-ctrl" id="vacEndTime" value="${v.endTime||'09:00'}" oninput="Nx.updateVac('endTime',this.value)">
+                </div>
+              </div>
+
+              <!-- Options additionnelles -->
+              <div style="margin-top:14px;display:flex;gap:14px;flex-wrap:wrap">
+                <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;cursor:pointer">
+                  <input type="checkbox" ${v.allDay?'checked':''} onchange="Nx.updateVac('allDay',this.checked)">
+                  <span>📆 Journée entière (00h-24h)</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;cursor:pointer">
+                  <input type="checkbox" ${v.weekendsOnly?'checked':''} onchange="Nx.updateVac('weekendsOnly',this.checked)">
+                  <span>📅 Week-ends uniquement</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;cursor:pointer">
+                  <input type="checkbox" ${v.recurrent?'checked':''} onchange="Nx.updateVac('recurrent',this.checked)">
+                  <span>🔁 Récurrent chaque année</span>
+                </label>
+              </div>
+
+              <!-- Plage horaire quotidienne fixe (ex : indisponible 14h-18h tous les jours) -->
+              <div style="margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)">
+                <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;cursor:pointer;margin-bottom:10px">
+                  <input type="checkbox" ${v.dailyRange?'checked':''} onchange="Nx.updateVac('dailyRange',this.checked)">
+                  <span><b>⏰ Plage horaire fixe quotidienne</b> <span style="color:var(--muted);font-weight:400">— ex : indisponible 14h-18h chaque jour</span></span>
+                </label>
+                ${v.dailyRange ? `
+                <div class="grid2" style="gap:10px">
+                  <div class="form-row">
+                    <label class="form-lbl">De</label>
+                    <input type="time" class="form-ctrl" value="${v.dailyStart||'14:00'}" oninput="Nx.updateVac('dailyStart',this.value)">
+                  </div>
+                  <div class="form-row">
+                    <label class="form-lbl">À</label>
+                    <input type="time" class="form-ctrl" value="${v.dailyEnd||'18:00'}" oninput="Nx.updateVac('dailyEnd',this.value)">
+                  </div>
+                </div>` : ''}
+              </div>
+            </div>
+
+            <!-- Récap clair : "de Vendredi 19h à lundi 5h du matin" (Augustin 19/05) -->
+            ${(() => {
+              const dayLbl = (d) => d ? new Date(d).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'}) : '';
+              const dayShort = (d) => d ? new Date(d).toLocaleDateString('fr-FR',{weekday:'long'}) : '';
+              const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+              const timeFr = (t) => {
+                if (!t) return '';
+                const [h, m] = t.split(':');
+                const hh = parseInt(h, 10);
+                if (m === '00') return `${hh}h`;
+                return `${hh}h${m}`;
+              };
+              if (v.startDate && v.endDate) {
+                const startTime = v.allDay ? '0h' : timeFr(v.startTime||'18:00');
+                const endTime = v.allDay ? '24h' : timeFr(v.endTime||'09:00');
+                const startDay = cap(dayShort(v.startDate));
+                const endDay = cap(dayShort(v.endDate));
+                // Calcul durée
+                const startDt = new Date(`${v.startDate}T${v.startTime||'18:00'}`);
+                const endDt = new Date(`${v.endDate}T${v.endTime||'09:00'}`);
+                const diffMs = endDt - startDt;
+                const diffHrs = Math.round(diffMs / (1000*60*60));
+                const diffDays = Math.floor(diffHrs / 24);
+                const remainHrs = diffHrs % 24;
+                let durationStr = '';
+                if (diffDays > 0) durationStr = `${diffDays} jour${diffDays>1?'s':''}` + (remainHrs ? ` et ${remainHrs}h` : '');
+                else durationStr = `${diffHrs}h`;
+                return `
+                <div style="margin-top:14px;padding:16px 18px;background:linear-gradient(135deg,#EFF6FF 0%,#DBEAFE 100%);border:2px solid #1A56DB;border-radius:14px;color:#1E3A8A">
+                  <div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;opacity:.75;margin-bottom:6px">📌 Programmé</div>
+                  <div style="font-size:17px;font-weight:800;line-height:1.4;letter-spacing:-.01em">
+                    De <span style="color:#1A56DB">${startDay} ${startTime}</span> à <span style="color:#1A56DB">${endDay} ${endTime}</span>
+                  </div>
+                  <div style="font-size:12px;color:#1E40AF;margin-top:8px;display:flex;gap:14px;flex-wrap:wrap">
+                    <span>📅 Du ${dayLbl(v.startDate)} au ${dayLbl(v.endDate)}</span>
+                    <span>⏱ Durée : <b>${durationStr}</b></span>
+                    ${v.dailyRange ? `<span>🕐 Chaque jour ${v.dailyStart||'14:00'}–${v.dailyEnd||'18:00'}</span>` : ''}
+                    ${v.recurrent ? `<span>🔁 Récurrent chaque année</span>` : ''}
+                    ${v.weekendsOnly ? `<span>📆 Week-ends uniquement</span>` : ''}
+                  </div>
+                </div>`;
+              } else if (v.preset) {
+                return `<div style="margin-top:14px;padding:11px 14px;background:#FEF3C7;border:1px solid #FCD34D;border-radius:10px;font-size:12.5px;color:#78350F">
+                  ⚠️ Durée pré-sélectionnée : <b>${presets.find(p=>p.id===v.preset)?.label || '—'}</b> · Clique sur un preset pour calculer les dates automatiquement, ou remplis-les à la main ci-dessus.
+                </div>`;
+              }
+              return `<div style="margin-top:14px;padding:11px 14px;background:var(--bg2);border:1px dashed var(--line);border-radius:10px;font-size:12.5px;color:var(--muted);text-align:center">
+                ⬆️ Choisis un raccourci au-dessus ou remplis date + heure précises pour programmer ton absence
+              </div>`;
+            })()}
           </div>
 
           <div class="vac-card" style="grid-column:span 2">
-            <h3>💬 Messages auto</h3>
-            <div class="sub">3 versions selon le contexte. L'IA choisit la plus appropriée.</div>
-            <div class="grid3">
-              <div class="form-row">
-                <label class="form-lbl">📝 Message court (≤ 7 jours)</label>
-                <textarea class="form-ctrl" rows="4" oninput="Nx.updateVac('msgShort',this.value)" placeholder="Hola! Estoy fuera unos días…">${v.msgShort||''}</textarea>
-              </div>
-              <div class="form-row">
-                <label class="form-lbl">📨 Message long (> 7 jours)</label>
-                <textarea class="form-ctrl" rows="4" oninput="Nx.updateVac('msgLong',this.value)" placeholder="Estimado cliente, estoy de vacaciones hasta…">${v.msgLong||''}</textarea>
-              </div>
-              <div class="form-row">
-                <label class="form-lbl">🚨 Message urgence</label>
-                <textarea class="form-ctrl" rows="4" oninput="Nx.updateVac('msgUrgent',this.value)" placeholder="Para urgencias, contactar a [TEL]">${v.msgUrgent||''}</textarea>
-              </div>
+            <h3>💬 Message auto · 1er message uniquement</h3>
+            <div class="sub">C'est le <b>tout premier message</b> envoyé quand un client te contacte pendant ton absence. <b>Les suivantes</b>, l'IA répond directement en s'inspirant de ton profil entreprise (catalogue, horaires, FAQ).</div>
+            <div class="form-row">
+              <label class="form-lbl">📝 Ton 1er message d'absence</label>
+              <textarea class="form-ctrl" rows="5" oninput="Nx.updateVac('msgShort',this.value)" placeholder="Hola! Estoy fuera unos días, vuelvo el [DATE]. Mientras tanto, mi asistente IA Nexus puede te ayudar para horarios, productos, comandos…">${v.msgShort||''}</textarea>
+              <div style="margin-top:8px;font-size:11px;color:var(--muted)">💡 Balises : <code>[DATE]</code> (date de retour), <code>[NOM]</code> (nom du client), <code>[TEL]</code> (téléphone d'urgence)</div>
+            </div>
+            <div style="margin-top:14px;padding:12px 14px;background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1px solid #86EFAC;border-radius:10px;font-size:12px;color:#14532D">
+              <b>🤖 Comment Nexus continue :</b> après ton 1er message, l'IA répond automatiquement en utilisant ton <a onclick="Nx.navigate('profile')" style="color:#15803D;font-weight:700;text-decoration:underline;cursor:pointer">profil entreprise</a> (horaires, catalogue, FAQ, ton). Plus ton profil est complet, plus les réponses sont précises.
             </div>
           </div>
 
@@ -7114,8 +7214,54 @@ const Nx = {
     catch(e){ vac = this.defaultVacances(); }
     vac[key] = value;
     localStorage.setItem('nexus_vacances', JSON.stringify(vac));
-    // Re-render uniquement pour preset (UI change)
-    if (key === 'preset') this.renderView();
+    // Re-render pour UI affectée
+    if (['preset','dailyRange','allDay'].includes(key)) this.renderView();
+  },
+
+  // Applique un preset de durée : calcule auto startDate/endDate/heures
+  applyVacPreset(presetId){
+    let vac = {};
+    try { vac = JSON.parse(localStorage.getItem('nexus_vacances') || 'null') || this.defaultVacances(); }
+    catch(e){ vac = this.defaultVacances(); }
+    const now = new Date();
+    const start = new Date(now);
+    const end = new Date(now);
+    let startTime = '18:00', endTime = '09:00';
+    switch(presetId) {
+      case 'afternoon': // après-midi = aujourd'hui 14h → aujourd'hui 18h
+        startTime = '14:00'; endTime = '18:00';
+        break;
+      case 'day': // 1 jour = aujourd'hui → demain
+        end.setDate(end.getDate() + 1);
+        startTime = '09:00'; endTime = '09:00';
+        break;
+      case 'weekend': // week-end = vendredi 18h → lundi 9h
+        { const dow = now.getDay(); const friOffset = (5 - dow + 7) % 7; start.setDate(start.getDate() + friOffset); end.setDate(start.getDate() + 3); }
+        break;
+      case 'week': // 1 semaine
+        end.setDate(end.getDate() + 7);
+        break;
+      case '2weeks':
+        end.setDate(end.getDate() + 14);
+        break;
+      case 'month':
+        end.setMonth(end.getMonth() + 1);
+        break;
+      case 'custom':
+        // Laisse l'user choisir, ne touche pas aux dates
+        vac.preset = 'custom';
+        localStorage.setItem('nexus_vacances', JSON.stringify(vac));
+        this.renderView();
+        return;
+    }
+    vac.preset = presetId;
+    vac.startDate = start.toISOString().slice(0,10);
+    vac.endDate = end.toISOString().slice(0,10);
+    vac.startTime = startTime;
+    vac.endTime = endTime;
+    localStorage.setItem('nexus_vacances', JSON.stringify(vac));
+    this.toast('✓ Dates pré-remplies','success', `${vac.startDate} → ${vac.endDate}`);
+    this.renderView();
   },
 
   toggleVacancesActive(){
