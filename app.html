@@ -1886,6 +1886,18 @@ const Nx = {
   state: null,
 
   init(){
+    // ⚡ FAILSAFE BOOT-HIDE (Augustin 19/05 : "loading en boucle")
+    // Force-hide boot après 2.5s MAX même si init plante quelque part en route
+    setTimeout(() => {
+      const b = document.getElementById('boot-screen');
+      if (b && b.style.display !== 'none') {
+        b.style.display = 'none';
+        console.warn('[init] failsafe boot-hide triggered after 2.5s');
+      }
+    }, 2500);
+
+    // Wrap tout init dans try/catch global pour ne jamais bloquer le boot screen
+    try {
     // VERSION CHECK : si version stockée différente, reset complet (évite page blanche après upgrade)
     const APP_VERSION = '2.0.0';
     const storedVersion = localStorage.getItem('nexus_app_version');
@@ -1973,6 +1985,12 @@ const Nx = {
     }
     // Welcome toast — après le boot
     setTimeout(() => this.toast('Bienvenue sur Nexus, Carlos ☀️', 'success', 'Ton agent IA veille sur tes conversations.'), 2200);
+    } catch(err) {
+      console.error('[init] CRASH:', err);
+      // Force-hide le boot même si init plante en route
+      const b = document.getElementById('boot-screen');
+      if (b) b.style.display = 'none';
+    }
   },
 
   save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state)); },
