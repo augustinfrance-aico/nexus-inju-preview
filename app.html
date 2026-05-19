@@ -5828,7 +5828,7 @@ const Nx = {
       {k:'norm', l:'👥 Normaux'},{k:'lost', l:'💔 Perdus'},{k:'all',  l:'👤 Tous'}
     ].map(o => `<option value="${o.k}" ${det.target===o.k?'selected':''}>${o.l}</option>`).join('');
     mc.innerHTML = `
-      <div class="modal-hd"><h3>🤖 ${editingId?'Modifier l\\'automatisation':'Nouvelle campagne automatique'}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-hd"><h3>🤖 ${editingId?"Modifier l'automatisation":"Nouvelle campagne automatique"}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
       <div class="modal-body">
         <div style="padding:14px;background:var(--blue-soft);border-radius:10px;margin-bottom:14px;font-size:13px;color:#1E40AF">
           💡 <b>Mode auto :</b> tu programmes une fois, Nexus envoie tout seul. Le formulaire s'<b>adapte selon le déclencheur choisi</b>.
