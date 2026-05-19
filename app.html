@@ -741,12 +741,22 @@ html[data-theme="dark"] .chat-input input::placeholder,
 html[data-theme="dark"] .chat-input textarea::placeholder{color:#8A94A6}
 
 /* POINT CRM b — Filter pills CRM par segment (palette unifiée) */
+.filter-pill .seg-dot{display:inline-block;width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-right:6px;background:#94A3B8;vertical-align:middle}
+.filter-pill.seg-vip .seg-dot{background:#F5C45E}
+.filter-pill.seg-rec .seg-dot{background:#1A56DB}
+.filter-pill.seg-new .seg-dot{background:#22C55E}
+.filter-pill.seg-occ .seg-dot{background:#F59E0B}
+.filter-pill.seg-biz .seg-dot{background:#7A3CFF}
+.filter-pill.seg-lost .seg-dot{background:#EF4444}
+.filter-pill.seg-custom .seg-dot{background:#7A3CFF}
 .filter-pill.seg-vip.on{background:#F5C45E;border-color:#F5C45E;color:#78350F}
 .filter-pill.seg-rec.on{background:#1A56DB;border-color:#1A56DB;color:#fff}
 .filter-pill.seg-new.on{background:#22C55E;border-color:#22C55E;color:#fff}
 .filter-pill.seg-occ.on{background:#F59E0B;border-color:#F59E0B;color:#fff}
 .filter-pill.seg-biz.on{background:#7A3CFF;border-color:#7A3CFF;color:#fff}
-.filter-pill.seg-lost.on{background:#FF6B6B;border-color:#FF6B6B;color:#fff}
+.filter-pill.seg-lost.on{background:#EF4444;border-color:#EF4444;color:#fff}
+.filter-pill.seg-custom.on{background:#7A3CFF;border-color:#7A3CFF;color:#fff}
+.filter-pill.on .seg-dot{background:#fff!important}
 
 /* POINT 8c — Sélecteur graphique stats */
 .chart-selector{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
@@ -4184,9 +4194,14 @@ const Nx = {
     if (filter==='active') clients = clients.filter(c=>c.status==='active');
     else if (filter==='prospect') clients = clients.filter(c=>c.status==='prospect');
     else if (filter==='lost') clients = clients.filter(c=>c.status==='lost');
-    else if (filter==='vip') clients = clients.filter(c=>c.tags.includes('VIP'));
+    else if (filter==='vip') clients = clients.filter(c=>c.tags&&c.tags.includes('VIP'));
     else if (filter==='biz') clients = clients.filter(c=>c.tag==='biz'||(c.tags&&c.tags.includes('Business')));
     else if (filter==='occ') clients = clients.filter(c=>c.tag==='occ');
+    else if (filter.startsWith('custom_')) {
+      const idx = parseInt(filter.slice(7), 10);
+      const seg = (this.state.customSegments||[])[idx];
+      if (seg && seg.clientIds) clients = clients.filter(c => seg.clientIds.includes(c.id));
+    }
     if (search) clients = clients.filter(c=>c.name.toLowerCase().includes(search) || c.notes.toLowerCase().includes(search));
 
     const sortMode = this.state.crmSort || 'score';
@@ -4216,14 +4231,22 @@ const Nx = {
             <!-- POINT CRM (a) — input debouncé, ne re-render pas à chaque touche -->
             <input id="crmSearchInput" class="form-ctrl" placeholder="${t('crm.search')}" value="${this.state.crmSearch||''}" oninput="Nx.onCrmSearchInput(this.value)">
           </div>
-          <!-- POINT CRM (b) — Filter pills couleurs unifiées par segment -->
+          <!-- Filter pills CRM : pastilles couleur unifiées (Augustin 19/05) — sans emoji thématique -->
           <button class="filter-pill ${filter==='all'?'on':''}" onclick="Nx.state.crmFilter='all';Nx.renderView()">Tous (${this.state.clients.length})</button>
-          <button class="filter-pill seg-rec ${filter==='active'?'on':''}" onclick="Nx.state.crmFilter='active';Nx.renderView()">🔁 Actifs (${this.state.clients.filter(c=>c.status==='active').length})</button>
-          <button class="filter-pill seg-new ${filter==='prospect'?'on':''}" onclick="Nx.state.crmFilter='prospect';Nx.renderView()">🌱 Prospects (${this.state.clients.filter(c=>c.status==='prospect').length})</button>
-          <button class="filter-pill seg-lost ${filter==='lost'?'on':''}" onclick="Nx.state.crmFilter='lost';Nx.renderView()">💔 Perdus (${this.state.clients.filter(c=>c.status==='lost').length})</button>
-          <button class="filter-pill seg-vip ${filter==='vip'?'on':''}" onclick="Nx.state.crmFilter='vip';Nx.renderView()">⭐ VIP</button>
-          <button class="filter-pill seg-biz ${filter==='biz'?'on':''}" onclick="Nx.state.crmFilter='biz';Nx.renderView()">💼 Business</button>
-          <button class="filter-pill seg-occ ${filter==='occ'?'on':''}" onclick="Nx.state.crmFilter='occ';Nx.renderView()">👥 Occasionnels</button>
+          <button class="filter-pill seg-rec ${filter==='active'?'on':''}" onclick="Nx.state.crmFilter='active';Nx.renderView()"><span class="seg-dot"></span>Actifs (${this.state.clients.filter(c=>c.status==='active').length})</button>
+          <button class="filter-pill seg-new ${filter==='prospect'?'on':''}" onclick="Nx.state.crmFilter='prospect';Nx.renderView()"><span class="seg-dot"></span>Prospects (${this.state.clients.filter(c=>c.status==='prospect').length})</button>
+          <button class="filter-pill seg-lost ${filter==='lost'?'on':''}" onclick="Nx.state.crmFilter='lost';Nx.renderView()"><span class="seg-dot"></span>Perdus (${this.state.clients.filter(c=>c.status==='lost').length})</button>
+          <button class="filter-pill seg-vip ${filter==='vip'?'on':''}" onclick="Nx.state.crmFilter='vip';Nx.renderView()"><span class="seg-dot"></span>VIP (${this.state.clients.filter(c=>c.tags&&c.tags.includes('VIP')).length})</button>
+          <button class="filter-pill seg-biz ${filter==='biz'?'on':''}" onclick="Nx.state.crmFilter='biz';Nx.renderView()"><span class="seg-dot"></span>Business (${this.state.clients.filter(c=>c.tag==='biz'||(c.tags&&c.tags.includes('Business'))).length})</button>
+          <button class="filter-pill seg-occ ${filter==='occ'?'on':''}" onclick="Nx.state.crmFilter='occ';Nx.renderView()"><span class="seg-dot"></span>Occasionnels (${this.state.clients.filter(c=>c.tag==='occ').length})</button>
+          <!-- Segments personnalisés (créés par l'user) -->
+          ${(this.state.customSegments||[]).map((s,i) => `
+            <button class="filter-pill seg-custom ${filter==='custom_'+i?'on':''}" onclick="Nx.state.crmFilter='custom_${i}';Nx.renderView()" title="Segment personnalisé">
+              <span class="seg-dot" style="background:#7A3CFF"></span>${s.name} (${s.clientIds.length})
+              <span style="margin-left:6px;opacity:.5;cursor:pointer;font-size:11px" onclick="event.stopPropagation();Nx.deleteCustomSegment(${i})" title="Supprimer">✕</span>
+            </button>
+          `).join('')}
+          <button class="filter-pill" style="border-style:dashed;color:var(--violet);border-color:var(--violet)" onclick="Nx.openCreateSegmentModal()" title="Créer un segment personnalisé">+ Nouveau segment</button>
         </div>
 
         <div class="card" id="crmPodium" style="margin-bottom:14px;padding:24px;background:linear-gradient(135deg,#FFF7ED,#FEF3C7);scroll-margin-top:80px">
