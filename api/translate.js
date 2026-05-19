@@ -34,8 +34,12 @@ export default async function handler(req, res) {
     if (texts.length > 200) {
       return res.status(400).json({ error: 'max 200 textes par batch' });
     }
-    if (!['es', 'en', 'fr'].includes(target)) {
-      return res.status(400).json({ error: 'target doit être "es", "en" ou "fr"' });
+    const SUPPORTED = ['es', 'en', 'fr', 'pt', 'it', 'de', 'nl', 'ca', 'zh', 'ja', 'ko', 'ar', 'ru'];
+    if (!SUPPORTED.includes(target)) {
+      return res.status(400).json({ error: `target doit être l'un de : ${SUPPORTED.join(', ')}` });
+    }
+    if (!SUPPORTED.includes(source)) {
+      return res.status(400).json({ error: `source doit être l'un de : ${SUPPORTED.join(', ')}` });
     }
     if (target === source) {
       return res.status(200).json({ translations: texts, model: 'noop' });
@@ -44,8 +48,14 @@ export default async function handler(req, res) {
     const groqKey = process.env.GROQ_API_KEY;
     const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
-    const langName = target === 'es' ? 'Spanish (es-ES)' : target === 'en' ? 'English (en-US)' : 'French (fr-FR)';
-    const sourceName = source === 'fr' ? 'French' : source === 'es' ? 'Spanish' : 'English';
+    const LANG_NAMES = {
+      fr: 'French (fr-FR)', es: 'Spanish (Latin American, Chilean preferred)', en: 'English (en-US)',
+      pt: 'Portuguese (Brazilian)', it: 'Italian (it-IT)', de: 'German (de-DE)', nl: 'Dutch (nl-NL)',
+      ca: 'Catalan (ca-ES)', zh: 'Mandarin Chinese (Simplified)', ja: 'Japanese',
+      ko: 'Korean', ar: 'Arabic (Modern Standard)', ru: 'Russian'
+    };
+    const langName = LANG_NAMES[target] || target;
+    const sourceName = LANG_NAMES[source] || source;
 
     const userMsg = `Translate from ${sourceName} to ${langName}.
 

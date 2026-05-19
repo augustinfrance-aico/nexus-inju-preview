@@ -3870,19 +3870,35 @@ const Nx = {
     this.toast('📝 Brouillon créé','success');
   },
 
-  // Vraie traduction du dernier message via /api/translate (Groq) — Augustin 19/05/2026
-  async translateMsg(clientId){
+  // Vraie traduction du dernier message — multi-langues (Augustin 19/05/2026)
+  async translateMsg(clientId, targetLangOverride){
     const conv = this.state.conversations.find(c=>c.clientId===clientId);
     if (!conv || !conv.messages || !conv.messages.length) return this.toast('Aucun message à traduire','error');
     const lastMsg = conv.messages[conv.messages.length-1];
-    const targetLang = this.state.lang === 'es' ? 'fr' : this.state.lang || 'fr';
     const sourceLang = 'es';
-    const flag = { fr:'🇫🇷 Français', es:'🇨🇱 Español', en:'🇬🇧 English' };
+    let savedTarget = null;
+    try { savedTarget = localStorage.getItem('nx_translate_target'); } catch(e){}
+    const targetLang = targetLangOverride || savedTarget || (this.state.lang === 'es' ? 'fr' : this.state.lang) || 'fr';
+    try { localStorage.setItem('nx_translate_target', targetLang); } catch(e){}
+    const LANG_OPTS = [
+      {k:'fr',f:'🇫🇷',l:'Français'},{k:'en',f:'🇬🇧',l:'English'},{k:'es',f:'🇨🇱',l:'Español'},
+      {k:'pt',f:'🇧🇷',l:'Português'},{k:'it',f:'🇮🇹',l:'Italiano'},{k:'de',f:'🇩🇪',l:'Deutsch'},
+      {k:'nl',f:'🇳🇱',l:'Nederlands'},{k:'ja',f:'🇯🇵',l:'日本語'},{k:'zh',f:'🇨🇳',l:'中文'}
+    ];
+    const flagOf = (k) => (LANG_OPTS.find(o=>o.k===k)||{f:'',l:k}).f + ' ' + (LANG_OPTS.find(o=>o.k===k)||{l:k}).l;
+    const langSwitcher = LANG_OPTS.filter(o=>o.k!==sourceLang).map(o =>
+      `<button onclick="Nx.translateMsg(${clientId},'${o.k}')" style="padding:5px 10px;font-size:11.5px;font-weight:600;border-radius:8px;border:1px solid ${o.k===targetLang?'var(--blue)':'var(--line)'};background:${o.k===targetLang?'var(--blue)':'var(--bg2)'};color:${o.k===targetLang?'#fff':'var(--ink2)'};cursor:pointer">${o.f} ${o.l}</button>`
+    ).join('');
     this.openModal('translation');
     const mc = document.getElementById('modal-content');
-    mc.innerHTML = `
-      <div class="modal-hd"><h3>🌐 Traduction</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
-      <div class="modal-body"><div style="text-align:center;padding:30px;color:var(--muted)"><div style="font-size:24px;margin-bottom:8px">⏳</div>Traduction en cours via Claude…</div></div>`;
+    const renderShell = (innerBody) => `
+      <div class="modal-hd"><h3>🌐 Traduction du dernier message</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-body" style="max-height:70vh;overflow-y:auto">
+        <div style="margin-bottom:14px"><div style="font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;font-weight:700">Traduire vers</div><div style="display:flex;flex-wrap:wrap;gap:6px">${langSwitcher}</div></div>
+        ${innerBody}
+      </div>
+      <div class="modal-foot"><button class="btn btn-p" onclick="Nx.closeModal()">OK</button></div>`;
+    mc.innerHTML = renderShell(`<div style="text-align:center;padding:30px;color:var(--muted)"><div style="font-size:24px;margin-bottom:8px">⏳</div>Traduction en cours via Claude…</div>`);
     try {
       const r = await fetch('/api/translate', {
         method:'POST', headers:{'Content-Type':'application/json'},
@@ -3890,16 +3906,13 @@ const Nx = {
       });
       const data = await r.json();
       const translated = (data.translations && data.translations[0]) || lastMsg.text;
-      mc.innerHTML = `
-        <div class="modal-hd"><h3>🌐 Traduction du dernier message</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
-        <div class="modal-body">
-          <div style="margin-bottom:14px"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">${flag[sourceLang]} (original)</div><div style="padding:12px 14px;background:var(--bg2);border-radius:8px;font-size:13.5px">${lastMsg.text}</div></div>
-          <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">${flag[targetLang]} (auto)</div><div style="padding:12px 14px;background:var(--blue-soft);border-radius:8px;font-size:13.5px;color:var(--blue-ink)">${translated}</div></div>
-          <div style="margin-top:10px;font-size:10px;color:var(--muted);text-align:right">${data.model||''}</div>
-        </div>
-        <div class="modal-foot"><button class="btn btn-p" onclick="Nx.closeModal()">OK</button></div>`;
+      const body = `
+        <div style="margin-bottom:14px"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">${flagOf(sourceLang)} (original)</div><div style="padding:12px 14px;background:var(--bg2);border-radius:8px;font-size:13.5px">${lastMsg.text}</div></div>
+        <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">${flagOf(targetLang)} (auto)</div><div style="padding:12px 14px;background:var(--blue-soft);border-radius:8px;font-size:13.5px;color:var(--blue-ink)">${translated}</div></div>
+        <div style="margin-top:10px;font-size:10px;color:var(--muted);text-align:right">${data.model||''}</div>`;
+      mc.innerHTML = renderShell(body);
     } catch(e) {
-      mc.innerHTML = `<div class="modal-hd"><h3>🌐 Traduction</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div><div class="modal-body" style="padding:30px;text-align:center;color:var(--red)">❌ Erreur : ${String(e).slice(0,100)}</div>`;
+      mc.innerHTML = renderShell(`<div style="padding:30px;text-align:center;color:var(--red)">❌ Erreur : ${String(e).slice(0,100)}</div>`);
     }
   },
 
@@ -3965,19 +3978,37 @@ const Nx = {
     this.toast('🔄 Brouillon reformulé','info');
   },
 
-  // Vraie traduction des 5 derniers messages de la conversation via /api/translate (Groq)
-  async translateConv(clientId){
+  // Vraie traduction des 5 derniers messages — multi-langues (FR/ES/EN/PT/IT/DE/+)
+  // Augustin 19/05/2026 : "il faut aussi en anglais et en plusieurs langues"
+  async translateConv(clientId, targetLangOverride){
     const conv = this.state.conversations.find(c => c.clientId === clientId);
     if (!conv || !conv.messages || !conv.messages.length) return this.toast('Aucun message à traduire','error');
-    const targetLang = this.state.lang === 'es' ? 'fr' : this.state.lang || 'fr';
     const sourceLang = 'es';
+    // Langue cible : override (clic sur switcher) > localStorage > langue app > FR
+    let savedTarget = null;
+    try { savedTarget = localStorage.getItem('nx_translate_target'); } catch(e){}
+    const targetLang = targetLangOverride || savedTarget || (this.state.lang === 'es' ? 'fr' : this.state.lang) || 'fr';
+    try { localStorage.setItem('nx_translate_target', targetLang); } catch(e){}
     const lastMsgs = conv.messages.slice(-5);
     const cl = (this.state.clients||[]).find(x=>x.id===clientId)||{};
+    const LANG_OPTS = [
+      {k:'fr',f:'🇫🇷',l:'Français'},{k:'en',f:'🇬🇧',l:'English'},{k:'es',f:'🇨🇱',l:'Español'},
+      {k:'pt',f:'🇧🇷',l:'Português'},{k:'it',f:'🇮🇹',l:'Italiano'},{k:'de',f:'🇩🇪',l:'Deutsch'},
+      {k:'nl',f:'🇳🇱',l:'Nederlands'},{k:'ja',f:'🇯🇵',l:'日本語'},{k:'zh',f:'🇨🇳',l:'中文'}
+    ];
+    const langSwitcher = LANG_OPTS.filter(o=>o.k!==sourceLang).map(o =>
+      `<button onclick="Nx.translateConv(${clientId},'${o.k}')" style="padding:5px 10px;font-size:11.5px;font-weight:600;border-radius:8px;border:1px solid ${o.k===targetLang?'var(--blue)':'var(--line)'};background:${o.k===targetLang?'var(--blue)':'var(--bg2)'};color:${o.k===targetLang?'#fff':'var(--ink2)'};cursor:pointer;transition:all .15s">${o.f} ${o.l}</button>`
+    ).join('');
     this.openModal('translation');
     const mc = document.getElementById('modal-content');
-    mc.innerHTML = `
+    const renderShell = (innerBody) => `
       <div class="modal-hd"><h3>🌐 Traduction · ${cl.name||'Client'}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
-      <div class="modal-body"><div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:24px;margin-bottom:8px">⏳</div>Traduction en cours via Claude…</div></div>`;
+      <div class="modal-body" style="max-height:70vh;overflow-y:auto">
+        <div style="margin-bottom:14px"><div style="font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;font-weight:700">Traduire vers</div><div style="display:flex;flex-wrap:wrap;gap:6px">${langSwitcher}</div></div>
+        ${innerBody}
+      </div>
+      <div class="modal-foot"><button class="btn btn-s" onclick="Nx.closeModal()">Fermer</button></div>`;
+    mc.innerHTML = renderShell(`<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:24px;margin-bottom:8px">⏳</div>Traduction en cours via Claude…</div>`);
     try {
       const r = await fetch('/api/translate', {
         method:'POST', headers:{'Content-Type':'application/json'},
@@ -3985,22 +4016,19 @@ const Nx = {
       });
       const data = await r.json();
       const translations = data.translations || lastMsgs.map(m=>m.text);
-      const flag = { fr:'🇫🇷 Français', es:'🇨🇱 Español', en:'🇬🇧 English' };
-      mc.innerHTML = `
-        <div class="modal-hd"><h3>🌐 Traduction · ${cl.name||'Client'}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
-        <div class="modal-body" style="max-height:60vh;overflow-y:auto">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:12px">${flag[sourceLang]||sourceLang} → ${flag[targetLang]||targetLang} · ${data.model||''}</div>
-          ${lastMsgs.map((m,i)=>`
-            <div style="margin-bottom:14px;padding:12px 14px;border:1px solid var(--line);border-radius:10px">
-              <div style="font-size:11px;color:var(--muted);margin-bottom:4px">${m.from==='client'?'👤 '+(cl.name||'Client'):'🥖 Toi'} · ${m.time||''}</div>
-              <div style="font-size:13px;margin-bottom:8px;color:var(--ink)">${m.text}</div>
-              <div style="font-size:13px;padding:8px 10px;background:var(--blue-soft);border-radius:6px;color:var(--blue-ink)"><b style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--blue);display:block;margin-bottom:3px">${flag[targetLang]||targetLang}</b>${translations[i]||m.text}</div>
-            </div>
-          `).join('')}
-        </div>
-        <div class="modal-foot"><button class="btn btn-s" onclick="Nx.closeModal()">Fermer</button></div>`;
+      const flagOf = (k) => (LANG_OPTS.find(o=>o.k===k)||{f:'',l:k}).f + ' ' + (LANG_OPTS.find(o=>o.k===k)||{l:k}).l;
+      const body = `
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px">${flagOf(sourceLang)} → ${flagOf(targetLang)} · ${data.model||''}</div>
+        ${lastMsgs.map((m,i)=>`
+          <div style="margin-bottom:14px;padding:12px 14px;border:1px solid var(--line);border-radius:10px">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">${m.from==='client'?'👤 '+(cl.name||'Client'):'🥖 Toi'} · ${m.time||''}</div>
+            <div style="font-size:13px;margin-bottom:8px;color:var(--ink)">${m.text}</div>
+            <div style="font-size:13px;padding:8px 10px;background:var(--blue-soft);border-radius:6px;color:var(--blue-ink)"><b style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--blue);display:block;margin-bottom:3px">${flagOf(targetLang)}</b>${translations[i]||m.text}</div>
+          </div>
+        `).join('')}`;
+      mc.innerHTML = renderShell(body);
     } catch (e) {
-      mc.innerHTML = `<div class="modal-hd"><h3>🌐 Traduction</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div><div class="modal-body" style="padding:30px;text-align:center;color:var(--red)">❌ Erreur de traduction : ${String(e).slice(0,100)}</div>`;
+      mc.innerHTML = renderShell(`<div style="padding:30px;text-align:center;color:var(--red)">❌ Erreur de traduction : ${String(e).slice(0,100)}</div>`);
     }
   },
 
