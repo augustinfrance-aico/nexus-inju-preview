@@ -232,7 +232,8 @@ html[data-theme="dark"] .bubble.me{background:#056162;color:#E8ECF3}
 .chat-input input:focus{outline:0;border-color:var(--blue)}
 
 /* MODAL */
-#modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+#modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.6);-webkit-backdrop-filter:blur(4px);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+#modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.6);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
 #modal-overlay.hidden{display:none}
 .modal{background:var(--panel);border-radius:var(--radius);max-width:640px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-xl);animation:slideUp .25s ease}
 @keyframes slideUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
@@ -256,7 +257,8 @@ html[data-theme="dark"] .bubble.me{background:#056162;color:#E8ECF3}
 @keyframes slideIn{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
 
 /* COMMAND PALETTE */
-#command-palette{position:fixed;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(4px);z-index:150;display:flex;align-items:flex-start;justify-content:center;padding-top:100px}
+#command-palette{position:fixed;inset:0;background:rgba(15,23,42,.5);-webkit-backdrop-filter:blur(4px);z-index:150;display:flex;align-items:flex-start;justify-content:center;padding-top:100px}
+#command-palette{position:fixed;inset:0;background:rgba(15,23,42,.5);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);z-index:150;display:flex;align-items:flex-start;justify-content:center;padding-top:100px}
 #command-palette.hidden{display:none}
 .cp{background:var(--panel);border-radius:var(--radius);max-width:560px;width:calc(100% - 40px);overflow:hidden;box-shadow:var(--shadow-xl);animation:slideUp .2s ease}
 .cp-input{width:100%;padding:18px 24px;border:0;border-bottom:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:16px}
@@ -341,7 +343,8 @@ html[data-theme="dark"] .streak{background:linear-gradient(135deg,rgba(253,186,1
 .menu-toggle{display:none;width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:var(--panel);align-items:center;justify-content:center;cursor:pointer;color:var(--ink2);flex-shrink:0;transition:all .15s}
 .menu-toggle:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-soft)}
 .menu-toggle:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
-.sidebar-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(2px);z-index:85;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s}
+.sidebar-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.55);-webkit-backdrop-filter:blur(2px);z-index:85;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s}
+.sidebar-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.55);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);z-index:85;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s}
 .sidebar-backdrop.show{opacity:1;visibility:visible}
 
 /* FOCUS RINGS (a11y) */
@@ -531,7 +534,8 @@ html[data-theme="dark"] .back-to-core-btn{color:#E8ECF3}
 .iface-window-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:10px;background:linear-gradient(135deg,#2E7BFF,#8B5CFF);border:0;color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:all .18s ease;font-family:inherit;box-shadow:0 6px 14px -6px rgba(46,123,255,.45)}
 .iface-window-btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px -6px rgba(139,92,255,.55)}
 .iface-window-btn svg{flex-shrink:0}
-.hub-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(6px);z-index:120;display:flex;align-items:center;justify-content:center;padding:24px;animation:slideUp .25s ease}
+.hub-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);-webkit-backdrop-filter:blur(6px);z-index:120;display:flex;align-items:center;justify-content:center;padding:24px;animation:slideUp .25s ease}
+.hub-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);z-index:120;display:flex;align-items:center;justify-content:center;padding:24px;animation:slideUp .25s ease}
 .hub-overlay.hidden{display:none}
 .hub-overlay-card{background:linear-gradient(135deg,#0F172A 0%,#1E293B 100%);border:1px solid rgba(255,255,255,.1);border-radius:20px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;padding:26px 26px 22px;box-shadow:var(--shadow-xl);color:#E8ECF3;position:relative}
 .hub-overlay-card::before{content:"";position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;background:linear-gradient(135deg,var(--violet),var(--cyan));border-radius:22px;z-index:-1;opacity:.4}
@@ -889,11 +893,146 @@ html[data-theme="dark"] .chat-input textarea::placeholder{color:#8A94A6}
 <!-- PRINT AREA -->
 <div id="print-area"></div>
 
+<!-- Module traduction dynamique (Claude via /api/translate) -->
+<script src="nexusTranslate.js"></script>
+
 <script>
 /* ============================================================
    NEXUS MVP — Client App · v1.0
    Built for Juan & Inigo · Panadería Don Carlos demo
    ============================================================ */
+
+// ====================================================
+// DYNAMIC TRANSLATE — couvre le DOM non-i18n via /api/translate (Claude)
+// Cache localStorage par hash, restore originals quand on revient en FR
+// ====================================================
+window.NexusDynTranslate = (function(){
+  const CACHE_KEY = 'nexus_dyn_translations_v1';
+  const ORIG_ATTR = 'data-dyn-orig';
+  const SKIP_SELECTOR = '[data-dyn-skip],[data-i18n],[data-i18n-html],[data-i18n-ph],[data-i18n-aria],[data-i18n-title]';
+  const TEXTUAL_TAGS = 'h1,h2,h3,h4,h5,h6,p,span,button,a,label,td,th,li,option,small,b,i,em,strong,div';
+  // Patterns à ne jamais traduire (cellules numériques, codes, IDs courts, emojis seuls)
+  const SKIP_TEXT = /^(\s*[\d.,%€$£+\-×\/]+\s*[mhskg]?\w{0,3}\s*)$/i;
+  const ONLY_EMOJI = /^[\s\p{Extended_Pictographic}‍️\d:.]+$/u;
+  // Mots qu'on ne traduit jamais (préservation marque/produit/lieu)
+  const PRESERVE = /^(Nexus|Carlos|María|Maria|Diego|Ana|Javier|Raviella|WhatsApp|Gmail|Calendar|Google|Claude|Stripe|Loom|Vercel|VIP|CRM|SOS|FAQ|API|PDF|CSV|empanadas|pan amasado|bolos|panadería|Providencia|Las Condes|Santiago|Pro|Business|Enterprise|Free|Chile|Chili)$/i;
+
+  let cache = {};
+  try { cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch(e){ cache = {}; }
+  let inFlight = false;
+  let pendingLang = null;
+
+  function saveCache(){
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch(e){}
+  }
+
+  function hash(s){
+    let h = 5381;
+    for (let i = 0; i < s.length; i++) h = ((h << 5) + h) + s.charCodeAt(i);
+    return (h >>> 0).toString(36);
+  }
+
+  function shouldTranslate(txt){
+    if (!txt || txt.length < 2 || txt.length > 500) return false;
+    if (SKIP_TEXT.test(txt)) return false;
+    if (ONLY_EMOJI.test(txt)) return false;
+    if (PRESERVE.test(txt.trim())) return false;
+    return true;
+  }
+
+  // Collecte les éléments text-only (sans enfants) non couverts par data-i18n
+  function collectNodes(){
+    const nodes = [];
+    document.body.querySelectorAll(TEXTUAL_TAGS).forEach(el => {
+      if (el.children.length > 0) return;
+      if (el.matches(SKIP_SELECTOR)) return;
+      if (el.closest(SKIP_SELECTOR + ',script,style,code,pre')) return;
+      const orig = el.getAttribute(ORIG_ATTR) || el.textContent.trim();
+      if (!shouldTranslate(orig)) return;
+      nodes.push({ el, orig });
+    });
+    return nodes;
+  }
+
+  async function translateBatch(texts, target){
+    try {
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ texts, target, source: 'fr' })
+      });
+      if (!res.ok) { console.warn('DT API error', res.status); return null; }
+      const data = await res.json();
+      return Array.isArray(data.translations) && data.translations.length === texts.length
+        ? data.translations
+        : null;
+    } catch (e) {
+      console.warn('DT fetch failed', e);
+      return null;
+    }
+  }
+
+  async function apply(lang){
+    if (!lang) return;
+    // Si la même langue est demandée pendant qu'on traduit, on note pour re-jouer
+    if (inFlight) { pendingLang = lang; return; }
+    inFlight = true;
+    try {
+      // Retour en FR → restore les originaux
+      if (lang === 'fr') {
+        document.querySelectorAll('[' + ORIG_ATTR + ']').forEach(el => {
+          el.textContent = el.getAttribute(ORIG_ATTR);
+          el.removeAttribute(ORIG_ATTR);
+        });
+        return;
+      }
+      const nodes = collectNodes();
+      if (nodes.length === 0) return;
+      if (!cache[lang]) cache[lang] = {};
+      // Sauvegarde originaux + applique cache instant
+      const needTranslate = [];
+      const needIdx = [];
+      nodes.forEach((n, i) => {
+        if (!n.el.hasAttribute(ORIG_ATTR)) n.el.setAttribute(ORIG_ATTR, n.orig);
+        const h = hash(n.orig);
+        if (cache[lang][h]) {
+          n.el.textContent = cache[lang][h];
+        } else {
+          needTranslate.push(n.orig);
+          needIdx.push(i);
+        }
+      });
+      // Envoi batch (200 max par requête)
+      const CHUNK = 80;
+      for (let i = 0; i < needTranslate.length; i += CHUNK) {
+        const batchTexts = needTranslate.slice(i, i + CHUNK);
+        const batchIdx = needIdx.slice(i, i + CHUNK);
+        const translated = await translateBatch(batchTexts, lang);
+        if (!translated) continue;
+        batchTexts.forEach((src, k) => {
+          const tr = translated[k];
+          if (!tr) return;
+          cache[lang][hash(src)] = tr;
+          const node = nodes[batchIdx[k]];
+          if (node && node.el && document.body.contains(node.el)) {
+            node.el.textContent = tr;
+          }
+        });
+      }
+      saveCache();
+    } finally {
+      inFlight = false;
+      if (pendingLang && pendingLang !== lang) {
+        const next = pendingLang; pendingLang = null;
+        apply(next);
+      } else {
+        pendingLang = null;
+      }
+    }
+  }
+
+  return { apply, clearCache(){ cache = {}; saveCache(); } };
+})();
 
 // -------- I18N DICTIONARY (complet FR/ES/EN) --------
 const I18N = {
@@ -938,6 +1077,47 @@ const I18N = {
     'stats.best.title':'⏰ Meilleures heures','stats.top.title':'❓ Top questions de la semaine',
     'stats.evolution':'Évolution sur','stats.7d':'7 jours','stats.30d':'30 jours','stats.always':'Depuis toujours',
     'stats.export':'Exporter PDF','stats.report':'Rapport général',
+    // STATS PAGE (extended)
+    'stats.page.title':'📊 Statistiques & santé business',
+    'stats.page.sub':'Toutes tes métriques en un coup d\'œil. Compare, exporte, écoute.',
+    'stats.export.pdf':'📄 Exporter PDF',
+    'stats.period.label':'Période :',
+    'stats.click.origin':'📍 Clic sur un cadre = origine de la donnée',
+    'stats.card.conv':'Conversations totales',
+    'stats.card.conv.sub':'cette période vs précédente · clic = inbox',
+    'stats.card.newclients':'Nouveaux clients',
+    'stats.card.newclients.sub':'clic = liste CRM',
+    'stats.card.response':'Taux de réponse',
+    'stats.card.response.sub':'temps moyen 2:18 min',
+    'stats.card.avgtime':'Temps moyen',
+    'stats.card.avgtime.sub':'< 5 min = Excellent',
+    'stats.note.revenue':'💰 <b>Note :</b> les stats <i>Revenu</i> arrivent dans Nexus Finance (prochain module). Pour l\'instant on garde les métriques liées au <b>core</b> : conversations, clients, messages.',
+    'stats.brief.title':'🎙 Brief audio quotidien · 30 sec',
+    'stats.brief.sub':'Voix douce, agréable. Pause/stop possible.',
+    'stats.brief.seetext':'📝 Voir le texte',
+    'stats.brief.speed.title':'Vitesse de lecture (style WhatsApp)',
+    'stats.brief.playpause':'Lecture / Pause',
+    'stats.brief.stop':'Stop',
+    'stats.besthours.title':'🔥 Best Hours — quand tes clients écrivent',
+    'stats.topq.title':'❓ Top questions — tendances',
+    'stats.faq.week':'Semaine','stats.faq.month':'Mois','stats.faq.all':'Depuis toujours',
+    'stats.evolution.title':'📈 Évolution sur la période',
+    'stats.evolution.legend':'Bleu = conv · Vert = clients · Orange = messages auto',
+    'stats.chart.conv':'Conversations','stats.chart.seg':'Segments clients','stats.chart.resp':'Taux de réponse',
+    'stats.chart.hours':'Best hours','stats.chart.camp':'Campagnes (ouvertures)','stats.chart.newlost':'Nouveaux vs perdus',
+    'stats.chart.sub.conv':'📊 Conversations · 30j','stats.chart.sub.seg':'👥 Segments clients · 30j',
+    'stats.chart.sub.resp':'✓ Taux de réponse · 30j','stats.chart.sub.hours':'⏰ Best hours · semaine',
+    'stats.chart.sub.camp':'📢 Campagnes — ouvertures · 30j','stats.chart.sub.newlost':'🔁 Nouveaux vs perdus · 30j',
+    'stats.distrib.title':'📊 Répartition clients · indicateurs delta',
+    'stats.distrib.month':'Mois','stats.distrib.quarter':'Trimestre','stats.distrib.all':'Depuis le début',
+    'stats.distrib.recurring':'Récurrents','stats.distrib.new':'Nouveaux','stats.distrib.occ':'Occasionnels','stats.distrib.lost':'Perdus',
+    'stats.snapshot.note':'<b>📊 Évolution stockée :</b> tu peux comparer ton état "il y a 1 semaine / 1 mois / 3 mois".',
+    'stats.snapshot.btn':'📜 Voir snapshot',
+    'stats.tip.recurring':'💡 <b>Tes récurrents +50%</b> ce mois → cool, ta stratégie de relance fonctionne.',
+    'stats.report.btn':'📄 Rapport général — exporter TOUT le Nexus Core en PDF',
+    'stats.besthours.range':'· période',
+    'stats.besthours.7days':'7 jours','stats.besthours.30days':'30 jours',
+    'stats.besthours.insights.title':'💡 Best hours — insights actionnables',
     // INBOX
     'inbox.unread':'Messages à répondre','inbox.search':'Rechercher une conversation…',
     'inbox.all':'Tous','inbox.vip':'VIP','inbox.new':'Nouveaux','inbox.biz':'Entreprise',
@@ -1081,6 +1261,46 @@ const I18N = {
     'stats.best.title':'⏰ Mejores horas','stats.top.title':'❓ Top preguntas de la semana',
     'stats.evolution':'Evolución en','stats.7d':'7 días','stats.30d':'30 días','stats.always':'Desde siempre',
     'stats.export':'Exportar PDF','stats.report':'Informe general',
+    'stats.page.title':'📊 Estadísticas & salud del negocio',
+    'stats.page.sub':'Todas tus métricas de un vistazo. Compara, exporta, escucha.',
+    'stats.export.pdf':'📄 Exportar PDF',
+    'stats.period.label':'Período:',
+    'stats.click.origin':'📍 Clic en un cuadro = origen del dato',
+    'stats.card.conv':'Conversaciones totales',
+    'stats.card.conv.sub':'este período vs anterior · clic = inbox',
+    'stats.card.newclients':'Nuevos clientes',
+    'stats.card.newclients.sub':'clic = lista CRM',
+    'stats.card.response':'Tasa de respuesta',
+    'stats.card.response.sub':'tiempo medio 2:18 min',
+    'stats.card.avgtime':'Tiempo medio',
+    'stats.card.avgtime.sub':'< 5 min = Excelente',
+    'stats.note.revenue':'💰 <b>Nota:</b> las stats <i>Ingresos</i> llegan en Nexus Finance (próximo módulo). Por ahora mantenemos las métricas del <b>core</b>: conversaciones, clientes, mensajes.',
+    'stats.brief.title':'🎙 Resumen audio diario · 30 seg',
+    'stats.brief.sub':'Voz suave, agradable. Pausa/stop disponibles.',
+    'stats.brief.seetext':'📝 Ver el texto',
+    'stats.brief.speed.title':'Velocidad de lectura (estilo WhatsApp)',
+    'stats.brief.playpause':'Reproducir / Pausa',
+    'stats.brief.stop':'Stop',
+    'stats.besthours.title':'🔥 Mejores horas — cuando tus clientes escriben',
+    'stats.topq.title':'❓ Top preguntas — tendencias',
+    'stats.faq.week':'Semana','stats.faq.month':'Mes','stats.faq.all':'Desde siempre',
+    'stats.evolution.title':'📈 Evolución en el período',
+    'stats.evolution.legend':'Azul = conv · Verde = clientes · Naranja = mensajes auto',
+    'stats.chart.conv':'Conversaciones','stats.chart.seg':'Segmentos clientes','stats.chart.resp':'Tasa de respuesta',
+    'stats.chart.hours':'Mejores horas','stats.chart.camp':'Campañas (aperturas)','stats.chart.newlost':'Nuevos vs perdidos',
+    'stats.chart.sub.conv':'📊 Conversaciones · 30d','stats.chart.sub.seg':'👥 Segmentos clientes · 30d',
+    'stats.chart.sub.resp':'✓ Tasa de respuesta · 30d','stats.chart.sub.hours':'⏰ Mejores horas · semana',
+    'stats.chart.sub.camp':'📢 Campañas — aperturas · 30d','stats.chart.sub.newlost':'🔁 Nuevos vs perdidos · 30d',
+    'stats.distrib.title':'📊 Reparto clientes · indicadores delta',
+    'stats.distrib.month':'Mes','stats.distrib.quarter':'Trimestre','stats.distrib.all':'Desde el inicio',
+    'stats.distrib.recurring':'Recurrentes','stats.distrib.new':'Nuevos','stats.distrib.occ':'Ocasionales','stats.distrib.lost':'Perdidos',
+    'stats.snapshot.note':'<b>📊 Evolución guardada:</b> puedes comparar tu estado "hace 1 semana / 1 mes / 3 meses".',
+    'stats.snapshot.btn':'📜 Ver snapshot',
+    'stats.tip.recurring':'💡 <b>Tus recurrentes +50%</b> este mes → genial, tu estrategia de recuperación funciona.',
+    'stats.report.btn':'📄 Informe general — exportar TODO el Nexus Core en PDF',
+    'stats.besthours.range':'· período',
+    'stats.besthours.7days':'7 días','stats.besthours.30days':'30 días',
+    'stats.besthours.insights.title':'💡 Mejores horas — insights accionables',
     'inbox.unread':'Mensajes por responder','inbox.search':'Buscar una conversación…',
     'inbox.all':'Todos','inbox.vip':'VIP','inbox.new':'Nuevos','inbox.biz':'Empresa',
     'inbox.rec':'Recurrente','inbox.occ':'Ocasional','inbox.lost':'Perdidos',
@@ -1209,6 +1429,46 @@ const I18N = {
     'stats.best.title':'⏰ Best hours','stats.top.title':'❓ Top questions this week',
     'stats.evolution':'Evolution over','stats.7d':'7 days','stats.30d':'30 days','stats.always':'All-time',
     'stats.export':'Export PDF','stats.report':'Full report',
+    'stats.page.title':'📊 Stats & business health',
+    'stats.page.sub':'All your metrics at a glance. Compare, export, listen.',
+    'stats.export.pdf':'📄 Export PDF',
+    'stats.period.label':'Period:',
+    'stats.click.origin':'📍 Click a card = data origin',
+    'stats.card.conv':'Total conversations',
+    'stats.card.conv.sub':'this period vs previous · click = inbox',
+    'stats.card.newclients':'New clients',
+    'stats.card.newclients.sub':'click = CRM list',
+    'stats.card.response':'Response rate',
+    'stats.card.response.sub':'avg time 2:18 min',
+    'stats.card.avgtime':'Average time',
+    'stats.card.avgtime.sub':'< 5 min = Excellent',
+    'stats.note.revenue':'💰 <b>Note:</b> <i>Revenue</i> stats are coming in Nexus Finance (next module). For now we keep the <b>core</b> metrics: conversations, clients, messages.',
+    'stats.brief.title':'🎙 Daily audio brief · 30 sec',
+    'stats.brief.sub':'Smooth, pleasant voice. Pause/stop available.',
+    'stats.brief.seetext':'📝 See text',
+    'stats.brief.speed.title':'Playback speed (WhatsApp style)',
+    'stats.brief.playpause':'Play / Pause',
+    'stats.brief.stop':'Stop',
+    'stats.besthours.title':'🔥 Best Hours — when your clients write',
+    'stats.topq.title':'❓ Top questions — trends',
+    'stats.faq.week':'Week','stats.faq.month':'Month','stats.faq.all':'All-time',
+    'stats.evolution.title':'📈 Evolution over the period',
+    'stats.evolution.legend':'Blue = conv · Green = clients · Orange = auto messages',
+    'stats.chart.conv':'Conversations','stats.chart.seg':'Client segments','stats.chart.resp':'Response rate',
+    'stats.chart.hours':'Best hours','stats.chart.camp':'Campaigns (opens)','stats.chart.newlost':'New vs lost',
+    'stats.chart.sub.conv':'📊 Conversations · 30d','stats.chart.sub.seg':'👥 Client segments · 30d',
+    'stats.chart.sub.resp':'✓ Response rate · 30d','stats.chart.sub.hours':'⏰ Best hours · week',
+    'stats.chart.sub.camp':'📢 Campaigns — opens · 30d','stats.chart.sub.newlost':'🔁 New vs lost · 30d',
+    'stats.distrib.title':'📊 Client distribution · delta indicators',
+    'stats.distrib.month':'Month','stats.distrib.quarter':'Quarter','stats.distrib.all':'All-time',
+    'stats.distrib.recurring':'Recurring','stats.distrib.new':'New','stats.distrib.occ':'Occasional','stats.distrib.lost':'Lost',
+    'stats.snapshot.note':'<b>📊 Stored evolution:</b> compare your state "1 week / 1 month / 3 months ago".',
+    'stats.snapshot.btn':'📜 View snapshot',
+    'stats.tip.recurring':'💡 <b>Your recurring +50%</b> this month → great, your recovery strategy works.',
+    'stats.report.btn':'📄 Full report — export the ENTIRE Nexus Core as PDF',
+    'stats.besthours.range':'· period',
+    'stats.besthours.7days':'7 days','stats.besthours.30days':'30 days',
+    'stats.besthours.insights.title':'💡 Best hours — actionable insights',
     'inbox.unread':'Messages to answer','inbox.search':'Search a conversation…',
     'inbox.all':'All','inbox.vip':'VIP','inbox.new':'New','inbox.biz':'Business',
     'inbox.rec':'Recurring','inbox.occ':'Occasional','inbox.lost':'Lost',
@@ -1513,6 +1773,11 @@ const Nx = {
     } else {
       this.state = JSON.parse(JSON.stringify(DEFAULT_STATE));
     }
+    // Sync langue avec core.html (clé partagée nexus_core_lang)
+    const sharedLang = localStorage.getItem('nexus_core_lang');
+    if (sharedLang && ['fr','es','en'].includes(sharedLang)) {
+      this.state.lang = sharedLang;
+    }
     // MIGRATION : champs ajoutés post-v1, garantis présents même si state ancien
     const ensure = (k, defaultVal) => { if (this.state[k] === undefined) this.state[k] = JSON.parse(JSON.stringify(defaultVal)); };
     ensure('customSegments', []);
@@ -1631,6 +1896,8 @@ const Nx = {
 
   setLang(l){
     this.state.lang = l;
+    // Sync avec core.html (langue partagée)
+    try { localStorage.setItem('nexus_core_lang', l); } catch(e) {}
     // Topbar lang buttons highlight
     document.querySelectorAll('.lang-btn button').forEach(b => b.classList.remove('on'));
     const btn = document.getElementById('lang-'+l); if (btn) btn.classList.add('on');
@@ -1652,6 +1919,10 @@ const Nx = {
     this.updateBreadcrumb();
     this.save();
     this.renderView();
+    // === DYNAMIC TRANSLATE via /api/translate (Claude) — couvre les textes non-i18n
+    if (window.NexusTranslate) {
+      setTimeout(() => { try { window.NexusTranslate.translate(l); } catch (e) { console.warn('[NexusTranslate]', e); } }, 50);
+    }
   },
 
   toggleTheme(){
@@ -2366,6 +2637,11 @@ const Nx = {
       </div>` + html;
     }
     vc.innerHTML = html;
+    // === DYNAMIC TRANSLATE après chaque render — re-traduit le DOM si EN/ES actif
+    const _lang = (this.state && this.state.lang) || localStorage.getItem('nexus_core_lang') || 'fr';
+    if (window.NexusTranslate && _lang !== 'fr') {
+      setTimeout(() => { try { window.NexusTranslate.translate(_lang, { silent: true }); } catch (e) { console.warn('[NexusTranslate]', e); } }, 60);
+    }
   },
 
   viewDashboard(){
@@ -2959,7 +3235,7 @@ const Nx = {
           </div>
 
           <!-- BLOC API INTÉGRATIONS — masqué (géré par Nexus Admin) -->
-          <div class="card" style="display:none;padding:22px;grid-column:span 2">
+          <div class="card" data-no-translate style="display:none;padding:22px;grid-column:span 2">
             <h3 style="margin-bottom:6px">🔌 Intégrations API <span style="font-size:11px;color:var(--muted);font-weight:400">· Claude Sonnet, Google, WhatsApp, Stripe</span></h3>
             <div style="padding:12px 14px;background:var(--red-soft);border-radius:8px;font-size:12px;color:#991B1B;margin-bottom:14px">
               ⚠️ <b>Sécurité critique :</b> tes clés API ne sont JAMAIS visibles côté client. Stockage backend chiffré (Supabase secrets). "Avec Claude Mythos qui sort, les gens vont se faire voler leurs clés — gros enjeu." — Augus
@@ -3863,51 +4139,51 @@ const Nx = {
     return `
       <div class="view">
         <div class="page-hd">
-          <div><h1>📊 Statistiques & santé business</h1><div class="sub">Toutes tes métriques en un coup d'œil. Compare, exporte, écoute.</div></div>
+          <div><h1>${t('stats.page.title')}</h1><div class="sub">${t('stats.page.sub')}</div></div>
           <div class="flex">
-            <button class="btn btn-s" onclick="Nx.openExportPdfModal('stats')">📄 Exporter PDF</button>
+            <button class="btn btn-s" onclick="Nx.openExportPdfModal('stats')">${t('stats.export.pdf')}</button>
           </div>
         </div>
 
         <!-- SÉLECTEUR PÉRIODE -->
         <div class="filter-bar" style="margin-bottom:14px">
-          <span style="font-size:12px;color:var(--muted)">Période :</span>
-          <button class="filter-pill ${range==='7d'?'on':''}" onclick="Nx.setStatsRange('7d')">7 jours</button>
-          <button class="filter-pill ${range==='30d'?'on':''}" onclick="Nx.setStatsRange('30d')">30 jours</button>
-          <button class="filter-pill ${range==='always'?'on':''}" onclick="Nx.setStatsRange('always')">Depuis toujours</button>
-          <span style="margin-left:auto;font-size:11px;color:var(--muted)">📍 Clic sur un cadre = origine de la donnée</span>
+          <span style="font-size:12px;color:var(--muted)">${t('stats.period.label')}</span>
+          <button class="filter-pill ${range==='7d'?'on':''}" onclick="Nx.setStatsRange('7d')">${t('stats.7d')}</button>
+          <button class="filter-pill ${range==='30d'?'on':''}" onclick="Nx.setStatsRange('30d')">${t('stats.30d')}</button>
+          <button class="filter-pill ${range==='always'?'on':''}" onclick="Nx.setStatsRange('always')">${t('stats.always')}</button>
+          <span style="margin-left:auto;font-size:11px;color:var(--muted)">${t('stats.click.origin')}</span>
         </div>
 
         <div class="stats">
-          ${this.statCard('💬','Conversations totales',d.conv,d.delta_conv,'cette période vs précédente · clic = inbox','','inbox')}
-          ${this.statCard('👥','Nouveaux clients',d.clients,d.delta_clients,'clic = liste CRM','g','crm')}
-          ${this.statCard('✓','Taux de réponse',d.response,d.delta_response,'temps moyen 2:18 min','p','stats')}
-          ${this.statCard('⚡','Temps moyen',a.avgResponseTime+' min',-15,'< 5 min = Excellent','c','stats')}
+          ${this.statCard('💬',t('stats.card.conv'),d.conv,d.delta_conv,t('stats.card.conv.sub'),'','inbox')}
+          ${this.statCard('👥',t('stats.card.newclients'),d.clients,d.delta_clients,t('stats.card.newclients.sub'),'g','crm')}
+          ${this.statCard('✓',t('stats.card.response'),d.response,d.delta_response,t('stats.card.response.sub'),'p','stats')}
+          ${this.statCard('⚡',t('stats.card.avgtime'),a.avgResponseTime+' min',-15,t('stats.card.avgtime.sub'),'c','stats')}
         </div>
         <div style="padding:10px 14px;background:var(--amber-soft);border-radius:8px;font-size:12px;color:#B45309;margin-bottom:14px">
-          💰 <b>Note :</b> les stats <i>Revenu</i> arrivent dans Nexus Finance (prochain module). Pour l'instant on garde les métriques liées au <b>core</b> : conversations, clients, messages.
+          ${t('stats.note.revenue')}
         </div>
 
         <!-- BRIEF AUDIO QUOTIDIEN AVEC PAUSE + VITESSE -->
         <div class="audio-bar" style="margin-bottom:14px">
-          <button class="play-btn" id="briefPlayBtn" onclick="Nx.toggleBriefAudio()" title="Lecture / Pause">▶</button>
+          <button class="play-btn" id="briefPlayBtn" onclick="Nx.toggleBriefAudio()" title="${t('stats.brief.playpause')}">▶</button>
           <div style="flex:1">
-            <div style="font-weight:700;font-size:13px">🎙 Brief audio quotidien · 30 sec</div>
-            <div style="font-size:11px;color:var(--muted)">Voix douce, agréable. Pause/stop possible.</div>
+            <div style="font-weight:700;font-size:13px">${t('stats.brief.title')}</div>
+            <div style="font-size:11px;color:var(--muted)">${t('stats.brief.sub')}</div>
           </div>
-          <div class="speed-btns" title="Vitesse de lecture (style WhatsApp)">
+          <div class="speed-btns" title="${t('stats.brief.speed.title')}">
             <button onclick="Nx.setAudioSpeed(0.75)" id="spd-slow" class="${(this.state.audioPlayState.speed||1)===0.75?'on':''}">0.75×</button>
             <button onclick="Nx.setAudioSpeed(1)" id="spd-norm" class="${(this.state.audioPlayState.speed||1)===1?'on':''}">1×</button>
             <button onclick="Nx.setAudioSpeed(1.5)" id="spd-fast" class="${(this.state.audioPlayState.speed||1)===1.5?'on':''}">1.5×</button>
             <button onclick="Nx.setAudioSpeed(2)" id="spd-2x" class="${(this.state.audioPlayState.speed||1)===2?'on':''}">2×</button>
           </div>
-          <button class="btn btn-s" onclick="Nx.openBriefTextModal()" title="Voir le texte du brief audio">📝 Voir le texte</button>
-          <button class="icon-btn" onclick="Nx.stopBriefAudio()" title="Stop">⏹</button>
+          <button class="btn btn-s" onclick="Nx.openBriefTextModal()" title="${t('stats.brief.seetext')}">${t('stats.brief.seetext')}</button>
+          <button class="icon-btn" onclick="Nx.stopBriefAudio()" title="${t('stats.brief.stop')}">⏹</button>
         </div>
 
         <div class="grid2">
           <div class="card">
-            <div class="card-hd"><h3>🔥 Best Hours — quand tes clients écrivent</h3>
+            <div class="card-hd"><h3>${t('stats.besthours.title')}</h3>
               <div class="actions">
                 <button class="btn-g ${this.state.heatRange==='7d'?'':''}" style="${this.state.heatRange==='7d'?'color:var(--blue);border-color:var(--blue)':''}" onclick="Nx.state.heatRange='7d';Nx.renderView()">7j</button>
                 <button class="btn-g" style="${(this.state.heatRange||'30d')==='30d'?'color:var(--blue);border-color:var(--blue)':''}" onclick="Nx.state.heatRange='30d';Nx.renderView()">30j</button>
@@ -3918,11 +4194,11 @@ const Nx = {
           </div>
 
           <div class="card">
-            <div class="card-hd"><h3>❓ Top questions — tendances</h3>
+            <div class="card-hd"><h3>${t('stats.topq.title')}</h3>
               <div class="actions">
-                <button class="btn-g" style="${(this.state.faqRange||'week')==='week'?'color:var(--blue);border-color:var(--blue);font-weight:700':''}" onclick="Nx.state.faqRange='week';Nx.renderView()">Semaine</button>
-                <button class="btn-g" style="${this.state.faqRange==='month'?'color:var(--blue);border-color:var(--blue);font-weight:700':''}" onclick="Nx.state.faqRange='month';Nx.renderView()">Mois</button>
-                <button class="btn-g" style="${this.state.faqRange==='all'?'color:var(--blue);border-color:var(--blue);font-weight:700':''}" onclick="Nx.state.faqRange='all';Nx.renderView()">Depuis toujours</button>
+                <button class="btn-g" style="${(this.state.faqRange||'week')==='week'?'color:var(--blue);border-color:var(--blue);font-weight:700':''}" onclick="Nx.state.faqRange='week';Nx.renderView()">${t('stats.faq.week')}</button>
+                <button class="btn-g" style="${this.state.faqRange==='month'?'color:var(--blue);border-color:var(--blue);font-weight:700':''}" onclick="Nx.state.faqRange='month';Nx.renderView()">${t('stats.faq.month')}</button>
+                <button class="btn-g" style="${this.state.faqRange==='all'?'color:var(--blue);border-color:var(--blue);font-weight:700':''}" onclick="Nx.state.faqRange='all';Nx.renderView()">${t('stats.faq.all')}</button>
               </div>
             </div>
             <div class="card-body">
@@ -3933,32 +4209,32 @@ const Nx = {
 
         <div class="grid2">
           <div class="card">
-            <div class="card-hd"><h3>📈 Évolution sur la période</h3>
-              <div class="actions"><span style="font-size:11px;color:var(--muted)" id="chartLegend">Bleu = conv · Vert = clients · Orange = messages auto</span></div>
+            <div class="card-hd"><h3>${t('stats.evolution.title')}</h3>
+              <div class="actions"><span style="font-size:11px;color:var(--muted)" id="chartLegend">${t('stats.evolution.legend')}</span></div>
             </div>
             <div class="card-body">
               <!-- POINT 8(c) — Sélecteur de graphique -->
               <div class="chart-selector">
                 ${[
-                  {k:'conv',  l:'Conversations'},
-                  {k:'seg',   l:'Segments clients'},
-                  {k:'resp',  l:'Taux de réponse'},
-                  {k:'hours', l:'Best hours'},
-                  {k:'camp',  l:'Campagnes (ouvertures)'},
-                  {k:'newlost', l:'Nouveaux vs perdus'}
+                  {k:'conv',  l:t('stats.chart.conv')},
+                  {k:'seg',   l:t('stats.chart.seg')},
+                  {k:'resp',  l:t('stats.chart.resp')},
+                  {k:'hours', l:t('stats.chart.hours')},
+                  {k:'camp',  l:t('stats.chart.camp')},
+                  {k:'newlost', l:t('stats.chart.newlost')}
                 ].map(opt => `<button class="${(this.state.chartType||'conv')===opt.k?'on':''}" onclick="Nx.state.chartType='${opt.k}';Nx.renderView()">${opt.l}</button>`).join('')}
               </div>
-              <div style="font-size:11px;color:var(--muted);margin-bottom:8px"><b>${({conv:'📊 Conversations · 30j', seg:'👥 Segments clients · 30j', resp:'✓ Taux de réponse · 30j', hours:'⏰ Best hours · semaine', camp:'📢 Campagnes — ouvertures · 30j', newlost:'🔁 Nouveaux vs perdus · 30j'})[this.state.chartType||'conv']}</b></div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:8px"><b>${({conv:t('stats.chart.sub.conv'), seg:t('stats.chart.sub.seg'), resp:t('stats.chart.sub.resp'), hours:t('stats.chart.sub.hours'), camp:t('stats.chart.sub.camp'), newlost:t('stats.chart.sub.newlost')})[this.state.chartType||'conv']}</b></div>
               ${this.chartSvg()}
             </div>
           </div>
 
           <div class="card">
-            <div class="card-hd"><h3>📊 Répartition clients · indicateurs delta</h3>
+            <div class="card-hd"><h3>${t('stats.distrib.title')}</h3>
               <div class="actions">
-                <button class="btn-g" style="${(this.state.repRange||'month')==='month'?'color:var(--blue);border-color:var(--blue);font-weight:700':''}" onclick="Nx.state.repRange='month';Nx.renderView()">Mois</button>
-                <button class="btn-g" style="${this.state.repRange==='quarter'?'color:var(--blue);border-color:var(--blue);font-weight:700':''}" onclick="Nx.state.repRange='quarter';Nx.renderView()">Trimestre</button>
-                <button class="btn-g" style="${this.state.repRange==='all'?'color:var(--blue);border-color:var(--blue);font-weight:700':''}" onclick="Nx.state.repRange='all';Nx.renderView()">Depuis le début</button>
+                <button class="btn-g" style="${(this.state.repRange||'month')==='month'?'color:var(--blue);border-color:var(--blue);font-weight:700':''}" onclick="Nx.state.repRange='month';Nx.renderView()">${t('stats.distrib.month')}</button>
+                <button class="btn-g" style="${this.state.repRange==='quarter'?'color:var(--blue);border-color:var(--blue);font-weight:700':''}" onclick="Nx.state.repRange='quarter';Nx.renderView()">${t('stats.distrib.quarter')}</button>
+                <button class="btn-g" style="${this.state.repRange==='all'?'color:var(--blue);border-color:var(--blue);font-weight:700':''}" onclick="Nx.state.repRange='all';Nx.renderView()">${t('stats.distrib.all')}</button>
               </div>
             </div>
             <div class="card-body">
@@ -3971,10 +4247,10 @@ const Nx = {
                 </div>
               </div>
               <div style="padding:12px;background:var(--bg2);border-radius:8px;margin-top:12px;font-size:12px">
-                <b>📊 Évolution stockée :</b> tu peux comparer ton état "il y a 1 semaine / 1 mois / 3 mois". <button class="btn-g" style="margin-left:6px" onclick="Nx.openSnapshotsModal()">📜 Voir snapshot</button>
+                ${t('stats.snapshot.note')} <button class="btn-g" style="margin-left:6px" onclick="Nx.openSnapshotsModal()">${t('stats.snapshot.btn')}</button>
               </div>
               <div style="padding:12px;background:var(--green-soft);border-radius:8px;margin-top:8px;font-size:12px;color:var(--green)">
-                💡 <b>Tes récurrents +50%</b> ce mois → cool, ta stratégie de relance fonctionne.
+                ${t('stats.tip.recurring')}
               </div>
             </div>
           </div>
@@ -3982,7 +4258,7 @@ const Nx = {
 
         <!-- BOUTON RAPPORT GÉNÉRAL EN BAS -->
         <div style="text-align:center;margin-top:20px">
-          <button class="btn btn-p" style="padding:14px 32px;font-size:14px" onclick="Nx.openExportPdfModal('all')">📄 Rapport général — exporter TOUT le Nexus Core en PDF</button>
+          <button class="btn btn-p" style="padding:14px 32px;font-size:14px" onclick="Nx.openExportPdfModal('all')">${t('stats.report.btn')}</button>
         </div>
       </div>`;
   },
