@@ -908,13 +908,15 @@ html[data-theme="dark"] .chat-input textarea::placeholder{color:#8A94A6}
 // ====================================================
 window.NexusDynTranslate = (function(){
   const CACHE_KEY = 'nexus_dyn_translations_v1';
-  const ORIG_ATTR = 'data-dyn-orig';
-  const SKIP_SELECTOR = '[data-dyn-skip],[data-i18n],[data-i18n-html],[data-i18n-ph],[data-i18n-aria],[data-i18n-title]';
-  const TEXTUAL_TAGS = 'h1,h2,h3,h4,h5,h6,p,span,button,a,label,td,th,li,option,small,b,i,em,strong,div';
-  // Patterns à ne jamais traduire (cellules numériques, codes, IDs courts, emojis seuls)
+  const ORIG_PREFIX = 'data-dyn-orig';        // text content
+  const ORIG_PH = 'data-dyn-orig-ph';         // placeholder
+  const ORIG_TITLE = 'data-dyn-orig-title';   // title attribute
+  const ORIG_ARIA = 'data-dyn-orig-aria';     // aria-label
+  const ORIG_ALT = 'data-dyn-orig-alt';       // image alt
+  const SKIP_SELECTOR = '[data-dyn-skip],[data-i18n],[data-i18n-html],[data-i18n-ph],[data-i18n-placeholder],[data-i18n-aria],[data-i18n-title]';
+  const TEXTUAL_TAGS = 'h1,h2,h3,h4,h5,h6,p,span,button,a,label,td,th,li,option,small,b,i,em,strong,div,figcaption,summary,legend';
   const SKIP_TEXT = /^(\s*[\d.,%€$£+\-×\/]+\s*[mhskg]?\w{0,3}\s*)$/i;
   const ONLY_EMOJI = /^[\s\p{Extended_Pictographic}‍️\d:.]+$/u;
-  // Mots qu'on ne traduit jamais (préservation marque/produit/lieu)
   const PRESERVE = /^(Nexus|Carlos|María|Maria|Diego|Ana|Javier|Raviella|WhatsApp|Gmail|Calendar|Google|Claude|Stripe|Loom|Vercel|VIP|CRM|SOS|FAQ|API|PDF|CSV|empanadas|pan amasado|bolos|panadería|Providencia|Las Condes|Santiago|Pro|Business|Enterprise|Free|Chile|Chili)$/i;
 
   let cache = {};
@@ -925,33 +927,112 @@ window.NexusDynTranslate = (function(){
   function saveCache(){
     try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch(e){}
   }
-
   function hash(s){
     let h = 5381;
     for (let i = 0; i < s.length; i++) h = ((h << 5) + h) + s.charCodeAt(i);
     return (h >>> 0).toString(36);
   }
-
   function shouldTranslate(txt){
-    if (!txt || txt.length < 2 || txt.length > 500) return false;
-    if (SKIP_TEXT.test(txt)) return false;
-    if (ONLY_EMOJI.test(txt)) return false;
-    if (PRESERVE.test(txt.trim())) return false;
+    if (!txt || typeof txt !== 'string') return false;
+    const t = txt.trim();
+    if (t.length < 2 || t.length > 500) return false;
+    if (SKIP_TEXT.test(t)) return false;
+    if (ONLY_EMOJI.test(t)) return false;
+    if (PRESERVE.test(t)) return false;
     return true;
   }
 
-  // Collecte les éléments text-only (sans enfants) non couverts par data-i18n
-  function collectNodes(){
-    const nodes = [];
+  // Collecte exhaustive : textContent + placeholder + title + aria-label + alt
+  // Chaque item : { el, attr, orig } où attr = 'text' | 'placeholder' | 'title' | 'aria-label' | 'alt'
+  function collectAll(){
+    const items = [];
+    // 1) Text content sur tags textuels (leaf nodes)
     document.body.querySelectorAll(TEXTUAL_TAGS).forEach(el => {
       if (el.children.length > 0) return;
       if (el.matches(SKIP_SELECTOR)) return;
       if (el.closest(SKIP_SELECTOR + ',script,style,code,pre')) return;
-      const orig = el.getAttribute(ORIG_ATTR) || el.textContent.trim();
+      const stored = el.getAttribute(ORIG_PREFIX);
+      const orig = stored != null ? stored : el.textContent.trim();
       if (!shouldTranslate(orig)) return;
-      nodes.push({ el, orig });
+      items.push({ el, attr: 'text', orig });
     });
-    return nodes;
+    // 2) Placeholders (input, textarea)
+    document.body.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el => {
+      if (el.matches(SKIP_SELECTOR)) return;
+      const stored = el.getAttribute(ORIG_PH);
+      const orig = stored != null ? stored : (el.getAttribute('placeholder') || '').trim();
+      if (!shouldTranslate(orig)) return;
+      items.push({ el, attr: 'placeholder', orig });
+    });
+    // 3) Title attributes (tooltips)
+    document.body.querySelectorAll('[title]').forEach(el => {
+      if (el.matches(SKIP_SELECTOR)) return;
+      const stored = el.getAttribute(ORIG_TITLE);
+      const orig = stored != null ? stored : (el.getAttribute('title') || '').trim();
+      if (!shouldTranslate(orig)) return;
+      items.push({ el, attr: 'title', orig });
+    });
+    // 4) Aria-labels
+    document.body.querySelectorAll('[aria-label]').forEach(el => {
+      if (el.matches(SKIP_SELECTOR)) return;
+      const stored = el.getAttribute(ORIG_ARIA);
+      const orig = stored != null ? stored : (el.getAttribute('aria-label') || '').trim();
+      if (!shouldTranslate(orig)) return;
+      items.push({ el, attr: 'aria-label', orig });
+    });
+    // 5) Alt sur images
+    document.body.querySelectorAll('img[alt]').forEach(el => {
+      if (el.matches(SKIP_SELECTOR)) return;
+      const stored = el.getAttribute(ORIG_ALT);
+      const orig = stored != null ? stored : (el.getAttribute('alt') || '').trim();
+      if (!shouldTranslate(orig)) return;
+      items.push({ el, attr: 'alt', orig });
+    });
+    return items;
+  }
+
+  function setOrig(item){
+    if (item.attr === 'text') {
+      if (!item.el.hasAttribute(ORIG_PREFIX)) item.el.setAttribute(ORIG_PREFIX, item.orig);
+    } else if (item.attr === 'placeholder') {
+      if (!item.el.hasAttribute(ORIG_PH)) item.el.setAttribute(ORIG_PH, item.orig);
+    } else if (item.attr === 'title') {
+      if (!item.el.hasAttribute(ORIG_TITLE)) item.el.setAttribute(ORIG_TITLE, item.orig);
+    } else if (item.attr === 'aria-label') {
+      if (!item.el.hasAttribute(ORIG_ARIA)) item.el.setAttribute(ORIG_ARIA, item.orig);
+    } else if (item.attr === 'alt') {
+      if (!item.el.hasAttribute(ORIG_ALT)) item.el.setAttribute(ORIG_ALT, item.orig);
+    }
+  }
+  function setTranslated(item, value){
+    if (!document.body.contains(item.el)) return;
+    if (item.attr === 'text') item.el.textContent = value;
+    else if (item.attr === 'placeholder') item.el.setAttribute('placeholder', value);
+    else if (item.attr === 'title') item.el.setAttribute('title', value);
+    else if (item.attr === 'aria-label') item.el.setAttribute('aria-label', value);
+    else if (item.attr === 'alt') item.el.setAttribute('alt', value);
+  }
+  function restoreOrig(){
+    document.querySelectorAll('[' + ORIG_PREFIX + ']').forEach(el => {
+      el.textContent = el.getAttribute(ORIG_PREFIX);
+      el.removeAttribute(ORIG_PREFIX);
+    });
+    document.querySelectorAll('[' + ORIG_PH + ']').forEach(el => {
+      el.setAttribute('placeholder', el.getAttribute(ORIG_PH));
+      el.removeAttribute(ORIG_PH);
+    });
+    document.querySelectorAll('[' + ORIG_TITLE + ']').forEach(el => {
+      el.setAttribute('title', el.getAttribute(ORIG_TITLE));
+      el.removeAttribute(ORIG_TITLE);
+    });
+    document.querySelectorAll('[' + ORIG_ARIA + ']').forEach(el => {
+      el.setAttribute('aria-label', el.getAttribute(ORIG_ARIA));
+      el.removeAttribute(ORIG_ARIA);
+    });
+    document.querySelectorAll('[' + ORIG_ALT + ']').forEach(el => {
+      el.setAttribute('alt', el.getAttribute(ORIG_ALT));
+      el.removeAttribute(ORIG_ALT);
+    });
   }
 
   async function translateBatch(texts, target){
@@ -964,48 +1045,41 @@ window.NexusDynTranslate = (function(){
       if (!res.ok) { console.warn('DT API error', res.status); return null; }
       const data = await res.json();
       return Array.isArray(data.translations) && data.translations.length === texts.length
-        ? data.translations
-        : null;
+        ? data.translations : null;
     } catch (e) {
       console.warn('DT fetch failed', e);
       return null;
     }
   }
 
-  async function apply(lang){
+  // apply(lang, opts) — opts.silent = true → applique uniquement le cache, n'appelle PAS l'API
+  async function apply(lang, opts){
+    opts = opts || {};
     if (!lang) return;
-    // Si la même langue est demandée pendant qu'on traduit, on note pour re-jouer
     if (inFlight) { pendingLang = lang; return; }
     inFlight = true;
     try {
-      // Retour en FR → restore les originaux
-      if (lang === 'fr') {
-        document.querySelectorAll('[' + ORIG_ATTR + ']').forEach(el => {
-          el.textContent = el.getAttribute(ORIG_ATTR);
-          el.removeAttribute(ORIG_ATTR);
-        });
-        return;
-      }
-      const nodes = collectNodes();
-      if (nodes.length === 0) return;
+      if (lang === 'fr') { restoreOrig(); return; }
+      const items = collectAll();
+      if (items.length === 0) return;
       if (!cache[lang]) cache[lang] = {};
-      // Sauvegarde originaux + applique cache instant
-      const needTranslate = [];
+      const needTexts = [];
       const needIdx = [];
-      nodes.forEach((n, i) => {
-        if (!n.el.hasAttribute(ORIG_ATTR)) n.el.setAttribute(ORIG_ATTR, n.orig);
-        const h = hash(n.orig);
-        if (cache[lang][h]) {
-          n.el.textContent = cache[lang][h];
-        } else {
-          needTranslate.push(n.orig);
+      items.forEach((it, i) => {
+        setOrig(it);
+        const h = hash(it.orig);
+        const cached = cache[lang][h];
+        if (cached) {
+          setTranslated(it, cached);
+        } else if (!opts.silent) {
+          needTexts.push(it.orig);
           needIdx.push(i);
         }
       });
-      // Envoi batch (200 max par requête)
-      const CHUNK = 80;
-      for (let i = 0; i < needTranslate.length; i += CHUNK) {
-        const batchTexts = needTranslate.slice(i, i + CHUNK);
+      if (opts.silent || needTexts.length === 0) return;
+      const CHUNK = 60;
+      for (let i = 0; i < needTexts.length; i += CHUNK) {
+        const batchTexts = needTexts.slice(i, i + CHUNK);
         const batchIdx = needIdx.slice(i, i + CHUNK);
         const translated = await translateBatch(batchTexts, lang);
         if (!translated) continue;
@@ -1013,10 +1087,7 @@ window.NexusDynTranslate = (function(){
           const tr = translated[k];
           if (!tr) return;
           cache[lang][hash(src)] = tr;
-          const node = nodes[batchIdx[k]];
-          if (node && node.el && document.body.contains(node.el)) {
-            node.el.textContent = tr;
-          }
+          setTranslated(items[batchIdx[k]], tr);
         });
       }
       saveCache();
@@ -1025,13 +1096,15 @@ window.NexusDynTranslate = (function(){
       if (pendingLang && pendingLang !== lang) {
         const next = pendingLang; pendingLang = null;
         apply(next);
-      } else {
-        pendingLang = null;
-      }
+      } else { pendingLang = null; }
     }
   }
 
-  return { apply, clearCache(){ cache = {}; saveCache(); } };
+  // applyNew(lang) — variante post-render : applique cache uniquement (zero API call)
+  // si nouveaux nœuds DOM non couverts par le cache, ils restent en FR jusqu'au prochain switch
+  function applyNew(lang){ return apply(lang, { silent: true }); }
+
+  return { apply, applyNew, clearCache(){ cache = {}; saveCache(); } };
 })();
 
 // -------- I18N DICTIONARY (complet FR/ES/EN) --------
@@ -2637,10 +2710,11 @@ const Nx = {
       </div>` + html;
     }
     vc.innerHTML = html;
-    // === DYNAMIC TRANSLATE après chaque render — re-traduit le DOM si EN/ES actif
+    // === DYNAMIC TRANSLATE post-render via Groq (gratuit)
+    // Cache hit = instant zéro API. Cache miss = 1 batch Groq (~1-2s, $0)
     const _lang = (this.state && this.state.lang) || localStorage.getItem('nexus_core_lang') || 'fr';
-    if (window.NexusTranslate && _lang !== 'fr') {
-      setTimeout(() => { try { window.NexusTranslate.translate(_lang, { silent: true }); } catch (e) { console.warn('[NexusTranslate]', e); } }, 60);
+    if (window.NexusDynTranslate && _lang !== 'fr') {
+      setTimeout(() => { try { window.NexusDynTranslate.apply(_lang); } catch (e) { console.warn('[DT]', e); } }, 80);
     }
   },
 

@@ -1640,12 +1640,16 @@ body{
     });
   });
 
-  // =========== DYNAMIC TRANSLATE — couvre le DOM non-i18n via /api/translate (Claude)
+  // =========== DYNAMIC TRANSLATE — couvre le DOM non-i18n via /api/translate (Groq priorité)
   window.NexusDynTranslate = (function(){
     const CACHE_KEY = 'nexus_dyn_translations_v1';
-    const ORIG_ATTR = 'data-dyn-orig';
-    const SKIP_SELECTOR = '[data-dyn-skip],[data-i18n],[data-i18n-html],[data-i18n-placeholder],[data-i18n-aria],[data-i18n-title]';
-    const TEXTUAL_TAGS = 'h1,h2,h3,h4,h5,h6,p,span,button,a,label,td,th,li,option,small,b,i,em,strong,div';
+    const ORIG_PREFIX = 'data-dyn-orig';
+    const ORIG_PH = 'data-dyn-orig-ph';
+    const ORIG_TITLE = 'data-dyn-orig-title';
+    const ORIG_ARIA = 'data-dyn-orig-aria';
+    const ORIG_ALT = 'data-dyn-orig-alt';
+    const SKIP_SELECTOR = '[data-dyn-skip],[data-i18n],[data-i18n-html],[data-i18n-ph],[data-i18n-placeholder],[data-i18n-aria],[data-i18n-title]';
+    const TEXTUAL_TAGS = 'h1,h2,h3,h4,h5,h6,p,span,button,a,label,td,th,li,option,small,b,i,em,strong,div,figcaption,summary,legend';
     const SKIP_TEXT = /^(\s*[\d.,%€$£+\-×\/]+\s*[mhskg]?\w{0,3}\s*)$/i;
     const ONLY_EMOJI = /^[\s\p{Extended_Pictographic}‍️\d:.]+$/u;
     const PRESERVE = /^(Nexus|Carlos|María|Maria|Diego|Ana|Javier|Raviella|WhatsApp|Gmail|Calendar|Google|Claude|Stripe|Loom|Vercel|VIP|CRM|SOS|FAQ|API|PDF|CSV|empanadas|pan amasado|bolos|panadería|Providencia|Las Condes|Santiago|Pro|Business|Enterprise|Free|Chile|Chili)$/i;
@@ -1660,23 +1664,86 @@ body{
       return (h >>> 0).toString(36);
     }
     function shouldTranslate(txt){
-      if (!txt || txt.length < 2 || txt.length > 500) return false;
-      if (SKIP_TEXT.test(txt)) return false;
-      if (ONLY_EMOJI.test(txt)) return false;
-      if (PRESERVE.test(txt.trim())) return false;
+      if (!txt || typeof txt !== 'string') return false;
+      const t = txt.trim();
+      if (t.length < 2 || t.length > 500) return false;
+      if (SKIP_TEXT.test(t)) return false;
+      if (ONLY_EMOJI.test(t)) return false;
+      if (PRESERVE.test(t)) return false;
       return true;
     }
-    function collectNodes(){
-      const nodes = [];
+    function collectAll(){
+      const items = [];
       document.body.querySelectorAll(TEXTUAL_TAGS).forEach(el => {
         if (el.children.length > 0) return;
         if (el.matches(SKIP_SELECTOR)) return;
         if (el.closest(SKIP_SELECTOR + ',script,style,code,pre')) return;
-        const orig = el.getAttribute(ORIG_ATTR) || el.textContent.trim();
+        const stored = el.getAttribute(ORIG_PREFIX);
+        const orig = stored != null ? stored : el.textContent.trim();
         if (!shouldTranslate(orig)) return;
-        nodes.push({ el, orig });
+        items.push({ el, attr: 'text', orig });
       });
-      return nodes;
+      document.body.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el => {
+        if (el.matches(SKIP_SELECTOR)) return;
+        const stored = el.getAttribute(ORIG_PH);
+        const orig = stored != null ? stored : (el.getAttribute('placeholder') || '').trim();
+        if (!shouldTranslate(orig)) return;
+        items.push({ el, attr: 'placeholder', orig });
+      });
+      document.body.querySelectorAll('[title]').forEach(el => {
+        if (el.matches(SKIP_SELECTOR)) return;
+        const stored = el.getAttribute(ORIG_TITLE);
+        const orig = stored != null ? stored : (el.getAttribute('title') || '').trim();
+        if (!shouldTranslate(orig)) return;
+        items.push({ el, attr: 'title', orig });
+      });
+      document.body.querySelectorAll('[aria-label]').forEach(el => {
+        if (el.matches(SKIP_SELECTOR)) return;
+        const stored = el.getAttribute(ORIG_ARIA);
+        const orig = stored != null ? stored : (el.getAttribute('aria-label') || '').trim();
+        if (!shouldTranslate(orig)) return;
+        items.push({ el, attr: 'aria-label', orig });
+      });
+      document.body.querySelectorAll('img[alt]').forEach(el => {
+        if (el.matches(SKIP_SELECTOR)) return;
+        const stored = el.getAttribute(ORIG_ALT);
+        const orig = stored != null ? stored : (el.getAttribute('alt') || '').trim();
+        if (!shouldTranslate(orig)) return;
+        items.push({ el, attr: 'alt', orig });
+      });
+      return items;
+    }
+    function setOrig(it){
+      if (it.attr === 'text')        { if (!it.el.hasAttribute(ORIG_PREFIX)) it.el.setAttribute(ORIG_PREFIX, it.orig); }
+      else if (it.attr === 'placeholder') { if (!it.el.hasAttribute(ORIG_PH)) it.el.setAttribute(ORIG_PH, it.orig); }
+      else if (it.attr === 'title')       { if (!it.el.hasAttribute(ORIG_TITLE)) it.el.setAttribute(ORIG_TITLE, it.orig); }
+      else if (it.attr === 'aria-label')  { if (!it.el.hasAttribute(ORIG_ARIA)) it.el.setAttribute(ORIG_ARIA, it.orig); }
+      else if (it.attr === 'alt')         { if (!it.el.hasAttribute(ORIG_ALT)) it.el.setAttribute(ORIG_ALT, it.orig); }
+    }
+    function setTranslated(it, value){
+      if (!document.body.contains(it.el)) return;
+      if (it.attr === 'text') it.el.textContent = value;
+      else if (it.attr === 'placeholder') it.el.setAttribute('placeholder', value);
+      else if (it.attr === 'title') it.el.setAttribute('title', value);
+      else if (it.attr === 'aria-label') it.el.setAttribute('aria-label', value);
+      else if (it.attr === 'alt') it.el.setAttribute('alt', value);
+    }
+    function restoreOrig(){
+      document.querySelectorAll('[' + ORIG_PREFIX + ']').forEach(el => {
+        el.textContent = el.getAttribute(ORIG_PREFIX); el.removeAttribute(ORIG_PREFIX);
+      });
+      document.querySelectorAll('[' + ORIG_PH + ']').forEach(el => {
+        el.setAttribute('placeholder', el.getAttribute(ORIG_PH)); el.removeAttribute(ORIG_PH);
+      });
+      document.querySelectorAll('[' + ORIG_TITLE + ']').forEach(el => {
+        el.setAttribute('title', el.getAttribute(ORIG_TITLE)); el.removeAttribute(ORIG_TITLE);
+      });
+      document.querySelectorAll('[' + ORIG_ARIA + ']').forEach(el => {
+        el.setAttribute('aria-label', el.getAttribute(ORIG_ARIA)); el.removeAttribute(ORIG_ARIA);
+      });
+      document.querySelectorAll('[' + ORIG_ALT + ']').forEach(el => {
+        el.setAttribute('alt', el.getAttribute(ORIG_ALT)); el.removeAttribute(ORIG_ALT);
+      });
     }
     async function translateBatch(texts, target){
       try {
@@ -1688,49 +1755,39 @@ body{
         if (!res.ok) { console.warn('DT API error', res.status); return null; }
         const data = await res.json();
         return Array.isArray(data.translations) && data.translations.length === texts.length
-          ? data.translations
-          : null;
+          ? data.translations : null;
       } catch (e) { console.warn('DT fetch failed', e); return null; }
     }
-    async function apply(lang){
+    async function apply(lang, opts){
+      opts = opts || {};
       if (!lang) return;
       if (inFlight) { pendingLang = lang; return; }
       inFlight = true;
       try {
-        if (lang === 'fr') {
-          document.querySelectorAll('[' + ORIG_ATTR + ']').forEach(el => {
-            el.textContent = el.getAttribute(ORIG_ATTR);
-            el.removeAttribute(ORIG_ATTR);
-          });
-          return;
-        }
-        const nodes = collectNodes();
-        if (nodes.length === 0) return;
+        if (lang === 'fr') { restoreOrig(); return; }
+        const items = collectAll();
+        if (items.length === 0) return;
         if (!cache[lang]) cache[lang] = {};
-        const needTranslate = [];
+        const needTexts = [];
         const needIdx = [];
-        nodes.forEach((n, i) => {
-          if (!n.el.hasAttribute(ORIG_ATTR)) n.el.setAttribute(ORIG_ATTR, n.orig);
-          const h = hash(n.orig);
-          if (cache[lang][h]) {
-            n.el.textContent = cache[lang][h];
-          } else {
-            needTranslate.push(n.orig); needIdx.push(i);
-          }
+        items.forEach((it, i) => {
+          setOrig(it);
+          const h = hash(it.orig);
+          const c = cache[lang][h];
+          if (c) setTranslated(it, c);
+          else if (!opts.silent) { needTexts.push(it.orig); needIdx.push(i); }
         });
-        const CHUNK = 80;
-        for (let i = 0; i < needTranslate.length; i += CHUNK) {
-          const batchTexts = needTranslate.slice(i, i + CHUNK);
+        if (opts.silent || needTexts.length === 0) return;
+        const CHUNK = 60;
+        for (let i = 0; i < needTexts.length; i += CHUNK) {
+          const batchTexts = needTexts.slice(i, i + CHUNK);
           const batchIdx = needIdx.slice(i, i + CHUNK);
           const translated = await translateBatch(batchTexts, lang);
           if (!translated) continue;
           batchTexts.forEach((src, k) => {
             const tr = translated[k]; if (!tr) return;
             cache[lang][hash(src)] = tr;
-            const node = nodes[batchIdx[k]];
-            if (node && node.el && document.body.contains(node.el)) {
-              node.el.textContent = tr;
-            }
+            setTranslated(items[batchIdx[k]], tr);
           });
         }
         saveCache();
@@ -1741,7 +1798,8 @@ body{
         } else { pendingLang = null; }
       }
     }
-    return { apply, clearCache(){ cache = {}; saveCache(); } };
+    function applyNew(lang){ return apply(lang, { silent: true }); }
+    return { apply, applyNew, clearCache(){ cache = {}; saveCache(); } };
   })();
 
   // =========== Sélecteur de langue (Point 1 PDF — TOUT doit être traduit)

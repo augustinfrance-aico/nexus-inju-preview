@@ -41,17 +41,8 @@ export default async function handler(req, res) {
       return res.status(200).json({ translations: texts, model: 'noop' });
     }
 
+    const groqKey = process.env.GROQ_API_KEY;
     const anthropicKey = process.env.ANTHROPIC_API_KEY;
-    if (!anthropicKey) {
-      // Fallback gracieux : on renvoie les textes inchangés + 503 pour indiquer service indisponible
-      return res.status(503).json({
-        translations: texts,
-        model: 'none',
-        target,
-        count: texts.length,
-        error: 'ANTHROPIC_API_KEY manquante — fallback original texts'
-      });
-    }
 
     const langName = target === 'es' ? 'Spanish (es-ES)' : target === 'en' ? 'English (en-US)' : 'French (fr-FR)';
     const sourceName = source === 'fr' ? 'French' : source === 'es' ? 'Spanish' : 'English';
@@ -61,7 +52,67 @@ export default async function handler(req, res) {
 Input (JSON array of ${texts.length} strings):
 ${JSON.stringify(texts)}
 
-Output (JSON array of ${texts.length} translated strings, same order):`;
+Output JSON object format: {"translations":["...","..."]} — ${texts.length} translated strings in the same order.`;
+
+    // === PRIORITÉ GROQ (Llama 3.3 70B, GRATUIT, ~1-2s) ===
+    if (groqKey) {
+      try {
+        const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${groqKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'llama-3.3-70b-versatile',
+            temperature: 0.2,
+            max_tokens: 4096,
+            response_format: { type: 'json_object' },
+            messages: [
+              { role: 'system', content: TRANSLATE_SYSTEM + '\n\nOutput STRICT JSON: {"translations":["str1","str2",...]} — never a bare array.' },
+              { role: 'user', content: userMsg }
+            ]
+          })
+        });
+
+        if (groqRes.ok) {
+          const data = await groqRes.json();
+          const raw = data.choices?.[0]?.message?.content || '{}';
+          let parsed;
+          try { parsed = JSON.parse(raw); }
+          catch (e) {
+            const m = raw.match(/\{[\s\S]*\}/);
+            parsed = m ? JSON.parse(m[0]) : {};
+          }
+          const translations = parsed.translations || (Array.isArray(parsed) ? parsed : null);
+          if (Array.isArray(translations) && translations.length === texts.length) {
+            return res.status(200).json({
+              translations,
+              model: 'groq-llama-3.3-70b',
+              target,
+              count: texts.length
+            });
+          }
+          console.warn('Groq length mismatch (got', translations?.length, 'expected', texts.length, ') → fallback Anthropic');
+        } else {
+          const errText = await groqRes.text();
+          console.warn('Groq error', groqRes.status, '→ fallback Anthropic:', errText.slice(0, 150));
+        }
+      } catch (e) {
+        console.warn('Groq fetch failed → fallback Anthropic:', e);
+      }
+    }
+
+    // === FALLBACK ANTHROPIC SONNET 4.5 (payant) ===
+    if (!anthropicKey) {
+      return res.status(503).json({
+        translations: texts,
+        model: 'none',
+        target,
+        count: texts.length,
+        error: 'Aucune clé API (GROQ_API_KEY/ANTHROPIC_API_KEY)'
+      });
+    }
 
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -74,7 +125,7 @@ Output (JSON array of ${texts.length} translated strings, same order):`;
         model: 'claude-sonnet-4-5-20250929',
         max_tokens: 4096,
         system: TRANSLATE_SYSTEM,
-        messages: [{ role: 'user', content: userMsg }]
+        messages: [{ role: 'user', content: `Translate from ${sourceName} to ${langName}.\n\nInput (JSON array of ${texts.length} strings):\n${JSON.stringify(texts)}\n\nOutput (JSON array of ${texts.length} translated strings, same order):` }]
       })
     });
 
