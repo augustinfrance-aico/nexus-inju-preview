@@ -4637,18 +4637,25 @@ const Nx = {
       </div>`;
   },
 
+  // Fix Augustin 19/05 : "j'ai essayer d'ajouter un client mais il s'est pas ajouté"
+  // 2 causes corrigées : status='prospect' invisible dans filtre Actifs + lecture defensive des champs
   saveNewClient(){
-    const name = document.getElementById('newCName').value.trim();
-    const phone = document.getElementById('newCPhone').value.trim();
-    if (!name || !phone) { this.toast('Nom et téléphone requis','warn'); return; }
-    const email = document.getElementById('newCEmail').value.trim();
-    const bday = document.getElementById('newCBday').value;
-    const tag = document.getElementById('newCTag').value;
-    const ctx = document.getElementById('newCContext').value;
-    const c1 = document.getElementById('newCCustom1').value;
-    const c2 = document.getElementById('newCCustom2').value;
-    const initials = name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
-    const colors = ['#1A56DB','#22C55E','#7A3CFF','#F59E0B','#EF4444','#06B6D4'];
+    const val = (id) => { const el = document.getElementById(id); return el ? (el.value||'').trim() : ''; };
+    const name = val('newCName');
+    const phone = val('newCPhone');
+    if (!name) { this.toast('⚠️ Le nom est obligatoire','warn','Remplis au moins le nom'); document.getElementById('newCName')?.focus(); return; }
+    if (!phone) { this.toast('⚠️ Le téléphone est obligatoire','warn','Format ex : +56 9 1234 5678'); document.getElementById('newCPhone')?.focus(); return; }
+    const email = val('newCEmail');
+    const bday = val('newCBday');
+    const tag = val('newCTag') || 'new';
+    const ctx = val('newCContext');
+    const c1 = val('newCCustom1');
+    const c2 = val('newCCustom2');
+    const initials = (name.split(' ').filter(Boolean).map(w=>w[0]).slice(0,2).join('') || name[0] || '?').toUpperCase();
+    const colors = ['#1A56DB','#22C55E','#7A3CFF','#F59E0B','#EF4444','#06B6D4','#EC4899','#0EA5E9'];
+    // Status = active par défaut (avant: 'prospect' pour 'new' → invisible dans filtre Actifs)
+    // Si tag = 'new' → reste actif ET tagué Nuevo, l'user peut le voir dans filtre Prospects OU Actifs
+    const statusMap = { lost: 'lost', vip: 'active', rec: 'active', biz: 'active', new: 'prospect' };
     const newClient = {
       id: Date.now(),
       name, phone, email,
@@ -4658,17 +4665,31 @@ const Nx = {
       lastSeen: 'À l\'instant',
       channel: 'whatsapp',
       tag: tag,
-      tags: [tag === 'vip' ? 'VIP' : tag === 'rec' ? 'Récurrent' : tag === 'biz' ? 'Business' : 'Nuevo'],
+      tags: [tag === 'vip' ? 'VIP' : tag === 'rec' ? 'Récurrent' : tag === 'biz' ? 'Business' : tag === 'lost' ? 'Perdu' : 'Nuevo'],
       notes: '', aiNotes: ctx,
-      status: tag === 'new' ? 'prospect' : 'active',
+      status: statusMap[tag] || 'active',
       birthday: bday,
-      preferences: c1, address: c2
+      preferences: c1, address: c2,
+      createdAt: new Date().toISOString()
     };
+    if (!this.state.clients) this.state.clients = [];
     this.state.clients.unshift(newClient);
+    // Switch automatique vers le filtre correspondant pour que l'user voit son nouveau client
+    const targetFilter = tag === 'vip' ? 'vip' : tag === 'rec' ? 'active' : tag === 'biz' ? 'biz' : tag === 'new' ? 'prospect' : tag === 'lost' ? 'lost' : 'all';
+    this.state.crmFilter = targetFilter;
+    this.state.crmSearch = ''; // Reset recherche pour le voir
     this.save();
     this.closeModal();
-    this.toast('✓ '+name+' ajouté au CRM','success', 'Score initial 50/100');
-    this.renderView();
+    // Toast avec bouton 'Voir →' qui ouvre la fiche
+    this.toast('✓ '+name+' ajouté au CRM','success', `Visible dans Clients → ${targetFilter === 'all' ? 'Tous' : targetFilter === 'active' ? 'Actifs' : targetFilter === 'vip' ? 'VIP' : targetFilter === 'biz' ? 'Business' : targetFilter === 'prospect' ? 'Prospects' : 'Perdus'}`);
+    // Si on n'est pas déjà sur CRM, naviguer
+    if (this.state.view !== 'crm') {
+      this.navigate('crm');
+    } else {
+      this.renderView();
+    }
+    // Ouvre la fiche client après un court délai pour confirmer visuellement
+    setTimeout(() => { try { this.openClientCard(newClient.id); } catch(e){} }, 400);
   },
 
   // CRM — Modal Export CSV avec filtre
