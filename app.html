@@ -797,6 +797,32 @@ html[data-theme="dark"] .chat-input textarea::placeholder{color:#8A94A6}
 .cal-recap-ic{font-size:18px}
 .cal-recap-tag{display:inline-block;margin-left:6px;padding:1px 8px;background:#1A56DB22;color:#1A56DB;border-radius:999px;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
 .cal-recap-tag.cal-peak-tag{background:#F59E0B22;color:#B45309}
+
+/* GESTION RÉUNIONS — UI propre cards (Augustin 19/05 : "il faut que ça soit joli") */
+.mtg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;padding:14px 20px}
+.mtg-card{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:all .2s;box-shadow:0 1px 3px rgba(15,23,42,.04)}
+.mtg-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px -10px rgba(26,86,219,.25);border-color:#93C5FD}
+.mtg-card.is-today{border-color:#F59E0B;background:linear-gradient(135deg,#FFFBEB 0%,var(--panel) 80%);box-shadow:0 6px 18px -8px rgba(245,158,11,.3)}
+.mtg-card.is-past{opacity:.7;background:var(--bg2)}
+.mtg-card{padding:14px;display:grid;grid-template-columns:64px 1fr;grid-template-rows:auto auto;gap:14px;align-items:start}
+.mtg-date{grid-row:span 2;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;background:color-mix(in srgb,var(--mtg-accent) 12%,transparent);border:1px solid color-mix(in srgb,var(--mtg-accent) 35%,transparent);border-radius:10px;color:var(--mtg-accent);min-height:74px}
+.mtg-weekday{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;opacity:.75}
+.mtg-day{font-size:24px;font-weight:900;line-height:1;margin:2px 0}
+.mtg-month{font-size:10px;font-weight:700;letter-spacing:.05em}
+.mtg-body{display:flex;flex-direction:column;gap:8px;min-width:0}
+.mtg-head{display:flex;gap:10px;align-items:center}
+.mtg-avatar{width:36px;height:36px;border-radius:50%;color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;text-transform:uppercase;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.mtg-client{font-weight:700;font-size:14px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mtg-status{font-size:11px;font-weight:600;margin-top:1px;letter-spacing:.01em}
+.mtg-meta{display:flex;gap:6px;flex-wrap:wrap}
+.mtg-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:var(--bg2);border-radius:999px;font-size:11px;font-weight:600;color:var(--ink2)}
+.mtg-tag.mtg-place{background:#EFF6FF;color:#1E40AF}
+.mtg-topic{font-size:12px;color:var(--muted);line-height:1.45;padding:8px 10px;background:var(--bg2);border-radius:8px;border-left:3px solid var(--mtg-accent,#1A56DB)}
+.mtg-actions{grid-column:1/-1;display:flex;gap:6px;justify-content:flex-end;border-top:1px solid var(--line2);padding-top:10px;margin-top:4px}
+.mtg-act-primary{background:linear-gradient(135deg,#1A56DB,#2E7BFF)!important;color:#fff!important;border-color:#1A56DB!important;font-weight:600}
+.mtg-act-primary:hover{box-shadow:0 4px 12px -3px rgba(26,86,219,.5)}
+.mtg-act-danger{color:var(--red)!important}
+@media(max-width:480px){.mtg-grid{grid-template-columns:1fr}.mtg-card{padding:12px}}
 </style>
 </head>
 <body>
@@ -4312,9 +4338,8 @@ const Nx = {
               <button class="btn btn-s" onclick="Nx.addMeeting()">+ Ajouter réunion</button>
             </div>
           </div>
-          <div class="card-body" style="padding:0">
+          <div class="card-body">
             ${(() => {
-              // Defaults si state.meetings vide (1ère fois)
               if (!this.state.meetings) {
                 this.state.meetings = [
                   { id: 1, dateISO:'2026-05-19T10:00', client:'María González', place:'Visioconférence Google Meet', topic:'Présentation pack VIP 2026' },
@@ -4323,27 +4348,59 @@ const Nx = {
                   { id: 4, dateISO:'2026-05-23T16:00', client:'Don Roberto',    place:'Visioconférence',             topic:'Catering événement entreprise 80p' }
                 ];
               }
-              const fmtDate = (iso) => {
-                const d = new Date(iso);
-                return d.toLocaleDateString('fr-FR', { weekday:'short', day:'numeric', month:'short' }).replace('.','');
-              };
-              const fmtTime = (iso) => {
-                const d = new Date(iso);
-                return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-              };
-              return (this.state.meetings.length === 0
-                ? `<div style="padding:30px;text-align:center;color:var(--muted);font-size:13px">📅 Aucune réunion programmée. Clique sur "+ Ajouter réunion" pour en créer une.</div>`
-                : this.state.meetings.sort((a,b)=>new Date(a.dateISO)-new Date(b.dateISO)).map(m => `
-                  <div style="padding:14px 20px;border-top:1px solid var(--line2);display:flex;gap:14px;align-items:center">
-                    <div style="width:70px;text-align:center;flex-shrink:0"><div style="font-weight:700;font-size:13px">${fmtDate(m.dateISO)}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${fmtTime(m.dateISO)}</div></div>
-                    <div style="flex:1;min-width:0">
-                      <div style="font-weight:600;font-size:13.5px">👤 ${m.client}</div>
-                      <div style="font-size:11.5px;color:var(--muted);margin-top:2px">📍 ${m.place} · ${m.topic}</div>
+              const today = new Date(); today.setHours(0,0,0,0);
+              const isToday = (d) => { const x = new Date(d); x.setHours(0,0,0,0); return x.getTime() === today.getTime(); };
+              const isPast  = (d) => new Date(d) < new Date();
+              const placeIcon = (p) => /visio|meet|zoom/i.test(p) ? '💻' : /caf[ée]/i.test(p) ? '☕' : /boutique|magasin|store/i.test(p) ? '🏪' : /restau/i.test(p) ? '🍽️' : '📍';
+              const clientLookup = (name) => (this.state.clients||[]).find(c => c.name === name);
+              const meetings = this.state.meetings.slice().sort((a,b)=>new Date(a.dateISO)-new Date(b.dateISO));
+              if (meetings.length === 0) {
+                return `<div style="padding:40px;text-align:center;color:var(--muted)">
+                  <div style="font-size:36px;margin-bottom:10px;opacity:.4">📅</div>
+                  <div style="font-weight:600;font-size:13px;margin-bottom:4px">Aucune réunion programmée</div>
+                  <div style="font-size:12px">Clique sur "+ Ajouter réunion" pour en créer une.</div>
+                </div>`;
+              }
+              return `<div class="mtg-grid">${meetings.map(m => {
+                const d = new Date(m.dateISO);
+                const isT = isToday(m.dateISO);
+                const isP = isPast(m.dateISO);
+                const dayNum = d.getDate();
+                const monthLbl = d.toLocaleDateString('fr-FR', { month:'short' }).replace('.','').toUpperCase();
+                const weekday = d.toLocaleDateString('fr-FR', { weekday:'long' });
+                const timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                const accent = isT ? '#F59E0B' : isP ? '#94A3B8' : '#1A56DB';
+                const statusLbl = isT ? '🔴 Aujourd\'hui' : isP ? 'Passée' : 'À venir';
+                const cl = clientLookup(m.client);
+                const avatar = cl ? `<div class="mtg-avatar" style="background:${cl.color||'#1A56DB'}">${cl.avatar||(m.client[0]||'?')}</div>`
+                                  : `<div class="mtg-avatar" style="background:#94A3B8">${(m.client[0]||'?').toUpperCase()}</div>`;
+                return `
+                <div class="mtg-card ${isT?'is-today':isP?'is-past':''}">
+                  <div class="mtg-date" style="--mtg-accent:${accent}">
+                    <div class="mtg-weekday">${weekday.slice(0,3)}</div>
+                    <div class="mtg-day">${dayNum}</div>
+                    <div class="mtg-month">${monthLbl}</div>
+                  </div>
+                  <div class="mtg-body">
+                    <div class="mtg-head">
+                      ${avatar}
+                      <div style="flex:1;min-width:0">
+                        <div class="mtg-client">${m.client}</div>
+                        <div class="mtg-status" style="color:${accent}">${statusLbl} · ${timeStr}</div>
+                      </div>
                     </div>
-                    <button class="btn-g" onclick="Nx.openMeetingInCalendar(${m.id})" title="Ouvre Google Calendar pour créer/voir l'event">📅 Ouvrir</button>
-                    <button class="btn-g" style="color:var(--red)" onclick="Nx.deleteMeeting(${m.id})" title="Supprimer">🗑</button>
-                  </div>`).join('')
-              );
+                    <div class="mtg-meta">
+                      <span class="mtg-tag mtg-place">${placeIcon(m.place)} ${m.place}</span>
+                    </div>
+                    ${m.topic ? `<div class="mtg-topic">${m.topic}</div>` : ''}
+                  </div>
+                  <div class="mtg-actions">
+                    <button class="btn-g mtg-act-primary" onclick="Nx.openMeetingInCalendar(${m.id})" title="Ouvrir dans Google Calendar">📅 Google Calendar</button>
+                    <button class="btn-g" onclick="Nx.editMeeting(${m.id})" title="Modifier">✏️</button>
+                    <button class="btn-g mtg-act-danger" onclick="Nx.deleteMeeting(${m.id})" title="Supprimer">🗑</button>
+                  </div>
+                </div>`;
+              }).join('')}</div>`;
             })()}
           </div>
         </div>
@@ -5665,18 +5722,97 @@ const Nx = {
     this.toast('Segment supprimé','success');
   },
 
-  // Bouton 'voir tous' depuis le podium → switch filtre Actifs + montre tous
+  // 'voir tous' → modal grand format avec recherche + grid (Augustin 19/05 : "scroll c'est nul")
   viewAllActiveClients(){
-    this.state.crmFilter = 'active';
-    this.state.crmShowAll = true;
-    this.save();
-    this.renderView();
+    const ov = document.getElementById('modal-overlay');
+    const mc = document.getElementById('modal-content');
+    ov.classList.remove('hidden');
+    mc.style.maxWidth = '900px';
+    const actives = this.state.clients.filter(c => c.status === 'active').sort((a,b) => b.score - a.score);
+    const renderList = (filterStr) => {
+      const f = (filterStr || '').toLowerCase().trim();
+      const filtered = f ? actives.filter(c => c.name.toLowerCase().includes(f) || (c.phone||'').includes(f) || (c.tags||[]).join(' ').toLowerCase().includes(f)) : actives;
+      if (!filtered.length) return `<div style="padding:30px;text-align:center;color:var(--muted)">Aucun client trouvé pour "${filterStr}"</div>`;
+      return `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">${filtered.map(c => `
+        <div class="all-client-card" onclick="Nx.closeModal();Nx.openClientCard(${c.id})">
+          <div class="all-client-row">
+            <div class="msg-av" style="width:38px;height:38px;background:${c.color||'#1A56DB'};font-size:13px;flex-shrink:0">${c.avatar||c.name[0]}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.name}</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:1px">${c.phone||''}</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+            ${(c.tags||[]).slice(0,2).map(t => `<span class="chip" style="font-size:10px;padding:2px 7px;background:${t==='VIP'?'#FEF3C7':'#EFF6FF'};color:${t==='VIP'?'#92400E':'#1E40AF'}">${t}</span>`).join('')}
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--line2)">
+            <span style="font-size:10.5px;color:var(--muted);font-weight:600">Score</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--blue);font-size:14px">${c.score}</span>
+          </div>
+        </div>
+      `).join('')}</div>`;
+    };
+    mc.innerHTML = `
+      <style>
+        .all-client-card{padding:12px;background:var(--panel);border:1px solid var(--line);border-radius:11px;cursor:pointer;transition:all .18s}
+        .all-client-card:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 8px 20px -8px rgba(26,86,219,.35)}
+        .all-client-row{display:flex;gap:10px;align-items:center}
+      </style>
+      <div class="modal-hd">
+        <h3>👥 Tous tes clients actifs <span style="font-size:12px;color:var(--muted);font-weight:500">· ${actives.length} clients</span></h3>
+        <button class="modal-close" onclick="Nx.closeModal()">✕</button>
+      </div>
+      <div class="modal-body" style="max-height:65vh;overflow-y:auto">
+        <input class="form-ctrl" id="allClientsSearch" placeholder="🔍 Recherche par nom, téléphone ou tag…" style="margin-bottom:14px" oninput="document.getElementById('allClientsListWrap').innerHTML = Nx._allClientsListRender(this.value)">
+        <div id="allClientsListWrap">${renderList('')}</div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-s" onclick="Nx.closeModal()">Fermer</button>
+        <button class="btn btn-p" onclick="Nx.closeModal();Nx.openAddClientModal()">+ Ajouter un client</button>
+      </div>`;
+    // Expose pour la recherche live
+    this._allClientsListRender = renderList;
+    setTimeout(() => document.getElementById('allClientsSearch')?.focus(), 80);
+  },
+
+  // Modifier une réunion existante (pré-remplit le modal)
+  editMeeting(id){
+    const m = (this.state.meetings||[]).find(x => x.id === id);
+    if (!m) return;
+    this.addMeeting();
     setTimeout(() => {
-      // Scroll vers la liste clients (ID #crmList si présent, sinon vers le tableau)
-      const target = document.querySelector('#crmList') || document.querySelector('.crm-list-card') || document.querySelectorAll('.card')[2];
-      if (target && target.scrollIntoView) target.scrollIntoView({ behavior:'smooth', block:'start' });
-    }, 100);
-    this.toast('Affichage de tous les clients actifs','info', `${this.state.clients.filter(c=>c.status==='active').length} clients`);
+      const dStr = m.dateISO.slice(0,10);
+      const tStr = m.dateISO.slice(11,16);
+      const el = (k) => document.getElementById(k);
+      if (el('mtgClient')) el('mtgClient').value = m.client || '';
+      if (el('mtgDate'))   el('mtgDate').value = dStr;
+      if (el('mtgTime'))   el('mtgTime').value = tStr;
+      if (el('mtgPlace'))  el('mtgPlace').value = m.place || '';
+      if (el('mtgTopic'))  el('mtgTopic').value = m.topic || '';
+      // Remplace le bouton "Créer" par "Modifier"
+      const foot = document.querySelector('.modal-foot');
+      if (foot) {
+        const btn = foot.querySelector('.btn-p');
+        if (btn) { btn.textContent = '💾 Enregistrer les modifications'; btn.onclick = () => Nx.saveMeetingEdit(id); }
+      }
+      const hd = document.querySelector('.modal-hd h3');
+      if (hd) hd.textContent = '✏️ Modifier la réunion';
+    }, 60);
+  },
+
+  saveMeetingEdit(id){
+    const m = (this.state.meetings||[]).find(x => x.id === id);
+    if (!m) return;
+    const dateStr = (document.getElementById('mtgDate')||{}).value || '';
+    const timeStr = (document.getElementById('mtgTime')||{}).value || '10:00';
+    m.client = (document.getElementById('mtgClient')||{}).value || m.client;
+    m.dateISO = dateStr + 'T' + timeStr;
+    m.place = (document.getElementById('mtgPlace')||{}).value || m.place;
+    m.topic = (document.getElementById('mtgTopic')||{}).value || m.topic;
+    this.save();
+    this.closeModal();
+    this.toast('✓ Réunion modifiée','success', m.client);
+    this.renderView();
   },
 
   // RAPPORT CAMPAGNE
