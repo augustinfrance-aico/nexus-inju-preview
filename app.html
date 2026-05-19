@@ -4313,33 +4313,135 @@ const Nx = {
             </div>
           </div>
           <div class="card-body" style="padding:0">
-            ${[
-              {date:'Lun 19 mai', time:'10:00', client:'María González', place:'Visioconférence Google Meet', topic:'Présentation pack VIP 2026'},
-              {date:'Mar 20 mai', time:'14:30', client:'Pedro Soto',     place:'Boutique Don Carlos',         topic:'Devis Torte mariage juin'},
-              {date:'Jeu 22 mai', time:'09:00', client:'Carmen López',   place:'Café Providencia',            topic:'Reprise de contact (ex-VIP silencieuse)'},
-              {date:'Ven 23 mai', time:'16:00', client:'Don Roberto',    place:'Visioconférence',             topic:'Catering événement entreprise 80p'}
-            ].map(m => `
-              <div style="padding:14px 20px;border-top:1px solid var(--line2);display:flex;gap:14px;align-items:center">
-                <div style="width:60px;text-align:center"><div style="font-weight:700;font-size:13px">${m.date}</div><div style="font-size:11px;color:var(--muted)">${m.time}</div></div>
-                <div style="flex:1">
-                  <div style="font-weight:600;font-size:13.5px">👤 ${m.client}</div>
-                  <div style="font-size:11.5px;color:var(--muted);margin-top:2px">📍 ${m.place} · ${m.topic}</div>
-                </div>
-                <button class="btn-g" onclick="Nx.toast('Google Calendar ouvert','info','Détails de la réunion')">📅 Ouvrir</button>
-              </div>`).join('')}
+            ${(() => {
+              // Defaults si state.meetings vide (1ère fois)
+              if (!this.state.meetings) {
+                this.state.meetings = [
+                  { id: 1, dateISO:'2026-05-19T10:00', client:'María González', place:'Visioconférence Google Meet', topic:'Présentation pack VIP 2026' },
+                  { id: 2, dateISO:'2026-05-20T14:30', client:'Pedro Soto',     place:'Boutique Don Carlos',         topic:'Devis Torte mariage juin' },
+                  { id: 3, dateISO:'2026-05-22T09:00', client:'Carmen López',   place:'Café Providencia',            topic:'Reprise de contact (ex-VIP silencieuse)' },
+                  { id: 4, dateISO:'2026-05-23T16:00', client:'Don Roberto',    place:'Visioconférence',             topic:'Catering événement entreprise 80p' }
+                ];
+              }
+              const fmtDate = (iso) => {
+                const d = new Date(iso);
+                return d.toLocaleDateString('fr-FR', { weekday:'short', day:'numeric', month:'short' }).replace('.','');
+              };
+              const fmtTime = (iso) => {
+                const d = new Date(iso);
+                return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+              };
+              return (this.state.meetings.length === 0
+                ? `<div style="padding:30px;text-align:center;color:var(--muted);font-size:13px">📅 Aucune réunion programmée. Clique sur "+ Ajouter réunion" pour en créer une.</div>`
+                : this.state.meetings.sort((a,b)=>new Date(a.dateISO)-new Date(b.dateISO)).map(m => `
+                  <div style="padding:14px 20px;border-top:1px solid var(--line2);display:flex;gap:14px;align-items:center">
+                    <div style="width:70px;text-align:center;flex-shrink:0"><div style="font-weight:700;font-size:13px">${fmtDate(m.dateISO)}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${fmtTime(m.dateISO)}</div></div>
+                    <div style="flex:1;min-width:0">
+                      <div style="font-weight:600;font-size:13.5px">👤 ${m.client}</div>
+                      <div style="font-size:11.5px;color:var(--muted);margin-top:2px">📍 ${m.place} · ${m.topic}</div>
+                    </div>
+                    <button class="btn-g" onclick="Nx.openMeetingInCalendar(${m.id})" title="Ouvre Google Calendar pour créer/voir l'event">📅 Ouvrir</button>
+                    <button class="btn-g" style="color:var(--red)" onclick="Nx.deleteMeeting(${m.id})" title="Supprimer">🗑</button>
+                  </div>`).join('')
+              );
+            })()}
           </div>
         </div>
       </div>`;
   },
 
-  // POINT CRM (e) — Ajouter réunion (mock)
+  // Augustin 19/05 : ajouter réunion DOIT sauver et ouvrir DOIT lancer Google Calendar
   addMeeting(){
-    const client = prompt('Nom du client pour la réunion ?');
-    if (!client) return;
-    const when = prompt('Date et heure (ex : 25 mai 10:00) ?');
-    if (!when) return;
-    const topic = prompt('Sujet de la réunion ?', 'Discussion projet');
-    this.toast('✓ Réunion ajoutée','success', client + ' · ' + when + (topic ? ' · ' + topic : ''));
+    // Modal propre au lieu de 3 prompts moches
+    const ov = document.getElementById('modal-overlay');
+    const mc = document.getElementById('modal-content');
+    ov.classList.remove('hidden');
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+    const dateStr = tomorrow.toISOString().slice(0,10);
+    const clientOpts = (this.state.clients||[]).map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+    mc.innerHTML = `
+      <div class="modal-hd"><h3>📅 Ajouter une réunion</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-body">
+        <div class="form-row"><label class="form-lbl">👤 Client</label>
+          <input class="form-ctrl" id="mtgClient" list="mtgClientList" placeholder="Nom du client (ou tape un nouveau)">
+          <datalist id="mtgClientList">${clientOpts}</datalist>
+        </div>
+        <div class="grid2">
+          <div class="form-row"><label class="form-lbl">📅 Date</label>
+            <input class="form-ctrl" type="date" id="mtgDate" value="${dateStr}" min="${new Date().toISOString().slice(0,10)}">
+          </div>
+          <div class="form-row"><label class="form-lbl">⏰ Heure</label>
+            <input class="form-ctrl" type="time" id="mtgTime" value="10:00">
+          </div>
+        </div>
+        <div class="form-row"><label class="form-lbl">📍 Lieu</label>
+          <input class="form-ctrl" id="mtgPlace" placeholder="Visioconférence Google Meet · Boutique · Café…" value="Visioconférence Google Meet">
+        </div>
+        <div class="form-row"><label class="form-lbl">📝 Sujet</label>
+          <textarea class="form-ctrl" id="mtgTopic" rows="2" placeholder="Présentation pack VIP · Devis · Reprise contact…"></textarea>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-s" onclick="Nx.closeModal()">Annuler</button>
+        <button class="btn btn-p" onclick="Nx.saveMeeting()">📅 Créer la réunion</button>
+      </div>`;
+  },
+
+  saveMeeting(){
+    const client = (document.getElementById('mtgClient')||{}).value || '';
+    const dateStr = (document.getElementById('mtgDate')||{}).value || '';
+    const timeStr = (document.getElementById('mtgTime')||{}).value || '10:00';
+    const place = (document.getElementById('mtgPlace')||{}).value || '';
+    const topic = (document.getElementById('mtgTopic')||{}).value || '';
+    if (!client || !dateStr) {
+      this.toast('Client + date requis','warn');
+      return;
+    }
+    if (!this.state.meetings) this.state.meetings = [];
+    const newMeeting = {
+      id: Date.now(),
+      dateISO: dateStr + 'T' + timeStr,
+      client, place, topic
+    };
+    this.state.meetings.push(newMeeting);
+    this.save();
+    this.closeModal();
+    this.toast('✓ Réunion ajoutée','success', `${client} · ${dateStr} ${timeStr}`);
+    this.renderView();
+    // Propose d'ouvrir Google Calendar pour synchroniser
+    setTimeout(() => {
+      if (confirm('Ouvrir Google Calendar pour synchroniser cette réunion ?')) {
+        this.openMeetingInCalendar(newMeeting.id);
+      }
+    }, 400);
+  },
+
+  // Ouvre Google Calendar (vraie URL) avec l'event pré-rempli
+  openMeetingInCalendar(id){
+    const m = (this.state.meetings||[]).find(x => x.id === id);
+    if (!m) return;
+    // Format Google Calendar : YYYYMMDDTHHMMSS
+    const start = new Date(m.dateISO);
+    const end = new Date(start.getTime() + 60 * 60 * 1000); // +1h
+    const fmt = (d) => d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
+    const params = new URLSearchParams({
+      action: 'TEMPLATE',
+      text: `${m.client} — ${m.topic||'Réunion'}`,
+      dates: `${fmt(start)}/${fmt(end)}`,
+      details: `Réunion programmée via Nexus.\n\nClient: ${m.client}\nSujet: ${m.topic||'—'}\nLieu: ${m.place||'—'}`,
+      location: m.place || ''
+    });
+    const url = 'https://calendar.google.com/calendar/u/0/r/eventedit?' + params.toString();
+    window.open(url, '_blank', 'noopener');
+    this.toast('📅 Google Calendar ouvert','success','Vérifie l\'onglet ouvert');
+  },
+
+  deleteMeeting(id){
+    if (!confirm('Supprimer cette réunion ?')) return;
+    this.state.meetings = (this.state.meetings||[]).filter(m => m.id !== id);
+    this.save();
+    this.renderView();
+    this.toast('🗑 Réunion supprimée','info');
   },
 
   // CRM — Modal Ajouter client (très personnalisable)
