@@ -2760,19 +2760,11 @@ const Nx = {
     // Barre top sur toutes les sections sauf dashboard :
     // 1) Bouton "← Retour Nexus Core"  2) Icône fenêtre = ouvre pop-up pour basculer entre modules
     if (v !== 'dashboard') {
+      // Bouton "Menus" retiré ici (Augustin 19/05/2026) — doublon avec celui en haut à droite à côté du switcher de langue
       html = `<div class="back-to-core-bar">
         <button class="back-to-core-btn" onclick="location.href='core.html'" title="Retour au tableau de bord Nexus Core">
           <span style="font-size:18px">←</span>
           <span>Retour au Nexus Core</span>
-        </button>
-        <button class="iface-window-btn" onclick="location.href='core.html'" title="Ouvrir les menus (Nexus Core)" aria-label="Menus">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="7" height="7" rx="1.5"/>
-            <rect x="14" y="3" width="7" height="7" rx="1.5"/>
-            <rect x="3" y="14" width="7" height="7" rx="1.5"/>
-            <rect x="14" y="14" width="7" height="7" rx="1.5"/>
-          </svg>
-          <span>Menus</span>
         </button>
       </div>` + html;
     }
