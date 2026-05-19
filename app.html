@@ -754,6 +754,39 @@ html[data-theme="dark"] .chat-input textarea::placeholder{color:#8A94A6}
 .chart-selector button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
 .chart-selector button:hover{border-color:var(--blue);color:var(--blue)}
 .chart-selector button.on:hover{color:#fff}
+
+/* CALENDRIER QUAND ENVOYER (Augustin 19/05 : "plus complet et intuitif") */
+.cal-presets{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.cal-chip{padding:14px 10px;background:var(--bg2);border:2px solid var(--line);border-radius:12px;cursor:pointer;text-align:center;transition:all .18s;font-family:inherit}
+.cal-chip:hover{border-color:var(--blue);transform:translateY(-1px);box-shadow:0 6px 18px -8px rgba(26,86,219,.35)}
+.cal-chip.on{border-color:var(--blue);background:linear-gradient(135deg,#EFF6FF,#DBEAFE);box-shadow:0 8px 22px -10px rgba(26,86,219,.55)}
+.cal-chip-emoji{font-size:24px;line-height:1;margin-bottom:6px}
+.cal-chip-title{font-weight:700;font-size:12.5px;color:var(--ink);margin-bottom:2px}
+.cal-chip-sub{font-size:10.5px;color:var(--muted);line-height:1.3}
+.cal-chip.on .cal-chip-title{color:var(--blue)}
+.cal-extra{margin-top:12px;padding:14px;background:var(--bg2);border-radius:10px;border:1px solid var(--line)}
+.cal-extra.hidden{display:none}
+.cal-lbl{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px}
+.cal-input{font-size:14px;padding:10px 12px}
+.cal-custom-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.cal-quick-hours{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.cal-quick-lbl{font-size:11px;color:var(--muted);font-weight:600;margin-right:4px}
+.cal-quick-btn{padding:4px 10px;font-size:11px;font-weight:600;background:var(--panel);border:1px solid var(--line);border-radius:999px;cursor:pointer;color:var(--ink2);transition:all .15s;font-family:inherit}
+.cal-quick-btn:hover{border-color:var(--blue);color:var(--blue)}
+.cal-quick-btn.cal-peak{border-color:#F59E0B;color:#B45309;background:#FEF3C7}
+.cal-rec-grid{display:flex;flex-direction:column;gap:10px}
+.cal-rec-tabs{display:flex;gap:4px;background:var(--panel);padding:4px;border-radius:10px;border:1px solid var(--line)}
+.cal-rec-tab{flex:1;padding:6px 10px;font-size:11.5px;font-weight:600;background:transparent;border:0;border-radius:7px;cursor:pointer;color:var(--ink2);transition:all .15s;font-family:inherit}
+.cal-rec-tab:hover{background:var(--bg2)}
+.cal-rec-tab.on{background:var(--blue);color:#fff}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal-day{padding:10px 0;background:var(--panel);border:1px solid var(--line);border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink2);transition:all .15s;font-family:inherit}
+.cal-day:hover{border-color:var(--blue);color:var(--blue)}
+.cal-day.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.cal-recap{margin-top:12px;padding:11px 14px;background:linear-gradient(135deg,#F0F9FF,#DBEAFE);border:1px solid #93C5FD;border-radius:10px;display:flex;align-items:center;gap:10px;font-size:13px;color:#1E40AF}
+.cal-recap-ic{font-size:18px}
+.cal-recap-tag{display:inline-block;margin-left:6px;padding:1px 8px;background:#1A56DB22;color:#1A56DB;border-radius:999px;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.cal-recap-tag.cal-peak-tag{background:#F59E0B22;color:#B45309}
 </style>
 </head>
 <body>
@@ -5429,17 +5462,10 @@ const Nx = {
     this.toast(newState==='active'?'✓ '+(labelMap[id]||id)+' ACTIVÉE':'⏸ '+(labelMap[id]||id)+' mise en pause','success');
   },
   editAutoCampaign(id){
-    // POINT CAMPAGNES (e) — Modifier ouvre le builder pré-rempli
-    this.openAutoCampaign();
-    setTimeout(() => {
-      const nameInput = document.getElementById('autoName');
-      if (nameInput) {
-        if (id === 'recovery-lost') nameInput.value = 'Récupération clients perdus −10%';
-        else if (id === 'anniv-clients') nameInput.value = 'Anniversaires clients';
-        else if (id === 'promo-fin-mois') nameInput.value = 'Promo fin de mois −15%';
-      }
-      this.toast('✏️ Édition de l\'automatisation','info', id);
-    }, 50);
+    // Fix Augustin 19/05 : avec le crayon, ça modifie pas le contenu
+    // → on passe l'id à openAutoCampaign pour qu'il pré-remplisse TOUS les champs depuis state
+    this.openAutoCampaign(id);
+    this.toast('✏️ Édition en cours', 'info', id);
   },
   deleteAutoCampaign(id){
     // POINT CAMPAGNES (e) — Suppression réelle (marque l'auto comme deleted)
@@ -5598,19 +5624,18 @@ const Nx = {
   openCampaignBuilder(templateName, presetSegment){
     this.openModal('ai-chat');
     const mc = document.getElementById('modal-content');
-    // Pastille couleur unifiée Augustin + emoji thématique (VIP jaune, Rec bleu, New vert, Occ orange, Lost rouge, Biz violet)
+    // Pastille couleur unifiée Augustin (sans emoji thématique, juste la pastille + le nom)
     const segOpts = [
-      {k:'vip',e:'🟡 ⭐',n:'Clients VIP',c:this.state.clients.filter(x=>x.tags.includes('VIP')).length},
-      {k:'recurrent',e:'🔵 🔁',n:'Récurrents',c:this.state.clients.filter(x=>x.tag==='rec').length},
-      {k:'new',e:'🟢 🌱',n:'Nouveaux',c:this.state.clients.filter(x=>x.status==='prospect').length},
-      {k:'occ',e:'🟠 👥',n:'Occasionnels',c:Math.round(this.state.clients.filter(x=>x.status==='active').length*0.3)},
-      {k:'lost',e:'🔴 💔',n:'Perdus',c:this.state.clients.filter(x=>x.status==='lost').length},
-      {k:'biz',e:'🟣 💼',n:'Business',c:this.state.clients.filter(x=>x.tag==='biz').length},
-      {k:'custom',e:'⚪ ⚙️',n:'Personnalisé (à la pince)',c:'sélection'}
+      {k:'vip',e:'🟡',n:'Clients VIP',c:this.state.clients.filter(x=>x.tags.includes('VIP')).length},
+      {k:'recurrent',e:'🔵',n:'Récurrents',c:this.state.clients.filter(x=>x.tag==='rec').length},
+      {k:'new',e:'🟢',n:'Nouveaux',c:this.state.clients.filter(x=>x.status==='prospect').length},
+      {k:'occ',e:'🟠',n:'Occasionnels',c:Math.round(this.state.clients.filter(x=>x.status==='active').length*0.3)},
+      {k:'lost',e:'🔴',n:'Perdus',c:this.state.clients.filter(x=>x.status==='lost').length},
+      {k:'biz',e:'🟣',n:'Business',c:this.state.clients.filter(x=>x.tag==='biz').length},
+      {k:'custom',e:'⚪',n:'Personnalisé (à la pince)',c:'sélection'}
     ];
-    // Ajout segments persistants (point violet = personnalisé)
     this.state.customSegments.forEach((s,i) => {
-      segOpts.push({k:'custom_'+i, e:'🟣 📌', n:s.name, c:s.clientIds.length});
+      segOpts.push({k:'custom_'+i, e:'🟣', n:s.name, c:s.clientIds.length});
     });
     const presetIdx = segOpts.findIndex(s => s.k === presetSegment);
     mc.innerHTML = `
@@ -5652,15 +5677,49 @@ const Nx = {
           </div>
           <div id="campPhotoPreview" style="margin-top:10px"></div>
         </div>
+        <!-- Calendrier d'envoi refait (Augustin 19/05 : "plus complet et intuitif") -->
         <div class="form-row"><label class="form-lbl">📅 Quand envoyer</label>
-          <select class="form-ctrl" id="campSchedule" onchange="Nx.onCampScheduleChange(this.value)">
-            <option value="now">Maintenant</option>
-            <option value="dimanche19" selected>Dimanche 19h (heure de lecture max)</option>
-            <option value="demain9">Demain 9h</option>
-            <option value="custom">📅 Date/heure précise (datetime-local)</option>
-            <option value="recurring">🔁 Récurrente (chaque semaine, mois…)</option>
-          </select>
-          <div id="campScheduleExtra" class="hidden" style="margin-top:8px"></div>
+          <input type="hidden" id="campSchedule" value="dimanche19">
+          <input type="hidden" id="campScheduleDate" value="">
+          <input type="hidden" id="campScheduleRec" value="weekly">
+
+          <!-- 4 chips presets rapides -->
+          <div class="cal-presets">
+            <button type="button" class="cal-chip" data-preset="now" onclick="Nx.setCampSchedule('now')">
+              <div class="cal-chip-emoji">⚡</div>
+              <div class="cal-chip-title">Maintenant</div>
+              <div class="cal-chip-sub">Envoi immédiat</div>
+            </button>
+            <button type="button" class="cal-chip on" data-preset="dimanche19" onclick="Nx.setCampSchedule('dimanche19')">
+              <div class="cal-chip-emoji">🔥</div>
+              <div class="cal-chip-title">Dimanche 19h</div>
+              <div class="cal-chip-sub">Heure de lecture max</div>
+            </button>
+            <button type="button" class="cal-chip" data-preset="demain9" onclick="Nx.setCampSchedule('demain9')">
+              <div class="cal-chip-emoji">☀️</div>
+              <div class="cal-chip-title">Demain 9h</div>
+              <div class="cal-chip-sub">Matin frais</div>
+            </button>
+            <button type="button" class="cal-chip" data-preset="custom" onclick="Nx.setCampSchedule('custom')">
+              <div class="cal-chip-emoji">📅</div>
+              <div class="cal-chip-title">Date précise</div>
+              <div class="cal-chip-sub">Choisir jour + heure</div>
+            </button>
+            <button type="button" class="cal-chip" data-preset="recurring" onclick="Nx.setCampSchedule('recurring')">
+              <div class="cal-chip-emoji">🔁</div>
+              <div class="cal-chip-title">Récurrent</div>
+              <div class="cal-chip-sub">Auto chaque sem./mois</div>
+            </button>
+          </div>
+
+          <!-- Zone extra qui apparait selon le preset choisi -->
+          <div id="campScheduleExtra" class="cal-extra hidden"></div>
+
+          <!-- Récap visuel "📅 Envoi prévu : ..." -->
+          <div id="campScheduleRecap" class="cal-recap">
+            <span class="cal-recap-ic">📅</span>
+            <span><b>Envoi prévu :</b> <span id="campScheduleRecapText">Dimanche 25 mai 2026 à 19h00</span></span>
+          </div>
         </div>
 
         <!-- Coût en crédits -->
@@ -5711,25 +5770,122 @@ const Nx = {
     });
   },
 
-  onCampScheduleChange(value){
+  // Nouveau calendrier intuitif (Augustin 19/05) — chips presets + datepicker stylisé + récurrence visuelle
+  setCampSchedule(preset){
+    const sched = document.getElementById('campSchedule');
+    if (sched) sched.value = preset;
+    // Toggle visuel chips
+    document.querySelectorAll('.cal-chip').forEach(c => c.classList.toggle('on', c.dataset.preset === preset));
     const extra = document.getElementById('campScheduleExtra');
     if (!extra) return;
-    if (value === 'custom') {
-      extra.classList.remove('hidden');
-      extra.innerHTML = `<input type="datetime-local" class="form-ctrl">`;
-    } else if (value === 'recurring') {
+    if (preset === 'custom') {
+      // Date + heure : 2 champs séparés, plus joli qu'un seul datetime-local
+      const now = new Date();
+      now.setDate(now.getDate() + 1); // demain par défaut
+      const dateStr = now.toISOString().slice(0,10);
       extra.classList.remove('hidden');
       extra.innerHTML = `
-        <select class="form-ctrl">
-          <option>🔁 Toutes les semaines (lundi 9h)</option>
-          <option>🔁 Chaque mois (le 1er)</option>
-          <option>🔁 Chaque trimestre</option>
-          <option>🔁 Tous les 15 jours</option>
-        </select>`;
+        <div class="cal-custom-grid">
+          <div>
+            <label class="cal-lbl">📅 Date d'envoi</label>
+            <input type="date" class="form-ctrl cal-input" id="campCustomDate" value="${dateStr}" min="${new Date().toISOString().slice(0,10)}" onchange="Nx.updateCampScheduleRecap()">
+          </div>
+          <div>
+            <label class="cal-lbl">⏰ Heure</label>
+            <input type="time" class="form-ctrl cal-input" id="campCustomTime" value="09:00" onchange="Nx.updateCampScheduleRecap()">
+          </div>
+        </div>
+        <div class="cal-quick-hours">
+          <span class="cal-quick-lbl">Suggestions :</span>
+          <button type="button" class="cal-quick-btn" onclick="document.getElementById('campCustomTime').value='09:00';Nx.updateCampScheduleRecap()">9h matin</button>
+          <button type="button" class="cal-quick-btn" onclick="document.getElementById('campCustomTime').value='12:00';Nx.updateCampScheduleRecap()">Midi</button>
+          <button type="button" class="cal-quick-btn" onclick="document.getElementById('campCustomTime').value='17:00';Nx.updateCampScheduleRecap()">17h</button>
+          <button type="button" class="cal-quick-btn cal-peak" onclick="document.getElementById('campCustomTime').value='19:00';Nx.updateCampScheduleRecap()">🔥 19h (peak)</button>
+        </div>`;
+    } else if (preset === 'recurring') {
+      extra.classList.remove('hidden');
+      extra.innerHTML = `
+        <div class="cal-rec-grid">
+          <div>
+            <label class="cal-lbl">🔁 Fréquence</label>
+            <div class="cal-rec-tabs">
+              <button type="button" class="cal-rec-tab on" data-freq="weekly" onclick="Nx.setCampRecFreq('weekly')">Hebdo</button>
+              <button type="button" class="cal-rec-tab" data-freq="biweekly" onclick="Nx.setCampRecFreq('biweekly')">Bi-mensuel</button>
+              <button type="button" class="cal-rec-tab" data-freq="monthly" onclick="Nx.setCampRecFreq('monthly')">Mensuel</button>
+              <button type="button" class="cal-rec-tab" data-freq="quarterly" onclick="Nx.setCampRecFreq('quarterly')">Trimestriel</button>
+            </div>
+          </div>
+          <div id="campRecFields"></div>
+        </div>`;
+      this.setCampRecFreq('weekly');
     } else {
       extra.classList.add('hidden');
       extra.innerHTML = '';
     }
+    this.updateCampScheduleRecap();
+  },
+
+  setCampRecFreq(freq){
+    const rec = document.getElementById('campScheduleRec');
+    if (rec) rec.value = freq;
+    document.querySelectorAll('.cal-rec-tab').forEach(t => t.classList.toggle('on', t.dataset.freq === freq));
+    const fields = document.getElementById('campRecFields');
+    if (!fields) return;
+    if (freq === 'weekly' || freq === 'biweekly') {
+      fields.innerHTML = `
+        <label class="cal-lbl" style="margin-top:14px">📍 Jour de la semaine</label>
+        <div class="cal-days">
+          ${['L','M','M','J','V','S','D'].map((d,i) => `<button type="button" class="cal-day ${i===4?'on':''}" data-day="${i+1}" onclick="document.querySelectorAll('.cal-day').forEach(x=>x.classList.remove('on'));this.classList.add('on');Nx.updateCampScheduleRecap()">${d}</button>`).join('')}
+        </div>
+        <label class="cal-lbl" style="margin-top:14px">⏰ Heure</label>
+        <input type="time" class="form-ctrl cal-input" id="campRecTime" value="17:00" onchange="Nx.updateCampScheduleRecap()">`;
+    } else if (freq === 'monthly') {
+      fields.innerHTML = `
+        <label class="cal-lbl" style="margin-top:14px">📅 Jour du mois</label>
+        <input type="number" class="form-ctrl cal-input" id="campRecDay" min="1" max="31" value="1" onchange="Nx.updateCampScheduleRecap()">
+        <label class="cal-lbl" style="margin-top:14px">⏰ Heure</label>
+        <input type="time" class="form-ctrl cal-input" id="campRecTime" value="09:00" onchange="Nx.updateCampScheduleRecap()">`;
+    } else {
+      fields.innerHTML = `
+        <div style="padding:10px;background:var(--blue-soft);border-radius:8px;font-size:12px;color:var(--blue-ink);margin-top:14px">
+          📌 Premier envoi : <b>1er ${{quarterly:'janvier'}[freq]||''} prochain à 9h</b>, puis tous les 3 mois.
+        </div>`;
+    }
+    this.updateCampScheduleRecap();
+  },
+
+  // Recalcule le texte de récap "Envoi prévu : ..." selon le preset actif
+  updateCampScheduleRecap(){
+    const preset = document.getElementById('campSchedule')?.value || 'dimanche19';
+    const recap = document.getElementById('campScheduleRecapText');
+    if (!recap) return;
+    const fr = (d) => d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+    let txt = '';
+    const today = new Date();
+    if (preset === 'now') {
+      txt = `${cap(fr(today))} à ${today.getHours()}h${String(today.getMinutes()).padStart(2,'0')} <span class="cal-recap-tag">maintenant</span>`;
+    } else if (preset === 'dimanche19') {
+      const d = new Date(today);
+      d.setDate(d.getDate() + ((7 - d.getDay()) % 7 || 7));
+      txt = `${cap(fr(d))} à 19h00 <span class="cal-recap-tag cal-peak-tag">🔥 peak</span>`;
+    } else if (preset === 'demain9') {
+      const d = new Date(today); d.setDate(d.getDate() + 1);
+      txt = `${cap(fr(d))} à 9h00`;
+    } else if (preset === 'custom') {
+      const dStr = document.getElementById('campCustomDate')?.value;
+      const tStr = document.getElementById('campCustomTime')?.value;
+      if (dStr) {
+        const d = new Date(dStr + 'T' + (tStr||'09:00'));
+        txt = `${cap(fr(d))} à ${tStr||'09:00'}`;
+      } else txt = '— choisir une date —';
+    } else if (preset === 'recurring') {
+      const freq = document.getElementById('campScheduleRec')?.value || 'weekly';
+      const fLbl = {weekly:'chaque semaine', biweekly:'tous les 15 jours', monthly:'chaque mois', quarterly:'chaque trimestre'}[freq];
+      const time = document.getElementById('campRecTime')?.value || '17:00';
+      txt = `Récurrent · <b>${fLbl}</b> à ${time} <span class="cal-recap-tag">🔁 auto</span>`;
+    }
+    recap.innerHTML = txt;
   },
 
   importCampPhoto(){
