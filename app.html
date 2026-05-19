@@ -5353,18 +5353,36 @@ const Nx = {
 
   toggleCampaignHistory(){ this.state.showCampaignHistory = !this.state.showCampaignHistory; this.renderView(); },
 
-  // RENDER CAMPAGNE AUTO avec contrôles Activer/Pause/Supprimer/Modifier
+  // RENDER CAMPAGNE AUTO — lit state.autoCampaignDetails pour les overrides user
+  // Fix Augustin 19/05 : quand on modifie le nom dans le builder, ça s'actualise vraiment ici
   renderAutoCampaign(id, ic, color, title, desc, status){
-    // POINT CAMPAGNES (e) — Statut depuis state.autoCampaignStatus si présent, sinon fallback
     const stored = (this.state.autoCampaignStatus||{})[id];
     if (stored === 'deleted') return '';
     const realStatus = stored || status;
+    // Override depuis state si l'utilisateur a modifié cette campagne
+    const det = (this.state.autoCampaignDetails||{})[id];
+    let realTitle = title, realDesc = desc;
+    if (det) {
+      if (det.name) realTitle = det.name;
+      // Reconstruit desc depuis cfg + trigger + target
+      const targetLabels = { vip:'VIP', rec:'Récurrents', new:'Nouveaux', norm:'Normaux', lost:'Perdus', all:'Tous' };
+      const tgt = targetLabels[det.target] || det.target || '';
+      const parts = [];
+      if (det.trigger === 'monthly' && det.cfg)      parts.push(`Le ${det.cfg.day||'?'} de chaque mois à ${det.cfg.time||'09:00'}`);
+      else if (det.trigger === 'weekly' && det.cfg)  parts.push(`Chaque ${det.cfg.weekday||'?'} à ${det.cfg.time||'17:00'}`);
+      else if (det.trigger === 'birthday')           parts.push(`Veille des anniversaires à ${(det.cfg&&det.cfg.time)||'09:00'}`);
+      else if (det.trigger === 'silence' && det.cfg) parts.push(`Si silence > ${det.cfg.silenceDays||'?'} jours`);
+      else if (det.trigger === 'weather')            parts.push('Selon météo');
+      else if (det.trigger === 'stat')               parts.push('Selon stat seuil');
+      if (tgt) parts.push(`cible ${tgt}`);
+      if (parts.length) realDesc = parts.join(' · ');
+    }
     return `
       <div style="padding:14px 16px;background:var(--bg2);border:1px solid var(--line);border-radius:11px;display:flex;align-items:center;gap:14px;margin-bottom:8px">
         <div style="width:42px;height:42px;border-radius:11px;background:${color}22;color:${color};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${ic}</div>
         <div style="flex:1">
-          <div style="font-weight:700;font-size:13.5px">${title}</div>
-          <div style="font-size:11.5px;color:var(--muted);margin-top:2px">${desc}</div>
+          <div style="font-weight:700;font-size:13.5px">${realTitle}</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:2px">${realDesc}</div>
         </div>
         <span class="chip ${realStatus==='active'?'green':''}" style="font-size:11px;${realStatus!=='active'?'background:#94A3B822;color:#475569':''}">${realStatus==='active'?'● Active':'○ Pause'}</span>
         <button class="btn-g" onclick="Nx.toggleAutoStatus('${id}')" title="${realStatus==='active'?'Mettre en pause':'Activer'}">${realStatus==='active'?'⏸ Pause':'▶ Activer'}</button>
@@ -5559,17 +5577,19 @@ const Nx = {
   openCampaignBuilder(templateName, presetSegment){
     this.openModal('ai-chat');
     const mc = document.getElementById('modal-content');
+    // Pastille couleur unifiée Augustin + emoji thématique (VIP jaune, Rec bleu, New vert, Occ orange, Lost rouge, Biz violet)
     const segOpts = [
-      {k:'vip',e:'⭐',n:'Clients VIP',c:this.state.clients.filter(x=>x.tags.includes('VIP')).length},
-      {k:'recurrent',e:'🔁',n:'Récurrents',c:this.state.clients.filter(x=>x.tag==='rec').length},
-      {k:'new',e:'🌱',n:'Nouveaux',c:this.state.clients.filter(x=>x.status==='prospect').length},
-      {k:'occ',e:'👥',n:'Occasionnels',c:Math.round(this.state.clients.filter(x=>x.status==='active').length*0.3)},
-      {k:'lost',e:'💔',n:'Perdus',c:this.state.clients.filter(x=>x.status==='lost').length},
-      {k:'custom',e:'⚙️',n:'Personnalisé (à la pince)',c:'sélection'}
+      {k:'vip',e:'🟡 ⭐',n:'Clients VIP',c:this.state.clients.filter(x=>x.tags.includes('VIP')).length},
+      {k:'recurrent',e:'🔵 🔁',n:'Récurrents',c:this.state.clients.filter(x=>x.tag==='rec').length},
+      {k:'new',e:'🟢 🌱',n:'Nouveaux',c:this.state.clients.filter(x=>x.status==='prospect').length},
+      {k:'occ',e:'🟠 👥',n:'Occasionnels',c:Math.round(this.state.clients.filter(x=>x.status==='active').length*0.3)},
+      {k:'lost',e:'🔴 💔',n:'Perdus',c:this.state.clients.filter(x=>x.status==='lost').length},
+      {k:'biz',e:'🟣 💼',n:'Business',c:this.state.clients.filter(x=>x.tag==='biz').length},
+      {k:'custom',e:'⚪ ⚙️',n:'Personnalisé (à la pince)',c:'sélection'}
     ];
-    // Ajout segments persistants
+    // Ajout segments persistants (point violet = personnalisé)
     this.state.customSegments.forEach((s,i) => {
-      segOpts.push({k:'custom_'+i, e:'📌', n:s.name, c:s.clientIds.length});
+      segOpts.push({k:'custom_'+i, e:'🟣 📌', n:s.name, c:s.clientIds.length});
     });
     const presetIdx = segOpts.findIndex(s => s.k === presetSegment);
     mc.innerHTML = `
