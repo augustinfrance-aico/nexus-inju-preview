@@ -2058,9 +2058,10 @@ const Nx = {
     this.updateBreadcrumb();
     this.save();
     this.renderView();
-    // === DYNAMIC TRANSLATE via /api/translate (Claude) — couvre les textes non-i18n
-    if (window.NexusTranslate) {
-      setTimeout(() => { try { window.NexusTranslate.translate(l); } catch (e) { console.warn('[NexusTranslate]', e); } }, 50);
+    // === DYNAMIC TRANSLATE via /api/translate (Groq) — couvre les textes non-i18n
+    // FIX 19/05 : ancien nom NexusTranslate.translate n'existait pas → restoreOrig jamais appelé
+    if (window.NexusDynTranslate) {
+      setTimeout(() => { try { window.NexusDynTranslate.apply(l); } catch (e) { console.warn('[DT]', e); } }, 80);
     }
   },
 
