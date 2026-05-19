@@ -5500,59 +5500,90 @@ const Nx = {
       cancelled: items.filter(i=>i.status==='cancelled').length
     };
     const tabBtn = (k, lblKey) => `<button class="filter-pill ${tab===k?'on':''}" onclick="Nx.setPilotageTab('${k}')">${t(lblKey)} <span class="chip" style="margin-left:6px">${counts[k]}</span></button>`;
-    const statusPill = (s) => {
-      const colorMap = {scheduled:'#3B82F6',active:'#10B981',done:'#6B7280',cancelled:'#EF4444'};
-      const lblMap = {scheduled:t('pilotage.tab.scheduled'),active:t('pilotage.tab.active'),done:t('pilotage.tab.done'),cancelled:t('pilotage.tab.cancelled')};
-      return `<span class="chip" style="background:${colorMap[s]}22;color:${colorMap[s]};font-weight:700">${lblMap[s]}</span>`;
-    };
+    const colorMap = { scheduled:'#3B82F6', active:'#10B981', done:'#6B7280', cancelled:'#EF4444' };
+    const statusLbl = { scheduled: t('pilotage.tab.scheduled'), active: t('pilotage.tab.active'), done: t('pilotage.tab.done'), cancelled: t('pilotage.tab.cancelled') };
+    const categoryColor = { message:'#3B82F6', social:'#EC4899', promo:'#F59E0B', inbox:'#10B981', reminder:'#7A3CFF', profile:'#06B6D4' };
     const actionsHtml = (it) => {
       if (it.status === 'scheduled' || it.status === 'active') {
-        return `<button class="btn-g" onclick="Nx.cancelAgendaItem('${it.id}')">${t('pilotage.btn.cancel')}</button>
-                <button class="btn-g" onclick="Nx.modifyAgendaItem('${it.id}')">${t('pilotage.btn.modify')}</button>`;
+        return `<button class="pn-btn" onclick="Nx.modifyAgendaItem('${it.id}')"><span>✏️</span>${t('pilotage.btn.modify')}</button>
+                <button class="pn-btn pn-btn-danger" onclick="Nx.cancelAgendaItem('${it.id}')"><span>✕</span>${t('pilotage.btn.cancel')}</button>`;
       } else if (it.status === 'cancelled') {
-        return `<button class="btn-g" onclick="Nx.reactivateAgendaItem('${it.id}')">${t('pilotage.btn.reactivate')}</button>`;
-      } else { // done
-        return `<button class="btn-g" onclick="Nx.duplicateAgendaItem('${it.id}')">${t('pilotage.btn.duplicate')}</button>`;
+        return `<button class="pn-btn pn-btn-primary" onclick="Nx.reactivateAgendaItem('${it.id}')"><span>↻</span>${t('pilotage.btn.reactivate')}</button>`;
+      } else {
+        return `<button class="pn-btn" onclick="Nx.duplicateAgendaItem('${it.id}')"><span>📋</span>${t('pilotage.btn.duplicate')}</button>`;
       }
     };
     const listHtml = filtered.length === 0
-      ? `<div class="card" style="padding:30px;text-align:center;color:var(--muted)">
-           <div style="font-size:32px;margin-bottom:10px;opacity:.4">📭</div>
-           <div>${t('pilotage.empty.'+tab)}</div>
-           <div style="margin-top:14px;font-size:11px;color:var(--muted)">${t('pilotage.empty.hint')}</div>
+      ? `<div class="pn-empty">
+           <div class="pn-empty-ic">📭</div>
+           <div class="pn-empty-title">${t('pilotage.empty.'+tab)}</div>
+           <div class="pn-empty-hint">${t('pilotage.empty.hint')}</div>
          </div>`
-      : `<table class="table">
-          <thead><tr>
-            <th>${t('pilotage.col.title')}</th>
-            <th>${t('pilotage.col.when')}</th>
-            <th>${t('pilotage.col.status')}</th>
-            <th style="text-align:right">${t('pilotage.col.actions')}</th>
-          </tr></thead>
-          <tbody>${filtered.map(it => `
-            <tr>
-              <td><div style="font-weight:600">${it.icon||'🎯'} ${it.title}</div>
-                  ${it.detail?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${it.detail}</div>`:''}</td>
-              <td style="white-space:nowrap">${it.when || '—'}</td>
-              <td>${statusPill(it.status)}</td>
-              <td style="text-align:right;white-space:nowrap">${actionsHtml(it)}</td>
-            </tr>`).join('')}
-          </tbody>
-         </table>`;
+      : `<div class="pn-grid">${filtered.map(it => {
+          const accent = categoryColor[it.category] || colorMap[it.status];
+          return `
+          <div class="pn-card" style="--pn-accent:${accent}">
+            <div class="pn-card-hd">
+              <div class="pn-card-ic">${it.icon||'🎯'}</div>
+              <div class="pn-card-meta">
+                <div class="pn-card-title">${it.title}</div>
+                ${it.category ? `<div class="pn-card-cat">${it.category}</div>` : ''}
+              </div>
+              <span class="pn-status" style="--pn-stcolor:${colorMap[it.status]}">${statusLbl[it.status]}</span>
+            </div>
+            ${it.detail ? `<div class="pn-card-detail">${it.detail}</div>` : ''}
+            <div class="pn-card-when">
+              <span class="pn-when-ic">📅</span>
+              <span><b>Quand :</b> ${it.when || '—'}</span>
+            </div>
+            <div class="pn-card-actions">${actionsHtml(it)}</div>
+          </div>`;
+        }).join('')}</div>`;
     return `
+      <style>
+        .pn-empty{padding:60px 30px;text-align:center;color:var(--muted);background:var(--panel);border:1px dashed var(--line);border-radius:14px}
+        .pn-empty-ic{font-size:48px;margin-bottom:14px;opacity:.35}
+        .pn-empty-title{font-size:14px;font-weight:600;color:var(--ink2);margin-bottom:8px}
+        .pn-empty-hint{font-size:12px;color:var(--muted);max-width:420px;margin:0 auto;line-height:1.5}
+        .pn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px}
+        .pn-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px;transition:all .2s;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.04)}
+        .pn-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--pn-accent)}
+        .pn-card:hover{transform:translateY(-2px);box-shadow:0 12px 28px -10px color-mix(in srgb,var(--pn-accent) 30%,transparent);border-color:color-mix(in srgb,var(--pn-accent) 30%,var(--line))}
+        .pn-card-hd{display:flex;gap:14px;align-items:flex-start}
+        .pn-card-ic{width:48px;height:48px;border-radius:12px;background:color-mix(in srgb,var(--pn-accent) 12%,transparent);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+        .pn-card-meta{flex:1;min-width:0}
+        .pn-card-title{font-weight:700;font-size:14.5px;color:var(--ink);line-height:1.35;letter-spacing:-.01em}
+        .pn-card-cat{font-size:10px;font-weight:700;color:var(--pn-accent);text-transform:uppercase;letter-spacing:.06em;margin-top:3px;opacity:.85}
+        .pn-status{padding:5px 11px;border-radius:999px;font-size:10.5px;font-weight:700;background:color-mix(in srgb,var(--pn-stcolor) 14%,transparent);color:var(--pn-stcolor);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;flex-shrink:0}
+        .pn-card-detail{font-size:12.5px;color:var(--ink2);line-height:1.6;padding:11px 14px;background:var(--bg2);border-radius:10px}
+        .pn-card-when{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2);padding:9px 14px;background:linear-gradient(135deg,color-mix(in srgb,var(--pn-accent) 6%,transparent),transparent);border-radius:10px;border:1px solid color-mix(in srgb,var(--pn-accent) 18%,transparent)}
+        .pn-when-ic{font-size:16px}
+        .pn-card-actions{display:flex;gap:8px;flex-wrap:wrap;padding-top:6px;border-top:1px solid var(--line2);margin-top:auto}
+        .pn-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;font-size:12px;font-weight:600;background:var(--bg2);border:1px solid var(--line);border-radius:8px;cursor:pointer;color:var(--ink2);transition:all .15s;font-family:inherit}
+        .pn-btn:hover{border-color:var(--pn-accent);color:var(--pn-accent);background:color-mix(in srgb,var(--pn-accent) 8%,transparent)}
+        .pn-btn span{font-size:13px}
+        .pn-btn-primary{background:var(--pn-accent);color:#fff;border-color:var(--pn-accent)}
+        .pn-btn-primary:hover{filter:brightness(.92);background:var(--pn-accent);color:#fff}
+        .pn-btn-danger{color:#EF4444;border-color:#FCA5A5}
+        .pn-btn-danger:hover{background:#FEE2E2;color:#B91C1C;border-color:#EF4444}
+        .pn-tabs-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;padding:6px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+        .pn-tabs-row .filter-pill{padding:9px 16px;font-size:13px}
+        @media(max-width:600px){.pn-grid{grid-template-columns:1fr}.pn-card{padding:14px}}
+      </style>
       <div class="view">
-        <div class="page-hd">
+        <div class="page-hd" style="margin-bottom:18px">
           <div>
-            <h1 style="margin:0">🎯 ${t('pilotage.title')}</h1>
-            <div style="color:var(--muted);font-size:13px;margin-top:4px">${t('pilotage.sub')}</div>
+            <h1 style="margin:0;display:flex;align-items:center;gap:10px"><span style="font-size:30px">🎯</span>${t('pilotage.title')}</h1>
+            <div style="color:var(--muted);font-size:13.5px;margin-top:6px;max-width:600px;line-height:1.5">${t('pilotage.sub')}</div>
           </div>
         </div>
-        <div class="filter-bar" style="margin-bottom:14px;flex-wrap:wrap">
+        <div class="pn-tabs-row">
           ${tabBtn('scheduled','pilotage.tab.scheduled')}
           ${tabBtn('active','pilotage.tab.active')}
           ${tabBtn('done','pilotage.tab.done')}
           ${tabBtn('cancelled','pilotage.tab.cancelled')}
         </div>
-        <div class="card" style="padding:14px">${listHtml}</div>
+        ${listHtml}
       </div>`;
   },
 
