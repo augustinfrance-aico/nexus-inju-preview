@@ -3689,7 +3689,10 @@ const Nx = {
             <button class="btn btn-s" onclick="Nx.addFaq()" style="margin-top:10px">+ Ajouter une FAQ</button>
 
             <!-- POINT PROFIL PERSO (a) — Suggestions IA depuis Conseil Nexus -->
-            <h4 style="margin:22px 0 10px;font-size:13px">✨ Suggestions IA <span style="font-size:11px;color:var(--muted);font-weight:400">· depuis Conseil Nexus, prêtes à intégrer</span></h4>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin:22px 0 10px;flex-wrap:wrap;gap:8px">
+              <h4 style="margin:0;font-size:13px">✨ Suggestions IA <span style="font-size:11px;color:var(--muted);font-weight:400">· depuis Conseil Nexus, prêtes à intégrer</span></h4>
+              <button class="btn btn-s" style="background:linear-gradient(135deg,#7A3CFF,#A855F7);color:#fff;border:0;font-weight:600" onclick="Nx.generateFaqSuggestions()" id="genFaqBtn">✨ Générer des suggestions</button>
+            </div>
             <div id="faqSuggestionsList">
               ${(this.state.faqSuggestions || [
                 {id:'s1', q:'¿Puedo hacer un pedido grande para una empresa?', a:'¡Por supuesto! Hacemos catering corporativo. Cuéntanos cuántas personas y la fecha, te preparamos un presupuesto.'},
@@ -3878,6 +3881,72 @@ const Nx = {
     this.state.business.faq.push({q:'',a:''});
     this.save();
     this.renderView();
+  },
+
+  // Génère 5 nouvelles suggestions de FAQ via Groq, basées sur le contexte business
+  // Augustin 19/05 : "il faut ajouter un bouton pour générer des suggestions aussi"
+  async generateFaqSuggestions(){
+    const btn = document.getElementById('genFaqBtn');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Génération en cours…'; }
+    const b = this.state.business || {};
+    const existingFaqs = (b.faq||[]).map(f => f.q).slice(0, 10).join(' | ');
+    const prompt = `Tu es expert en service client pour une PME. Pour ${b.name||'cette entreprise'} (${b.industry||'commerce'}, ${b.city||'Santiago'}), génère 5 NOUVELLES questions fréquentes pertinentes que des clients pourraient poser (différentes de celles déjà existantes).
+
+Contexte entreprise :
+- Description : ${(b.description||'').slice(0,250)}
+- Catalogue principal : ${(b.catalog||[]).slice(0,5).map(p=>p.name).join(', ')}
+- FAQ déjà couvertes (ne pas dupliquer) : ${existingFaqs}
+
+Réponds en espagnol (clients chiliens). Format STRICT JSON uniquement, pas de texte autour :
+{"suggestions":[{"q":"question 1","a":"réponse courte 1-2 phrases"},{"q":"question 2","a":"réponse"},...]}
+
+Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton chaleureux.`;
+    try {
+      const r = await fetch('/api/claude', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ question: prompt })
+      });
+      const data = await r.json();
+      const raw = data.answer || '';
+      // Tente de parser le JSON depuis la réponse
+      let suggestions = [];
+      try {
+        const match = raw.match(/\{[\s\S]*\}/);
+        if (match) {
+          const parsed = JSON.parse(match[0]);
+          suggestions = parsed.suggestions || [];
+        }
+      } catch(e) {
+        // Fallback : tente regex sur Q: / R: ou question/réponse
+        const lines = raw.split(/\n+/);
+        let curQ = null;
+        for (const line of lines) {
+          const qMatch = line.match(/(?:^|^\d+\.\s*)(?:Q[:.]\s*|question\s*:?\s*|¿)(.+?)(?:\?|$)/i);
+          if (qMatch) { curQ = qMatch[1].trim() + '?'; continue; }
+          if (curQ && line.trim()) { suggestions.push({ q: curQ, a: line.trim() }); curQ = null; }
+        }
+      }
+      if (!suggestions.length) {
+        this.toast('⚠️ Aucune suggestion générée','warn','Réponse IA non parsable, réessaie');
+        if (btn) { btn.disabled = false; btn.textContent = '✨ Générer des suggestions'; }
+        return;
+      }
+      // Limite à 5 + ajoute des IDs uniques
+      const newSuggestions = suggestions.slice(0, 5).map((s, idx) => ({
+        id: 'ai_' + Date.now() + '_' + idx,
+        q: s.q || '',
+        a: s.a || ''
+      })).filter(s => s.q && s.a);
+      // Append aux existantes (ou remplace selon préférence — ici append)
+      const existing = this.state.faqSuggestions || [];
+      this.state.faqSuggestions = [...newSuggestions, ...existing].slice(0, 12); // max 12
+      this.save();
+      this.toast(`✨ ${newSuggestions.length} suggestion(s) générée(s)`,'success','Adopte ou élimine selon ton choix');
+      this.renderView();
+    } catch(e) {
+      this.toast('Erreur génération','warn', String(e).slice(0,80));
+      if (btn) { btn.disabled = false; btn.textContent = '✨ Générer des suggestions'; }
+    }
   },
 
   // POINT PROFIL PERSO (a) — Suggestions FAQ depuis Conseil Nexus
