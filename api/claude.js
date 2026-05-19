@@ -50,7 +50,32 @@ export default async function handler(req, res) {
     // Garde l'historique court pour limiter les coûts/latence
     const trimmed = history.slice(-6);
 
-    // === Anthropic en priorité ===
+    // === GROQ EN PRIORITÉ (gratuit, Llama 3.3 70B) — Augustin 19/05 ===
+    if (groqKey) {
+      const messages = [
+        { role: 'system', content: SYSTEM_PROMPT },
+        ...trimmed.map(m => ({ role: m.role, content: m.content })),
+        { role: 'user', content: question }
+      ];
+      try {
+        const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${groqKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages, temperature: 0.7, max_tokens: 600 })
+        });
+        if (groqRes.ok) {
+          const data = await groqRes.json();
+          const answer = data.choices?.[0]?.message?.content || 'Réponse vide.';
+          return res.status(200).json({ answer, model: 'groq-llama-3.3-70b' });
+        }
+        const errText = await groqRes.text();
+        console.warn('Groq error', groqRes.status, '→ fallback Anthropic:', errText.slice(0,150));
+      } catch (e) {
+        console.warn('Groq fetch failed → fallback Anthropic:', e);
+      }
+    }
+
+    // === Fallback ANTHROPIC SONNET 4.5 (payant) ===
     if (anthropicKey) {
       const msgs = [
         ...trimmed.map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.content })),
@@ -73,16 +98,14 @@ export default async function handler(req, res) {
       if (!r.ok) {
         const errText = await r.text();
         console.error('Anthropic error:', r.status, errText);
-        // Si clé invalide ou crédit épuisé, on tente Groq
-        if (!groqKey) return res.status(502).json({ error: 'Anthropic indisponible', detail: errText.slice(0, 200) });
-      } else {
-        const data = await r.json();
-        const answer = (data.content?.[0]?.text) || 'Réponse vide.';
-        return res.status(200).json({ answer, model: 'claude-sonnet-4-5' });
+        return res.status(502).json({ error: 'Anthropic indisponible', detail: errText.slice(0, 200) });
       }
+      const data = await r.json();
+      const answer = (data.content?.[0]?.text) || 'Réponse vide.';
+      return res.status(200).json({ answer, model: 'claude-sonnet-4-5' });
     }
 
-    // === Fallback Groq ===
+    // === Cas extrême : aucune clé ===
     if (groqKey) {
       const messages = [
         { role: 'system', content: SYSTEM_PROMPT },

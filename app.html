@@ -2648,18 +2648,105 @@ const Nx = {
           <button class="btn btn-p" onclick="Nx.closeModal();Nx.openConversation(${c.id})">💬 Ouvrir la conversation</button>
         </div>`;
     } else if (type === 'ai-chat') {
+      // Coach Nexus combiné : conseils proactifs (depuis Conseil Nexus core) + chat IA + quick actions étendues
+      // Augustin 19/05 : "combiner conseils généraux avec ceux du CRM, plus complet, plus joli, capable de plus"
+      mc.style.maxWidth = '720px';
+      const tips = [
+        { ic:'🎂', accent:'#F59E0B', ctx:'Demain · Anniversaire client', text:'<b>Raviella Mendoza</b> fête ses 35 ans demain. Veux-tu envoyer un message avec un <b>code -15%</b> sur ses cookies préférés ?', actions:[
+            { lbl:'💌 Programmer', cmd:`Nx.askAi('Programme un message anniversaire pour Raviella Mendoza avec -15% sur ses cookies préférés')` },
+            { lbl:'Pas maintenant', cmd:`Nx.toast('Conseil mis de côté','info')` }
+          ]},
+        { ic:'🔥', accent:'#EF4444', ctx:'Vendredi · Pic d\'activité', text:'<b>Vendredi 19h-21h</b> est ton créneau roi. Programme une story Instagram à <b>18h</b> pour capter +15% de commandes.', actions:[
+            { lbl:'📸 Programmer la story', cmd:`Nx.askAi('Programme une story Instagram vendredi 18h pour le pic de commandes 19h-21h')` },
+            { lbl:'Voir historique', cmd:`Nx.closeModal();Nx.navigate('stats')` }
+          ]},
+        { ic:'☔', accent:'#0EA5E9', ctx:'Samedi · Météo pluie', text:'<b>Samedi</b> il va pleuvoir. Tes ventes de <b>soupe maison</b> grimpent de +40% les jours de pluie. Activer la promo ?', actions:[
+            { lbl:'🥣 Activer promo soupe', cmd:`Nx.askAi('Active la promo soupe maison pour samedi (jour de pluie)')` },
+            { lbl:'Détails météo', cmd:`Nx.toast('Météo Santiago : 80% pluie samedi','info')` }
+          ]},
+        { ic:'💔', accent:'#94A3B8', ctx:'3 clientes silencieuses', text:'<b>María, Sofía, Carmen</b> (~340k CLP/mo cumulé) n\'ont pas commandé depuis 45+ jours. Lancer une campagne récup ?', actions:[
+            { lbl:'🎯 Créer campagne', cmd:`Nx.closeModal();Nx.openCampaignBuilder('Récupération -15%','lost')` },
+            { lbl:'Voir les 3', cmd:`Nx.closeModal();Nx.navigate('crm');setTimeout(()=>{Nx.state.crmFilter='lost';Nx.renderView()},80)` }
+          ]},
+        { ic:'❓', accent:'#7A3CFF', ctx:'Question récurrente · 3 clients', text:'3 clients ont demandé cette semaine : <b>« Faites-vous des livraisons à Providencia ? »</b> — ajouter à ta FAQ Nexus ?', actions:[
+            { lbl:'📝 Éditer profil', cmd:`Nx.closeModal();Nx.navigate('profile')` },
+            { lbl:'Voir les 3 messages', cmd:`Nx.closeModal();Nx.navigate('inbox')` }
+          ]}
+      ];
+      const quickActions = [
+        '📊 Analyse mes ventes du mois',
+        '🎯 Quels sont mes clients à risque de partir ?',
+        '✍️ Écris une promo week-end en espagnol',
+        '🔥 Quel est mon top produit + tendance ?',
+        '💡 Donne-moi 3 idées pour augmenter mon panier moyen',
+        '📅 Quand est le meilleur moment pour poster sur Instagram ?',
+        '🥖 Suggère une nouveauté basée sur mes ventes',
+        '💰 Combien je dois vendre cette semaine pour atteindre mon objectif ?',
+        '🤖 Rédige un message d\'absence en 3 langues',
+        '📈 Comment réduire mon temps de réponse ?'
+      ];
+      const tipsHtml = tips.map(t => `
+        <div class="ai-tip" style="--accent:${t.accent}">
+          <div class="ai-tip-hd">
+            <span class="ai-tip-ic">${t.ic}</span>
+            <span class="ai-tip-ctx">${t.ctx}</span>
+          </div>
+          <div class="ai-tip-text">${t.text}</div>
+          <div class="ai-tip-acts">${t.actions.map(a => `<button class="ai-tip-btn" onclick="${a.cmd}">${a.lbl}</button>`).join('')}</div>
+        </div>
+      `).join('');
       html = `
-        <div class="modal-hd"><h3>✨ Nexus AI — ton coach business</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
-        <div class="modal-body" style="padding:0;max-height:60vh">
-          <div id="aiMessages" style="padding:20px;max-height:400px;overflow-y:auto">
-            <div class="bubble them">Hola Carlos 👋 Je suis Nexus, ton IA. Demande-moi n'importe quoi — analyser tes ventes, écrire une promo, relancer un client…</div>
-          </div>
-          <div style="padding:14px;border-top:1px solid var(--line);display:flex;gap:8px">
-            <input class="form-ctrl" id="aiInput" placeholder="Tape ta question…" onkeypress="if(event.key==='Enter')Nx.askAi()"/>
-            <button class="btn btn-p" onclick="Nx.askAi()">Envoyer</button>
-          </div>
-          <div style="padding:8px 14px 14px;display:flex;gap:6px;flex-wrap:wrap">
-            ${['📊 Analyse mes ventes','🎯 Relance les clients perdus','✍️ Écris une promo week-end','🔥 Top produit du mois'].map(q=>`<button class="btn-g" onclick="Nx.askAi('${q}')">${q}</button>`).join('')}
+        <style>
+          .ai-coach-grid{display:grid;grid-template-columns:280px 1fr;gap:0;max-height:75vh}
+          @media(max-width:780px){.ai-coach-grid{grid-template-columns:1fr;max-height:90vh}}
+          .ai-tips-panel{background:linear-gradient(180deg,#F8FAFF,#fff);border-right:1px solid var(--line);overflow-y:auto;padding:14px}
+          .ai-tips-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+          .ai-tips-title .ai-tips-badge{background:#1A56DB22;color:#1A56DB;padding:2px 8px;border-radius:999px;font-size:10px;text-transform:none;letter-spacing:0}
+          .ai-tip{background:#fff;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;padding:11px 12px;margin-bottom:10px;transition:all .2s}
+          .ai-tip:hover{border-color:var(--accent);box-shadow:0 4px 12px -4px color-mix(in srgb,var(--accent) 35%,transparent)}
+          .ai-tip-hd{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+          .ai-tip-ic{font-size:18px;line-height:1}
+          .ai-tip-ctx{font-size:10.5px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.04em}
+          .ai-tip-text{font-size:12px;color:var(--ink);line-height:1.5;margin-bottom:8px}
+          .ai-tip-acts{display:flex;gap:5px;flex-wrap:wrap}
+          .ai-tip-btn{padding:4px 9px;font-size:10.5px;font-weight:600;background:var(--bg2);border:1px solid var(--line);border-radius:7px;cursor:pointer;color:var(--ink2);transition:all .15s;font-family:inherit}
+          .ai-tip-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+          .ai-tip-btn:first-child{background:var(--accent);color:#fff;border-color:var(--accent)}
+          .ai-tip-btn:first-child:hover{filter:brightness(.92)}
+          .ai-chat-panel{display:flex;flex-direction:column;min-height:500px}
+          .ai-chat-msgs{flex:1;overflow-y:auto;padding:18px;max-height:55vh}
+          .ai-chat-input-row{padding:12px 14px;border-top:1px solid var(--line);display:flex;gap:8px;background:var(--panel)}
+          .ai-quick-row{padding:10px 14px 14px;border-top:1px solid var(--line);display:flex;gap:6px;flex-wrap:wrap;background:linear-gradient(180deg,var(--bg2),var(--panel))}
+          .ai-quick-btn{padding:5px 10px;font-size:11px;font-weight:600;background:var(--panel);border:1px solid var(--line);border-radius:999px;cursor:pointer;color:var(--ink2);transition:all .15s;font-family:inherit}
+          .ai-quick-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-soft)}
+          .ai-chat-msgs .bubble.them{background:linear-gradient(135deg,#EFF6FF,#F5F3FF);border:1px solid #E0E7FF;color:#0F172A}
+        </style>
+        <div class="modal-hd">
+          <h3>🤖 Coach Nexus <span style="font-size:11.5px;color:var(--muted);font-weight:500">· conseils & assistant IA business</span></h3>
+          <button class="modal-close" onclick="Nx.closeModal()">✕</button>
+        </div>
+        <div class="modal-body" style="padding:0">
+          <div class="ai-coach-grid">
+            <aside class="ai-tips-panel">
+              <div class="ai-tips-title">💡 Conseils du jour <span class="ai-tips-badge">${tips.length}</span></div>
+              ${tipsHtml}
+            </aside>
+            <section class="ai-chat-panel">
+              <div id="aiMessages" class="ai-chat-msgs">
+                <div class="bubble them">
+                  <b>Hola Carlos 👋</b><br>
+                  Je suis ton coach Nexus, connecté à toutes tes données (ventes, clients, conversations).<br>
+                  Demande-moi <b>ce que tu veux</b> — analyse, idée, action concrète. Ou clique un conseil à gauche 👈
+                </div>
+              </div>
+              <div class="ai-chat-input-row">
+                <input class="form-ctrl" id="aiInput" placeholder="Pose ta question à Nexus…" onkeypress="if(event.key==='Enter')Nx.askAi()"/>
+                <button class="btn btn-p" onclick="Nx.askAi()">Envoyer</button>
+              </div>
+              <div class="ai-quick-row">
+                ${quickActions.map(q => `<button class="ai-quick-btn" onclick="Nx.askAi(${JSON.stringify(q).replace(/"/g,'&quot;')})">${q}</button>`).join('')}
+              </div>
+            </section>
           </div>
         </div>`;
     }
@@ -2839,33 +2926,44 @@ const Nx = {
   },
 
   openAiChat(){ this.openModal('ai-chat'); },
-  askAi(preset){
+  // Coach Nexus connecté à /api/claude (priorité Groq Llama 3.3 70B GRATUIT)
+  // Augustin 19/05 : "connecte a groq sinon ca va trop couter"
+  async askAi(preset){
     const input = document.getElementById('aiInput');
-    const q = preset || input.value.trim();
+    const q = (preset || (input && input.value.trim()) || '').trim();
     if (!q) return;
     const msgs = document.getElementById('aiMessages');
+    if (!msgs) return;
+    // Affiche le message user immédiatement
     msgs.innerHTML += `<div class="bubble me">${q}</div>`;
-    input.value = '';
+    if (input) input.value = '';
     msgs.scrollTop = msgs.scrollHeight;
-
-    setTimeout(() => {
-      const answers = {
-        'analyse mes ventes': '📊 En avril, CA estimé <b>2,84M CLP</b> (+12% vs mars). Top produit : <b>Pan amasado</b> (62% des ventes). Jour le plus fort : <b>samedi</b> (38% du CA hebdo). Tu es en streak de 12 jours, bravo 🔥.',
-        'relance': '🎯 J\'ai identifié <b>3 clientes silencieuses</b> depuis 45+ jours : María, Sofía, Carmen. Leur CA cumulé est de ~340k CLP/mois. Veux-tu que je prépare une campagne -15% personnalisée ?',
-        'promo': '✍️ Voici 3 versions pour ta promo week-end :<br>1. "🥖 Hola! Este fin de semana: 3kg de pan amasado = 10k CLP (en vez de 12k). Escríbeme para reservar 💛"<br>2. "Panadería Don Carlos · -20% sobre tortas caseras por encargo el sábado. Últimas 10 disponibles 🎂"<br>3. "Fin de semana en Don Carlos: empanadas 2x1 el domingo después de las 10h. Te esperamos 🥟"',
-        'top produit': '🏆 Top 3 du mois :<br>1. Pan amasado — 620 kg vendus · 2,17M CLP<br>2. Empanadas de pino — 380 unités · 836k CLP<br>3. Tortas cumpleaños — 12 commandes · 336k CLP<br>Le pan amasado représente <b>76% du volume</b>.'
-      };
-      let answer = '🤖 Analyse en cours… ';
-      const qLow = q.toLowerCase();
-      if (qLow.includes('vente') || qLow.includes('analyse')) answer = answers['analyse mes ventes'];
-      else if (qLow.includes('relance') || qLow.includes('perdus') || qLow.includes('lost')) answer = answers['relance'];
-      else if (qLow.includes('promo') || qLow.includes('campagne') || qLow.includes('écris')) answer = answers['promo'];
-      else if (qLow.includes('top') || qLow.includes('produit')) answer = answers['top produit'];
-      else answer = '🤖 Je ne connais pas encore la réponse précise (démo). Mais voici ce que je peux faire : <b>analyser tes ventes</b>, <b>relancer des clients</b>, <b>écrire des promos</b>, ou <b>t\'alerter sur des opportunités</b>. Demande-moi directement !';
-
-      msgs.innerHTML += `<div class="bubble them">${answer}</div>`;
+    // Indicateur de typing
+    const typingId = 'typing_' + Date.now();
+    msgs.innerHTML += `<div class="bubble them" id="${typingId}"><span style="opacity:.6">🤖 Nexus réfléchit<span style="display:inline-block;animation:dotsBlink 1.4s infinite">…</span></span></div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+    // Historique pour contexte (les 6 derniers messages)
+    if (!this._aiHistory) this._aiHistory = [];
+    this._aiHistory.push({ role:'user', content: q });
+    try {
+      const r = await fetch('/api/claude', {
+        method:'POST',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify({ question: q, history: this._aiHistory.slice(-6) })
+      });
+      const data = await r.json();
+      const answer = data.answer || data.error || '🤖 Réponse vide';
+      this._aiHistory.push({ role:'assistant', content: answer });
+      // Retire le typing + ajoute la vraie réponse
+      const typEl = document.getElementById(typingId);
+      if (typEl) typEl.remove();
+      const modelTag = data.model ? `<div style="font-size:9.5px;color:var(--muted);margin-top:6px;text-align:right">⚡ ${data.model}</div>` : '';
+      msgs.innerHTML += `<div class="bubble them">${answer}${modelTag}</div>`;
       msgs.scrollTop = msgs.scrollHeight;
-    }, 600);
+    } catch(e) {
+      const typEl = document.getElementById(typingId);
+      if (typEl) typEl.innerHTML = `<span style="color:var(--red)">⚠️ Erreur : ${String(e).slice(0,100)}</span>`;
+    }
   },
 
   // ---------- VIEW RENDERING ----------
