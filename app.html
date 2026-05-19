@@ -3571,9 +3571,10 @@ const Nx = {
     const nutriColors = {A:'A',B:'B',C:'C',D:'D',E:'E'};
     return `
       <div class="cat-prod">
-        <div class="cat-prod-photo" style="position:relative" onclick="Nx.uploadProductPhoto(${i})" title="Cliquer pour ajouter une photo">
+        <div class="cat-prod-photo" style="position:relative" onclick="Nx.uploadProductPhoto(${i})" title="Cliquer pour ${p.photo?'changer':'ajouter'} la photo">
           ${p.photo ? `<img src="${p.photo}" alt="${p.name}"><button onclick="event.stopPropagation();Nx.removeProductPhoto(${i})" title="Retirer la photo" style="position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;background:rgba(15,23,42,.8);border:0;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">✕</button>` : `<span>${p.emoji||'📦'}</span>`}
         </div>
+        ${p.photo ? `<button class="btn-g" style="margin-bottom:8px;width:100%;color:var(--red);font-size:11.5px;border-color:#FCA5A5" onclick="Nx.removeProductPhoto(${i})">🗑 Retirer la photo</button>` : `<button class="btn-g" style="margin-bottom:8px;width:100%;font-size:11.5px" onclick="Nx.uploadProductPhoto(${i})">📎 Importer une photo</button>`}
         <input class="form-ctrl" style="margin-bottom:6px;font-weight:600" value="${p.name}" onchange="Nx.state.business.catalog[${i}].name=this.value;Nx.save()">
         <textarea class="form-ctrl" rows="2" style="margin-bottom:6px;font-size:11.5px" placeholder="Mini description (1 ligne)" onchange="Nx.state.business.catalog[${i}].miniDesc=this.value;Nx.save()">${p.miniDesc||''}</textarea>
         <div class="flex" style="margin-bottom:6px;gap:6px">
