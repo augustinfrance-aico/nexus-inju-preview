@@ -4273,7 +4273,7 @@ const Nx = {
                 ${c.tags.length?`<div style="margin-top:10px;display:flex;gap:4px;flex-wrap:wrap">${c.tags.map(tg=>`<span class="chip blue" style="font-size:10px;padding:2px 7px">${tg}</span>`).join('')}</div>`:''}
               </div>`).join('')}
           </div>
-          <div style="margin-top:14px;font-size:12px;color:#78350F;text-align:center"><b>${this.state.clients.filter(c=>c.status==='active').length - 3}</b> autres clients actifs · <a href="#/crm" style="color:#92400E;text-decoration:underline" onclick="Nx.toast('Liste filtrée','info')">voir tous</a></div>
+          <div style="margin-top:14px;font-size:12px;color:#78350F;text-align:center"><b>${this.state.clients.filter(c=>c.status==='active').length - 3}</b> autres clients actifs · <a style="color:#92400E;text-decoration:underline;cursor:pointer;font-weight:600" onclick="Nx.viewAllActiveClients()">voir tous →</a></div>
         </div>
 
         <div class="card">
@@ -5561,6 +5561,20 @@ const Nx = {
     this.save();
     this.renderView();
     this.toast('Segment supprimé','success');
+  },
+
+  // Bouton 'voir tous' depuis le podium → switch filtre Actifs + montre tous
+  viewAllActiveClients(){
+    this.state.crmFilter = 'active';
+    this.state.crmShowAll = true;
+    this.save();
+    this.renderView();
+    setTimeout(() => {
+      // Scroll vers la liste clients (ID #crmList si présent, sinon vers le tableau)
+      const target = document.querySelector('#crmList') || document.querySelector('.crm-list-card') || document.querySelectorAll('.card')[2];
+      if (target && target.scrollIntoView) target.scrollIntoView({ behavior:'smooth', block:'start' });
+    }, 100);
+    this.toast('Affichage de tous les clients actifs','info', `${this.state.clients.filter(c=>c.status==='active').length} clients`);
   },
 
   // RAPPORT CAMPAGNE
