@@ -3760,9 +3760,6 @@ const Nx = {
       <div class="view">
         <div class="page-hd">
           <div><h1>📬 Messagerie unifiée</h1><div class="sub">Tous tes canaux dans une seule boîte — WhatsApp, Instagram, Email.</div></div>
-          <div class="flex">
-            <button class="btn btn-s" onclick="Nx.openModal('share-data')">🔌 Partage 1-clic</button>
-          </div>
         </div>
 
         <div class="chat-layout">
@@ -3873,28 +3870,37 @@ const Nx = {
     this.toast('📝 Brouillon créé','success');
   },
 
-  translateMsg(clientId){
+  // Vraie traduction du dernier message via /api/translate (Groq) — Augustin 19/05/2026
+  async translateMsg(clientId){
     const conv = this.state.conversations.find(c=>c.clientId===clientId);
+    if (!conv || !conv.messages || !conv.messages.length) return this.toast('Aucun message à traduire','error');
     const lastMsg = conv.messages[conv.messages.length-1];
-    // Mock traduction ES → FR
-    const translations = {
-      '¿tienes pan amasado disponible para mañana? necesito 3 kilos para una reunión familiar': 'As-tu du pan amasado disponible pour demain ? J\'en ai besoin de 3 kilos pour une réunion familiale.',
-      'gracias por la factura. ¿aceptan transferencia bancaria?': 'Merci pour la facture. Acceptez-vous le virement bancaire ?',
-      'buenos días, me podrías mandar los precios de las tortas de cumpleaños porfa': 'Bonjour, pouvez-vous m\'envoyer les prix des gâteaux d\'anniversaire s\'il vous plaît ?'
-    };
-    const key = lastMsg.text.toLowerCase().slice(0, 80);
-    const fr = Object.keys(translations).find(k => key.includes(k.slice(0,30))) ? translations[Object.keys(translations).find(k => key.includes(k.slice(0,30)))] : '[Traduction] ' + lastMsg.text;
+    const targetLang = this.state.lang === 'es' ? 'fr' : this.state.lang || 'fr';
+    const sourceLang = 'es';
+    const flag = { fr:'🇫🇷 Français', es:'🇨🇱 Español', en:'🇬🇧 English' };
     this.openModal('translation');
-    setTimeout(() => {
-      const mc = document.getElementById('modal-content');
+    const mc = document.getElementById('modal-content');
+    mc.innerHTML = `
+      <div class="modal-hd"><h3>🌐 Traduction</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-body"><div style="text-align:center;padding:30px;color:var(--muted)"><div style="font-size:24px;margin-bottom:8px">⏳</div>Traduction en cours via Claude…</div></div>`;
+    try {
+      const r = await fetch('/api/translate', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ texts: [lastMsg.text], target: targetLang, source: sourceLang })
+      });
+      const data = await r.json();
+      const translated = (data.translations && data.translations[0]) || lastMsg.text;
       mc.innerHTML = `
-        <div class="modal-hd"><h3>🌐 Traduction des derniers messages du client</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+        <div class="modal-hd"><h3>🌐 Traduction du dernier message</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
         <div class="modal-body">
-          <div style="margin-bottom:14px"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">🇨🇱 Espagnol (original)</div><div style="padding:12px 14px;background:var(--bg2);border-radius:8px;font-size:13.5px">${lastMsg.text}</div></div>
-          <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">🇫🇷 Français (auto)</div><div style="padding:12px 14px;background:var(--blue-soft);border-radius:8px;font-size:13.5px;color:var(--blue-ink)">${fr}</div></div>
+          <div style="margin-bottom:14px"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">${flag[sourceLang]} (original)</div><div style="padding:12px 14px;background:var(--bg2);border-radius:8px;font-size:13.5px">${lastMsg.text}</div></div>
+          <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">${flag[targetLang]} (auto)</div><div style="padding:12px 14px;background:var(--blue-soft);border-radius:8px;font-size:13.5px;color:var(--blue-ink)">${translated}</div></div>
+          <div style="margin-top:10px;font-size:10px;color:var(--muted);text-align:right">${data.model||''}</div>
         </div>
         <div class="modal-foot"><button class="btn btn-p" onclick="Nx.closeModal()">OK</button></div>`;
-    }, 50);
+    } catch(e) {
+      mc.innerHTML = `<div class="modal-hd"><h3>🌐 Traduction</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div><div class="modal-body" style="padding:30px;text-align:center;color:var(--red)">❌ Erreur : ${String(e).slice(0,100)}</div>`;
+    }
   },
 
   openClientCard(clientId){
@@ -3959,7 +3965,44 @@ const Nx = {
     this.toast('🔄 Brouillon reformulé','info');
   },
 
-  translateConv(){ this.toast('🌐 Traduction activée','success','FR ↔ ES en temps réel'); },
+  // Vraie traduction des 5 derniers messages de la conversation via /api/translate (Groq)
+  async translateConv(clientId){
+    const conv = this.state.conversations.find(c => c.clientId === clientId);
+    if (!conv || !conv.messages || !conv.messages.length) return this.toast('Aucun message à traduire','error');
+    const targetLang = this.state.lang === 'es' ? 'fr' : this.state.lang || 'fr';
+    const sourceLang = 'es';
+    const lastMsgs = conv.messages.slice(-5);
+    const cl = (this.state.clients||[]).find(x=>x.id===clientId)||{};
+    this.openModal('translation');
+    const mc = document.getElementById('modal-content');
+    mc.innerHTML = `
+      <div class="modal-hd"><h3>🌐 Traduction · ${cl.name||'Client'}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-body"><div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:24px;margin-bottom:8px">⏳</div>Traduction en cours via Claude…</div></div>`;
+    try {
+      const r = await fetch('/api/translate', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ texts: lastMsgs.map(m=>m.text), target: targetLang, source: sourceLang })
+      });
+      const data = await r.json();
+      const translations = data.translations || lastMsgs.map(m=>m.text);
+      const flag = { fr:'🇫🇷 Français', es:'🇨🇱 Español', en:'🇬🇧 English' };
+      mc.innerHTML = `
+        <div class="modal-hd"><h3>🌐 Traduction · ${cl.name||'Client'}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+        <div class="modal-body" style="max-height:60vh;overflow-y:auto">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:12px">${flag[sourceLang]||sourceLang} → ${flag[targetLang]||targetLang} · ${data.model||''}</div>
+          ${lastMsgs.map((m,i)=>`
+            <div style="margin-bottom:14px;padding:12px 14px;border:1px solid var(--line);border-radius:10px">
+              <div style="font-size:11px;color:var(--muted);margin-bottom:4px">${m.from==='client'?'👤 '+(cl.name||'Client'):'🥖 Toi'} · ${m.time||''}</div>
+              <div style="font-size:13px;margin-bottom:8px;color:var(--ink)">${m.text}</div>
+              <div style="font-size:13px;padding:8px 10px;background:var(--blue-soft);border-radius:6px;color:var(--blue-ink)"><b style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--blue);display:block;margin-bottom:3px">${flag[targetLang]||targetLang}</b>${translations[i]||m.text}</div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="modal-foot"><button class="btn btn-s" onclick="Nx.closeModal()">Fermer</button></div>`;
+    } catch (e) {
+      mc.innerHTML = `<div class="modal-hd"><h3>🌐 Traduction</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div><div class="modal-body" style="padding:30px;text-align:center;color:var(--red)">❌ Erreur de traduction : ${String(e).slice(0,100)}</div>`;
+    }
+  },
 
   confirmDeleteClient(id, ev){
     if (ev) ev.stopPropagation();
