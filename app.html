@@ -758,6 +758,36 @@ html[data-theme="dark"] .chat-input textarea::placeholder{color:#8A94A6}
 </head>
 <body>
 
+<!-- ⚡ MEGA FAILSAFE BOOT HIDE (Augustin 19/05 : "loading en boucle peu importe le menu")
+     Force-hide le boot screen après 1.5s MAX, INDÉPENDANT de tout le JS de Nx.
+     Même si init() crash, même si Nx n'existe pas, même si setLang plante,
+     le user voit l'app après 1.5s garanti. -->
+<script>
+(function(){
+  var failsafe = function(){
+    var b = document.getElementById('boot-screen');
+    if (b) {
+      b.style.setProperty('display', 'none', 'important');
+      b.style.setProperty('visibility', 'hidden', 'important');
+      b.style.setProperty('opacity', '0', 'important');
+      b.style.setProperty('pointer-events', 'none', 'important');
+      try { sessionStorage.setItem('nx_booted_v1','1'); } catch(e){}
+    }
+  };
+  // Skip immédiat si déjà bootée dans la session
+  try {
+    if (sessionStorage.getItem('nx_booted_v1') === '1') {
+      // Hide direct, sans même attendre que le DOM soit prêt
+      if (document.readyState !== 'loading') failsafe();
+      else document.addEventListener('DOMContentLoaded', failsafe);
+      return;
+    }
+  } catch(e){}
+  // Sinon, hide après 1.5s max
+  setTimeout(failsafe, 1500);
+})();
+</script>
+
 <!-- BOOT SCREEN (chargement initial Nexus) -->
 <div id="boot-screen">
   <div class="boot-logo">
