@@ -683,9 +683,11 @@ body{
 @media(max-width:720px){.menus-grid{grid-template-columns:1fr}}
 
 /* Version simplifiée (Point 4 PDF) — 6 cases visibles d'un coup, gros logos, titre+sous-titre seulement */
-.menus-grid.simplified-v2{grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:14px}
-@media(max-width:780px){.menus-grid.simplified-v2{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(3,1fr)}}
-@media(max-width:480px){.menus-grid.simplified-v2{grid-template-columns:1fr;grid-template-rows:repeat(6,1fr);gap:10px}}
+.menus-grid.simplified-v2{grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:920px){.menus-grid.simplified-v2{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:680px){.menus-grid.simplified-v2{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:420px){.menus-grid.simplified-v2{grid-template-columns:1fr;gap:10px}}
+.menus-grid.simplified-v2 .menus-cell.c-pilotage{--accent:#FFB347}
 .menus-grid.simplified-v2 .menus-cell{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding:24px 16px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);cursor:pointer;transition:all .25s cubic-bezier(.2,.8,.2,1);position:relative;overflow:hidden;justify-content:center;min-height:160px}
 .menus-grid.simplified-v2 .menus-cell::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent,var(--cyan));opacity:.85}
 .menus-grid.simplified-v2 .menus-cell.c-stats{--accent:#1EFF8E}
@@ -1609,29 +1611,81 @@ body{
     e.currentTarget.lastChild.textContent = tb.classList.contains('expanded') ? ' Réduire' : ' Lire en entier';
   });
 
-  // =========== Conseil Nexus : boutons fonctionnels (Point 3 PDF)
+  // =========== Conseil Nexus : boutons fonctionnels (Point 3 PDF + Pilotage Nexus 19/05/2026)
+  // Chaque action positive (send/schedule/enable) → push dans localStorage 'nx_agenda' + redirect /pilotage
+  // Chaque action négative (skip/later) → push avec status 'cancelled' (visible dans onglet Annulé)
+  const _addAgendaItem = (item) => {
+    let agenda = [];
+    try { agenda = JSON.parse(localStorage.getItem('nx_agenda') || '[]'); } catch(e){ agenda = []; }
+    const full = Object.assign({
+      id: 'agd_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+      createdAt: new Date().toISOString()
+    }, item);
+    agenda.push(full);
+    try { localStorage.setItem('nx_agenda', JSON.stringify(agenda)); } catch(e){}
+    return full;
+  };
+  const _goPilotage = (tab) => {
+    if (tab) try { localStorage.setItem('nx_pilotage_tab', tab); } catch(e){}
+    setTimeout(() => { location.href = 'app.html#/pilotage'; }, 700);
+  };
   document.querySelectorAll('[data-advice-action]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const action = btn.dataset.adviceAction;
       const handlers = {
         // Card 1 : Anniversaire Raviella
-        'send-birthday': () => showToast({fr:'💌 Message anniversaire envoyé à Raviella Mendoza', es:'💌 Mensaje de cumpleaños enviado a Raviella Mendoza', en:'💌 Birthday message sent to Raviella Mendoza'}[curLang]),
-        'schedule-birthday': () => showToast({fr:'⏰ Message programmé pour demain 9 h', es:'⏰ Mensaje programado para mañana 9 h', en:'⏰ Message scheduled for tomorrow 9 am'}[curLang]),
-        'skip-birthday': () => { btn.closest('.advice-card').style.opacity = '0.4'; showToast({fr:'❌ Conseil ignoré', es:'❌ Consejo ignorado', en:'❌ Advice skipped'}[curLang]); },
+        'send-birthday': () => {
+          _addAgendaItem({ icon:'💌', title:{fr:'Message anniversaire Raviella Mendoza',es:'Mensaje cumpleaños Raviella Mendoza',en:'Birthday message Raviella Mendoza'}[curLang], detail:{fr:'Promo -15% sur ses cookies favoris',es:'Promo -15% en sus galletas favoritas',en:'-15% promo on her favorite cookies'}[curLang], when:{fr:'Envoyé maintenant',es:'Enviado ahora',en:'Sent now'}[curLang], status:'active', category:'message' });
+          showToast({fr:'💌 Message envoyé · ouverture Pilotage Nexus…', es:'💌 Mensaje enviado · abriendo Pilotaje Nexus…', en:'💌 Message sent · opening Nexus Pilot…'}[curLang]);
+          _goPilotage('active');
+        },
+        'schedule-birthday': () => {
+          _addAgendaItem({ icon:'⏰', title:{fr:'Message anniversaire Raviella Mendoza',es:'Mensaje cumpleaños Raviella Mendoza',en:'Birthday message Raviella Mendoza'}[curLang], detail:{fr:'Programmé pour demain 9 h',es:'Programado para mañana 9 h',en:'Scheduled for tomorrow 9 am'}[curLang], when:{fr:'Demain 9 h',es:'Mañana 9 h',en:'Tomorrow 9 am'}[curLang], status:'scheduled', category:'message' });
+          showToast({fr:'⏰ Programmé · ouverture Pilotage Nexus…', es:'⏰ Programado · abriendo Pilotaje Nexus…', en:'⏰ Scheduled · opening Nexus Pilot…'}[curLang]);
+          _goPilotage('scheduled');
+        },
+        'skip-birthday': () => {
+          _addAgendaItem({ icon:'❌', title:{fr:'Message anniversaire Raviella (ignoré)',es:'Mensaje cumpleaños Raviella (ignorado)',en:'Birthday message Raviella (skipped)'}[curLang], detail:'', when:'—', status:'cancelled', category:'message' });
+          btn.closest('.advice-card').style.opacity = '0.4';
+          showToast({fr:'❌ Conseil ignoré', es:'❌ Consejo ignorado', en:'❌ Advice skipped'}[curLang]);
+        },
         // Card 2 : 5 chats en attente
         'see-chats': () => location.href = 'app.html#/inbox',
-        'validate-all': () => showToast({fr:'✅ 4 chats validés par IA · 1 à vérifier', es:'✅ 4 chats validados por IA · 1 por verificar', en:'✅ 4 chats validated by AI · 1 to check'}[curLang]),
-        'later-chats': () => { btn.closest('.advice-card').style.opacity = '0.4'; showToast({fr:'⏳ Rappel programmé dans 2 h', es:'⏳ Recordatorio programado en 2 h', en:'⏳ Reminder scheduled in 2 h'}[curLang]); },
+        'validate-all': () => {
+          _addAgendaItem({ icon:'✅', title:{fr:'Validation 4 brouillons IA',es:'Validación 4 borradores IA',en:'Validate 4 AI drafts'}[curLang], detail:{fr:'4 chats validés · 1 à vérifier manuellement',es:'4 chats validados · 1 por verificar manualmente',en:'4 chats validated · 1 to check manually'}[curLang], when:{fr:'À l\'instant',es:'Ahora mismo',en:'Just now'}[curLang], status:'done', category:'inbox' });
+          showToast({fr:'✅ Validés · ouverture Pilotage Nexus…', es:'✅ Validados · abriendo Pilotaje Nexus…', en:'✅ Validated · opening Nexus Pilot…'}[curLang]);
+          _goPilotage('done');
+        },
+        'later-chats': () => {
+          _addAgendaItem({ icon:'⏳', title:{fr:'Rappel : 5 chats à valider',es:'Recordatorio: 5 chats por validar',en:'Reminder: 5 chats to validate'}[curLang], detail:{fr:'Reporté à dans 2 h',es:'Aplazado en 2 h',en:'Postponed in 2 h'}[curLang], when:{fr:'Dans 2 h',es:'En 2 h',en:'In 2 h'}[curLang], status:'scheduled', category:'reminder' });
+          btn.closest('.advice-card').style.opacity = '0.4';
+          showToast({fr:'⏳ Rappel programmé dans 2 h', es:'⏳ Recordatorio programado en 2 h', en:'⏳ Reminder scheduled in 2 h'}[curLang]);
+        },
         // Card 3 : Vendredi pic d'activité
-        'schedule-story': () => showToast({fr:'📸 Story Instagram programmée vendredi 18 h', es:'📸 Story Instagram programada viernes 18 h', en:'📸 Instagram story scheduled Friday 6 pm'}[curLang]),
-        'see-history': () => showToast({fr:'📊 Historique pic d\'activité ouvert', es:'📊 Historial pico de actividad abierto', en:'📊 Peak activity history opened'}[curLang]),
-        'skip-story': () => { btn.closest('.advice-card').style.opacity = '0.4'; showToast({fr:'❌ Conseil ignoré', es:'❌ Consejo ignorado', en:'❌ Advice skipped'}[curLang]); },
+        'schedule-story': () => {
+          _addAgendaItem({ icon:'📸', title:{fr:'Story Instagram pic d\'activité',es:'Story Instagram pico de actividad',en:'Instagram story peak hours'}[curLang], detail:{fr:'Story poussée vendredi 18 h pour capter +15% commandes',es:'Story publicada viernes 18 h para capturar +15% pedidos',en:'Story pushed Friday 6 pm to capture +15% orders'}[curLang], when:{fr:'Vendredi 18 h',es:'Viernes 18 h',en:'Friday 6 pm'}[curLang], status:'scheduled', category:'social' });
+          showToast({fr:'📸 Story programmée · ouverture Pilotage Nexus…', es:'📸 Story programada · abriendo Pilotaje Nexus…', en:'📸 Story scheduled · opening Nexus Pilot…'}[curLang]);
+          _goPilotage('scheduled');
+        },
+        'see-history': () => _goPilotage('done'),
+        'skip-story': () => {
+          _addAgendaItem({ icon:'❌', title:{fr:'Story vendredi pic (ignorée)',es:'Story viernes pico (ignorada)',en:'Friday peak story (skipped)'}[curLang], detail:'', when:'—', status:'cancelled', category:'social' });
+          btn.closest('.advice-card').style.opacity = '0.4';
+          showToast({fr:'❌ Conseil ignoré', es:'❌ Consejo ignorado', en:'❌ Advice skipped'}[curLang]);
+        },
         // Card 4 : Météo pluie samedi
-        'enable-soup-promo': () => showToast({fr:'🥣 Promo soupe maison activée pour samedi', es:'🥣 Promo sopa casera activada para sábado', en:'🥣 Homemade soup promo enabled for Saturday'}[curLang]),
+        'enable-soup-promo': () => {
+          _addAgendaItem({ icon:'🥣', title:{fr:'Promo soupe maison · pluie samedi',es:'Promo sopa casera · lluvia sábado',en:'Homemade soup promo · Saturday rain'}[curLang], detail:{fr:'Active jusqu\'à dimanche · attendu +40% ventes',es:'Activa hasta domingo · esperado +40% ventas',en:'Active until Sunday · expected +40% sales'}[curLang], when:{fr:'Samedi toute la journée',es:'Sábado todo el día',en:'All Saturday'}[curLang], status:'active', category:'promo' });
+          showToast({fr:'🥣 Promo activée · ouverture Pilotage Nexus…', es:'🥣 Promo activada · abriendo Pilotaje Nexus…', en:'🥣 Promo enabled · opening Nexus Pilot…'}[curLang]);
+          _goPilotage('active');
+        },
         'more-soup-info': () => showToast({fr:'☔ Stats météo & ventes affichées', es:'☔ Estadísticas clima & ventas mostradas', en:'☔ Weather & sales stats shown'}[curLang]),
         // Card 5 : Question Providencia
-        'edit-profile-faq': () => location.href = 'app.html#/profile',
+        'edit-profile-faq': () => {
+          _addAgendaItem({ icon:'📝', title:{fr:'Ajout FAQ : livraisons Providencia',es:'Añadir FAQ: entregas Providencia',en:'Add FAQ: Providencia deliveries'}[curLang], detail:{fr:'À compléter dans Profil entreprise',es:'Por completar en Perfil empresa',en:'To complete in Business profile'}[curLang], when:{fr:'À faire',es:'Por hacer',en:'To do'}[curLang], status:'scheduled', category:'profile' });
+          location.href = 'app.html#/profile';
+        },
         'see-3-messages': () => location.href = 'app.html#/inbox'
       };
       const fn = handlers[action];
@@ -1908,6 +1962,8 @@ body{
       'menus.stats.title':'Statistiques', 'menus.stats.desc':'Performance, heatmap, top questions, évolution',
       'menus.msg.title':'Messagerie', 'menus.msg.desc':'Inbox WhatsApp + Gmail unifiée, suggestions IA',
       'menus.camp.title':'Campagnes', 'menus.camp.desc':'Promos, relances, segments cibles, automations', 'menus.camp.badge':'Limited',
+      'menus.pilotage.title':'Pilotage Nexus', 'menus.pilotage.desc':'Gère ce qui est programmé, actif, effectué',
+      'badge.new':'Nouveau',
       'menus.crm.title':'Clients CRM', 'menus.crm.desc':'Fiches clients, podium top, segments, gestion',
       'menus.vac.title':'Mode vacances', 'menus.vac.desc':'Configuration IA, plage horaire, réponses auto',
       'menus.tuto.title':'Tutoriel', 'menus.tuto.desc':'5 étapes pour bien démarrer',
@@ -1983,6 +2039,8 @@ body{
       'menus.stats.title':'Estadísticas', 'menus.stats.desc':'Rendimiento, heatmap, top preguntas, evolución',
       'menus.msg.title':'Mensajería', 'menus.msg.desc':'Inbox WhatsApp + Gmail unificada, sugerencias IA',
       'menus.camp.title':'Campañas', 'menus.camp.desc':'Promos, recuperación, segmentos, automatizaciones', 'menus.camp.badge':'Limited',
+      'menus.pilotage.title':'Pilotaje Nexus', 'menus.pilotage.desc':'Gestiona lo programado, activo, hecho',
+      'badge.new':'Nuevo',
       'menus.crm.title':'Clientes CRM', 'menus.crm.desc':'Fichas clientes, podium top, segmentos, gestión',
       'menus.vac.title':'Modo vacaciones', 'menus.vac.desc':'Configuración IA, horario, respuestas auto',
       'menus.tuto.title':'Tutorial', 'menus.tuto.desc':'5 pasos para empezar bien',
@@ -2057,6 +2115,8 @@ body{
       'menus.stats.title':'Statistics', 'menus.stats.desc':'Performance, heatmap, top questions, evolution',
       'menus.msg.title':'Messaging', 'menus.msg.desc':'Unified WhatsApp + Gmail inbox, AI suggestions',
       'menus.camp.title':'Campaigns', 'menus.camp.desc':'Promos, recovery, segments, automations', 'menus.camp.badge':'Limited',
+      'menus.pilotage.title':'Nexus Pilot', 'menus.pilotage.desc':'Manage scheduled, active, completed',
+      'badge.new':'New',
       'menus.crm.title':'CRM Clients', 'menus.crm.desc':'Client cards, top podium, segments, management',
       'menus.vac.title':'Vacation mode', 'menus.vac.desc':'AI config, time range, auto replies',
       'menus.tuto.title':'Tutorial', 'menus.tuto.desc':'5 steps to get started',
@@ -2208,6 +2268,14 @@ body{
                 <small data-i18n="menus.camp.desc">Promos, relances, segments cibles, automations</small>
               </div>
             </div>
+            <div class="menus-cell c-pilotage" data-target="pilotage" style="--accent:#FFB347">
+              <span class="mcell-badge-mini" style="background:rgba(30,255,142,.22);color:#1EFF8E;border-color:rgba(30,255,142,.32)" data-i18n="badge.new">Nouveau</span>
+              <div class="mcell-big-logo">🎯</div>
+              <div class="mcell-text-only">
+                <b data-i18n="menus.pilotage.title">Pilotage Nexus</b>
+                <small data-i18n="menus.pilotage.desc">Gère ce qui est programmé, actif, effectué</small>
+              </div>
+            </div>
             <div class="menus-cell c-crm" data-target="crm">
               <div class="mcell-big-logo">👥</div>
               <div class="mcell-text-only">
@@ -2248,6 +2316,7 @@ body{
         stats: 'app.html#/stats',
         messages: 'app.html#/inbox',
         campaigns: 'app.html#/campaigns',
+        pilotage: 'app.html#/pilotage',
         crm: 'app.html#/crm',
         vacances: 'app.html#/vacances',
         tutorial: 'app.html#/tutorial'

@@ -1148,8 +1148,18 @@ const I18N = {
     // NAVIGATION & TOPBAR
     'nav.main':'Navigation','nav.dashboard':'Tableau de bord','nav.profile':'Profil entreprise',
     'nav.inbox':'Messagerie','nav.crm':'Clients & CRM','nav.stats':'Statistiques',
-    'nav.campaigns':'Campagnes','nav.vacances':'Mode vacances','nav.tutorial':'Tutoriel',
+    'nav.campaigns':'Campagnes','nav.pilotage':'Pilotage Nexus','nav.vacances':'Mode vacances','nav.tutorial':'Tutoriel',
     'nav.payments':'Paiement & Plan','nav.settings':'Paramètres','nav.tools':'Outils',
+    'pilotage.title':'Pilotage Nexus','pilotage.sub':'Tout ce que Nexus gère pour toi — programmé, actif, effectué',
+    'pilotage.tab.scheduled':'📅 Programmé','pilotage.tab.active':'🟢 Actif','pilotage.tab.done':'✅ Effectué','pilotage.tab.cancelled':'❌ Annulé',
+    'pilotage.empty.scheduled':'Aucune action programmée. Va sur Nexus Core et clique sur un conseil pour en planifier une.',
+    'pilotage.empty.active':'Aucune action active actuellement.',
+    'pilotage.empty.done':'Aucune action effectuée cette semaine.',
+    'pilotage.empty.cancelled':'Aucune action annulée.',
+    'pilotage.col.title':'Action','pilotage.col.when':'Quand','pilotage.col.status':'Statut','pilotage.col.actions':'Gérer',
+    'pilotage.btn.modify':'Modifier','pilotage.btn.cancel':'Annuler','pilotage.btn.reactivate':'Réactiver','pilotage.btn.duplicate':'Dupliquer',
+    'pilotage.toast.cancelled':'Action annulée','pilotage.toast.reactivated':'Action réactivée','pilotage.toast.modified':'Action modifiée',
+    'pilotage.empty.hint':'💡 Astuce : les conseils acceptés depuis Nexus Core arrivent ici automatiquement.',
     'nav.hub':'Hub','nav.connected':'Canaux connectés',
     'topbar.search':'Rechercher…','topbar.search.short':'Rechercher','badge.new':'Nouveau',
     'topbar.home':'Accueil','topbar.menu':'Menu','topbar.notif':'Notifications','topbar.settings':'Paramètres',
@@ -1350,8 +1360,18 @@ const I18N = {
   es: {
     'nav.main':'Navegación','nav.dashboard':'Tablero','nav.profile':'Perfil empresa',
     'nav.inbox':'Mensajería','nav.crm':'Clientes & CRM','nav.stats':'Estadísticas',
-    'nav.campaigns':'Campañas','nav.vacances':'Modo vacaciones','nav.tutorial':'Tutorial',
+    'nav.campaigns':'Campañas','nav.pilotage':'Pilotaje Nexus','nav.vacances':'Modo vacaciones','nav.tutorial':'Tutorial',
     'nav.payments':'Pago & Plan','nav.settings':'Ajustes','nav.tools':'Herramientas',
+    'pilotage.title':'Pilotaje Nexus','pilotage.sub':'Todo lo que Nexus gestiona por ti — programado, activo, hecho',
+    'pilotage.tab.scheduled':'📅 Programado','pilotage.tab.active':'🟢 Activo','pilotage.tab.done':'✅ Hecho','pilotage.tab.cancelled':'❌ Cancelado',
+    'pilotage.empty.scheduled':'Ninguna acción programada. Ve a Nexus Core y haz clic en un consejo para planear una.',
+    'pilotage.empty.active':'Ninguna acción activa actualmente.',
+    'pilotage.empty.done':'Ninguna acción realizada esta semana.',
+    'pilotage.empty.cancelled':'Ninguna acción cancelada.',
+    'pilotage.col.title':'Acción','pilotage.col.when':'Cuándo','pilotage.col.status':'Estado','pilotage.col.actions':'Gestionar',
+    'pilotage.btn.modify':'Modificar','pilotage.btn.cancel':'Cancelar','pilotage.btn.reactivate':'Reactivar','pilotage.btn.duplicate':'Duplicar',
+    'pilotage.toast.cancelled':'Acción cancelada','pilotage.toast.reactivated':'Acción reactivada','pilotage.toast.modified':'Acción modificada',
+    'pilotage.empty.hint':'💡 Consejo: los consejos aceptados desde Nexus Core llegan aquí automáticamente.',
     'topbar.search':'Buscar…','topbar.search.short':'Buscar','badge.new':'Nuevo',
     'greet.morning':'Buenos días','greet.afternoon':'Buenas tardes','greet.evening':'Buenas noches',
     'ncd.eyebrow':'Nexus Core · Tablero',
@@ -1518,8 +1538,18 @@ const I18N = {
   en: {
     'nav.main':'Navigation','nav.dashboard':'Dashboard','nav.profile':'Business Profile',
     'nav.inbox':'Inbox','nav.crm':'Clients & CRM','nav.stats':'Stats',
-    'nav.campaigns':'Campaigns','nav.vacances':'Vacation mode','nav.tutorial':'Tutorial',
+    'nav.campaigns':'Campaigns','nav.pilotage':'Nexus Pilot','nav.vacances':'Vacation mode','nav.tutorial':'Tutorial',
     'nav.payments':'Billing','nav.settings':'Settings','nav.tools':'Tools',
+    'pilotage.title':'Nexus Pilot','pilotage.sub':'Everything Nexus manages for you — scheduled, active, done',
+    'pilotage.tab.scheduled':'📅 Scheduled','pilotage.tab.active':'🟢 Active','pilotage.tab.done':'✅ Done','pilotage.tab.cancelled':'❌ Cancelled',
+    'pilotage.empty.scheduled':'No scheduled actions. Go to Nexus Core and click on advice to schedule one.',
+    'pilotage.empty.active':'No active actions currently.',
+    'pilotage.empty.done':'No actions completed this week.',
+    'pilotage.empty.cancelled':'No cancelled actions.',
+    'pilotage.col.title':'Action','pilotage.col.when':'When','pilotage.col.status':'Status','pilotage.col.actions':'Manage',
+    'pilotage.btn.modify':'Edit','pilotage.btn.cancel':'Cancel','pilotage.btn.reactivate':'Reactivate','pilotage.btn.duplicate':'Duplicate',
+    'pilotage.toast.cancelled':'Action cancelled','pilotage.toast.reactivated':'Action reactivated','pilotage.toast.modified':'Action modified',
+    'pilotage.empty.hint':'💡 Tip: actions accepted from Nexus Core land here automatically.',
     'topbar.search':'Search…','topbar.search.short':'Search','badge.new':'New',
     'greet.morning':'Good morning','greet.afternoon':'Good afternoon','greet.evening':'Good evening',
     'ncd.eyebrow':'Nexus Core · Dashboard',
@@ -1977,7 +2007,7 @@ const Nx = {
   },
 
   updateBreadcrumb(){
-    const map = {dashboard:'Hub',profile:t('nav.profile'),inbox:t('nav.inbox'),crm:t('nav.crm'),stats:t('nav.stats'),campaigns:t('nav.campaigns'),payments:t('nav.payments'),tutorial:'Tutoriel',vacances:'Mode vacances',settings:t('nav.settings')};
+    const map = {dashboard:'Hub',profile:t('nav.profile'),inbox:t('nav.inbox'),crm:t('nav.crm'),stats:t('nav.stats'),campaigns:t('nav.campaigns'),pilotage:t('nav.pilotage'),payments:t('nav.payments'),tutorial:'Tutoriel',vacances:'Mode vacances',settings:t('nav.settings')};
     document.getElementById('breadcrumb').textContent = map[this.state.view] || this.state.view;
   },
 
@@ -1989,6 +2019,7 @@ const Nx = {
       {view:'crm',ic:'👥',label:'nav.crm'},
       {view:'stats',ic:'📊',label:'nav.stats'},
       {view:'campaigns',ic:'📢',label:'nav.campaigns'},
+      {view:'pilotage',ic:'🎯',label:'nav.pilotage',meta:'Nouveau',metaCls:'new'},
       {view:'vacances',ic:'✈️',label:'Mode vacances',meta:'Nouveau',metaCls:'new'},
       {view:'tutorial',ic:'🎓',label:'Tutoriel',meta:'Nouveau',metaCls:'new'},
       {view:'payments',ic:'💳',label:'nav.payments'},
@@ -2720,6 +2751,7 @@ const Nx = {
     else if (v === 'crm') html = this.viewCrm();
     else if (v === 'stats') html = this.viewStats();
     else if (v === 'campaigns') html = this.viewCampaigns();
+    else if (v === 'pilotage') html = this.viewPilotage();
     else if (v === 'payments') html = this.viewPayments();
     else if (v === 'tutorial') html = this.viewTutorial();
     else if (v === 'vacances') html = this.viewVacances();
@@ -2892,124 +2924,80 @@ const Nx = {
     const tutoDone = tutoSteps.filter(s=>tutoProgress[s]).length;
     const tutoPct = Math.round(tutoDone/5*100) || 60;
     const tutoStepsLabels = [['pop.tuto.s1',tutoProgress.s1!==false],['pop.tuto.s2',tutoProgress.s2!==false],['pop.tuto.s3',tutoProgress.s3!==false],['pop.tuto.s4',!!tutoProgress.s4],['pop.tuto.s5',!!tutoProgress.s5]];
+    // ==== Pop-up MENUS unifié style core.html (Augustin 19/05/2026)
+    // Format simplifié partout : 7 cells = gros logo + titre + sous-titre (pas de stats/podium détaillés)
     mc.innerHTML = `
-      <div class="hub-overlay-card">
-        <div class="hub-overlay-hd">
+      <style>
+        .menus-popup-card{background:linear-gradient(135deg,#0F1520 0%,#1A2335 100%);border:1px solid rgba(255,255,255,.1);border-radius:22px;padding:24px;color:#E8ECF3;position:relative;max-width:980px}
+        .menus-popup-card::before{content:"";position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;background:linear-gradient(135deg,#7A3CFF,#00E5FF);border-radius:24px;z-index:-1;opacity:.35}
+        .menus-popup-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.08)}
+        .menus-popup-eyebrow{font-size:10.5px;color:#00E5FF;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+        .menus-popup-title{font-size:22px;font-weight:800;letter-spacing:-.01em;color:#fff;margin-top:4px;margin-bottom:0}
+        .menus-popup-sub{font-size:12.5px;color:#B8C1CE;margin-top:4px}
+        .menus-popup-close{background:rgba(255,255,255,.12);color:#fff;border:0;cursor:pointer;width:34px;height:34px;border-radius:10px;font-size:14px;flex-shrink:0;transition:background .15s}
+        .menus-popup-close:hover{background:rgba(255,255,255,.22)}
+        .menus-popup-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+        @media(max-width:920px){.menus-popup-grid{grid-template-columns:repeat(3,1fr)}}
+        @media(max-width:680px){.menus-popup-grid{grid-template-columns:repeat(2,1fr)}}
+        @media(max-width:420px){.menus-popup-grid{grid-template-columns:1fr}}
+        .menus-popup-cell{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:22px 14px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);cursor:pointer;transition:all .25s cubic-bezier(.2,.8,.2,1);position:relative;overflow:hidden;justify-content:center;min-height:150px}
+        .menus-popup-cell::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent,#00E5FF);opacity:.85}
+        .menus-popup-cell.c-stats{--accent:#1EFF8E}
+        .menus-popup-cell.c-msg{--accent:#8B5CFF}
+        .menus-popup-cell.c-camp{--accent:#F5C45E}
+        .menus-popup-cell.c-pilotage{--accent:#FFB347}
+        .menus-popup-cell.c-crm{--accent:#2E7BFF}
+        .menus-popup-cell.c-vac{--accent:#00E5FF}
+        .menus-popup-cell.c-tuto{--accent:#FF6B9D}
+        .menus-popup-cell:hover{transform:translateY(-3px);background:rgba(255,255,255,.07);border-color:var(--accent);box-shadow:0 18px 40px -14px var(--accent)}
+        .menus-popup-cell .mpc-logo{font-size:46px;line-height:1;filter:drop-shadow(0 8px 24px rgba(0,0,0,.4));transition:transform .25s}
+        .menus-popup-cell:hover .mpc-logo{transform:scale(1.12) rotate(-3deg)}
+        .menus-popup-cell .mpc-text{display:flex;flex-direction:column;gap:5px;align-items:center}
+        .menus-popup-cell .mpc-text b{font-size:15.5px;font-weight:800;color:#fff;letter-spacing:-.01em;line-height:1.2}
+        .menus-popup-cell .mpc-text small{font-size:11.5px;color:#8A94A6;line-height:1.45;max-width:170px}
+        .menus-popup-cell .mpc-badge{position:absolute;top:8px;right:8px;background:rgba(245,196,94,.22);color:#F5C45E;font-size:9px;font-weight:800;padding:3px 7px;border-radius:6px;letter-spacing:.08em;text-transform:uppercase;border:1px solid rgba(245,196,94,.32)}
+        .menus-popup-cell .mpc-badge.new{background:rgba(30,255,142,.22);color:#1EFF8E;border-color:rgba(30,255,142,.32)}
+      </style>
+      <div class="menus-popup-card">
+        <div class="menus-popup-hd">
           <div>
-            <div class="hoh-eyebrow">${t('iface.eyebrow')}</div>
-            <h2 class="hoh-title">${t('iface.title')}</h2>
-            <div class="hoh-sub">${t('iface.subtitle')}</div>
+            <div class="menus-popup-eyebrow">${t('iface.eyebrow')}</div>
+            <h2 class="menus-popup-title">${t('iface.title')}</h2>
+            <div class="menus-popup-sub">${t('iface.subtitle')}</div>
           </div>
-          <button class="modal-close hoh-close" onclick="Nx.closeHubOverlay()" aria-label="${t('iface.close')}">✕</button>
+          <button class="menus-popup-close" onclick="Nx.closeHubOverlay()" aria-label="${t('iface.close')}">✕</button>
         </div>
-        <div class="hub-overlay-grid">
-
-          <!-- 1. STATISTIQUES -->
-          <div class="hub-cell c-stats">
-            <div class="hcell-hd">
-              <span class="hcell-ic">📊</span>
-              <div><b>${t('pop.stats.title')}</b><small>${t('pop.stats.sub')}</small></div>
-            </div>
-            <div class="hcell-body">
-              <div class="mini-stat"><b>47</b><small>${t('pop.stats.conv')} · ▲18%</small></div>
-              <div class="mini-stat"><b>${activeCl}</b><small>${t('pop.stats.cli')} · ▲6%</small></div>
-              <div class="mini-stat"><b>94%</b><small>${t('pop.stats.resp')} · ▲5%</small></div>
-              <div class="mini-pending">${t('pop.stats.pending').replace('{n}',unread||5)}</div>
-            </div>
-            <button class="hcell-cta" onclick="Nx.closeHubOverlay();Nx.navigate('stats')">${t('pop.stats.cta')}</button>
+        <div class="menus-popup-grid">
+          <div class="menus-popup-cell c-stats" onclick="Nx.closeHubOverlay();Nx.navigate('stats')">
+            <div class="mpc-logo">📊</div>
+            <div class="mpc-text"><b>${t('pop.stats.title')}</b><small>${t('pop.stats.sub')}</small></div>
           </div>
-
-          <!-- 2. MESSAGERIE -->
-          <div class="hub-cell c-msg">
-            <div class="hcell-hd">
-              <span class="hcell-ic">📬</span>
-              <div><b>${t('pop.msg.title')}</b><small>${t('pop.msg.sub').replace('{n}',unread)}</small></div>
-            </div>
-            <div class="hcell-body">
-              ${(this.state.conversations||[]).slice(0,3).map(conv=>{
-                const cl = (this.state.clients||[]).find(x=>x.id===conv.clientId)||{};
-                const last = conv.messages[conv.messages.length-1]||{};
-                return `<div class="mini-msg ${conv.unread?'unread':''}" onclick="event.stopPropagation();Nx.closeHubOverlay();Nx.openConversation(${conv.clientId})">
-                  <span class="mm-av" style="background:${cl.color||'#1A56DB'}">${cl.avatar||'?'}</span>
-                  <span class="mm-info"><b>${cl.name||''}</b><small>${(last.text||'').slice(0,42)}…</small></span>
-                </div>`;
-              }).join('')}
-            </div>
-            <button class="hcell-cta" onclick="Nx.closeHubOverlay();Nx.navigate('inbox')">${t('pop.msg.cta')}</button>
+          <div class="menus-popup-cell c-msg" onclick="Nx.closeHubOverlay();Nx.navigate('inbox')">
+            <div class="mpc-logo">📬</div>
+            <div class="mpc-text"><b>${t('pop.msg.title')}</b><small>${(t('pop.msg.sub')||'').replace('{n}',unread)}</small></div>
           </div>
-
-          <!-- 3. CAMPAGNES (limited usage) -->
-          <div class="hub-cell c-camp">
-            <div class="hcell-hd">
-              <span class="hcell-ic">📢</span>
-              <div><b>${t('pop.camp.title')}</b><small>${t('pop.camp.sub').replace('{n}',campAuto)}</small></div>
-              <span class="hcell-badge">${t('pop.camp.badge')}</span>
-            </div>
-            <div class="hcell-body">
-              <div class="mini-target">${t('pop.camp.target')}</div>
-              <div class="mini-toggle">
-                <label class="mini-switch"><input type="checkbox" ${campAuto>0?'checked':''} onclick="event.stopPropagation();Nx.toggleCampAuto(this.checked)"><span></span></label>
-                <span>${t('pop.camp.toggle')}</span>
-              </div>
-              <button class="mini-action" onclick="event.stopPropagation();Nx.popSaveCampDraft()">${t('pop.camp.save')}</button>
-            </div>
-            <button class="hcell-cta" onclick="Nx.closeHubOverlay();Nx.navigate('campaigns')">${t('pop.camp.cta')}</button>
+          <div class="menus-popup-cell c-camp" onclick="Nx.closeHubOverlay();Nx.navigate('campaigns')">
+            <span class="mpc-badge">${t('pop.camp.badge')}</span>
+            <div class="mpc-logo">📢</div>
+            <div class="mpc-text"><b>${t('pop.camp.title')}</b><small>${(t('pop.camp.sub')||'').replace('{n}',campAuto)}</small></div>
           </div>
-
-          <!-- 4. CLIENTS CRM -->
-          <div class="hub-cell c-crm">
-            <div class="hcell-hd">
-              <span class="hcell-ic">👥</span>
-              <div><b>${t('pop.crm.title')}</b><small>${t('pop.crm.sub').replace('{n}',activeCl)}</small></div>
-            </div>
-            <div class="hcell-body">
-              <div class="mini-podium-title">${t('pop.crm.podium')}</div>
-              ${top3.map((c,i)=>`<div class="mini-podium-row" onclick="event.stopPropagation();Nx.closeHubOverlay();Nx.openClientCard(${c.id})">
-                <span class="mp-rank">${i+1}</span>
-                <span class="mp-name">${c.name}</span>
-                <span class="mp-score">${c.score}</span>
-              </div>`).join('')}
-              <button class="mini-action danger" onclick="event.stopPropagation();Nx.popDeleteClient()">${t('pop.crm.delete')}</button>
-            </div>
-            <button class="hcell-cta" onclick="Nx.closeHubOverlay();Nx.navigate('crm')">${t('pop.crm.cta')}</button>
+          <div class="menus-popup-cell c-pilotage" onclick="Nx.closeHubOverlay();Nx.navigate('pilotage')">
+            <span class="mpc-badge new">${t('badge.new')}</span>
+            <div class="mpc-logo">🎯</div>
+            <div class="mpc-text"><b>${t('nav.pilotage')}</b><small>${t('pilotage.sub')}</small></div>
           </div>
-
-          <!-- 5. MODE VACANCES -->
-          <div class="hub-cell c-vac">
-            <div class="hcell-hd">
-              <span class="hcell-ic">✈️</span>
-              <div><b>${t('pop.vac.title')}</b><small>${this.state.vacation?t('pop.vac.on'):t('pop.vac.off')}</small></div>
-            </div>
-            <div class="hcell-body">
-              <div class="mini-config">${t('pop.vac.config')}</div>
-              <div class="mini-list">
-                <div>• ${t('pop.vac.when')}</div>
-                <div>• ${t('pop.vac.how')}</div>
-                <div>• ${t('pop.vac.what')}</div>
-              </div>
-              <button class="mini-action ${this.state.vacation?'danger':'primary'}" onclick="event.stopPropagation();Nx.popToggleVacation()">${this.state.vacation?t('pop.vac.deactivate'):t('pop.vac.activate')}</button>
-            </div>
-            <button class="hcell-cta" onclick="Nx.closeHubOverlay();Nx.navigate('vacances')">${t('pop.vac.cta')}</button>
+          <div class="menus-popup-cell c-crm" onclick="Nx.closeHubOverlay();Nx.navigate('crm')">
+            <div class="mpc-logo">👥</div>
+            <div class="mpc-text"><b>${t('pop.crm.title')}</b><small>${(t('pop.crm.sub')||'').replace('{n}',activeCl)}</small></div>
           </div>
-
-          <!-- 6. TUTORIEL -->
-          <div class="hub-cell c-tuto">
-            <div class="hcell-hd">
-              <span class="hcell-ic">🎓</span>
-              <div><b>${t('pop.tuto.title')}</b><small>${t('pop.tuto.sub')}</small></div>
-            </div>
-            <div class="hcell-body">
-              <div class="mini-tuto-progress">
-                <div class="mtp-bar"><span style="width:${tutoPct}%"></span></div>
-                <small>${t('pop.tuto.progress').replace('{done}',tutoDone||3)}</small>
-              </div>
-              <div class="mini-list">
-                ${tutoStepsLabels.map(([k,done])=>`<div>${done?'✓':'○'} ${t(k)}</div>`).join('')}
-              </div>
-            </div>
-            <button class="hcell-cta" onclick="Nx.closeHubOverlay();Nx.navigate('tutorial')">${t('pop.tuto.cta')}</button>
+          <div class="menus-popup-cell c-vac" onclick="Nx.closeHubOverlay();Nx.navigate('vacances')">
+            <div class="mpc-logo">✈️</div>
+            <div class="mpc-text"><b>${t('pop.vac.title')}</b><small>${this.state.vacation?t('pop.vac.on'):t('pop.vac.off')}</small></div>
           </div>
-
+          <div class="menus-popup-cell c-tuto" onclick="Nx.closeHubOverlay();Nx.navigate('tutorial')">
+            <div class="mpc-logo">🎓</div>
+            <div class="mpc-text"><b>${t('pop.tuto.title')}</b><small>${t('pop.tuto.sub')}</small></div>
+          </div>
         </div>
       </div>`;
     // Click sur fond = ferme
@@ -4758,6 +4746,152 @@ const Nx = {
       <text x="21" y="22" text-anchor="middle" dominant-baseline="middle" font-size="5" font-weight="800" fill="currentColor">342</text>
       <text x="21" y="28" text-anchor="middle" dominant-baseline="middle" font-size="2.5" fill="#8A94A6">clients</text>
     </svg>`;
+  },
+
+  // ---------- PILOTAGE NEXUS VIEW ----------
+  // Espace de gestion centralisé : tout ce qui est programmé/actif/effectué/annulé
+  // Items poussés ici depuis Conseil Nexus (core.html) via localStorage 'nx_agenda'
+  viewPilotage(){
+    // Sync tab from core.html redirect (nx_pilotage_tab written before navigation)
+    try {
+      const pendingTab = localStorage.getItem('nx_pilotage_tab');
+      if (pendingTab && ['scheduled','active','done','cancelled'].includes(pendingTab)) {
+        this.state.pilotageTab = pendingTab;
+        localStorage.removeItem('nx_pilotage_tab');
+      }
+    } catch(e){}
+    const tab = this.state.pilotageTab || 'scheduled';
+    const items = this.getAgendaItems();
+    const filtered = items.filter(it => it.status === tab);
+    const counts = {
+      scheduled: items.filter(i=>i.status==='scheduled').length,
+      active:    items.filter(i=>i.status==='active').length,
+      done:      items.filter(i=>i.status==='done').length,
+      cancelled: items.filter(i=>i.status==='cancelled').length
+    };
+    const tabBtn = (k, lblKey) => `<button class="filter-pill ${tab===k?'on':''}" onclick="Nx.setPilotageTab('${k}')">${t(lblKey)} <span class="chip" style="margin-left:6px">${counts[k]}</span></button>`;
+    const statusPill = (s) => {
+      const colorMap = {scheduled:'#3B82F6',active:'#10B981',done:'#6B7280',cancelled:'#EF4444'};
+      const lblMap = {scheduled:t('pilotage.tab.scheduled'),active:t('pilotage.tab.active'),done:t('pilotage.tab.done'),cancelled:t('pilotage.tab.cancelled')};
+      return `<span class="chip" style="background:${colorMap[s]}22;color:${colorMap[s]};font-weight:700">${lblMap[s]}</span>`;
+    };
+    const actionsHtml = (it) => {
+      if (it.status === 'scheduled' || it.status === 'active') {
+        return `<button class="btn-g" onclick="Nx.cancelAgendaItem('${it.id}')">${t('pilotage.btn.cancel')}</button>
+                <button class="btn-g" onclick="Nx.modifyAgendaItem('${it.id}')">${t('pilotage.btn.modify')}</button>`;
+      } else if (it.status === 'cancelled') {
+        return `<button class="btn-g" onclick="Nx.reactivateAgendaItem('${it.id}')">${t('pilotage.btn.reactivate')}</button>`;
+      } else { // done
+        return `<button class="btn-g" onclick="Nx.duplicateAgendaItem('${it.id}')">${t('pilotage.btn.duplicate')}</button>`;
+      }
+    };
+    const listHtml = filtered.length === 0
+      ? `<div class="card" style="padding:30px;text-align:center;color:var(--muted)">
+           <div style="font-size:32px;margin-bottom:10px;opacity:.4">📭</div>
+           <div>${t('pilotage.empty.'+tab)}</div>
+           <div style="margin-top:14px;font-size:11px;color:var(--muted)">${t('pilotage.empty.hint')}</div>
+         </div>`
+      : `<table class="table">
+          <thead><tr>
+            <th>${t('pilotage.col.title')}</th>
+            <th>${t('pilotage.col.when')}</th>
+            <th>${t('pilotage.col.status')}</th>
+            <th style="text-align:right">${t('pilotage.col.actions')}</th>
+          </tr></thead>
+          <tbody>${filtered.map(it => `
+            <tr>
+              <td><div style="font-weight:600">${it.icon||'🎯'} ${it.title}</div>
+                  ${it.detail?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${it.detail}</div>`:''}</td>
+              <td style="white-space:nowrap">${it.when || '—'}</td>
+              <td>${statusPill(it.status)}</td>
+              <td style="text-align:right;white-space:nowrap">${actionsHtml(it)}</td>
+            </tr>`).join('')}
+          </tbody>
+         </table>`;
+    return `
+      <div class="view">
+        <div class="page-hd">
+          <div>
+            <h1 style="margin:0">🎯 ${t('pilotage.title')}</h1>
+            <div style="color:var(--muted);font-size:13px;margin-top:4px">${t('pilotage.sub')}</div>
+          </div>
+        </div>
+        <div class="filter-bar" style="margin-bottom:14px;flex-wrap:wrap">
+          ${tabBtn('scheduled','pilotage.tab.scheduled')}
+          ${tabBtn('active','pilotage.tab.active')}
+          ${tabBtn('done','pilotage.tab.done')}
+          ${tabBtn('cancelled','pilotage.tab.cancelled')}
+        </div>
+        <div class="card" style="padding:14px">${listHtml}</div>
+      </div>`;
+  },
+
+  setPilotageTab(tab){
+    this.state.pilotageTab = tab;
+    this.save();
+    this.renderView();
+  },
+
+  // Lit l'agenda depuis localStorage (partagé avec core.html)
+  getAgendaItems(){
+    try {
+      const raw = localStorage.getItem('nx_agenda');
+      return raw ? JSON.parse(raw) : [];
+    } catch(e){ return []; }
+  },
+  saveAgendaItems(items){
+    try { localStorage.setItem('nx_agenda', JSON.stringify(items)); } catch(e){}
+  },
+
+  cancelAgendaItem(id){
+    const items = this.getAgendaItems();
+    const idx = items.findIndex(i => i.id === id);
+    if (idx < 0) return;
+    items[idx].status = 'cancelled';
+    items[idx].cancelledAt = new Date().toISOString();
+    this.saveAgendaItems(items);
+    this.toast(t('pilotage.toast.cancelled'), 'info');
+    this.renderView();
+  },
+  reactivateAgendaItem(id){
+    const items = this.getAgendaItems();
+    const idx = items.findIndex(i => i.id === id);
+    if (idx < 0) return;
+    items[idx].status = 'scheduled';
+    delete items[idx].cancelledAt;
+    this.saveAgendaItems(items);
+    this.toast(t('pilotage.toast.reactivated'), 'success');
+    this.renderView();
+  },
+  modifyAgendaItem(id){
+    const items = this.getAgendaItems();
+    const it = items.find(i => i.id === id);
+    if (!it) return;
+    const newWhen = prompt('Nouvelle date/heure (ex: Vendredi 19h) :', it.when || '');
+    if (newWhen === null) return;
+    it.when = newWhen.trim() || it.when;
+    it.modifiedAt = new Date().toISOString();
+    this.saveAgendaItems(items);
+    this.toast(t('pilotage.toast.modified'), 'success');
+    this.renderView();
+  },
+  duplicateAgendaItem(id){
+    const items = this.getAgendaItems();
+    const src = items.find(i => i.id === id);
+    if (!src) return;
+    const copy = Object.assign({}, src, {
+      id: 'agd_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+      status: 'scheduled',
+      createdAt: new Date().toISOString()
+    });
+    delete copy.cancelledAt;
+    delete copy.doneAt;
+    items.push(copy);
+    this.saveAgendaItems(items);
+    this.state.pilotageTab = 'scheduled';
+    this.save();
+    this.toast('Action dupliquée → onglet Programmé', 'success');
+    this.renderView();
   },
 
   // ---------- CAMPAIGNS VIEW ----------
