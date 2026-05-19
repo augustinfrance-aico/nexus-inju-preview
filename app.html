@@ -5308,6 +5308,27 @@ const Nx = {
           </div>
         </div>
 
+        <!-- MES TEMPLATES & BROUILLONS PERSO (sauvés depuis le builder) -->
+        ${(this.state.userTemplates||[]).length > 0 ? `
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-hd"><h3>💾 Mes templates & brouillons <span style="font-size:11px;color:var(--muted);font-weight:400">· ${this.state.userTemplates.length} sauvegardés</span></h3></div>
+          <div class="card-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px">
+            ${this.state.userTemplates.map(t => `
+              <div style="padding:14px;border:1px solid var(--line);border-radius:10px;background:${t.cat==='Brouillon'?'var(--amber-soft)':'var(--bg2)'};position:relative">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px">
+                  <div style="flex:1;min-width:0">
+                    <span class="chip" style="font-size:9.5px;background:${t.cat==='Brouillon'?'#F59E0B22':'#1A56DB22'};color:${t.cat==='Brouillon'?'#B45309':'#1A56DB'};font-weight:700">${t.cat==='Brouillon'?'📝 BROUILLON':'📋 TEMPLATE'}</span>
+                    <div style="font-weight:700;font-size:13px;margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.name||'Sans nom'}</div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${t.msg||'(message vide)'}</div>
+                  </div>
+                  <button style="background:transparent;border:0;cursor:pointer;color:var(--muted);font-size:14px;padding:2px 6px" onclick="Nx.deleteUserTemplate(${t.id})" title="Supprimer">✕</button>
+                </div>
+                <button class="btn-g" style="margin-top:10px;width:100%" onclick="Nx.useUserTemplate(${t.id})">Utiliser →</button>
+              </div>
+            `).join('')}
+          </div>
+        </div>` : ''}
+
         <div class="card" style="margin-bottom:16px">
           <div class="card-hd"><h3>📋 Bibliothèque de templates</h3><div class="actions"><button class="btn-g" onclick="Nx.openImportTemplate()">+ Importer</button></div></div>
           <div class="card-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
@@ -5627,6 +5648,7 @@ const Nx = {
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn btn-s" onclick="Nx.importCampPhoto()">📎 Importer photo</button>
             <button class="btn btn-s" onclick="Nx.pickCatalogProduct()">🖼 Choisir du catalogue</button>
+            <button class="btn btn-s" style="color:var(--red);border-color:#FCA5A5" onclick="Nx.removeCampPhoto()">🗑 Retirer photo</button>
           </div>
           <div id="campPhotoPreview" style="margin-top:10px"></div>
         </div>
@@ -5647,9 +5669,23 @@ const Nx = {
           <span style="color:#1A56DB;font-weight:700">⚡ 85 crédits</span>
         </div>
 
+        <!-- APERÇU MAIL — toutes les campagnes passent par mail (Augustin : anti-ban WhatsApp) -->
         <div style="padding:16px;background:var(--bg2);border-radius:10px;margin-top:14px">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:8px">📱 APERÇU WHATSAPP</div>
-          <div class="bubble me" style="margin:0;max-width:100%">Hola 👋 Este fin de semana en Don Carlos: 3kg de pan amasado por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! 🥖<div class="t">19:00</div></div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+            <span>📧 APERÇU MAIL</span>
+            <span style="font-size:10px;color:#94A3B8">Toutes les campagnes Nexus passent par mail</span>
+          </div>
+          <div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;font-family:Inter,sans-serif">
+            <div style="font-size:11px;color:#94A3B8;display:flex;justify-content:space-between;border-bottom:1px solid #F1F5F9;padding-bottom:8px;margin-bottom:10px">
+              <span><b style="color:#334155">De :</b> Panadería Don Carlos &lt;hola@doncarlos.cl&gt;</span>
+              <span>19:00</span>
+            </div>
+            <div style="font-size:13px;color:#0F172A;font-weight:700;margin-bottom:8px">Objet : <span id="campSubjectPreview" style="font-weight:600;color:#334155">${document.getElementById('campName')?.value || 'Promo pan amasado week-end'}</span></div>
+            <div style="font-size:13px;color:#1E293B;line-height:1.55;white-space:pre-wrap" id="campBodyPreview">Hola 👋 Este fin de semana en Don Carlos: 3kg de pan amasado por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! 🥖</div>
+            <div style="margin-top:14px;padding-top:10px;border-top:1px solid #F1F5F9;font-size:11px;color:#94A3B8">
+              ✂️ Si tu ne souhaites plus recevoir ces emails, <a style="color:#1A56DB">se désinscrire</a> · Panadería Don Carlos · Las Condes, Santiago
+            </div>
+          </div>
         </div>
       </div>
       <div class="modal-foot">
@@ -5767,20 +5803,53 @@ const Nx = {
     this.toast('✓ Produit ajouté','success', name);
   },
 
+  // Fix Augustin 19/05 : sauver template/brouillon doit vraiment fonctionner ET être visible après
   saveAsDraft(){
     const name = document.getElementById('campName')?.value || 'Brouillon sans nom';
     const msg = document.getElementById('campMsg')?.value || '';
-    this.state.userTemplates.push({ id: Date.now(), name: '[BROUILLON] ' + name, msg, cat: 'Brouillon' });
+    const target = document.getElementById('campTarget')?.value || '';
+    if (!this.state.userTemplates) this.state.userTemplates = [];
+    this.state.userTemplates.unshift({
+      id: Date.now(), name, msg, cat: 'Brouillon', target,
+      createdAt: new Date().toISOString()
+    });
     this.save();
-    this.toast('💾 Brouillon sauvegardé','success', name);
+    this.toast('💾 Brouillon sauvegardé','success', `"${name}" visible dans Campagnes → Mes brouillons`);
+    this.closeModal();
+    this.renderView();
   },
 
   saveAsTemplate(){
     const name = document.getElementById('campName')?.value || 'Sans nom';
     const msg = document.getElementById('campMsg')?.value || '';
-    this.state.userTemplates.push({ id: Date.now(), name, msg, cat: 'Template' });
+    const target = document.getElementById('campTarget')?.value || '';
+    if (!this.state.userTemplates) this.state.userTemplates = [];
+    this.state.userTemplates.unshift({
+      id: Date.now(), name, msg, cat: 'Template', target,
+      createdAt: new Date().toISOString()
+    });
     this.save();
-    this.toast('📋 Template sauvegardé', 'success', `"${name}" disponible dans ta bibliothèque`);
+    this.toast('📋 Template sauvegardé', 'success', `"${name}" visible dans Campagnes → Mes templates`);
+    this.closeModal();
+    this.renderView();
+  },
+
+  // Utilise un template/brouillon : ouvre le builder pré-rempli
+  useUserTemplate(id){
+    const t = (this.state.userTemplates||[]).find(x=>x.id===id);
+    if (!t) return;
+    this.openCampaignBuilder(t.name, t.target);
+    setTimeout(() => {
+      const msgEl = document.getElementById('campMsg');
+      if (msgEl && t.msg) msgEl.value = t.msg;
+    }, 60);
+  },
+  deleteUserTemplate(id){
+    if (!confirm('Supprimer cet élément ?')) return;
+    this.state.userTemplates = (this.state.userTemplates||[]).filter(x => x.id !== id);
+    this.save();
+    this.toast('🗑 Supprimé','info');
+    this.renderView();
   },
 
   downloadInvoicePdf(invoiceId){
