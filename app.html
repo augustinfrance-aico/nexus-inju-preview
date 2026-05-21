@@ -1369,8 +1369,7 @@ const I18N = {
     'profile.tab.catalog':'Catalogue','profile.tab.api':'API & intégrations',
     'profile.desc':'Description de ton entreprise','profile.data':'Data & archives',
     'profile.composition':'Composition / Équipe','profile.web':'Page web','profile.scrape':'🔍 Lire le site',
-    'profile.cat.add':'+ Ajouter un produit','profile.cat.nutri':'Nutri-score',
-    'profile.save':'💾 Sauvegarder le profil',
+    'profile.cat.add':'+ Ajouter un produit',    'profile.save':'💾 Sauvegarder le profil',
     // VACANCES SECTION
     'vac.title':'Mode vacances','vac.subtitle':'Configure tes absences en détail',
     'vac.config.title':'Configuration IA','vac.config.when':'Quand répondre',
@@ -1562,8 +1561,7 @@ const I18N = {
     'profile.tab.catalog':'Catálogo','profile.tab.api':'API & integraciones',
     'profile.desc':'Descripción de tu empresa','profile.data':'Data & archivos',
     'profile.composition':'Equipo / Composición','profile.web':'Página web','profile.scrape':'🔍 Leer el sitio',
-    'profile.cat.add':'+ Agregar un producto','profile.cat.nutri':'Nutri-score',
-    'profile.save':'💾 Guardar el perfil',
+    'profile.cat.add':'+ Agregar un producto',    'profile.save':'💾 Guardar el perfil',
     'vac.title':'Modo vacaciones','vac.subtitle':'Configura tus ausencias en detalle',
     'vac.config.title':'Configuración IA','vac.config.when':'Cuándo responder',
     'vac.config.how':'Cómo responder','vac.config.what':'Qué responder',
@@ -1745,8 +1743,7 @@ const I18N = {
     'profile.tab.catalog':'Catalog','profile.tab.api':'API & integrations',
     'profile.desc':'Your business description','profile.data':'Data & archives',
     'profile.composition':'Team / Composition','profile.web':'Website','profile.scrape':'🔍 Read the site',
-    'profile.cat.add':'+ Add a product','profile.cat.nutri':'Nutri-score',
-    'profile.save':'💾 Save profile',
+    'profile.cat.add':'+ Add a product',    'profile.save':'💾 Save profile',
     'vac.title':'Vacation mode','vac.subtitle':'Configure your absences in detail',
     'vac.config.title':'AI configuration','vac.config.when':'When to reply',
     'vac.config.how':'How to reply','vac.config.what':'What to reply',
@@ -3967,10 +3964,6 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
         </div>
         <textarea class="form-ctrl" rows="2" style="margin-bottom:6px;font-size:11px" placeholder="Ingrédients / composition" onchange="Nx.state.business.catalog[${i}].ingredients=this.value;Nx.save()">${p.ingredients||''}</textarea>
         <input class="form-ctrl" style="font-size:11px;margin-bottom:6px" placeholder="Allergènes (Gluten, Lait…)" value="${p.allergens||''}" onchange="Nx.state.business.catalog[${i}].allergens=this.value;Nx.save()">
-        <div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Nutri-Score</div>
-        <div class="nutri-grid">
-          ${['A','B','C','D','E'].map(n => `<div class="nutri-cell nutri-${n} ${p.nutriScore===n?'on':''}" onclick="Nx.state.business.catalog[${i}].nutriScore='${n}';Nx.save();Nx.renderView()">${n}</div>`).join('')}
-        </div>
         <button class="btn-g" style="margin-top:10px;width:100%" onclick="Nx.removeProduct(${i})">🗑 Retirer</button>
       </div>`;
   },
@@ -8081,9 +8074,23 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           <div class="vac-card" style="grid-column:span 2">
             <h3>💬 Message auto · 1er message uniquement</h3>
             <div class="sub">C'est le <b>tout premier message</b> envoyé quand un client te contacte pendant ton absence. <b>Les suivantes</b>, l'IA répond directement en s'inspirant de ton profil entreprise (catalogue, horaires, FAQ).</div>
+            <!-- SUGGESTIONS rapides (Augustin 21/05/2026) -->
+            <div style="margin:10px 0 8px">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px">✨ Suggestions — clique pour utiliser</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                ${[
+                  {lbl:'🥖 Chaleureux LATAM (ES)', txt:'¡Hola [NOM]! 🥖 Estoy fuera unos días, vuelvo el [DATE]. Mientras tanto, mi asistente Nexus puede ayudarte con horarios, precios, productos disponibles y pedidos simples. Para urgencias: [TEL]. ¡Gracias por tu paciencia! 🙏'},
+                  {lbl:'⚡ Court & pro (ES)', txt:'¡Hola! Fuera del 21/05 al [DATE]. Nexus IA responde por mí: horarios, catálogo, disponibilidad. Urgencias: [TEL]. ¡Te respondo a mi vuelta!'},
+                  {lbl:'🌍 Multilingue auto (ES+EN)', txt:'¡Hola! 👋 Estoy fuera hasta el [DATE]. Mi asistente Nexus responde en español, inglés y francés. Para urgencias: [TEL].\\n\\nHi! Away until [DATE]. My Nexus assistant replies in Spanish, English and French. Emergencies: [TEL].'},
+                  {lbl:'🎉 Pro événements (ES)', txt:'¡Hola [NOM]! Estoy fuera hasta el [DATE], pero Nexus puede confirmar disponibilidad, precios y armar tu pre-cotización para eventos. Para confirmar y firmar el presupuesto, te contacto apenas vuelva. Urgencias: [TEL].'},
+                  {lbl:'😊 Simple FR', txt:'Bonjour [NOM] ! 👋 Je suis absent jusqu\\'au [DATE]. Mon assistante IA Nexus peut répondre à vos questions sur les horaires, les prix et la disponibilité. Pour toute urgence : [TEL]. À très vite !'}
+                ].map(s => `<button type="button" style="padding:6px 12px;font-size:11.5px;background:var(--bg2);border:1px solid var(--line);border-radius:999px;cursor:pointer;color:var(--ink2);font-family:inherit;transition:all .15s" onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)';this.style.background='var(--blue-soft)'" onmouseout="this.style.borderColor='var(--line)';this.style.color='var(--ink2)';this.style.background='var(--bg2)'" onclick="Nx.applyVacMsgSuggestion('${s.txt.replace(/'/g,'&#39;').replace(/"/g,'&quot;')}')">${s.lbl}</button>`).join('')}
+                <button type="button" style="padding:6px 12px;font-size:11.5px;background:linear-gradient(135deg,#1A56DB,#7A3CFF);color:#fff;border:0;border-radius:999px;cursor:pointer;font-weight:700;font-family:inherit" onclick="Nx.suggestVacMsgAI()">✨ Générer via IA</button>
+              </div>
+            </div>
             <div class="form-row">
               <label class="form-lbl">📝 Ton 1er message d'absence</label>
-              <textarea class="form-ctrl" rows="5" oninput="Nx.updateVac('msgShort',this.value)" placeholder="Hola! Estoy fuera unos días, vuelvo el [DATE]. Mientras tanto, mi asistente IA Nexus puede te ayudar para horarios, productos, comandos…">${v.msgShort||''}</textarea>
+              <textarea id="vacMsgShortTA" class="form-ctrl" rows="5" oninput="Nx.updateVac('msgShort',this.value)" placeholder="Hola! Estoy fuera unos días, vuelvo el [DATE]. Mientras tanto, mi asistente IA Nexus puede te ayudar para horarios, productos, comandos…">${v.msgShort||''}</textarea>
               <div style="margin-top:8px;font-size:11px;color:var(--muted)">💡 Balises : <code>[DATE]</code> (date de retour), <code>[NOM]</code> (nom du client), <code>[TEL]</code> (téléphone d'urgence)</div>
             </div>
             <div style="margin-top:14px;padding:12px 14px;background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1px solid #86EFAC;border-radius:10px;font-size:12px;color:#14532D">
@@ -8259,6 +8266,40 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     if (!vac.cfg_what_topics) vac.cfg_what_topics = {};
     vac.cfg_what_topics[topicKey] = checked;
     localStorage.setItem('nexus_vacances', JSON.stringify(vac));
+  },
+
+  // Applique un template pré-écrit dans le textarea du 1er message vacances (Augustin 21/05/2026)
+  applyVacMsgSuggestion(txt){
+    const decoded = (txt||'').replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/\\n/g,'\n');
+    const ta = document.getElementById('vacMsgShortTA');
+    if (ta) ta.value = decoded;
+    this.updateVac('msgShort', decoded);
+    this.toast('✓ Suggestion appliquée','success','Modifie librement avant d\'activer');
+  },
+
+  // Génère un message d'absence personnalisé via Groq (utilise profil entreprise)
+  async suggestVacMsgAI(){
+    const ta = document.getElementById('vacMsgShortTA');
+    if (!ta) return;
+    const orig = ta.value;
+    ta.value = '✨ Nexus rédige un message adapté à ton entreprise…';
+    ta.disabled = true;
+    const b = this.state.business || {};
+    const prompt = `Tu es Nexus, IA assistante d'une PME LATAM. Rédige UN message d'absence court (max 3 phrases) en espagnol, chaleureux et professionnel, pour un client qui contacte la boutique pendant l'absence du propriétaire. Contexte : entreprise "${b.name||'PME'}", ville ${b.city||'Santiago'}, type ${b.description||'commerce local'}. Utilise les balises [DATE] et [TEL]. Mentionne que l'IA assistante peut répondre aux questions courantes. Réponds UNIQUEMENT avec le texte du message, rien d'autre.`;
+    try {
+      const r = await fetch('/api/claude', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ question: prompt }) });
+      const data = await r.json();
+      const answer = (data.answer||'').trim().replace(/^["«]|["»]$/g,'');
+      if (!answer) throw new Error('vide');
+      ta.value = answer;
+      this.updateVac('msgShort', answer);
+      this.toast('✨ Message généré via IA','success', 'Modifie librement avant d\'activer');
+    } catch(e) {
+      ta.value = orig;
+      this.toast('❌ Génération échouée','warn');
+    } finally {
+      ta.disabled = false;
+    }
   },
 
   updateVac(key, value){

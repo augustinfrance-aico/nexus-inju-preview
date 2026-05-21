@@ -656,6 +656,15 @@ body{
 }
 
 /* ============ TOPBAR : sélecteur langue + bouton profil (Update 12 mai PDF) ============ */
+/* Bouton Réglages (Augustin 21/05/2026) */
+.settings-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 13px 8px 11px;border-radius:11px;background:var(--panel);border:1px solid var(--line);color:var(--ink2);cursor:pointer;font-size:12.5px;font-weight:600;font-family:inherit;transition:all .18s;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.settings-btn:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(0,229,255,.06);transform:translateY(-1px)}
+.settings-btn svg{width:16px;height:16px;transition:transform .4s}
+.settings-btn:hover svg{transform:rotate(60deg)}
+/* Toggle thème */
+.theme-toggle{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--panel);color:var(--ink2);cursor:pointer;transition:all .18s;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);padding:0}
+.theme-toggle:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-1px)}
+.theme-toggle svg{width:17px;height:17px}
 .lang-switcher{display:inline-flex;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:9px;padding:2px;gap:0}
 .lang-switcher .lang-btn{padding:5px 10px;border-radius:7px;border:0;background:transparent;color:var(--muted);font-size:11.5px;font-weight:700;letter-spacing:.05em;cursor:pointer;font-family:inherit;transition:all .15s}
 .lang-switcher .lang-btn:hover{color:var(--ink2)}
@@ -808,6 +817,16 @@ body{
     </div>
 
     <div class="top-actions">
+      <!-- Bouton Réglages (engrenage) à GAUCHE des langues (Augustin 21/05/2026) -->
+      <button class="settings-btn" id="settingsBtn" title="Réglages" aria-label="Réglages">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span data-i18n="top.settings">Réglages</span>
+      </button>
+      <!-- Toggle Thème (Soleil/Lune) -->
+      <button class="theme-toggle" id="themeToggle" title="Changer le thème" aria-label="Thème clair / sombre">
+        <svg id="themeSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg id="themeMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
       <!-- Sélecteur de langue (selon Update 12 mai PDF) -->
       <div class="lang-switcher" id="langSwitcher" data-i18n-title="top.lang.tooltip" title="Changer de langue">
         <button class="lang-btn on" data-lang="fr">FR</button>
@@ -2463,6 +2482,39 @@ body{
   document.getElementById('profileBtn').addEventListener('click', () => {
     location.href = 'app.html#/profile';
   });
+
+  // =========== Bouton Réglages — ouvre les settings (Augustin 21/05/2026)
+  const settingsBtn = document.getElementById('settingsBtn');
+  if (settingsBtn) {
+    settingsBtn.addEventListener('click', () => {
+      location.href = 'app.html#/profile';
+    });
+  }
+
+  // =========== Toggle thème clair / sombre (Augustin 21/05/2026)
+  // Light theme par défaut — sauvegardé dans localStorage
+  const savedTheme = localStorage.getItem('nexus_theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  const sun = document.getElementById('themeSun');
+  const moon = document.getElementById('themeMoon');
+  const updateThemeIcons = (theme) => {
+    if (sun && moon) {
+      sun.style.display = (theme === 'light') ? '' : 'none';
+      moon.style.display = (theme === 'light') ? 'none' : '';
+    }
+  };
+  updateThemeIcons(savedTheme);
+  const themeToggle = document.getElementById('themeToggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme') || 'light';
+      const next = (cur === 'light') ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('nexus_theme', next);
+      updateThemeIcons(next);
+      showToast(next === 'light' ? '☀️ Thème clair' : '🌙 Thème sombre');
+    });
+  }
 
   // =========== Audio : contrôles vitesse + toggle pause amélioré (Update 12 mai PDF)
   // Ajoute des boutons vitesse à côté du mic existant
