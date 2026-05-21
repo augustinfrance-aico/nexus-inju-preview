@@ -438,8 +438,10 @@ body{
   z-index:201;padding:24px 22px;
   display:flex;flex-direction:column;
   transition:right .35s cubic-bezier(.2,.8,.2,1);
-  overflow-y:auto;
+  overflow-y:auto;overflow-x:hidden;
+  scrollbar-width:none;-ms-overflow-style:none;
 }
+.drawer::-webkit-scrollbar{width:0;height:0;display:none}
 .drawer.show{right:0}
 .drawer-head{
   display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px;
@@ -487,8 +489,10 @@ body{
   max-width:560px;width:100%;padding:0;
   box-shadow:0 30px 80px -20px rgba(0,0,0,.6);
   position:relative;animation:slideUp .3s cubic-bezier(.2,.8,.2,1);
-  max-height:90vh;overflow-y:auto;
+  max-height:90vh;overflow-y:auto;overflow-x:hidden;
+  scrollbar-width:none;-ms-overflow-style:none;
 }
+.modal::-webkit-scrollbar{width:0;height:0;display:none}
 @keyframes slideUp{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
 .modal-pad{padding:30px 28px}
 .modal-close{
@@ -670,7 +674,8 @@ body{
 .menus-iface-btn:hover{transform:translateY(-1px);box-shadow:0 14px 28px -8px rgba(122,60,255,.7) !important;border-color:transparent !important}
 .menus-overlay{position:fixed;inset:0;background:rgba(5,7,10,.65);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
 .menus-overlay.show{opacity:1;visibility:visible}
-.menus-card{background:linear-gradient(135deg,#0F1520 0%,#1A2335 100%);border:1px solid rgba(255,255,255,.1);border-radius:22px;max-width:920px;width:100%;max-height:90vh;overflow-y:auto;padding:24px;box-shadow:0 30px 70px -16px rgba(0,0,0,.55);color:#E8ECF3;position:relative;transform:scale(.95);transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.menus-card{background:linear-gradient(135deg,#0F1520 0%,#1A2335 100%);border:1px solid rgba(255,255,255,.1);border-radius:22px;max-width:920px;width:100%;max-height:90vh;overflow-y:auto;overflow-x:hidden;padding:24px;box-shadow:0 30px 70px -16px rgba(0,0,0,.55);color:#E8ECF3;position:relative;transform:scale(.95);transition:transform .25s cubic-bezier(.2,.8,.2,1);scrollbar-width:none;-ms-overflow-style:none}
+.menus-card::-webkit-scrollbar{width:0;height:0;display:none}
 .menus-overlay.show .menus-card{transform:scale(1)}
 .menus-card::before{content:"";position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;background:linear-gradient(135deg,#7A3CFF,#00E5FF);border-radius:24px;z-index:-1;opacity:.35}
 .menus-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.08)}
@@ -915,6 +920,7 @@ body{
       </div>
       <div class="advice-nav">
         <span class="advice-counter" id="adviceCounter">1 / 5</span>
+        <button class="advice-arrow" id="adviceRegen" data-i18n-title="advice.regen" title="Régénérer ce conseil avec l'IA" aria-label="Régénérer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg></button>
         <button class="advice-arrow" id="advicePrev" data-i18n-aria="advice.prev" aria-label="Précédent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
         <button class="advice-arrow" id="adviceNext" data-i18n-aria="advice.next" aria-label="Suivant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
       </div>
@@ -1081,10 +1087,16 @@ body{
           <p><b>Bon début de semaine. On garde le rythme.</b></p>
         </div>
       </div>
-      <button class="text-cta" id="textExpand">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        <span data-i18n="text.expand">Lire en entier</span>
-      </button>
+      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+        <button class="text-cta" id="textExpand" style="flex:1;min-width:140px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          <span data-i18n="text.expand">Lire en entier</span>
+        </button>
+        <button class="text-cta" id="textCopy" title="Copier le brief actif" style="flex:0 0 auto;padding:0 16px;background:rgba(0,229,255,.08);border-color:rgba(0,229,255,.25);color:#00E5FF">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <span data-i18n="text.copy">Copier</span>
+        </button>
+      </div>
     </div>
 
   </section>
@@ -1478,6 +1490,42 @@ body{
   let auto = setInterval(() => setCard(cur + 1), 9000);
   document.querySelector('.advice').addEventListener('mouseenter', () => clearInterval(auto));
 
+  // =========== Régénération conseil via Groq (Augustin 21/05/2026)
+  const aRegen = document.getElementById('adviceRegen');
+  if (aRegen) {
+    aRegen.addEventListener('click', async () => {
+      const card = cards[cur];
+      if (!card || aRegen.classList.contains('loading')) return;
+      const textEl = card.querySelector('.advice-text');
+      const ctxEl = card.querySelector('.advice-context span');
+      const original = textEl.innerHTML;
+      const ctxLabel = ctxEl ? ctxEl.textContent.trim() : 'business panaderia';
+      aRegen.classList.add('loading');
+      aRegen.style.opacity = '.55';
+      textEl.innerHTML = `<span style="opacity:.6;font-style:italic">✨ Nexus rédige un nouveau conseil…</span>`;
+      const langPrompt = {fr:'français',es:'español',en:'english'}[curLang] || 'français';
+      const prompt = `Tu es Nexus, IA business pour une PME LATAM (Pan de Maipo, panaderia familiale à Santiago Chile). Contexte du conseil actuel : "${ctxLabel}". Génère UN NOUVEAU conseil business court (max 2 phrases, en ${langPrompt}), différent du précédent, actionnable, avec 1 chiffre concret ou nom client si pertinent. Utilise <b>...</b> sur les mots-clés. Réponds UNIQUEMENT avec le texte du conseil, sans intro ni "voici" ni guillemets.`;
+      try {
+        const r = await fetch('/api/claude', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ question: prompt })
+        });
+        const data = await r.json();
+        let answer = (data.answer||'').trim().replace(/^["«]|["»]$/g,'').replace(/<\/?p>/g,'').trim();
+        if (!answer) throw new Error('vide');
+        textEl.innerHTML = answer;
+        showToast({fr:'✨ Conseil régénéré',es:'✨ Consejo regenerado',en:'✨ Advice regenerated'}[curLang]);
+      } catch(e){
+        textEl.innerHTML = original;
+        showToast({fr:'❌ Régénération échouée',es:'❌ Regeneración fallida',en:'❌ Regeneration failed'}[curLang]);
+      } finally {
+        aRegen.classList.remove('loading');
+        aRegen.style.opacity = '';
+      }
+    });
+  }
+
   // =========== Brief audio + texte (mode tabs)
   const dayDur = 138, weekDur = 312;
   let curMode = { audio: 'day', text: 'day' };
@@ -1611,6 +1659,42 @@ body{
     e.currentTarget.lastChild.textContent = tb.classList.contains('expanded') ? ' Réduire' : ' Lire en entier';
   });
 
+  // Copier le brief actif (jour OU semaine selon onglet) — Augustin 21/05/2026
+  const textCopyBtn = document.getElementById('textCopy');
+  if (textCopyBtn) {
+    textCopyBtn.addEventListener('click', async () => {
+      const active = document.querySelector('.text-content[data-mode="'+curMode.text+'"]');
+      if (!active) return;
+      const txt = active.innerText.trim();
+      const which = curMode.text === 'day'
+        ? ({fr:'Brief du jour',es:'Brief del día',en:'Daily brief'}[curLang]||'Brief du jour')
+        : ({fr:'Brief de la semaine',es:'Brief de la semana',en:'Weekly brief'}[curLang]||'Brief de la semaine');
+      try {
+        if (navigator.clipboard) await navigator.clipboard.writeText(txt);
+        else {
+          const ta = document.createElement('textarea');
+          ta.value = txt; document.body.appendChild(ta); ta.select();
+          document.execCommand('copy'); ta.remove();
+        }
+        const ic = textCopyBtn.querySelector('svg');
+        const lbl = textCopyBtn.querySelector('span');
+        const oldHTML = ic.outerHTML;
+        const oldLbl = lbl.textContent;
+        ic.outerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+        lbl.textContent = ({fr:'Copié !',es:'¡Copiado!',en:'Copied!'}[curLang]||'Copié !');
+        showToast(`📋 ${which} ${({fr:'copié dans le presse-papier',es:'copiado al portapapeles',en:'copied to clipboard'}[curLang]||'copié')}`);
+        setTimeout(() => {
+          const newIc = textCopyBtn.querySelector('svg');
+          if (newIc) newIc.outerHTML = oldHTML;
+          const newLbl = textCopyBtn.querySelector('span');
+          if (newLbl) newLbl.textContent = oldLbl;
+        }, 1800);
+      } catch(err) {
+        showToast({fr:'❌ Copie échouée',es:'❌ Copia fallida',en:'❌ Copy failed'}[curLang]||'Copy failed');
+      }
+    });
+  }
+
   // =========== Conseil Nexus : boutons fonctionnels (Point 3 PDF + Pilotage Nexus 19/05/2026)
   // Chaque action positive (send/schedule/enable) → push dans localStorage 'nx_agenda' + redirect /pilotage
   // Chaque action négative (skip/later) → push avec status 'cancelled' (visible dans onglet Annulé)
@@ -1628,6 +1712,187 @@ body{
   const _goPilotage = (tab) => {
     if (tab) try { localStorage.setItem('nx_pilotage_tab', tab); } catch(e){}
     setTimeout(() => { location.href = 'app.html#/pilotage'; }, 700);
+  };
+
+  // =========== POPUP "Voir les 5 chats" — propositions IA + accept/refuse + envoyer (Augustin 21/05/2026)
+  const PENDING_CHATS = [
+    { id:1, name:'María González', initials:'MG', color:'#FF6B6B', channel:'WhatsApp', time:'Hace 4 min',
+      message:'Hola Carlos, ¿tienes pan amasado disponible para mañana? Necesito 3 kilos para una reunión familiar 😊',
+      draft:'¡Hola María! Claro que sí, te guardo 3 kilos de pan amasado para mañana. ¿A qué hora te viene mejor pasar a buscarlo? 🥖' },
+    { id:2, name:'Diego Ramírez', initials:'DR', color:'#3B82F6', channel:'WhatsApp', time:'Hace 18 min',
+      message:'Gracias por la factura. ¿Aceptan transferencia bancaria?',
+      draft:'¡Sí, claro Diego! Te paso los datos bancarios por privado. Apenas confirmes la transferencia, despachamos tu pedido 🙏' },
+    { id:3, name:'Carmen López', initials:'CL', color:'#22C55E', channel:'WhatsApp', time:'Hace 1 h',
+      message:'Buenos días, ¿me podrías mandar los precios de las tortas de cumpleaños porfa?',
+      draft:'¡Buenos días Carmen! Te envío el catálogo de tortas con precios. Tenemos 12 sabores y entregamos a domicilio en Las Condes y Providencia 🎂' },
+    { id:4, name:'Javier Soto', initials:'JS', color:'#F59E0B', channel:'Instagram', time:'Hace 2 h',
+      message:'Vi tus fotos en Insta, hermosas tortas! ¿Hacen delivery a Providencia?',
+      draft:'¡Gracias Javier! Sí, hacemos delivery a Providencia todos los días excepto el lunes. Costo $3 500 CLP. ¿Para qué fecha la necesitarías? 💐' },
+    { id:5, name:'Ana Vidal', initials:'AV', color:'#8B5CFF', channel:'Email', time:'Hace 3 h',
+      message:'Cotización para evento corporativo 80 personas el 25 de abril.',
+      draft:'¡Hola Ana! Con gusto te preparo la cotización. Para 80 personas el 25/04, te sugiero nuestro pack corporativo (cafés + 3 tipos de tortas). Te mando el detalle por mail en 1 h ✉️' }
+  ];
+
+  const openPendingChatsPopup = () => {
+    let overlay = document.getElementById('chatsPopupOverlay');
+    if (overlay) { overlay.classList.add('show'); return; }
+    overlay = document.createElement('div');
+    overlay.id = 'chatsPopupOverlay';
+    overlay.className = 'menus-overlay';
+    overlay.innerHTML = `
+      <style>
+        .cpop-card{background:linear-gradient(135deg,#0F1520 0%,#1A2335 100%);border:1px solid rgba(255,255,255,.1);border-radius:22px;max-width:780px;width:100%;max-height:92vh;overflow-y:auto;overflow-x:hidden;padding:0;box-shadow:0 30px 70px -16px rgba(0,0,0,.55);color:#E8ECF3;position:relative;transform:scale(.95);transition:transform .25s cubic-bezier(.2,.8,.2,1);scrollbar-width:none;-ms-overflow-style:none}
+        .cpop-card::-webkit-scrollbar{width:0;height:0;display:none}
+        .menus-overlay.show .cpop-card{transform:scale(1)}
+        .cpop-card::before{content:"";position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;background:linear-gradient(135deg,#7A3CFF,#00E5FF);border-radius:24px;z-index:-1;opacity:.35}
+        .cpop-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:22px 24px 16px;border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:0;background:linear-gradient(135deg,#0F1520 0%,#1A2335 100%);z-index:2;border-radius:22px 22px 0 0}
+        .cpop-eyebrow{font-size:10.5px;color:#00E5FF;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+        .cpop-title{font-size:20px;font-weight:800;letter-spacing:-.01em;color:#fff;margin-top:4px}
+        .cpop-sub{font-size:12.5px;color:#B8C1CE;margin-top:4px}
+        .cpop-close{background:rgba(255,255,255,.12);color:#fff;border:0;cursor:pointer;width:34px;height:34px;border-radius:10px;font-size:14px;flex-shrink:0;transition:background .15s}
+        .cpop-close:hover{background:rgba(255,255,255,.22)}
+        .cpop-list{padding:18px 24px;display:flex;flex-direction:column;gap:14px}
+        .cpop-row{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 16px;transition:all .2s}
+        .cpop-row.refused{opacity:.4;border-color:rgba(255,107,107,.25)}
+        .cpop-row.accepted{border-color:rgba(30,255,142,.32);background:rgba(30,255,142,.03)}
+        .cpop-row.sent{opacity:.5;pointer-events:none}
+        .cpop-meta{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+        .cpop-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0}
+        .cpop-info{flex:1;min-width:0}
+        .cpop-info b{display:block;color:#fff;font-size:13.5px;font-weight:700}
+        .cpop-channel{font-size:11px;color:#8A94A6;letter-spacing:.04em}
+        .cpop-state{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:4px 8px;border-radius:6px}
+        .cpop-state.s-accepted{background:rgba(30,255,142,.18);color:#1EFF8E;border:1px solid rgba(30,255,142,.3)}
+        .cpop-state.s-refused{background:rgba(255,107,107,.18);color:#FF6B6B;border:1px solid rgba(255,107,107,.3)}
+        .cpop-state.s-sent{background:rgba(122,60,255,.22);color:#A88AFF;border:1px solid rgba(122,60,255,.35)}
+        .cpop-msg{background:rgba(255,255,255,.03);border-left:2px solid rgba(255,255,255,.15);padding:9px 11px;border-radius:6px;color:#B8C1CE;font-size:12.5px;line-height:1.5;margin-bottom:10px;font-style:italic}
+        .cpop-ai-lbl{font-size:10.5px;color:#00E5FF;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+        .cpop-ai-draft{width:100%;background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.18);border-radius:8px;padding:10px 12px;color:#E8ECF3;font-size:13px;line-height:1.5;font-family:inherit;resize:vertical;min-height:60px;outline:none;transition:border-color .15s}
+        .cpop-ai-draft:focus{border-color:rgba(0,229,255,.5)}
+        .cpop-actions{display:flex;align-items:center;gap:10px;margin-top:11px;flex-wrap:wrap}
+        .cpop-act-toggle{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);padding:6px 11px;border-radius:8px;cursor:pointer;font-size:12px;color:#B8C1CE;transition:all .15s;user-select:none}
+        .cpop-act-toggle:hover{background:rgba(255,255,255,.08)}
+        .cpop-act-toggle input{accent-color:#00E5FF}
+        .cpop-act-toggle.acc.on{background:rgba(30,255,142,.16);color:#1EFF8E;border-color:rgba(30,255,142,.32)}
+        .cpop-act-toggle.ref.on{background:rgba(255,107,107,.16);color:#FF6B6B;border-color:rgba(255,107,107,.32)}
+        .cpop-foot{padding:14px 24px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;gap:12px;background:rgba(15,21,32,.85);position:sticky;bottom:0;border-radius:0 0 22px 22px;flex-wrap:wrap}
+        .cpop-count{font-size:12px;color:#8A94A6}
+        .cpop-count b{color:#fff;font-weight:700}
+        .cpop-btn-group{display:flex;gap:8px}
+        .cpop-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#E8ECF3;font-size:12.5px;font-weight:600;padding:9px 16px;border-radius:9px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px}
+        .cpop-btn:hover{background:rgba(255,255,255,.12)}
+        .cpop-btn.primary{background:linear-gradient(135deg,#7A3CFF,#00E5FF);border:0;color:#0F1520;font-weight:800}
+        .cpop-btn.primary:hover{transform:translateY(-1px);box-shadow:0 12px 24px -8px rgba(0,229,255,.5)}
+        .cpop-btn.primary:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+        .cpop-empty{padding:60px 20px;text-align:center;color:#8A94A6;font-size:13px}
+      </style>
+      <div class="cpop-card" role="dialog" aria-modal="true">
+        <div class="cpop-hd">
+          <div>
+            <div class="cpop-eyebrow">Messagerie · Nexus IA</div>
+            <h2 class="cpop-title">📬 5 chats en attente</h2>
+            <div class="cpop-sub">Coche les réponses IA que tu valides, puis envoie. Tu peux modifier chaque brouillon avant.</div>
+          </div>
+          <button class="cpop-close" id="cpopClose" aria-label="Fermer">✕</button>
+        </div>
+        <div class="cpop-list" id="cpopList">
+          ${PENDING_CHATS.map(c => `
+            <div class="cpop-row accepted" data-chat-id="${c.id}" data-state="accepted">
+              <div class="cpop-meta">
+                <div class="cpop-avatar" style="background:${c.color}">${c.initials}</div>
+                <div class="cpop-info">
+                  <b>${c.name}</b>
+                  <span class="cpop-channel">${c.channel} · ${c.time}</span>
+                </div>
+                <span class="cpop-state s-accepted">✓ Accepté</span>
+              </div>
+              <div class="cpop-msg">"${c.message}"</div>
+              <div class="cpop-ai-lbl">✨ Réponse proposée par l'IA — modifiable</div>
+              <textarea class="cpop-ai-draft" data-chat-draft="${c.id}">${c.draft}</textarea>
+              <div class="cpop-actions">
+                <label class="cpop-act-toggle acc on"><input type="checkbox" data-act="accept" data-chat-id="${c.id}" checked> Accepter</label>
+                <label class="cpop-act-toggle ref"><input type="checkbox" data-act="refuse" data-chat-id="${c.id}"> Refuser</label>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="cpop-foot">
+          <div class="cpop-count"><b id="cpopAccCount">5</b>/${PENDING_CHATS.length} acceptés · <b id="cpopRefCount">0</b> refusés</div>
+          <div class="cpop-btn-group">
+            <button class="cpop-btn" id="cpopCancel">Fermer</button>
+            <button class="cpop-btn primary" id="cpopSend">📨 Envoyer les acceptés</button>
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add('show'));
+
+    const close = () => {
+      overlay.classList.remove('show');
+      setTimeout(() => { try { overlay.remove(); } catch(e){} }, 260);
+    };
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+    overlay.querySelector('#cpopClose').addEventListener('click', close);
+    overlay.querySelector('#cpopCancel').addEventListener('click', close);
+
+    const refreshCount = () => {
+      const accs = overlay.querySelectorAll('.cpop-row[data-state="accepted"]').length;
+      const refs = overlay.querySelectorAll('.cpop-row[data-state="refused"]').length;
+      overlay.querySelector('#cpopAccCount').textContent = accs;
+      overlay.querySelector('#cpopRefCount').textContent = refs;
+      const sendBtn = overlay.querySelector('#cpopSend');
+      sendBtn.textContent = accs > 0 ? `📨 Envoyer ${accs} réponse${accs>1?'s':''}` : '📨 Envoyer les acceptés';
+      sendBtn.disabled = accs === 0;
+    };
+
+    overlay.querySelectorAll('input[type="checkbox"][data-act]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const row = cb.closest('.cpop-row');
+        const id = cb.dataset.chatId;
+        const act = cb.dataset.act;
+        const otherAct = act === 'accept' ? 'refuse' : 'accept';
+        const otherCb = overlay.querySelector(`input[data-act="${otherAct}"][data-chat-id="${id}"]`);
+        if (cb.checked && otherCb) otherCb.checked = false;
+        const accCb = overlay.querySelector(`input[data-act="accept"][data-chat-id="${id}"]`);
+        const refCb = overlay.querySelector(`input[data-act="refuse"][data-chat-id="${id}"]`);
+        const accLbl = row.querySelector('.cpop-act-toggle.acc');
+        const refLbl = row.querySelector('.cpop-act-toggle.ref');
+        accLbl.classList.toggle('on', accCb.checked);
+        refLbl.classList.toggle('on', refCb.checked);
+        const chip = row.querySelector('.cpop-state');
+        row.classList.remove('accepted','refused');
+        chip.classList.remove('s-accepted','s-refused','s-sent');
+        if (accCb.checked) { row.classList.add('accepted'); row.dataset.state='accepted'; chip.classList.add('s-accepted'); chip.textContent='✓ Accepté'; }
+        else if (refCb.checked) { row.classList.add('refused'); row.dataset.state='refused'; chip.classList.add('s-refused'); chip.textContent='✕ Refusé'; }
+        else { row.dataset.state='neutral'; chip.textContent='⏸ En attente'; }
+        refreshCount();
+      });
+    });
+
+    overlay.querySelector('#cpopSend').addEventListener('click', () => {
+      const accRows = overlay.querySelectorAll('.cpop-row[data-state="accepted"]');
+      if (accRows.length === 0) return;
+      let sent = 0;
+      accRows.forEach((row, i) => {
+        setTimeout(() => {
+          row.classList.remove('accepted'); row.classList.add('sent');
+          const chip = row.querySelector('.cpop-state');
+          chip.classList.remove('s-accepted'); chip.classList.add('s-sent');
+          chip.textContent = '📨 Envoyé';
+          sent++;
+          if (sent === accRows.length) {
+            const langTxt = {fr:`✅ ${sent} réponse${sent>1?'s':''} envoyée${sent>1?'s':''} aux clients`, es:`✅ ${sent} respuesta${sent>1?'s':''} enviada${sent>1?'s':''} a clientes`, en:`✅ ${sent} repl${sent>1?'ies':'y'} sent to customers`}[curLang] || `✅ ${sent} envoyés`;
+            showToast(langTxt);
+            try {
+              const agenda = JSON.parse(localStorage.getItem('nx_agenda')||'[]');
+              agenda.push({ id:'agd_'+Date.now()+'_chats', icon:'✅', title:{fr:`${sent} chat${sent>1?'s':''} validé${sent>1?'s':''} via popup IA`,es:`${sent} chat${sent>1?'s':''} validado${sent>1?'s':''} vía popup IA`,en:`${sent} chat${sent>1?'s':''} validated via AI popup`}[curLang]||`${sent} chats sent`, detail:'', when:{fr:'À l\\'instant',es:'Ahora mismo',en:'Just now'}[curLang]||'now', status:'done', category:'inbox', createdAt:new Date().toISOString() });
+              localStorage.setItem('nx_agenda', JSON.stringify(agenda));
+            } catch(e){}
+            setTimeout(close, 1500);
+          }
+        }, i * 220);
+      });
+    });
   };
   document.querySelectorAll('[data-advice-action]').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -1650,8 +1915,8 @@ body{
           btn.closest('.advice-card').style.opacity = '0.4';
           showToast({fr:'❌ Conseil ignoré', es:'❌ Consejo ignorado', en:'❌ Advice skipped'}[curLang]);
         },
-        // Card 2 : 5 chats en attente
-        'see-chats': () => location.href = 'app.html#/inbox',
+        // Card 2 : 5 chats en attente — popup avec propositions IA (Augustin 21/05/2026)
+        'see-chats': () => openPendingChatsPopup(),
         'validate-all': () => {
           _addAgendaItem({ icon:'✅', title:{fr:'Validation 4 brouillons IA',es:'Validación 4 borradores IA',en:'Validate 4 AI drafts'}[curLang], detail:{fr:'4 chats validés · 1 à vérifier manuellement',es:'4 chats validados · 1 por verificar manualmente',en:'4 chats validated · 1 to check manually'}[curLang], when:{fr:'À l\'instant',es:'Ahora mismo',en:'Just now'}[curLang], status:'done', category:'inbox' });
           showToast({fr:'✅ Validés · ouverture Pilotage Nexus…', es:'✅ Validados · abriendo Pilotaje Nexus…', en:'✅ Validated · opening Nexus Pilot…'}[curLang]);
