@@ -7929,7 +7929,29 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
             </div>
             <div class="form-row" style="margin-bottom:0">
               <label class="form-lbl">💬 Quoi répondre (sujets autorisés)</label>
-              <textarea class="form-ctrl" rows="3" placeholder="Ex : Horaires, prix du catalogue, disponibilité produits, commandes simples. Ne PAS donner d'engagement sur les gros événements." oninput="Nx.updateVac('cfg_what_text',this.value)">${v.cfg_what_text||''}</textarea>
+              <!-- Cases à cocher pour aider l'IA (Augustin 21/05/2026) -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;padding:12px;background:var(--bg2);border-radius:10px;border:1px solid var(--line)">
+                ${[
+                  {k:'horaires',  l:'🕐 Horaires d\'ouverture'},
+                  {k:'prix',      l:'💰 Prix du catalogue'},
+                  {k:'dispo',     l:'📦 Disponibilité produits'},
+                  {k:'commandes', l:'🛒 Commandes simples (< 5 unités)'},
+                  {k:'livraison', l:'🚚 Infos livraison + zones'},
+                  {k:'paiement',  l:'💳 Modes de paiement'},
+                  {k:'localisation',l:'📍 Adresse boutique'},
+                  {k:'allergenes',l:'🥜 Ingrédients / allergènes'},
+                  {k:'evenements',l:'🎉 Devis événements (gros volumes)'},
+                  {k:'reclamations',l:'⚠️ Réclamations / litiges'}
+                ].map(opt => {
+                  const checked = (v.cfg_what_topics||{})[opt.k] !== false;
+                  return `<label style="display:flex;align-items:center;gap:7px;padding:5px;font-size:12.5px;cursor:pointer;border-radius:5px;transition:background .15s" onmouseover="this.style.background='var(--panel)'" onmouseout="this.style.background='transparent'">
+                    <input type="checkbox" ${checked?'checked':''} onchange="Nx.updateVacTopic('${opt.k}',this.checked)" style="cursor:pointer;accent-color:var(--blue)">
+                    <span>${opt.l}</span>
+                  </label>`;
+                }).join('')}
+              </div>
+              <textarea class="form-ctrl" rows="2" placeholder="Précisions libres : nuances, exceptions, sujets spécifiques à ton métier…" oninput="Nx.updateVac('cfg_what_text',this.value)">${v.cfg_what_text||''}</textarea>
+              <small style="color:var(--muted);font-size:11px;display:block;margin-top:4px">L'IA reçoit la liste des sujets cochés <b>+ tes précisions libres</b>. Les sujets décochés sont explicitement interdits.</small>
             </div>
           </div>
 
@@ -8227,6 +8249,16 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       lang:'auto',
       perm_orders:false, perm_prices:true, perm_calendar:true, perm_escalate:true, perm_promo:false
     };
+  },
+
+  // Toggle d'un sujet autorisé dans le mode vacances (Augustin 21/05/2026)
+  updateVacTopic(topicKey, checked){
+    let vac = {};
+    try { vac = JSON.parse(localStorage.getItem('nexus_vacances') || 'null') || this.defaultVacances(); }
+    catch(e){ vac = this.defaultVacances(); }
+    if (!vac.cfg_what_topics) vac.cfg_what_topics = {};
+    vac.cfg_what_topics[topicKey] = checked;
+    localStorage.setItem('nexus_vacances', JSON.stringify(vac));
   },
 
   updateVac(key, value){
