@@ -6458,13 +6458,34 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           </div>
         </div>
 
-        <!-- CAMPAGNES AUTO -->
+        <!-- CAMPAGNES AUTO (3 par défaut + custom-* créées via builder — Augustin 21/05/2026) -->
         <div class="card" style="margin-bottom:16px">
           <div class="card-hd"><h3>🤖 Campagnes automatiques</h3><div class="actions"><button class="btn-p" onclick="Nx.openAutoCampaign()">+ Nouvelle auto</button></div></div>
           <div class="card-body">
             ${this.renderAutoCampaign('promo-fin-mois','📅','#22C55E','Promo fin de mois — −15 %','Déclenchée le 28 de chaque mois · cible Récurrents · 2 derniers jours','active')}
             ${this.renderAutoCampaign('anniv-clients','🎂','#F59E0B','Anniversaires clients','La veille à 9h · cible chaque client · code promo personnalisé','active')}
             ${this.renderAutoCampaign('recovery-lost','💔','#EF4444','Récupération clients perdus','Quand silence > 45 j · cible Perdus · message chaleureux + −10 %', this.state.recoveryStatus || 'paused')}
+            ${(() => {
+              // Render les campagnes auto custom créées par l'utilisateur via '+ Nouvelle auto'
+              const details = this.state.autoCampaignDetails || {};
+              const defaults = ['promo-fin-mois','anniv-clients','recovery-lost'];
+              const customIds = Object.keys(details).filter(id => !defaults.includes(id));
+              if (!customIds.length) return '';
+              // Couleurs cycliques par catégorie de trigger
+              const triggerStyle = {
+                monthly:  { ic:'📆', col:'#2E7BFF' },
+                weekly:   { ic:'🗓️', col:'#7A3CFF' },
+                birthday: { ic:'🎂', col:'#F59E0B' },
+                silence:  { ic:'💤', col:'#EF4444' },
+                weather:  { ic:'☔', col:'#06B6D4' },
+                stat:     { ic:'📊', col:'#EC4899' }
+              };
+              return customIds.map(id => {
+                const det = details[id];
+                const s = triggerStyle[det.trigger] || { ic:'🤖', col:'#1A56DB' };
+                return this.renderAutoCampaign(id, s.ic, s.col, det.name || 'Campagne sans nom', '', 'active');
+              }).join('');
+            })()}
           </div>
         </div>
 
