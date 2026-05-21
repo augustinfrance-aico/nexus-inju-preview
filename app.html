@@ -1317,6 +1317,11 @@ const I18N = {
     'stats.brief.speed.title':'Vitesse de lecture (style WhatsApp)',
     'stats.brief.playpause':'Lecture / Pause',
     'stats.brief.stop':'Stop',
+    'brief.period.label':'Période :',
+    'brief.range.today':'Brief du jour',
+    'brief.range.7d':'7 derniers jours',
+    'brief.range.30d':'30 derniers jours',
+    'brief.range.always':'Depuis toujours',
     'stats.besthours.title':'🔥 Best Hours — quand tes clients écrivent',
     'stats.topq.title':'❓ Top questions — tendances',
     'stats.faq.week':'Semaine','stats.faq.month':'Mois','stats.faq.all':'Depuis toujours',
@@ -1510,6 +1515,11 @@ const I18N = {
     'stats.brief.speed.title':'Velocidad de lectura (estilo WhatsApp)',
     'stats.brief.playpause':'Reproducir / Pausa',
     'stats.brief.stop':'Stop',
+    'brief.period.label':'Período:',
+    'brief.range.today':'Brief del día',
+    'brief.range.7d':'Últimos 7 días',
+    'brief.range.30d':'Últimos 30 días',
+    'brief.range.always':'Desde siempre',
     'stats.besthours.title':'🔥 Mejores horas — cuando tus clientes escriben',
     'stats.topq.title':'❓ Top preguntas — tendencias',
     'stats.faq.week':'Semana','stats.faq.month':'Mes','stats.faq.all':'Desde siempre',
@@ -1688,6 +1698,11 @@ const I18N = {
     'stats.brief.speed.title':'Playback speed (WhatsApp style)',
     'stats.brief.playpause':'Play / Pause',
     'stats.brief.stop':'Stop',
+    'brief.period.label':'Period:',
+    'brief.range.today':'Today\'s brief',
+    'brief.range.7d':'Last 7 days',
+    'brief.range.30d':'Last 30 days',
+    'brief.range.always':'All time',
     'stats.besthours.title':'🔥 Best Hours — when your clients write',
     'stats.topq.title':'❓ Top questions — trends',
     'stats.faq.week':'Week','stats.faq.month':'Month','stats.faq.all':'All-time',
@@ -1923,6 +1938,7 @@ const DEFAULT_STATE = {
   crmCorrections: [], // { question, claudeAnswer, userCorrection, date }
   campaignHistory: [],
   statsRange: '30d', // 7d | 30d | always
+  briefRange: 'today', // today | 7d | 30d | always — Augustin 21/05/2026
   audioPlayState: { playing:false, speed: 1, paused: false },
   onboarding: [
     {id:'profile',label:'Remplir ton profil entreprise',done:true},
@@ -2036,6 +2052,7 @@ const Nx = {
     ensure('crmCorrections', []);
     ensure('campaignHistory', []);
     ensure('statsRange', '30d');
+    ensure('briefRange', 'today');
     ensure('audioPlayState', { playing:false, speed:1, paused:false });
     ensure('vacationDetails', DEFAULT_STATE.vacationDetails);
     ensure('apiKeys', DEFAULT_STATE.apiKeys);
@@ -5186,21 +5203,30 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           ${t('stats.note.revenue')}
         </div>
 
-        <!-- BRIEF AUDIO QUOTIDIEN AVEC PAUSE + VITESSE -->
-        <div class="audio-bar" style="margin-bottom:14px">
-          <button class="play-btn" id="briefPlayBtn" onclick="Nx.toggleBriefAudio()" title="${t('stats.brief.playpause')}">▶</button>
-          <div style="flex:1">
-            <div style="font-weight:700;font-size:13px">${t('stats.brief.title')}</div>
-            <div style="font-size:11px;color:var(--muted)">${t('stats.brief.sub')}</div>
+        <!-- BRIEF AUDIO MULTI-PÉRIODES (Augustin 21/05/2026) -->
+        <div style="background:linear-gradient(160deg,rgba(46,123,255,.08),rgba(122,60,255,.04));border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px">
+          <div class="audio-bar" style="margin:0;background:transparent;border:0;padding:0">
+            <button class="play-btn" id="briefPlayBtn" onclick="Nx.toggleBriefAudio()" title="${t('stats.brief.playpause')}">▶</button>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:700;font-size:13px" id="briefTitleDyn">🎙 ${t('brief.range.'+(this.state.briefRange||'today'))}</div>
+              <div style="font-size:11px;color:var(--muted)" id="briefSubDyn">${t('stats.brief.sub')}</div>
+            </div>
+            <div class="speed-btns" title="${t('stats.brief.speed.title')}">
+              <button onclick="Nx.setAudioSpeed(0.75)" id="spd-slow" class="${(this.state.audioPlayState.speed||1)===0.75?'on':''}">0.75×</button>
+              <button onclick="Nx.setAudioSpeed(1)" id="spd-norm" class="${(this.state.audioPlayState.speed||1)===1?'on':''}">1×</button>
+              <button onclick="Nx.setAudioSpeed(1.5)" id="spd-fast" class="${(this.state.audioPlayState.speed||1)===1.5?'on':''}">1.5×</button>
+              <button onclick="Nx.setAudioSpeed(2)" id="spd-2x" class="${(this.state.audioPlayState.speed||1)===2?'on':''}">2×</button>
+            </div>
+            <button class="btn btn-s" onclick="Nx.openBriefTextModal()" title="${t('stats.brief.seetext')}">${t('stats.brief.seetext')}</button>
+            <button class="icon-btn" onclick="Nx.stopBriefAudio()" title="${t('stats.brief.stop')}">⏹</button>
           </div>
-          <div class="speed-btns" title="${t('stats.brief.speed.title')}">
-            <button onclick="Nx.setAudioSpeed(0.75)" id="spd-slow" class="${(this.state.audioPlayState.speed||1)===0.75?'on':''}">0.75×</button>
-            <button onclick="Nx.setAudioSpeed(1)" id="spd-norm" class="${(this.state.audioPlayState.speed||1)===1?'on':''}">1×</button>
-            <button onclick="Nx.setAudioSpeed(1.5)" id="spd-fast" class="${(this.state.audioPlayState.speed||1)===1.5?'on':''}">1.5×</button>
-            <button onclick="Nx.setAudioSpeed(2)" id="spd-2x" class="${(this.state.audioPlayState.speed||1)===2?'on':''}">2×</button>
+          <div class="filter-bar" style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);gap:6px;flex-wrap:wrap">
+            <span style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700">${t('brief.period.label')}</span>
+            <button class="filter-pill ${(this.state.briefRange||'today')==='today'?'on':''}" onclick="Nx.setBriefRange('today')">${t('brief.range.today')}</button>
+            <button class="filter-pill ${this.state.briefRange==='7d'?'on':''}" onclick="Nx.setBriefRange('7d')">${t('brief.range.7d')}</button>
+            <button class="filter-pill ${this.state.briefRange==='30d'?'on':''}" onclick="Nx.setBriefRange('30d')">${t('brief.range.30d')}</button>
+            <button class="filter-pill ${this.state.briefRange==='always'?'on':''}" onclick="Nx.setBriefRange('always')">${t('brief.range.always')}</button>
           </div>
-          <button class="btn btn-s" onclick="Nx.openBriefTextModal()" title="${t('stats.brief.seetext')}">${t('stats.brief.seetext')}</button>
-          <button class="icon-btn" onclick="Nx.stopBriefAudio()" title="${t('stats.brief.stop')}">⏹</button>
         </div>
 
         <div class="grid2">
@@ -5483,6 +5509,49 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   openVocalBriefV2(){
     this.openModal('vocal-summary');
   },
+  // Helper texte brief par période × langue (Augustin 21/05/2026)
+  getBriefText(range, lang){
+    const r = range || (this.state.briefRange || 'today');
+    const L = lang || (this.state.lang || 'fr');
+    const dict = {
+      today: {
+        fr: "Salut Carlos, brief Nexus du jour. 47 conversations aujourd'hui, dont 12 automatisées. María González, ta cliente VIP, attend ta réponse. 3 clients à relancer cette semaine. Streak à 12 jours. Bonne journée !",
+        es: "Hola Carlos, brief Nexus del día. 47 conversaciones hoy, 12 automatizadas. María González, tu cliente VIP, espera tu respuesta. 3 clientes para reactivar esta semana. Racha de 12 días. ¡Buen día!",
+        en: "Hi Carlos, your Nexus brief for today. 47 conversations today, 12 automated. María González, your VIP client, is waiting for your reply. 3 clients to reach out to this week. 12-day streak. Have a great day!"
+      },
+      '7d': {
+        fr: "Brief des 7 derniers jours. 612 conversations gérées, plus 12 pour cent par rapport à la semaine précédente. 8 nouveaux clients dont 2 VIP. Taux de réponse 92 pour cent. Pic d'activité vendredi soir entre 17h et 19h. Les 3 questions les plus posées : prix des tortas, livraison Providencia, horaires samedi. Bonne dynamique, on garde le rythme.",
+        es: "Brief de los últimos 7 días. 612 conversaciones gestionadas, más 12 por ciento vs la semana anterior. 8 nuevos clientes, 2 VIP. Tasa de respuesta 92 por ciento. Pico viernes noche entre 17 y 19h. Las 3 preguntas más frecuentes: precio de tortas, entrega Providencia, horarios sábado. Buena dinámica, mantenemos el ritmo.",
+        en: "Last 7-day brief. 612 conversations handled, up 12 percent vs the previous week. 8 new clients, 2 VIP. 92 percent response rate. Peak Friday evening between 5 and 7 pm. Top 3 questions: cake prices, Providencia delivery, Saturday hours. Good momentum, keep it going."
+      },
+      '30d': {
+        fr: "Brief des 30 derniers jours. 2 840 conversations, plus 18 pour cent par rapport au mois précédent. 21 nouveaux clients dont 5 entrés en VIP. Taux de réponse moyen 94 pour cent. Temps moyen de réponse 2 minutes 18 secondes. Top question : prix des tortas. CA estimé 2 840 000 pesos chiliens. Pic vendredi soir confirmé. Mardi 14h-16h reste creux : à éviter pour les promos.",
+        es: "Brief de los últimos 30 días. 2 840 conversaciones, más 18 por ciento vs el mes anterior. 21 nuevos clientes, 5 pasaron a VIP. Tasa de respuesta media 94 por ciento. Tiempo medio de respuesta 2 minutos 18 segundos. Top pregunta: precio de tortas. Ingresos estimados 2 840 000 pesos chilenos. Pico viernes noche confirmado. Martes 14-16h queda flojo: evitar para promos.",
+        en: "Last 30-day brief. 2,840 conversations, up 18 percent vs the previous month. 21 new clients, 5 became VIP. 94 percent average response rate. Average response time 2 minutes 18 seconds. Top question: cake prices. Estimated revenue 2,840,000 Chilean pesos. Friday evening peak confirmed. Tuesday 2 to 4 pm stays slow: avoid for promos."
+      },
+      always: {
+        fr: "Bilan depuis le début. 24 380 conversations gérées avec Nexus, 342 clients dans le CRM dont 38 en VIP. Taux de réponse moyen 93 pour cent. Tu as économisé environ 280 heures de travail commercial sur cette période. Top 3 produits : empanadas, pan amasado, tortas de cumpleaños. Saisonnalité forte sur les anniversaires en mai-juin. Continue, c'est solide.",
+        es: "Balance desde el inicio. 24 380 conversaciones gestionadas con Nexus, 342 clientes en el CRM, 38 VIP. Tasa de respuesta media 93 por ciento. Ahorraste cerca de 280 horas de trabajo comercial en este período. Top 3 productos: empanadas, pan amasado, tortas de cumpleaños. Fuerte estacionalidad de cumpleaños en mayo-junio. Sigue así, está sólido.",
+        en: "All-time recap. 24,380 conversations handled with Nexus, 342 clients in the CRM, 38 VIP. 93 percent average response rate. You saved about 280 hours of sales work over this period. Top 3 products: empanadas, pan amasado, birthday cakes. Strong birthday seasonality in May and June. Keep going, it's solid."
+      }
+    };
+    return (dict[r] && dict[r][L]) || (dict[r] && dict[r].fr) || dict.today.fr;
+  },
+
+  setBriefRange(r){
+    this.state.briefRange = r;
+    this.save();
+    // Stop current playback (text change)
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+    this.state.audioPlayState.playing = false;
+    this.state.audioPlayState.paused = false;
+    const btn = document.getElementById('briefPlayBtn');
+    if (btn) btn.textContent = '▶';
+    this.renderView();
+    const lbl = {today:'Brief du jour','7d':'7 derniers jours','30d':'30 derniers jours',always:'Depuis toujours'}[r] || r;
+    this.toast('🎙 '+lbl,'info','Texte adapté à la période');
+  },
+
   toggleBriefAudio(){
     if (!('speechSynthesis' in window)) { this.toast('Synthèse vocale non supportée','warn'); return; }
     const btn = document.getElementById('briefPlayBtn');
@@ -5498,8 +5567,11 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       this.toast('▶ Reprise','info');
     } else {
       speechSynthesis.cancel();
-      const msg = new SpeechSynthesisUtterance("Salut Carlos, voici ton brief Nexus du jour. 47 conversations aujourd'hui, dont 12 automatisées. María González, ta cliente VIP, attend ta réponse. 3 clients à relancer cette semaine. Streak à 12 jours. Bonne journée !");
-      msg.lang = 'fr-FR';
+      const range = this.state.briefRange || 'today';
+      const lang = this.state.lang || 'fr';
+      const txt = this.getBriefText(range, lang);
+      const msg = new SpeechSynthesisUtterance(txt);
+      msg.lang = {fr:'fr-FR',es:'es-CL',en:'en-US'}[lang] || 'fr-FR';
       msg.rate = this.state.audioPlayState.speed || 1;
       msg.onend = () => {
         this.state.audioPlayState.playing = false;
@@ -5511,7 +5583,8 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       this.state.audioPlayState.playing = true;
       this.state.audioPlayState.paused = false;
       if (btn) btn.textContent = '⏸';
-      this.toast('🎙 Lecture','info','Vitesse '+(this.state.audioPlayState.speed||1)+'×');
+      const lbl = {today:'Aujourd\'hui','7d':'7j','30d':'30j',always:'Depuis toujours'}[range] || range;
+      this.toast('🎙 Lecture · '+lbl,'info','Vitesse '+(this.state.audioPlayState.speed||1)+'×');
     }
     this.save();
   },
@@ -5533,25 +5606,26 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     this.toast('🎙 Vitesse : '+s+'×','info');
   },
 
-  // POINT 5(b) — Modal "Voir le texte" du brief audio (FR/ES/EN selon langue active)
+  // Modal "Voir le texte" du brief audio — adapté à briefRange + langue (Augustin 21/05/2026)
   openBriefTextModal(){
     const ov = document.getElementById('modal-overlay');
     const mc = document.getElementById('modal-content');
     ov.classList.remove('hidden');
-    const briefByLang = {
-      fr: "Salut Carlos, voici ton brief Nexus du jour. 47 conversations aujourd'hui, dont 12 automatisées. María González, ta cliente VIP, attend ta réponse. 3 clients à relancer cette semaine. Streak à 12 jours. Bonne journée !",
-      es: "Hola Carlos, aquí tu brief Nexus del día. 47 conversaciones hoy, 12 automatizadas. María González, tu cliente VIP, espera tu respuesta. 3 clientes para reactivar esta semana. Racha de 12 días. ¡Buen día!",
-      en: "Hi Carlos, here's your Nexus brief for today. 47 conversations today, 12 of them automated. María González, your VIP client, is waiting for your reply. 3 clients to reach out to this week. 12-day streak. Have a great day!"
-    };
     const lang = (this.state.lang || 'fr');
-    const txt = briefByLang[lang] || briefByLang.fr;
+    const range = this.state.briefRange || 'today';
+    const txt = this.getBriefText(range, lang);
     const langLabel = {fr:'🇫🇷 Français', es:'🇪🇸 Español', en:'🇬🇧 English'}[lang] || '🇫🇷 Français';
-    // Store brief in a dataset so the copy button can read it safely
+    const rangeLabel = {
+      today: {fr:'Brief du jour',es:'Brief del día',en:'Today\'s brief'}[lang],
+      '7d':   {fr:'Brief 7 derniers jours',es:'Brief últimos 7 días',en:'Last 7 days brief'}[lang],
+      '30d':  {fr:'Brief 30 derniers jours',es:'Brief últimos 30 días',en:'Last 30 days brief'}[lang],
+      always: {fr:'Bilan depuis toujours',es:'Balance desde siempre',en:'All-time recap'}[lang]
+    }[range];
     this._currentBriefText = txt;
     mc.innerHTML = `
-      <div class="modal-hd"><h3>📝 Brief audio — transcription</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-hd"><h3>📝 ${rangeLabel}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
       <div class="modal-body">
-        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">${langLabel} · texte du brief audio</div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">${langLabel} · transcription audio</div>
         <div style="padding:16px;background:var(--bg2);border-radius:10px;font-size:13.5px;line-height:1.7;color:var(--ink2)" id="briefTextContent">${txt}</div>
       </div>
       <div class="modal-foot">
@@ -5585,7 +5659,11 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         </div>
         <div class="form-row">
           <label class="form-lbl">Période</label>
-          <select class="form-ctrl" id="pdfPeriod"><option>7 derniers jours</option><option selected>30 derniers jours</option><option>Depuis le début</option></select>
+          <select class="form-ctrl" id="pdfPeriod">
+            <option value="7d">7 derniers jours</option>
+            <option value="30d" selected>30 derniers jours</option>
+            <option value="always">Depuis le début</option>
+          </select>
         </div>
       </div>
       <div class="modal-foot">
@@ -5596,9 +5674,8 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
 
   generatePdf(){
     const scope = document.querySelector('input[name="pdfScope"]:checked')?.value || 'stats';
-    const period = document.getElementById('pdfPeriod')?.value || '30 derniers jours';
+    const period = document.getElementById('pdfPeriod')?.value || '30d';
     this.closeModal();
-    // Construit la zone de print
     const area = document.getElementById('print-area') || document.createElement('div');
     area.id = 'print-area';
     area.innerHTML = this.buildPdfReport(scope, period);
@@ -5608,56 +5685,93 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       window.print();
       setTimeout(() => { area.style.display = 'none'; }, 500);
     }, 100);
-    this.toast('📄 PDF en préparation…','info', scope+' · '+period);
+    const periodLbl = {'7d':'7 derniers jours','30d':'30 derniers jours','always':'Depuis le début'}[period] || period;
+    this.toast('📄 PDF en préparation…','info', scope+' · '+periodLbl);
   },
 
+  // PDF dynamique selon période (Augustin 21/05/2026)
   buildPdfReport(scope, period){
     const b = this.state.business;
     const date = new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+    const periodKey = ['7d','30d','always'].includes(period) ? period : '30d';
+    const periodLabel = {'7d':'7 derniers jours','30d':'30 derniers jours','always':'Depuis le début'}[periodKey];
+    // Données chiffrées par période — alignées avec viewStats() dataByRange
+    const data = {
+      '7d':     { conv:'612',    clients:8,   response:'92%', avgTime:'2:24', revenue:'690 000',  saved:'58',  prevLabel:'semaine précédente' },
+      '30d':    { conv:'2 840',  clients:21,  response:'94%', avgTime:'2:18', revenue:'2 840 000', saved:'248', prevLabel:'mois précédent' },
+      'always': { conv:'24 380', clients:342, response:'93%', avgTime:'2:21', revenue:'18 600 000', saved:'2 134', prevLabel:'à date' }
+    }[periodKey];
+    // Frequences top questions ajustées
+    const freqMul = {'7d':0.25, '30d':1, 'always':6.8}[periodKey];
     let html = `
       <div class="pdf-page">
         <div class="pdf-h1">📊 Rapport Nexus — ${b.name}</div>
-        <div class="pdf-meta">Généré le ${date} · Période : ${period} · ${b.city}, Chile</div>
+        <div class="pdf-meta">Généré le ${date} · Période : <b>${periodLabel}</b> · ${b.city}, Chile</div>
     `;
     if (scope === 'stats' || scope === 'all') {
       html += `
-        <div class="pdf-h2">📈 Métriques clés</div>
+        <div class="pdf-h2">📈 Métriques clés — ${periodLabel}</div>
         <div>
-          <div class="pdf-stat"><div class="v">2 840</div><div class="l">Conversations</div></div>
-          <div class="pdf-stat"><div class="v">21</div><div class="l">Nouveaux clients</div></div>
-          <div class="pdf-stat"><div class="v">94%</div><div class="l">Taux réponse</div></div>
-          <div class="pdf-stat"><div class="v">2:18</div><div class="l">Temps moyen</div></div>
+          <div class="pdf-stat"><div class="v">${data.conv}</div><div class="l">Conversations</div></div>
+          <div class="pdf-stat"><div class="v">${data.clients}</div><div class="l">Nouveaux clients</div></div>
+          <div class="pdf-stat"><div class="v">${data.response}</div><div class="l">Taux réponse</div></div>
+          <div class="pdf-stat"><div class="v">${data.avgTime}</div><div class="l">Temps moyen</div></div>
         </div>
-        <div class="pdf-h2">🔥 Best hours</div>
+        <div class="pdf-h2">💰 Estimation économique — ${periodLabel}</div>
         <ul style="font-size:12.5px;line-height:1.8;color:#0F172A">
-          <li><b>Vendredi 17h–19h</b> = pic absolu (60% du volume hebdo).</li>
-          <li>Clients silencieux le <b>lundi avant 11h</b> → privilégier vendredi 13h.</li>
-          <li>Trou : <b>mardi 14h–16h</b>, à éviter pour les promos.</li>
+          <li>CA estimé via conversations Nexus : <b>${data.revenue} CLP</b></li>
+          <li>Heures de travail commercial économisées : <b>~${data.saved} h</b></li>
+          <li>Comparaison : ${data.prevLabel}</li>
         </ul>
-        <div class="pdf-h2">❓ Top questions semaine</div>
+        <div class="pdf-h2">🔥 Best hours — ${periodLabel}</div>
+        <ul style="font-size:12.5px;line-height:1.8;color:#0F172A">
+          ${periodKey === '7d' ? `
+            <li><b>Vendredi 18h–19h</b> = pic de la semaine (37% du volume).</li>
+            <li>Mardi creux : 14h–16h.</li>
+            <li>Pic secondaire : samedi 11h–12h.</li>` :
+          periodKey === '30d' ? `
+            <li><b>Vendredi 17h–19h</b> = pic absolu (60% du volume hebdo).</li>
+            <li>Clients silencieux le <b>lundi avant 11h</b> → privilégier vendredi 13h.</li>
+            <li>Trou : <b>mardi 14h–16h</b>, à éviter pour les promos.</li>` : `
+            <li><b>Vendredi soir</b> = pic constant toute l'année (62% volume hebdo cumulé).</li>
+            <li>Saisonnalité forte : <b>mai–juin</b> (anniversaires), <b>décembre</b> (Noël).</li>
+            <li>Trou structurel : mardi 14h–16h et dimanche matin avant 11h.</li>`}
+        </ul>
+        <div class="pdf-h2">❓ Top questions ${periodKey==='7d'?'semaine':periodKey==='30d'?'mois':'depuis le début'}</div>
         <table class="pdf-table">
           <thead><tr><th>#</th><th>Question</th><th>Fréquence</th><th>Tendance</th></tr></thead>
-          <tbody>${this.state.analytics.topQuestions.map((q,i)=>`<tr><td>${i+1}</td><td>${q}</td><td>${40-i*6}×</td><td>${['↑','↓','↑','=','↓'][i]||'='}</td></tr>`).join('')}</tbody>
+          <tbody>${this.state.analytics.topQuestions.map((q,i)=>{
+            const freq = Math.max(1, Math.round((40-i*6) * freqMul));
+            return `<tr><td>${i+1}</td><td>${q}</td><td>${freq.toLocaleString('fr-FR').replace(/,/g,' ')}×</td><td>${['↑','↓','↑','=','↓'][i]||'='}</td></tr>`;
+          }).join('')}</tbody>
         </table>`;
     }
     if (scope === 'clients' || scope === 'all') {
-      const top = this.state.clients.sort((a,b)=>b.score-a.score).slice(0,10);
+      const limit = {'7d':5,'30d':10,'always':20}[periodKey] || 10;
+      const top = this.state.clients.sort((a,b)=>b.score-a.score).slice(0,limit);
+      const clientTitle = {'7d':'Top 5 clients actifs (7 derniers jours)','30d':'Top 10 clients (30 derniers jours)','always':'Top 20 clients (depuis le début)'}[periodKey];
       html += `
-        <div class="pdf-h2">👥 Top 10 clients</div>
+        <div class="pdf-h2">👥 ${clientTitle}</div>
         <table class="pdf-table">
           <thead><tr><th>Nom</th><th>Téléphone</th><th>Score</th><th>Commandes</th><th>CA cumulé</th></tr></thead>
           <tbody>${top.map(c=>`<tr><td>${c.name}</td><td>${c.phone}</td><td>${c.score}</td><td>${c.orders}</td><td>${c.spent.toLocaleString('es-CL')} CLP</td></tr>`).join('')}</tbody>
         </table>`;
     }
     if (scope === 'campaigns' || scope === 'all') {
+      // Filtre approximatif des campagnes par période (mock data — campaigns ont des dates string FR)
+      const allCamps = this.state.campaigns || [];
+      let camps = allCamps;
+      if (periodKey === '7d') camps = allCamps.slice(0, Math.min(3, allCamps.length));
+      else if (periodKey === '30d') camps = allCamps.slice(0, Math.min(8, allCamps.length));
+      const campTitle = {'7d':'Campagnes 7 derniers jours','30d':'Campagnes 30 derniers jours','always':'Toutes les campagnes envoyées'}[periodKey];
       html += `
-        <div class="pdf-h2">📢 Campagnes envoyées</div>
+        <div class="pdf-h2">📢 ${campTitle}</div>
         <table class="pdf-table">
           <thead><tr><th>Campagne</th><th>Date</th><th>Cible</th><th>Envoyés</th><th>Ouverts</th><th>Réponses</th><th>Taux</th></tr></thead>
-          <tbody>${this.state.campaigns.map(c=>`<tr><td>${c.name}</td><td>${c.date}</td><td>${c.audience}</td><td>${c.sent}</td><td>${c.opened}</td><td>${c.replied}</td><td>${c.sent>0?Math.round(c.opened/c.sent*100):0}%</td></tr>`).join('')}</tbody>
+          <tbody>${camps.length===0?`<tr><td colspan="7" style="text-align:center;color:#94A3B8">Aucune campagne sur cette période</td></tr>`:camps.map(c=>`<tr><td>${c.name}</td><td>${c.date}</td><td>${c.audience}</td><td>${c.sent}</td><td>${c.opened}</td><td>${c.replied}</td><td>${c.sent>0?Math.round(c.opened/c.sent*100):0}%</td></tr>`).join('')}</tbody>
         </table>`;
     }
-    html += `<div style="margin-top:40px;color:#94A3B8;font-size:11px;text-align:center;border-top:1px solid #E2E8F0;padding-top:14px">Rapport généré par Nexus · ${b.name} · nexus.app</div></div>`;
+    html += `<div style="margin-top:40px;color:#94A3B8;font-size:11px;text-align:center;border-top:1px solid #E2E8F0;padding-top:14px">Rapport généré par Nexus · ${b.name} · ${periodLabel} · nexus.app</div></div>`;
     return html;
   },
 
