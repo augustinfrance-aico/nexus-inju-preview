@@ -672,8 +672,8 @@ body{
 /* ============ POP-UP MENUS (selon Smart bell PDF) ============ */
 .menus-iface-btn{background:linear-gradient(135deg,#2E7BFF,#8B5CFF) !important;color:#fff !important;border:0 !important;box-shadow:0 8px 22px -8px rgba(122,60,255,.5) !important}
 .menus-iface-btn:hover{transform:translateY(-1px);box-shadow:0 14px 28px -8px rgba(122,60,255,.7) !important;border-color:transparent !important}
-.menus-overlay{position:fixed;inset:0;background:rgba(5,7,10,.65);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
-.menus-overlay.show{opacity:1;visibility:visible}
+.menus-overlay{position:fixed;inset:0;background:rgba(5,7,10,.65);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s,visibility .25s}
+.menus-overlay.show{opacity:1;visibility:visible;pointer-events:auto}
 .menus-card{background:linear-gradient(135deg,#0F1520 0%,#1A2335 100%);border:1px solid rgba(255,255,255,.1);border-radius:22px;max-width:920px;width:100%;max-height:90vh;overflow-y:auto;overflow-x:hidden;padding:24px;box-shadow:0 30px 70px -16px rgba(0,0,0,.55);color:#E8ECF3;position:relative;transform:scale(.95);transition:transform .25s cubic-bezier(.2,.8,.2,1);scrollbar-width:none;-ms-overflow-style:none}
 .menus-card::-webkit-scrollbar{width:0;height:0;display:none}
 .menus-overlay.show .menus-card{transform:scale(1)}
