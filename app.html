@@ -6961,18 +6961,18 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   openCampaignBuilder(templateName, presetSegment){
     this.openModal('ai-chat');
     const mc = document.getElementById('modal-content');
-    // Pastille couleur unifiée Augustin (sans emoji thématique, juste la pastille + le nom)
+    // Segments unifiés couleur (Augustin 21/05/2026) — Business ajouté, ordre cohérent partout
     const segOpts = [
-      {k:'vip',e:'🟡',n:'Clients VIP',c:this.state.clients.filter(x=>x.tags.includes('VIP')).length},
-      {k:'recurrent',e:'🔵',n:'Récurrents',c:this.state.clients.filter(x=>x.tag==='rec').length},
-      {k:'new',e:'🟢',n:'Nouveaux',c:this.state.clients.filter(x=>x.status==='prospect').length},
-      {k:'occ',e:'🟠',n:'Occasionnels',c:Math.round(this.state.clients.filter(x=>x.status==='active').length*0.3)},
-      {k:'lost',e:'🔴',n:'Perdus',c:this.state.clients.filter(x=>x.status==='lost').length},
-      {k:'biz',e:'🟣',n:'Business',c:this.state.clients.filter(x=>x.tag==='biz').length},
-      {k:'custom',e:'⚪',n:'Personnalisé (à la pince)',c:'sélection'}
+      {k:'vip',      n:'Clients VIP',                 col:'#F5C45E', c:this.state.clients.filter(x=>x.tags.includes('VIP')).length},
+      {k:'recurrent',n:'Récurrents',                  col:'#1A56DB', c:this.state.clients.filter(x=>x.tag==='rec').length},
+      {k:'biz',      n:'Business',                    col:'#7A3CFF', c:this.state.clients.filter(x=>(x.tags||[]).includes('Business')||x.tag==='biz').length},
+      {k:'new',      n:'Nouveaux',                    col:'#22C55E', c:this.state.clients.filter(x=>x.status==='prospect').length},
+      {k:'occ',      n:'Occasionnels',                col:'#F59E0B', c:Math.round(this.state.clients.filter(x=>x.status==='active').length*0.3)},
+      {k:'lost',     n:'Perdus',                      col:'#EF4444', c:this.state.clients.filter(x=>x.status==='lost').length},
+      {k:'custom',   n:'Personnalisé (à la pince)',   col:'#EC4899', c:'sélection'}
     ];
     this.state.customSegments.forEach((s,i) => {
-      segOpts.push({k:'custom_'+i, e:'🟣', n:s.name, c:s.clientIds.length});
+      segOpts.push({k:'custom_'+i, n:s.name, col:'#EC4899', c:s.clientIds.length});
     });
     const presetIdx = segOpts.findIndex(s => s.k === presetSegment);
     mc.innerHTML = `
@@ -6982,7 +6982,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           <input class="form-ctrl" id="campName" value="${templateName||'Promo pan amasado week-end'}"></div>
         <div class="form-row"><label class="form-lbl">Cibler par segment <span style="color:var(--muted);font-weight:400">· cohérent avec ton CRM</span></label>
           <select class="form-ctrl" id="campTarget" onchange="Nx.onCampTargetChange(this.value)">
-            ${segOpts.map((s,i)=>`<option value="${s.k}" ${i===(presetIdx>=0?presetIdx:1)?'selected':''}>${s.e} ${s.n} ${s.c!=='sélection'?'('+s.c+')':''}</option>`).join('')}
+            ${segOpts.map((s,i)=>`<option value="${s.k}" style="color:${s.col};font-weight:600" ${i===(presetIdx>=0?presetIdx:1)?'selected':''}>● ${s.n} ${s.c!=='sélection'?'('+s.c+')':''}</option>`).join('')}
           </select>
           <div id="customClientPicker" class="hidden" style="margin-top:10px;border:1px solid var(--violet);border-radius:8px;padding:10px;background:var(--violet-soft)">
             <div style="font-size:11px;font-weight:700;color:var(--violet);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">📌 Sélection à la pince</div>
