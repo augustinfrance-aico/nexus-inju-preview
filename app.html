@@ -1012,7 +1012,8 @@ window.NexusDynTranslate = (function(){
   const ORIG_ARIA = 'data-dyn-orig-aria';     // aria-label
   const ORIG_ALT = 'data-dyn-orig-alt';       // image alt
   const SKIP_SELECTOR = '[data-dyn-skip],[data-i18n],[data-i18n-html],[data-i18n-ph],[data-i18n-placeholder],[data-i18n-aria],[data-i18n-title]';
-  const SKIP_PARENT_SELECTOR = SKIP_SELECTOR + ',script,style,code,pre,svg';
+  const SKIP_PARENT_SELECTOR = SKIP_SELECTOR + ',script,style,code,pre';
+  /* Augustin 20/05 : retiré 'svg' du skip pour que les <text> graphiques Stats soient traduits */
   const SKIP_TEXT = /^(\s*[\d.,%€$£+\-×\/]+\s*[mhskg]?\w{0,3}\s*)$/i;
   const ONLY_EMOJI = /^[\s\p{Extended_Pictographic}‍️\d:.]+$/u;
   const PRESERVE = /^(Nexus|Carlos|María|Maria|Diego|Ana|Javier|Raviella|WhatsApp|Gmail|Calendar|Google|Claude|Stripe|Loom|Vercel|VIP|CRM|SOS|FAQ|API|PDF|CSV|empanadas|pan amasado|bolos|panadería|Providencia|Las Condes|Santiago|Pro|Business|Enterprise|Free|Chile|Chili)$/i;
@@ -2351,7 +2352,12 @@ const Nx = {
     d.className = 'toast ' + type;
     d.innerHTML = `<span class="i">${icons[type]||'💡'}</span><div class="toast-body"><b>${msg}</b>${body?`<small>${body}</small>`:''}</div>`;
     document.getElementById('toast-container').appendChild(d);
-    setTimeout(() => { d.style.opacity = '0'; d.style.transform = 'translateX(20px)'; setTimeout(()=>d.remove(), 300); }, 4000);
+    // Fix Augustin 20/05 : traduit auto le toast si lang ≠ fr (Groq gratuit)
+    const lang = (this.state && this.state.lang) || localStorage.getItem('nexus_core_lang') || 'fr';
+    if (lang !== 'fr' && window.NexusDynTranslate) {
+      setTimeout(() => { try { window.NexusDynTranslate.apply(lang); } catch(e){} }, 50);
+    }
+    setTimeout(() => { d.style.opacity = '0'; d.style.transform = 'translateX(20px)'; setTimeout(()=>d.remove(), 300); }, 5000);
   },
 
   openModal(type, data){
@@ -2751,6 +2757,11 @@ const Nx = {
         </div>`;
     }
     mc.innerHTML = html;
+    // Fix Augustin 20/05 : traduit auto le contenu du modal si lang ≠ fr
+    const lang = (this.state && this.state.lang) || localStorage.getItem('nexus_core_lang') || 'fr';
+    if (lang !== 'fr' && window.NexusDynTranslate) {
+      setTimeout(() => { try { window.NexusDynTranslate.apply(lang); } catch(e){} }, 80);
+    }
   },
 
   closeModal(){ document.getElementById('modal-overlay').classList.add('hidden'); },
