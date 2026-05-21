@@ -1920,6 +1920,17 @@ body{
     overlay.querySelector('#cpopSend').addEventListener('click', () => {
       const accRows = overlay.querySelectorAll('.cpop-row[data-state="accepted"]');
       if (accRows.length === 0) return;
+      // Collecte des messages à pousser vers Messagerie (Augustin 21/05/2026)
+      const toInject = [];
+      accRows.forEach(row => {
+        const id = parseInt(row.dataset.chatId);
+        const chat = PENDING_CHATS.find(c => c.id === id);
+        const ta = row.querySelector('.cpop-ai-draft');
+        const finalText = (ta && ta.value.trim()) || (chat && chat.draft) || '';
+        if (chat && finalText) {
+          toInject.push({ clientId: id, name: chat.name, channel: chat.channel, text: finalText, time: new Date().toISOString() });
+        }
+      });
       let sent = 0;
       accRows.forEach((row, i) => {
         setTimeout(() => {
@@ -1929,14 +1940,21 @@ body{
           chip.textContent = '📨 Envoyé';
           sent++;
           if (sent === accRows.length) {
-            const langTxt = {fr:`✅ ${sent} réponse${sent>1?'s':''} envoyée${sent>1?'s':''} aux clients`, es:`✅ ${sent} respuesta${sent>1?'s':''} enviada${sent>1?'s':''} a clientes`, en:`✅ ${sent} repl${sent>1?'ies':'y'} sent to customers`}[curLang] || `✅ ${sent} envoyés`;
+            const langTxt = {fr:`✅ ${sent} réponse${sent>1?'s':''} envoyée${sent>1?'s':''} · redirection vers Messagerie…`, es:`✅ ${sent} respuesta${sent>1?'s':''} enviada${sent>1?'s':''} · redirigiendo a Mensajería…`, en:`✅ ${sent} repl${sent>1?'ies':'y'} sent · redirecting to Inbox…`}[curLang] || `✅ ${sent} envoyés`;
             showToast(langTxt);
             try {
+              // Trace dans l'agenda Pilotage
               const agenda = JSON.parse(localStorage.getItem('nx_agenda')||'[]');
               agenda.push({ id:'agd_'+Date.now()+'_chats', icon:'✅', title:{fr:`${sent} chat${sent>1?'s':''} validé${sent>1?'s':''} via popup IA`,es:`${sent} chat${sent>1?'s':''} validado${sent>1?'s':''} vía popup IA`,en:`${sent} chat${sent>1?'s':''} validated via AI popup`}[curLang]||`${sent} chats sent`, detail:'', when:{fr:"À l'instant",es:'Ahora mismo',en:'Just now'}[curLang]||'now', status:'done', category:'inbox', createdAt:new Date().toISOString() });
               localStorage.setItem('nx_agenda', JSON.stringify(agenda));
+              // Stocke les messages à injecter dans les vraies conversations Inbox
+              localStorage.setItem('nx_inbox_recent_sent', JSON.stringify(toInject));
             } catch(e){}
-            setTimeout(close, 1500);
+            // Redirection vers Messagerie après animation
+            setTimeout(() => {
+              try { close(); } catch(e){}
+              location.href = 'app.html#/inbox';
+            }, 1100);
           }
         }, i * 220);
       });
