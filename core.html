@@ -665,6 +665,21 @@ body{
 .theme-toggle{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--panel);color:var(--ink2);cursor:pointer;transition:all .18s;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);padding:0}
 .theme-toggle:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-1px)}
 .theme-toggle svg{width:17px;height:17px}
+/* Lang dropdown compact (Augustin 21/05/2026) */
+.lang-dropdown{position:relative;display:inline-block}
+.lang-dd-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 9px 7px 10px;background:var(--panel);border:1px solid var(--line);border-radius:11px;cursor:pointer;color:var(--ink);font-size:12.5px;font-weight:700;font-family:inherit;transition:all .15s;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.lang-dd-btn:hover{border-color:var(--blue);color:var(--blue)}
+.lang-dd-flag{font-size:15px;line-height:1}
+.lang-dd-code{letter-spacing:.05em}
+.lang-dd-btn svg{width:11px;height:11px;opacity:.6;transition:transform .2s}
+.lang-dropdown.open .lang-dd-btn svg{transform:rotate(180deg)}
+.lang-dropdown.open .lang-dd-btn{border-color:var(--blue);color:var(--blue)}
+.lang-dd-menu{position:absolute;top:calc(100% + 6px);right:0;min-width:150px;background:var(--bg2);border:1px solid var(--line);border-radius:11px;padding:5px;box-shadow:0 18px 40px -10px rgba(0,0,0,.4);opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .15s,visibility .15s,transform .15s;z-index:160}
+.lang-dropdown.open .lang-dd-menu{opacity:1;visibility:visible;transform:translateY(0)}
+.lang-dd-item{display:flex;align-items:center;gap:10px;width:100%;padding:8px 12px;background:transparent;border:0;border-radius:7px;cursor:pointer;color:var(--ink2);font-size:13px;font-weight:600;font-family:inherit;text-align:left;transition:all .12s}
+.lang-dd-item span{font-size:16px;line-height:1}
+.lang-dd-item:hover{background:var(--panel2);color:var(--blue)}
+.lang-dd-item.on{background:linear-gradient(135deg,#2E7BFF22,#8B5CFF22);color:var(--blue)}
 .lang-switcher{display:inline-flex;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:9px;padding:2px;gap:0}
 .lang-switcher .lang-btn{padding:5px 10px;border-radius:7px;border:0;background:transparent;color:var(--muted);font-size:11.5px;font-weight:700;letter-spacing:.05em;cursor:pointer;font-family:inherit;transition:all .15s}
 .lang-switcher .lang-btn:hover{color:var(--ink2)}
@@ -827,11 +842,18 @@ body{
         <svg id="themeSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
         <svg id="themeMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
-      <!-- Sélecteur de langue (selon Update 12 mai PDF) -->
-      <div class="lang-switcher" id="langSwitcher" data-i18n-title="top.lang.tooltip" title="Changer de langue">
-        <button class="lang-btn on" data-lang="fr">FR</button>
-        <button class="lang-btn" data-lang="es">ES</button>
-        <button class="lang-btn" data-lang="en">EN</button>
+      <!-- Sélecteur de langue compact dropdown (Augustin 21/05/2026) -->
+      <div class="lang-dropdown" id="langDropdown">
+        <button type="button" class="lang-dd-btn" id="langDdBtn" title="Changer de langue" aria-label="Langue">
+          <span class="lang-dd-flag" id="langDdFlag">🇫🇷</span>
+          <span class="lang-dd-code" id="langDdCode">FR</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="lang-dd-menu" id="langDdMenu">
+          <button type="button" class="lang-dd-item" data-lang="fr"><span>🇫🇷</span> Français</button>
+          <button type="button" class="lang-dd-item" data-lang="es"><span>🇪🇸</span> Español</button>
+          <button type="button" class="lang-dd-item" data-lang="en"><span>🇬🇧</span> English</button>
+        </div>
       </div>
       <button class="notif" data-i18n-title="top.notif" data-i18n-aria="top.notif" title="Notifications" aria-label="Notifications">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -2470,6 +2492,32 @@ body{
   document.querySelectorAll('.lang-switcher .lang-btn').forEach(btn => {
     btn.addEventListener('click', () => applyLang(btn.dataset.lang));
   });
+  // Wiring du nouveau dropdown lang (Augustin 21/05/2026)
+  const langDD     = document.getElementById('langDropdown');
+  const langDDBtn  = document.getElementById('langDdBtn');
+  const langDDMenu = document.getElementById('langDdMenu');
+  const langDDFlag = document.getElementById('langDdFlag');
+  const langDDCode = document.getElementById('langDdCode');
+  const langMeta   = { fr:{flag:'🇫🇷',code:'FR'}, es:{flag:'🇪🇸',code:'ES'}, en:{flag:'🇬🇧',code:'EN'} };
+  const syncLangDD = (lang) => {
+    const m = langMeta[lang] || langMeta.fr;
+    if (langDDFlag) langDDFlag.textContent = m.flag;
+    if (langDDCode) langDDCode.textContent = m.code;
+    document.querySelectorAll('.lang-dd-item').forEach(it => it.classList.toggle('on', it.dataset.lang === lang));
+  };
+  if (langDDBtn) {
+    langDDBtn.addEventListener('click', (e) => { e.stopPropagation(); langDD.classList.toggle('open'); });
+    document.addEventListener('click', (e) => { if (!langDD.contains(e.target)) langDD.classList.remove('open'); });
+  }
+  document.querySelectorAll('.lang-dd-item').forEach(it => {
+    it.addEventListener('click', () => {
+      const l = it.dataset.lang;
+      applyLang(l);
+      syncLangDD(l);
+      langDD.classList.remove('open');
+    });
+  });
+  syncLangDD(curLang);
   // Apply on load
   setTimeout(() => {
     applyLang(curLang);
