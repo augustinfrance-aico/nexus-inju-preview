@@ -5943,6 +5943,14 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   },
 
   viewPilotage(){
+    // Migration one-time : force calendar view pour utilisateurs ayant une ancienne state
+    try {
+      if (!localStorage.getItem('nx_pilotage_v2_calendar_seen')) {
+        this.state.pilotageView = 'calendar';
+        this.save();
+        localStorage.setItem('nx_pilotage_v2_calendar_seen', '1');
+      }
+    } catch(e){}
     // Sync tab/category from core.html redirect (localStorage hints écrits avant navigation)
     try {
       const pendingTab = localStorage.getItem('nx_pilotage_tab');
@@ -5955,7 +5963,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     } catch(e){}
     const tab = this.state.pilotageTab || 'scheduled';
     const cat = this.state.pilotageCategory || 'all';
-    const view = this.state.pilotageView || 'calendar'; // calendar | list
+    const view = (this.state.pilotageView === 'list') ? 'list' : 'calendar'; // défaut calendar
     if (!this.state.pilotageMonth) {
       const n = new Date();
       this.state.pilotageMonth = { year: n.getFullYear(), month: n.getMonth() };
