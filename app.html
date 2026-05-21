@@ -2428,7 +2428,6 @@ const Nx = {
           </div>
         </div>
         <div class="modal-foot">
-          <button class="btn btn-s" onclick="Nx.sendThankyou(${c.id})">🙏 Envoyer un merci</button>
           <button class="btn btn-s" onclick="Nx.saveClientNotes(${c.id})">💾 Sauvegarder notes</button>
           <button class="btn btn-p" onclick="Nx.closeModal();Nx.openConversation(${c.id})">💬 Ouvrir la conversation</button>
         </div>`;
@@ -2650,7 +2649,6 @@ const Nx = {
           </div>
         </div>
         <div class="modal-foot">
-          <button class="btn btn-s" onclick="Nx.sendThankyou(${c.id})">🙏 Envoyer un merci</button>
           <button class="btn btn-s" onclick="Nx.saveClientFull(${c.id})">💾 Sauvegarder</button>
           <button class="btn btn-p" onclick="Nx.closeModal();Nx.openConversation(${c.id})">💬 Ouvrir la conversation</button>
         </div>`;
@@ -4275,7 +4273,6 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
               <button class="btn-g" onclick="Nx.suggestAiReply(${activeClient.id})">✨ Suggestion IA</button>
               <button class="btn-g" onclick="Nx.createDraft(${activeClient.id})">📝 Brouillon</button>
               <button class="btn-g" onclick="Nx.translateMsg(${activeClient.id})">🌐 Traduire</button>
-              <button class="btn-g" onclick="Nx.sendThankyou(${activeClient.id})">🙏 Envoyer un merci</button>
               <button class="btn-g" onclick="Nx.openModal('share-data')">🔌 Partage 1-clic</button>
             </div>
             <div class="chat-input">
