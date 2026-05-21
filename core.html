@@ -40,7 +40,8 @@ body{
 .shell{max-width:1180px;margin:0 auto;padding:22px 28px 120px}
 
 /* ============ TOP ============ */
-.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:36px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:36px;position:relative;z-index:150}
+.top *{pointer-events:auto}
 .home{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;cursor:pointer;transition:opacity .2s}
 .home:hover{opacity:.7}
 .home .logo{
@@ -1891,7 +1892,7 @@ body{
             showToast(langTxt);
             try {
               const agenda = JSON.parse(localStorage.getItem('nx_agenda')||'[]');
-              agenda.push({ id:'agd_'+Date.now()+'_chats', icon:'✅', title:{fr:`${sent} chat${sent>1?'s':''} validé${sent>1?'s':''} via popup IA`,es:`${sent} chat${sent>1?'s':''} validado${sent>1?'s':''} vía popup IA`,en:`${sent} chat${sent>1?'s':''} validated via AI popup`}[curLang]||`${sent} chats sent`, detail:'', when:{fr:'À l\\'instant',es:'Ahora mismo',en:'Just now'}[curLang]||'now', status:'done', category:'inbox', createdAt:new Date().toISOString() });
+              agenda.push({ id:'agd_'+Date.now()+'_chats', icon:'✅', title:{fr:`${sent} chat${sent>1?'s':''} validé${sent>1?'s':''} via popup IA`,es:`${sent} chat${sent>1?'s':''} validado${sent>1?'s':''} vía popup IA`,en:`${sent} chat${sent>1?'s':''} validated via AI popup`}[curLang]||`${sent} chats sent`, detail:'', when:{fr:"À l'instant",es:'Ahora mismo',en:'Just now'}[curLang]||'now', status:'done', category:'inbox', createdAt:new Date().toISOString() });
               localStorage.setItem('nx_agenda', JSON.stringify(agenda));
             } catch(e){}
             setTimeout(close, 1500);
