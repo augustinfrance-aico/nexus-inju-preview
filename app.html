@@ -2053,6 +2053,9 @@ const Nx = {
     ensure('campaignHistory', []);
     ensure('statsRange', '30d');
     ensure('briefRange', 'today');
+    ensure('pilotageTab', 'scheduled');
+    ensure('pilotageCategory', 'all');
+    ensure('pilotageView', 'calendar');
     ensure('audioPlayState', { playing:false, speed:1, paused:false });
     ensure('vacationDetails', DEFAULT_STATE.vacationDetails);
     ensure('apiKeys', DEFAULT_STATE.apiKeys);
@@ -5802,31 +5805,127 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     </svg>`;
   },
 
-  // ---------- PILOTAGE NEXUS VIEW ----------
-  // Espace de gestion centralisé : tout ce qui est programmé/actif/effectué/annulé
+  // ---------- PILOTAGE NEXUS VIEW (refonte 21/05/2026) ----------
+  // Calendrier visuel + filtres catégorie + redirect par catégorie + toggle liste/calendrier
   // Items poussés ici depuis Conseil Nexus (core.html) via localStorage 'nx_agenda'
+
+  // ---- Helpers Pilotage ----
+  // Catégories → couleur + icône + label + route de redirection
+  pilotageCategories(){
+    return {
+      message:  { color:'#3B82F6', ic:'💬', lbl:'Messagerie',  route:'inbox' },
+      inbox:    { color:'#10B981', ic:'📬', lbl:'Inbox',       route:'inbox' },
+      social:   { color:'#EC4899', ic:'📸', lbl:'Réseaux',     route:'campaigns' },
+      promo:    { color:'#F59E0B', ic:'🎁', lbl:'Promo',       route:'campaigns' },
+      reminder: { color:'#7A3CFF', ic:'⏰', lbl:'Rappel',      route:'pilotage' },
+      profile:  { color:'#06B6D4', ic:'👤', lbl:'Profil',      route:'profile' }
+    };
+  },
+  // Parse "when" en Date best-effort (ex: "Vendredi 18 h", "Demain 9 h", "Dans 2 h", "À l'instant")
+  parseAgendaDate(it){
+    const now = new Date();
+    if (!it) return now;
+    if (it.dueDate) { const d = new Date(it.dueDate); if (!isNaN(d)) return d; }
+    const w = (it.when||'').toLowerCase().trim();
+    const refDate = it.createdAt ? new Date(it.createdAt) : now;
+    if (!w || w === '—') return refDate;
+    // "à l'instant", "ahora", "just now", "envoyé maintenant"
+    if (/instant|maintenant|ahora|just now|envoyé/i.test(w)) return now;
+    // "hier", "ayer", "yesterday"
+    if (/^hier|^ayer|^yesterday/i.test(w)) { const d=new Date(now); d.setDate(d.getDate()-1); return d; }
+    // "demain", "mañana", "tomorrow"
+    if (/^demain|^mañana|^tomorrow/i.test(w)) {
+      const d=new Date(now); d.setDate(d.getDate()+1);
+      const hm = w.match(/(\d{1,2})\s*h?\s*(\d{2})?/); if (hm) d.setHours(parseInt(hm[1]), parseInt(hm[2]||'0'), 0, 0);
+      return d;
+    }
+    // "dans 2 h", "en 2 h", "in 2 h"
+    const inH = w.match(/^(dans|en|in)\s+(\d+)\s*h/i);
+    if (inH) { const d=new Date(now); d.setHours(d.getHours()+parseInt(inH[2])); return d; }
+    // jour de la semaine français
+    const dayMap = { 'lundi':1,'mardi':2,'mercredi':3,'jeudi':4,'vendredi':5,'samedi':6,'dimanche':0,
+                     'lunes':1,'martes':2,'miércoles':3,'miercoles':3,'jueves':4,'viernes':5,'sábado':6,'sabado':6,'domingo':0,
+                     'monday':1,'tuesday':2,'wednesday':3,'thursday':4,'friday':5,'saturday':6,'sunday':0 };
+    for (const [name, dow] of Object.entries(dayMap)) {
+      if (w.startsWith(name)) {
+        const d = new Date(now);
+        const cur = d.getDay();
+        let diff = (dow - cur + 7) % 7; if (diff === 0) diff = 7; // next occurrence (semaine prochaine si même jour)
+        d.setDate(d.getDate() + diff);
+        const hm = w.match(/(\d{1,2})\s*h?\s*(\d{2})?/); if (hm) d.setHours(parseInt(hm[1]), parseInt(hm[2]||'0'), 0, 0);
+        return d;
+      }
+    }
+    // Date ISO directe
+    const iso = new Date(w); if (!isNaN(iso)) return iso;
+    return refDate;
+  },
+
   viewPilotage(){
-    // Sync tab from core.html redirect (nx_pilotage_tab written before navigation)
+    // Sync tab/category from core.html redirect (localStorage hints écrits avant navigation)
     try {
       const pendingTab = localStorage.getItem('nx_pilotage_tab');
       if (pendingTab && ['scheduled','active','done','cancelled'].includes(pendingTab)) {
         this.state.pilotageTab = pendingTab;
         localStorage.removeItem('nx_pilotage_tab');
       }
+      const pendingCat = localStorage.getItem('nx_pilotage_cat');
+      if (pendingCat) { this.state.pilotageCategory = pendingCat; localStorage.removeItem('nx_pilotage_cat'); }
     } catch(e){}
     const tab = this.state.pilotageTab || 'scheduled';
-    const items = this.getAgendaItems();
-    const filtered = items.filter(it => it.status === tab);
+    const cat = this.state.pilotageCategory || 'all';
+    const view = this.state.pilotageView || 'calendar'; // calendar | list
+    if (!this.state.pilotageMonth) {
+      const n = new Date();
+      this.state.pilotageMonth = { year: n.getFullYear(), month: n.getMonth() };
+    }
+    const cM = this.state.pilotageMonth;
+
+    const cats = this.pilotageCategories();
+    const allItems = this.getAgendaItems();
+    // Filtrage statut + catégorie
+    let items = allItems.filter(it => it.status === tab);
+    if (cat !== 'all') items = items.filter(it => (it.category||'reminder') === cat);
+    // Compteurs par statut (sur catégorie active)
+    const baseForCounts = cat === 'all' ? allItems : allItems.filter(i => (i.category||'reminder') === cat);
     const counts = {
-      scheduled: items.filter(i=>i.status==='scheduled').length,
-      active:    items.filter(i=>i.status==='active').length,
-      done:      items.filter(i=>i.status==='done').length,
-      cancelled: items.filter(i=>i.status==='cancelled').length
+      scheduled: baseForCounts.filter(i=>i.status==='scheduled').length,
+      active:    baseForCounts.filter(i=>i.status==='active').length,
+      done:      baseForCounts.filter(i=>i.status==='done').length,
+      cancelled: baseForCounts.filter(i=>i.status==='cancelled').length
     };
-    const tabBtn = (k, lblKey) => `<button class="filter-pill ${tab===k?'on':''}" onclick="Nx.setPilotageTab('${k}')">${t(lblKey)} <span class="chip" style="margin-left:6px">${counts[k]}</span></button>`;
+    // Compteurs par catégorie (sur statut actif)
+    const baseForCats = allItems.filter(i => i.status === tab);
+    const catCounts = { all: baseForCats.length };
+    Object.keys(cats).forEach(k => { catCounts[k] = baseForCats.filter(i => (i.category||'reminder') === k).length; });
+
     const colorMap = { scheduled:'#3B82F6', active:'#10B981', done:'#6B7280', cancelled:'#EF4444' };
     const statusLbl = { scheduled: t('pilotage.tab.scheduled'), active: t('pilotage.tab.active'), done: t('pilotage.tab.done'), cancelled: t('pilotage.tab.cancelled') };
-    const categoryColor = { message:'#3B82F6', social:'#EC4899', promo:'#F59E0B', inbox:'#10B981', reminder:'#7A3CFF', profile:'#06B6D4' };
+
+    const tabBtn = (k, lblKey) => `<button class="filter-pill ${tab===k?'on':''}" onclick="Nx.setPilotageTab('${k}')">${t(lblKey)} <span class="chip" style="margin-left:6px">${counts[k]}</span></button>`;
+
+    const catChip = (k) => {
+      const meta = cats[k]; if (!meta) return '';
+      const on = cat === k;
+      return `<button class="pn-cat-chip ${on?'on':''}" style="${on?`--c:${meta.color};background:${meta.color}1A;border-color:${meta.color};color:${meta.color}`:''}" onclick="Nx.setPilotageCategory('${k}')">
+        <span style="font-size:14px">${meta.ic}</span>${meta.lbl}<span class="chip" style="margin-left:6px;${on?`background:${meta.color}33;color:${meta.color}`:''}">${catCounts[k]||0}</span>
+      </button>`;
+    };
+    const allChip = `<button class="pn-cat-chip ${cat==='all'?'on':''}" onclick="Nx.setPilotageCategory('all')">🌐 Tout <span class="chip" style="margin-left:6px">${catCounts.all||0}</span></button>`;
+
+    // Bandeau "Aller au menu" — visible UNIQUEMENT quand catégorie != all
+    const redirectBanner = cat !== 'all' && cats[cat] ? `
+      <div class="pn-redirect" style="--c:${cats[cat].color}">
+        <div class="pn-redirect-left">
+          <span class="pn-redirect-ic">${cats[cat].ic}</span>
+          <div>
+            <div class="pn-redirect-title">Filtre actif : <b>${cats[cat].lbl}</b></div>
+            <div class="pn-redirect-sub">Tu veux gérer tout ce qui est en <b>${cats[cat].lbl.toLowerCase()}</b> côté source ?</div>
+          </div>
+        </div>
+        <button class="pn-redirect-btn" onclick="Nx.navigate('${cats[cat].route}')">→ Aller à <b>${cats[cat].lbl}</b></button>
+      </div>` : '';
+
     const actionsHtml = (it) => {
       if (it.status === 'scheduled' || it.status === 'active') {
         return `<button class="pn-btn" onclick="Nx.modifyAgendaItem('${it.id}')"><span>✏️</span>${t('pilotage.btn.modify')}</button>
@@ -5837,21 +5936,23 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         return `<button class="pn-btn" onclick="Nx.duplicateAgendaItem('${it.id}')"><span>📋</span>${t('pilotage.btn.duplicate')}</button>`;
       }
     };
-    const listHtml = filtered.length === 0
+
+    // ----------- VIEW : LISTE -----------
+    const listHtml = items.length === 0
       ? `<div class="pn-empty">
            <div class="pn-empty-ic">📭</div>
            <div class="pn-empty-title">${t('pilotage.empty.'+tab)}</div>
            <div class="pn-empty-hint">${t('pilotage.empty.hint')}</div>
          </div>`
-      : `<div class="pn-grid">${filtered.map(it => {
-          const accent = categoryColor[it.category] || colorMap[it.status];
+      : `<div class="pn-grid">${items.map(it => {
+          const accent = (cats[it.category]?.color) || colorMap[it.status];
           return `
           <div class="pn-card" style="--pn-accent:${accent}">
             <div class="pn-card-hd">
-              <div class="pn-card-ic">${it.icon||'🎯'}</div>
+              <div class="pn-card-ic">${it.icon||(cats[it.category]?.ic)||'🎯'}</div>
               <div class="pn-card-meta">
                 <div class="pn-card-title">${it.title}</div>
-                ${it.category ? `<div class="pn-card-cat">${it.category}</div>` : ''}
+                ${it.category ? `<div class="pn-card-cat">${(cats[it.category]?.lbl)||it.category}</div>` : ''}
               </div>
               <span class="pn-status" style="--pn-stcolor:${colorMap[it.status]}">${statusLbl[it.status]}</span>
             </div>
@@ -5863,8 +5964,106 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
             <div class="pn-card-actions">${actionsHtml(it)}</div>
           </div>`;
         }).join('')}</div>`;
+
+    // ----------- VIEW : CALENDRIER -----------
+    // Génère 6 semaines × 7 jours autour du mois courant
+    const monthNames = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+    const dayNames = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+    const firstDay = new Date(cM.year, cM.month, 1);
+    const lastDay = new Date(cM.year, cM.month+1, 0);
+    // Premier jour de la grille (lundi avant ou égal au 1er)
+    const startDow = (firstDay.getDay() + 6) % 7; // lundi = 0
+    const gridStart = new Date(cM.year, cM.month, 1 - startDow);
+    // 6 semaines = 42 cellules
+    const cells = [];
+    for (let i = 0; i < 42; i++) {
+      const d = new Date(gridStart); d.setDate(gridStart.getDate() + i);
+      const sameMonth = d.getMonth() === cM.month;
+      const today = new Date();
+      const isToday = d.getFullYear()===today.getFullYear() && d.getMonth()===today.getMonth() && d.getDate()===today.getDate();
+      // Items qui tombent ce jour
+      const dayItems = items.filter(it => {
+        const id = this.parseAgendaDate(it);
+        return id.getFullYear()===d.getFullYear() && id.getMonth()===d.getMonth() && id.getDate()===d.getDate();
+      });
+      cells.push({ d, sameMonth, isToday, items: dayItems });
+    }
+    const calHtml = `
+      <div class="pn-cal">
+        <div class="pn-cal-hd">
+          <button class="pn-cal-nav" onclick="Nx.shiftPilotageMonth(-1)" aria-label="Mois précédent">‹</button>
+          <div class="pn-cal-title">${monthNames[cM.month]} ${cM.year}</div>
+          <button class="pn-cal-nav" onclick="Nx.shiftPilotageMonth(1)" aria-label="Mois suivant">›</button>
+          <button class="pn-cal-today" onclick="Nx.gotoTodayPilotage()">Aujourd'hui</button>
+        </div>
+        <div class="pn-cal-grid">
+          ${dayNames.map(n => `<div class="pn-cal-dayname">${n}</div>`).join('')}
+          ${cells.map(c => {
+            const cellCls = ['pn-cal-cell'];
+            if (!c.sameMonth) cellCls.push('out');
+            if (c.isToday) cellCls.push('today');
+            if (c.items.length) cellCls.push('has');
+            const max = 3;
+            const visible = c.items.slice(0, max);
+            const overflow = c.items.length - max;
+            return `<div class="${cellCls.join(' ')}">
+              <div class="pn-cal-num">${c.d.getDate()}</div>
+              <div class="pn-cal-items">
+                ${visible.map(it => {
+                  const meta = cats[it.category] || { color:'#7A3CFF', ic:'🎯' };
+                  return `<div class="pn-cal-pill" style="background:${meta.color}1A;border-color:${meta.color}66;color:${meta.color}" title="${(it.title||'').replace(/"/g,'&quot;')}" onclick="Nx.openAgendaDetail('${it.id}')">${meta.ic} ${it.title.length>22?it.title.slice(0,22)+'…':it.title}</div>`;
+                }).join('')}
+                ${overflow > 0 ? `<div class="pn-cal-more" onclick="Nx.openDayPopup(${c.d.getTime()})">+ ${overflow} autre${overflow>1?'s':''}</div>` : ''}
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+
     return `
       <style>
+        .pn-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;padding:8px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+        .pn-view-toggle{display:flex;gap:4px;background:var(--bg2);border-radius:8px;padding:3px;margin-left:auto}
+        .pn-view-toggle button{border:0;background:transparent;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--muted);transition:all .15s;display:flex;align-items:center;gap:6px}
+        .pn-view-toggle button.on{background:var(--panel);color:var(--blue);box-shadow:0 1px 3px rgba(15,23,42,.08)}
+        .pn-tabs-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;padding:6px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+        .pn-tabs-row .filter-pill{padding:9px 16px;font-size:13px}
+        .pn-cat-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;padding:6px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;align-items:center}
+        .pn-cat-row-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-left:6px;margin-right:4px}
+        .pn-cat-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;font-size:12.5px;font-weight:600;border:1px solid var(--line);background:var(--panel);color:var(--ink2);border-radius:999px;cursor:pointer;transition:all .15s;font-family:inherit}
+        .pn-cat-chip:hover{transform:translateY(-1px);border-color:var(--blue)}
+        .pn-redirect{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 18px;background:linear-gradient(135deg,color-mix(in srgb,var(--c) 14%,transparent),color-mix(in srgb,var(--c) 5%,transparent));border:1px solid color-mix(in srgb,var(--c) 35%,transparent);border-radius:12px;margin-bottom:14px;flex-wrap:wrap}
+        .pn-redirect-left{display:flex;align-items:center;gap:14px}
+        .pn-redirect-ic{font-size:30px;width:50px;height:50px;border-radius:12px;background:color-mix(in srgb,var(--c) 18%,transparent);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .pn-redirect-title{font-size:13.5px;font-weight:700;color:var(--ink)}
+        .pn-redirect-sub{font-size:12px;color:var(--ink2);margin-top:2px}
+        .pn-redirect-btn{padding:11px 18px;background:var(--c);color:#fff;border:0;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:8px;transition:all .15s;font-family:inherit}
+        .pn-redirect-btn:hover{filter:brightness(.92);transform:translateY(-1px);box-shadow:0 8px 20px -6px color-mix(in srgb,var(--c) 50%,transparent)}
+        .pn-redirect-btn b{font-weight:800}
+        /* CALENDRIER */
+        .pn-cal{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.04)}
+        .pn-cal-hd{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);background:linear-gradient(135deg,rgba(122,60,255,.05),rgba(0,229,255,.03))}
+        .pn-cal-title{font-size:18px;font-weight:800;color:var(--ink);text-transform:capitalize;letter-spacing:-.01em}
+        .pn-cal-nav{width:34px;height:34px;border:1px solid var(--line);background:var(--bg);border-radius:10px;cursor:pointer;font-size:18px;font-weight:700;color:var(--ink2);transition:all .15s;display:flex;align-items:center;justify-content:center}
+        .pn-cal-nav:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-soft)}
+        .pn-cal-today{margin-left:auto;padding:8px 14px;background:var(--blue-soft);color:var(--blue);border:1px solid color-mix(in srgb,var(--blue) 30%,transparent);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;font-family:inherit}
+        .pn-cal-today:hover{background:var(--blue);color:#fff}
+        .pn-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--line)}
+        .pn-cal-dayname{padding:10px 6px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;background:var(--bg2);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+        .pn-cal-dayname:nth-child(7){border-right:0}
+        .pn-cal-cell{min-height:108px;padding:6px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;gap:4px;position:relative;transition:background .15s}
+        .pn-cal-cell:nth-child(7n){border-right:0}
+        .pn-cal-cell.out{background:var(--bg2);opacity:.45}
+        .pn-cal-cell.today{background:linear-gradient(135deg,rgba(46,123,255,.06),rgba(122,60,255,.04))}
+        .pn-cal-cell.today .pn-cal-num{background:var(--blue);color:#fff;font-weight:800}
+        .pn-cal-cell.has:hover{background:linear-gradient(135deg,rgba(46,123,255,.04),transparent)}
+        .pn-cal-num{font-size:12px;font-weight:600;color:var(--ink2);width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .pn-cal-items{display:flex;flex-direction:column;gap:3px;overflow:hidden}
+        .pn-cal-pill{font-size:10.5px;font-weight:600;padding:3px 7px;border-radius:5px;border:1px solid;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:all .12s;line-height:1.3}
+        .pn-cal-pill:hover{transform:translateX(1px);filter:brightness(.95)}
+        .pn-cal-more{font-size:10px;color:var(--muted);font-weight:700;padding:2px 7px;cursor:pointer;border-radius:4px}
+        .pn-cal-more:hover{background:var(--bg2);color:var(--blue)}
+        /* LISTE (préservée pour toggle) */
         .pn-empty{padding:60px 30px;text-align:center;color:var(--muted);background:var(--panel);border:1px dashed var(--line);border-radius:14px}
         .pn-empty-ic{font-size:48px;margin-bottom:14px;opacity:.35}
         .pn-empty-title{font-size:14px;font-weight:600;color:var(--ink2);margin-bottom:8px}
@@ -5890,15 +6089,17 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         .pn-btn-primary:hover{filter:brightness(.92);background:var(--pn-accent);color:#fff}
         .pn-btn-danger{color:#EF4444;border-color:#FCA5A5}
         .pn-btn-danger:hover{background:#FEE2E2;color:#B91C1C;border-color:#EF4444}
-        .pn-tabs-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;padding:6px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
-        .pn-tabs-row .filter-pill{padding:9px 16px;font-size:13px}
-        @media(max-width:600px){.pn-grid{grid-template-columns:1fr}.pn-card{padding:14px}}
+        @media(max-width:600px){.pn-grid{grid-template-columns:1fr}.pn-card{padding:14px}.pn-cal-cell{min-height:78px}.pn-cal-pill{font-size:9.5px;padding:2px 5px}}
       </style>
       <div class="view">
-        <div class="page-hd" style="margin-bottom:18px">
+        <div class="page-hd" style="margin-bottom:14px">
           <div>
             <h1 style="margin:0;display:flex;align-items:center;gap:10px"><span style="font-size:30px">🎯</span>${t('pilotage.title')}</h1>
             <div style="color:var(--muted);font-size:13.5px;margin-top:6px;max-width:600px;line-height:1.5">${t('pilotage.sub')}</div>
+          </div>
+          <div class="pn-view-toggle">
+            <button class="${view==='calendar'?'on':''}" onclick="Nx.setPilotageView('calendar')"><span>📅</span>Calendrier</button>
+            <button class="${view==='list'?'on':''}" onclick="Nx.setPilotageView('list')"><span>📋</span>Liste</button>
           </div>
         </div>
         <div class="pn-tabs-row">
@@ -5907,8 +6108,93 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           ${tabBtn('done','pilotage.tab.done')}
           ${tabBtn('cancelled','pilotage.tab.cancelled')}
         </div>
-        ${listHtml}
+        <div class="pn-cat-row">
+          <span class="pn-cat-row-lbl">Type :</span>
+          ${allChip}
+          ${Object.keys(cats).map(k => catChip(k)).join('')}
+        </div>
+        ${redirectBanner}
+        ${view === 'calendar' ? calHtml : listHtml}
       </div>`;
+  },
+
+  setPilotageCategory(c){
+    this.state.pilotageCategory = c;
+    this.save();
+    this.renderView();
+  },
+  setPilotageView(v){
+    this.state.pilotageView = v;
+    this.save();
+    this.renderView();
+  },
+  shiftPilotageMonth(delta){
+    if (!this.state.pilotageMonth) { const n = new Date(); this.state.pilotageMonth = { year:n.getFullYear(), month:n.getMonth() }; }
+    let { year, month } = this.state.pilotageMonth;
+    month += delta;
+    if (month < 0) { month = 11; year--; }
+    if (month > 11) { month = 0; year++; }
+    this.state.pilotageMonth = { year, month };
+    this.save();
+    this.renderView();
+  },
+  gotoTodayPilotage(){
+    const n = new Date();
+    this.state.pilotageMonth = { year:n.getFullYear(), month:n.getMonth() };
+    this.save();
+    this.renderView();
+  },
+  openAgendaDetail(id){
+    const it = this.getAgendaItems().find(x => x.id === id);
+    if (!it) return;
+    const cats = this.pilotageCategories();
+    const meta = cats[it.category] || { color:'#7A3CFF', ic:'🎯', lbl:it.category||'Item' };
+    const statusLbl = { scheduled:'Programmé', active:'Actif', done:'Effectué', cancelled:'Annulé' }[it.status] || it.status;
+    const ov = document.getElementById('modal-overlay');
+    const mc = document.getElementById('modal-content');
+    ov.classList.remove('hidden');
+    mc.innerHTML = `
+      <div class="modal-hd" style="border-bottom:3px solid ${meta.color}"><h3>${it.icon||meta.ic} ${it.title}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-body">
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <span class="chip" style="background:${meta.color}1A;color:${meta.color};border:1px solid ${meta.color}55">${meta.ic} ${meta.lbl}</span>
+          <span class="chip">${statusLbl}</span>
+        </div>
+        ${it.detail ? `<div style="padding:14px;background:var(--bg2);border-radius:10px;margin-bottom:14px;font-size:13.5px;line-height:1.6;color:var(--ink2)">${it.detail}</div>` : ''}
+        <div style="font-size:12.5px;color:var(--muted)"><b>📅 Quand :</b> ${it.when || '—'}</div>
+        ${it.createdAt ? `<div style="font-size:11px;color:var(--muted);margin-top:6px"><b>Créé :</b> ${new Date(it.createdAt).toLocaleString('fr-FR')}</div>` : ''}
+      </div>
+      <div class="modal-foot">
+        ${(it.status==='scheduled'||it.status==='active') ? `
+          <button class="btn btn-s" onclick="Nx.closeModal();Nx.modifyAgendaItem('${it.id}')">✏️ Modifier</button>
+          <button class="btn btn-s" style="color:#EF4444;border-color:#FCA5A5" onclick="Nx.closeModal();Nx.cancelAgendaItem('${it.id}')">✕ Annuler</button>` : ''}
+        ${it.status==='cancelled' ? `<button class="btn btn-s" onclick="Nx.closeModal();Nx.reactivateAgendaItem('${it.id}')">↻ Réactiver</button>` : ''}
+        ${meta.route && meta.route !== 'pilotage' ? `<button class="btn btn-p" onclick="Nx.closeModal();Nx.navigate('${meta.route}')">→ Aller à ${meta.lbl}</button>` : `<button class="btn btn-p" onclick="Nx.closeModal()">OK</button>`}
+      </div>`;
+  },
+  openDayPopup(ts){
+    const d = new Date(ts);
+    const items = this.getAgendaItems().filter(it => {
+      const id = this.parseAgendaDate(it);
+      return id.getFullYear()===d.getFullYear() && id.getMonth()===d.getMonth() && id.getDate()===d.getDate();
+    });
+    const cats = this.pilotageCategories();
+    const ov = document.getElementById('modal-overlay');
+    const mc = document.getElementById('modal-content');
+    ov.classList.remove('hidden');
+    mc.innerHTML = `
+      <div class="modal-hd"><h3>📅 ${d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-body" style="max-height:60vh;overflow-y:auto">
+        ${items.length === 0 ? '<div style="text-align:center;color:var(--muted);padding:30px">Rien de prévu ce jour.</div>' :
+          items.map(it => {
+            const meta = cats[it.category] || { color:'#7A3CFF', ic:'🎯', lbl:'—' };
+            return `<div style="padding:12px 14px;background:var(--bg2);border-left:3px solid ${meta.color};border-radius:8px;margin-bottom:8px;cursor:pointer" onclick="Nx.closeModal();Nx.openAgendaDetail('${it.id}')">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:16px">${it.icon||meta.ic}</span><b style="font-size:13px">${it.title}</b></div>
+              <div style="font-size:11.5px;color:var(--muted);margin-left:24px">${meta.lbl} · ${it.when||'—'}</div>
+            </div>`;
+          }).join('')}
+      </div>
+      <div class="modal-foot"><button class="btn btn-p" onclick="Nx.closeModal()">Fermer</button></div>`;
   },
 
   setPilotageTab(tab){
