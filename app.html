@@ -4900,10 +4900,10 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         </div>
         <div class="form-row"><label class="form-lbl">🏷️ Dénomination</label>
           <select class="form-ctrl" id="newCTag">
-            <option value="new">🌱 Nouveau</option>
-            <option value="rec">🔁 Récurrent</option>
-            <option value="vip">⭐ VIP</option>
-            <option value="biz">💼 Business</option>
+            <option value="new" style="color:#22C55E;font-weight:600">● Nouveau</option>
+            <option value="rec" style="color:#1A56DB;font-weight:600">● Récurrent</option>
+            <option value="vip" style="color:#F5C45E;font-weight:600">● VIP</option>
+            <option value="biz" style="color:#7A3CFF;font-weight:600">● Business</option>
           </select>
         </div>
         <div class="form-row"><label class="form-lbl">💬 Contexte spécifique <span style="color:var(--muted);font-weight:400">(ex : "elle aime être reçue avec un café")</span></label>
@@ -4998,13 +4998,13 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         <div class="form-row">
           <label class="form-lbl">Filtre clients</label>
           <select class="form-ctrl" id="csvFilter">
-            <option value="all">Tous les clients (${counts.all})</option>
-            <option value="vip">⭐ Clients VIP (${counts.vip})</option>
-            <option value="lost">💔 Clients perdus (${counts.lost})</option>
-            <option value="rec">🔁 Récurrents (${counts.rec})</option>
-            <option value="occ">👥 Occasionnels (${counts.occ})</option>
-            <option value="biz">💼 Business (${counts.biz})</option>
-            <option value="new">🌱 Nouveaux (${counts.new})</option>
+            <option value="all" style="color:#64748B;font-weight:600">● Tous les clients (${counts.all})</option>
+            <option value="vip" style="color:#F5C45E;font-weight:600">● Clients VIP (${counts.vip})</option>
+            <option value="rec" style="color:#1A56DB;font-weight:600">● Récurrents (${counts.rec})</option>
+            <option value="biz" style="color:#7A3CFF;font-weight:600">● Business (${counts.biz})</option>
+            <option value="new" style="color:#22C55E;font-weight:600">● Nouveaux (${counts.new})</option>
+            <option value="occ" style="color:#F59E0B;font-weight:600">● Occasionnels (${counts.occ})</option>
+            <option value="lost" style="color:#EF4444;font-weight:600">● Clients perdus (${counts.lost})</option>
           </select>
         </div>
         <div class="form-row">
@@ -7447,10 +7447,16 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       {k:'weather',  l:'☔ Selon météo (ex : pluie → promo soupe)'},
       {k:'stat',     l:'📈 Selon stat (ex : si CA semaine < seuil)'}
     ].map(o => `<option value="${o.k}" ${det.trigger===o.k?'selected':''}>${o.l}</option>`).join('');
+    // Cibles avec code couleur (Augustin 21/05/2026 : remplace icônes par pastilles colorées)
     const targetOptions = [
-      {k:'vip',  l:'⭐ VIP'},{k:'rec',  l:'🔁 Récurrents'},{k:'new',  l:'🌱 Nouveaux'},
-      {k:'norm', l:'👥 Normaux'},{k:'lost', l:'💔 Perdus'},{k:'all',  l:'👤 Tous'}
-    ].map(o => `<option value="${o.k}" ${det.target===o.k?'selected':''}>${o.l}</option>`).join('');
+      {k:'vip',  l:'VIP',         col:'#F5C45E'},
+      {k:'rec',  l:'Récurrents',  col:'#1A56DB'},
+      {k:'biz',  l:'Business',    col:'#7A3CFF'},
+      {k:'new',  l:'Nouveaux',    col:'#22C55E'},
+      {k:'norm', l:'Normaux',     col:'#F59E0B'},
+      {k:'lost', l:'Perdus',      col:'#EF4444'},
+      {k:'all',  l:'Tous',        col:'#64748B'}
+    ].map(o => `<option value="${o.k}" style="color:${o.col};font-weight:600" ${det.target===o.k?'selected':''}>● ${o.l}</option>`).join('');
     mc.innerHTML = `
       <div class="modal-hd"><h3>🤖 ${editingId?"Modifier l'automatisation":"Nouvelle campagne automatique"}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
       <div class="modal-body">
