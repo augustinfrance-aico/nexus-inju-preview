@@ -2053,6 +2053,7 @@ const Nx = {
     ensure('campaignHistory', []);
     ensure('statsRange', '30d');
     ensure('briefRange', 'today');
+    ensure('chartRange', '30d');
     ensure('pilotageTab', 'scheduled');
     ensure('pilotageCategory', 'all');
     ensure('pilotageView', 'calendar');
@@ -2627,6 +2628,32 @@ const Nx = {
             <b style="color:var(--blue-ink)">📋 Synthèse :</b> ${synth}
           </div>
 
+          <!-- SEGMENT (changement direct depuis la fiche — Augustin 21/05/2026) -->
+          <div style="padding:12px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;margin-bottom:14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:10px">
+              <div>
+                <div style="font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)">Segment du client</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px">Clique pour changer · prend effet partout (CRM, campagnes, stats)</div>
+              </div>
+              <span id="curSegBadge" style="padding:5px 11px;border-radius:999px;font-size:11px;font-weight:700;background:${({vip:'#F5C45E',rec:'#1A56DB',biz:'#7A3CFF',new:'#22C55E',occ:'#F59E0B',lost:'#EF4444'})[this.segOf(c)]||'#94A3B8'}1A;color:${({vip:'#F5C45E',rec:'#1A56DB',biz:'#7A3CFF',new:'#22C55E',occ:'#F59E0B',lost:'#EF4444'})[this.segOf(c)]||'#94A3B8'};border:1px solid ${({vip:'#F5C45E',rec:'#1A56DB',biz:'#7A3CFF',new:'#22C55E',occ:'#F59E0B',lost:'#EF4444'})[this.segOf(c)]||'#94A3B8'}55">${({vip:'VIP',rec:'Récurrent',biz:'Business',new:'Nouveau',occ:'Occasionnel',lost:'Perdu'})[this.segOf(c)]}</span>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap" id="segSwitcher">
+              ${[
+                {k:'vip', l:'VIP',         col:'#F5C45E'},
+                {k:'rec', l:'Récurrent',   col:'#1A56DB'},
+                {k:'biz', l:'Business',    col:'#7A3CFF'},
+                {k:'new', l:'Nouveau',     col:'#22C55E'},
+                {k:'occ', l:'Occasionnel', col:'#F59E0B'},
+                {k:'lost',l:'Perdu',       col:'#EF4444'}
+              ].map(s => {
+                const on = this.segOf(c) === s.k;
+                return `<button onclick="Nx.changeClientSegment(${c.id},'${s.k}')" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;font-size:12px;font-weight:600;border-radius:8px;cursor:pointer;border:1px solid ${on?s.col:'var(--line)'};background:${on?s.col+'1A':'var(--panel)'};color:${on?s.col:'var(--ink2)'};transition:all .12s">
+                  <span style="width:8px;height:8px;border-radius:50%;background:${s.col};flex-shrink:0"></span>${s.l}
+                </button>`;
+              }).join('')}
+            </div>
+          </div>
+
           <!-- CONTACT UNIFIÉ -->
           <div class="grid2" style="margin-bottom:14px">
             <div class="form-row" style="margin-bottom:0">
@@ -2872,6 +2899,27 @@ const Nx = {
     this.state.clientEditing = null;
     this.save();
     this.toast('💾 Fiche sauvegardée','success', c.name);
+    this.openModal('client-v2', c);
+  },
+
+  // Changer le segment du client direct depuis la fiche (Augustin 21/05/2026)
+  // Met à jour tags + tag + status pour cohérence avec segOf() partout (CRM, campagnes, stats)
+  changeClientSegment(clientId, newSeg){
+    const c = this.state.clients.find(x => x.id === clientId);
+    if (!c) return;
+    // Reset des marqueurs de segment précédents
+    c.tags = (c.tags || []).filter(t => !['VIP','Business','Récurrent','Récurrents','Nuevo','Nouveau'].includes(t));
+    if (c.status === 'lost') c.status = 'active';
+    // Application du nouveau segment
+    if (newSeg === 'vip')      { c.tags.push('VIP'); c.tag = 'rec'; }
+    else if (newSeg === 'biz') { c.tags.push('Business'); c.tag = 'biz'; }
+    else if (newSeg === 'rec') { c.tags.push('Récurrent'); c.tag = 'rec'; }
+    else if (newSeg === 'new') { c.tags.push('Nouveau'); c.tag = 'new'; c.status = 'prospect'; }
+    else if (newSeg === 'occ') { c.tag = 'occ'; }
+    else if (newSeg === 'lost'){ c.status = 'lost'; c.tag = c.tag || 'rec'; }
+    this.save();
+    const lblMap = { vip:'VIP', rec:'Récurrent', biz:'Business', new:'Nouveau', occ:'Occasionnel', lost:'Perdu' };
+    this.toast('✓ Segment changé → '+lblMap[newSeg], 'success', c.name);
     this.openModal('client-v2', c);
   },
 
@@ -3423,9 +3471,10 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
     return 'rec';
   },
 
-  // Graphique dynamique selon chartType (Augustin 19/05/2026 — les courbes doivent vraiment changer)
+  // Graphique dynamique selon chartType + chartRange (Augustin 19/05 + 21/05/2026)
   chartSvg(){
     const type = this.state.chartType || 'conv';
+    const chartRange = this.state.chartRange || '30d';
     const W = 760, H = 220, PAD_BOTTOM = 30;
     // Données mock cohérentes par type
     const datasets = {
@@ -3472,7 +3521,13 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
       <line x1="0" y1="110" x2="${W}" y2="110"/>
       <line x1="0" y1="170" x2="${W}" y2="170"/>
     </g>`;
-    const monthLabels = ['1avr','5','10','15','20','25','30','5mai','10','15','19'];
+    // Labels axe X selon période (Augustin 21/05/2026)
+    const labelsByRange = {
+      '30d':     ['1avr','5','10','15','20','25','30','5mai','10','15','19'],
+      'quarter': ['Mar','15 Mar','Avr','15 Avr','Mai','15 Mai','Juin'],
+      'all':     ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Août','Sep','Oct','Nov','Déc']
+    };
+    const monthLabels = labelsByRange[chartRange] || labelsByRange['30d'];
 
     // ====== TYPE 1: COURBE SIMPLE (conv, resp) ======
     if (datasets[type] && datasets[type].values) {
@@ -5182,9 +5237,6 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       <div class="view">
         <div class="page-hd">
           <div><h1>${t('stats.page.title')}</h1><div class="sub">${t('stats.page.sub')}</div></div>
-          <div class="flex">
-            <button class="btn btn-s" onclick="Nx.openExportPdfModal('stats')">${t('stats.export.pdf')}</button>
-          </div>
         </div>
 
         <!-- SÉLECTEUR PÉRIODE -->
@@ -5264,7 +5316,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
               <div class="actions"><span style="font-size:11px;color:var(--muted)" id="chartLegend">${t('stats.evolution.legend')}</span></div>
             </div>
             <div class="card-body">
-              <!-- POINT 8(c) — Sélecteur de graphique -->
+              <!-- Sélecteur de graphique -->
               <div class="chart-selector">
                 ${[
                   {k:'conv',  l:t('stats.chart.conv')},
@@ -5275,7 +5327,14 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
                   {k:'newlost', l:t('stats.chart.newlost')}
                 ].map(opt => `<button class="${(this.state.chartType||'conv')===opt.k?'on':''}" onclick="Nx.state.chartType='${opt.k}';Nx.renderView()">${opt.l}</button>`).join('')}
               </div>
-              <div style="font-size:11px;color:var(--muted);margin-bottom:8px"><b>${({conv:t('stats.chart.sub.conv'), seg:t('stats.chart.sub.seg'), resp:t('stats.chart.sub.resp'), hours:t('stats.chart.sub.hours'), camp:t('stats.chart.sub.camp'), newlost:t('stats.chart.sub.newlost')})[this.state.chartType||'conv']}</b></div>
+              <!-- Sélecteur période (Augustin 21/05/2026) -->
+              <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
+                <span style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-right:4px">Période :</span>
+                <button class="filter-pill ${(this.state.chartRange||'30d')==='30d'?'on':''}" style="font-size:11.5px;padding:5px 11px" onclick="Nx.setChartRange('30d')">30 jours</button>
+                <button class="filter-pill ${this.state.chartRange==='quarter'?'on':''}" style="font-size:11.5px;padding:5px 11px" onclick="Nx.setChartRange('quarter')">Trimestre</button>
+                <button class="filter-pill ${this.state.chartRange==='all'?'on':''}" style="font-size:11.5px;padding:5px 11px" onclick="Nx.setChartRange('all')">Depuis le début</button>
+              </div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:8px"><b>${({conv:t('stats.chart.sub.conv'), seg:t('stats.chart.sub.seg'), resp:t('stats.chart.sub.resp'), hours:t('stats.chart.sub.hours'), camp:t('stats.chart.sub.camp'), newlost:t('stats.chart.sub.newlost')})[this.state.chartType||'conv']}</b> · ${({'30d':'30 derniers jours','quarter':'Dernier trimestre','all':'Depuis le début'})[this.state.chartRange||'30d']}</div>
               ${this.chartSvg()}
             </div>
           </div>
@@ -5315,28 +5374,36 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   },
 
   setStatsRange(r){ this.state.statsRange = r; this.save(); this.renderView(); },
+  setChartRange(r){ this.state.chartRange = r; this.save(); this.renderView(); },
 
   // POINT 8(a) — Répartition clients selon range (mois/trimestre/depuis le début)
+  // Augustin 21/05/2026 : ajout VIP + Business segments
   renderRepartition(){
     const range = this.state.repRange || 'month';
     const data = {
       month: [
-        {c:'#1A56DB',l:'Récurrents',v:'68%',n:232,delta:'+50%',cls:'trend-up'},
-        {c:'#22C55E',l:'Nouveaux',v:'18%',n:62,delta:'+8%',cls:'trend-up'},
+        {c:'#F5C45E',l:'VIP',v:'7%',n:24,delta:'+15%',cls:'trend-up'},
+        {c:'#1A56DB',l:'Récurrents',v:'55%',n:188,delta:'+50%',cls:'trend-up'},
+        {c:'#7A3CFF',l:'Business',v:'8%',n:27,delta:'+22%',cls:'trend-up'},
+        {c:'#22C55E',l:'Nouveaux',v:'16%',n:55,delta:'+8%',cls:'trend-up'},
         {c:'#F59E0B',l:'Occasionnels',v:'10%',n:34,delta:'−2%',cls:'trend-dn'},
         {c:'#FF6B6B',l:'Perdus',v:'4%',n:14,delta:'+5%',cls:'trend-dn'}
       ],
       quarter: [
-        {c:'#1A56DB',l:'Récurrents',v:'62%',n:680,delta:'+32%',cls:'trend-up'},
-        {c:'#22C55E',l:'Nouveaux',v:'22%',n:241,delta:'+18%',cls:'trend-up'},
+        {c:'#F5C45E',l:'VIP',v:'6%',n:66,delta:'+12%',cls:'trend-up'},
+        {c:'#1A56DB',l:'Récurrents',v:'50%',n:548,delta:'+32%',cls:'trend-up'},
+        {c:'#7A3CFF',l:'Business',v:'8%',n:87,delta:'+18%',cls:'trend-up'},
+        {c:'#22C55E',l:'Nouveaux',v:'20%',n:219,delta:'+18%',cls:'trend-up'},
         {c:'#F59E0B',l:'Occasionnels',v:'11%',n:120,delta:'+4%',cls:'trend-up'},
         {c:'#FF6B6B',l:'Perdus',v:'5%',n:55,delta:'+2%',cls:'trend-dn'}
       ],
       all: [
-        {c:'#1A56DB',l:'Récurrents',v:'58%',n:1980,delta:'—',cls:'trend-eq'},
-        {c:'#22C55E',l:'Nouveaux',v:'24%',n:820,delta:'—',cls:'trend-eq'},
+        {c:'#F5C45E',l:'VIP',v:'5%',n:170,delta:'—',cls:'trend-eq'},
+        {c:'#1A56DB',l:'Récurrents',v:'48%',n:1638,delta:'—',cls:'trend-eq'},
+        {c:'#7A3CFF',l:'Business',v:'7%',n:240,delta:'—',cls:'trend-eq'},
+        {c:'#22C55E',l:'Nouveaux',v:'22%',n:751,delta:'—',cls:'trend-eq'},
         {c:'#F59E0B',l:'Occasionnels',v:'12%',n:410,delta:'—',cls:'trend-eq'},
-        {c:'#FF6B6B',l:'Perdus',v:'6%',n:205,delta:'—',cls:'trend-eq'}
+        {c:'#FF6B6B',l:'Perdus',v:'6%',n:206,delta:'—',cls:'trend-eq'}
       ]
     };
     return (data[range]||data.month).map(x=>`
@@ -5344,15 +5411,24 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     `).join('');
   },
 
-  // POINT 8(b) — Modal snapshots historiques (1 sem / 1 mois / 3 mois)
+  // POINT 8(b) — Modal snapshots historiques (Augustin 21/05/2026 : ajout VIP + Business + codes couleur au lieu d'icônes)
   openSnapshotsModal(){
     const ov = document.getElementById('modal-overlay');
     const mc = document.getElementById('modal-content');
     ov.classList.remove('hidden');
     const snaps = [
-      { period:'Il y a 1 semaine', date:'10 mai 2026', rec:{v:64,d:'+4%'}, neu:{v:19,d:'−1%'}, occ:{v:11,d:'+1%'}, lost:{v:6,d:'−2%'} },
-      { period:'Il y a 1 mois',    date:'17 avr. 2026', rec:{v:58,d:'+10%'}, neu:{v:21,d:'−3%'}, occ:{v:13,d:'−3%'}, lost:{v:8,d:'−4%'} },
-      { period:'Il y a 3 mois',    date:'17 fév. 2026', rec:{v:45,d:'+23%'}, neu:{v:30,d:'−12%'}, occ:{v:15,d:'−5%'}, lost:{v:10,d:'−6%'} }
+      { period:'Il y a 1 semaine', date:'10 mai 2026', vip:{v:7,d:'+1%'}, rec:{v:54,d:'+4%'}, biz:{v:8,d:'+1%'}, neu:{v:17,d:'−1%'}, occ:{v:10,d:'+1%'}, lost:{v:4,d:'−2%'} },
+      { period:'Il y a 1 mois',    date:'17 avr. 2026', vip:{v:6,d:'+2%'}, rec:{v:50,d:'+10%'}, biz:{v:7,d:'+2%'}, neu:{v:19,d:'−3%'}, occ:{v:12,d:'−3%'}, lost:{v:6,d:'−4%'} },
+      { period:'Il y a 3 mois',    date:'17 fév. 2026', vip:{v:4,d:'+5%'}, rec:{v:42,d:'+23%'}, biz:{v:5,d:'+4%'}, neu:{v:28,d:'−12%'}, occ:{v:14,d:'−5%'}, lost:{v:7,d:'−6%'} }
+    ];
+    // Segments : code couleur (au lieu d'icônes — Augustin 21/05)
+    const segs = [
+      { k:'vip', l:'VIP',         col:'#F5C45E' },
+      { k:'rec', l:'Récurrents',  col:'#1A56DB' },
+      { k:'biz', l:'Business',    col:'#7A3CFF' },
+      { k:'neu', l:'Nouveaux',    col:'#22C55E' },
+      { k:'occ', l:'Occasionnels',col:'#F59E0B' },
+      { k:'lost',l:'Perdus',      col:'#FF6B6B' }
     ];
     mc.innerHTML = `
       <div class="modal-hd"><h3>📜 Snapshots historiques — répartition clients</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
@@ -5360,15 +5436,20 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         <p style="color:var(--muted);font-size:12.5px;margin-bottom:14px">Compare ta photo client à 3 moments du passé (delta vs aujourd'hui).</p>
         ${snaps.map(s => `
           <div style="padding:14px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;margin-bottom:10px">
-            <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:10px">
               <b style="font-size:13px">${s.period}</b>
               <span style="font-size:11px;color:var(--muted)">${s.date}</span>
             </div>
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-              <div style="text-align:center;padding:8px;background:var(--panel);border-radius:6px"><div style="font-size:11px;color:var(--muted)">🔁 Récurrents</div><div style="font-weight:800;color:#1A56DB" class="mono">${s.rec.v}%</div><div style="font-size:10px;color:${s.rec.d.startsWith('+')?'var(--green)':'var(--red)'}">${s.rec.d}</div></div>
-              <div style="text-align:center;padding:8px;background:var(--panel);border-radius:6px"><div style="font-size:11px;color:var(--muted)">🌱 Nouveaux</div><div style="font-weight:800;color:#22C55E" class="mono">${s.neu.v}%</div><div style="font-size:10px;color:${s.neu.d.startsWith('+')?'var(--green)':'var(--red)'}">${s.neu.d}</div></div>
-              <div style="text-align:center;padding:8px;background:var(--panel);border-radius:6px"><div style="font-size:11px;color:var(--muted)">👥 Occas.</div><div style="font-weight:800;color:#F59E0B" class="mono">${s.occ.v}%</div><div style="font-size:10px;color:${s.occ.d.startsWith('+')?'var(--green)':'var(--red)'}">${s.occ.d}</div></div>
-              <div style="text-align:center;padding:8px;background:var(--panel);border-radius:6px"><div style="font-size:11px;color:var(--muted)">💔 Perdus</div><div style="font-weight:800;color:#FF6B6B" class="mono">${s.lost.v}%</div><div style="font-size:10px;color:${s.lost.d.startsWith('+')?'var(--green)':'var(--red)'}">${s.lost.d}</div></div>
+            <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px">
+              ${segs.map(seg => {
+                const v = s[seg.k]; if (!v) return '';
+                const deltaCol = v.d.startsWith('+') ? 'var(--green)' : v.d.startsWith('−') || v.d.startsWith('-') ? 'var(--red)' : 'var(--muted)';
+                return `<div style="text-align:center;padding:10px 6px;background:var(--panel);border-radius:8px;border-top:3px solid ${seg.col}">
+                  <div style="display:flex;align-items:center;justify-content:center;gap:5px;font-size:10.5px;color:var(--muted);margin-bottom:4px"><span style="width:8px;height:8px;border-radius:50%;background:${seg.col};flex-shrink:0"></span>${seg.l}</div>
+                  <div style="font-weight:800;color:${seg.col};font-size:16px" class="mono">${v.v}%</div>
+                  <div style="font-size:10px;color:${deltaCol};font-weight:600;margin-top:2px">${v.d}</div>
+                </div>`;
+              }).join('')}
             </div>
           </div>`).join('')}
       </div>
@@ -5778,14 +5859,14 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     return html;
   },
 
-  // Donut dynamique selon repRange (Augustin 19/05/2026 — les segments doivent changer)
+  // Donut dynamique selon repRange (Augustin 19/05 + 21/05/2026 : VIP + Business)
   donutSvg(){
     const range = this.state.repRange || 'month';
     // Doit matcher exactement renderRepartition() pour cohérence visuelle
     const data = {
-      month:   { segs:[{c:'#1A56DB',p:68},{c:'#22C55E',p:18},{c:'#F59E0B',p:10},{c:'#FF6B6B',p:4}], total:342 },
-      quarter: { segs:[{c:'#1A56DB',p:62},{c:'#22C55E',p:22},{c:'#F59E0B',p:11},{c:'#FF6B6B',p:5}], total:1096 },
-      all:     { segs:[{c:'#1A56DB',p:58},{c:'#22C55E',p:24},{c:'#F59E0B',p:12},{c:'#FF6B6B',p:6}], total:3415 }
+      month:   { segs:[{c:'#F5C45E',p:7},{c:'#1A56DB',p:55},{c:'#7A3CFF',p:8},{c:'#22C55E',p:16},{c:'#F59E0B',p:10},{c:'#FF6B6B',p:4}], total:342 },
+      quarter: { segs:[{c:'#F5C45E',p:6},{c:'#1A56DB',p:50},{c:'#7A3CFF',p:8},{c:'#22C55E',p:20},{c:'#F59E0B',p:11},{c:'#FF6B6B',p:5}], total:1095 },
+      all:     { segs:[{c:'#F5C45E',p:5},{c:'#1A56DB',p:48},{c:'#7A3CFF',p:7},{c:'#22C55E',p:22},{c:'#F59E0B',p:12},{c:'#FF6B6B',p:6}], total:3415 }
     };
     const d = data[range] || data.month;
     // Calcule offsets cumulatifs (chaque segment commence où le précédent finit)
@@ -6322,22 +6403,24 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           </div>
           <div class="card-body" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
             ${[
-              {k:'vip',e:'⭐',n:'Clients VIP',col:'#F5C45E',bg:'#FEF3C7'},
-              {k:'recurrent',e:'🔁',n:'Récurrents',col:'#1A56DB',bg:'#DBE5FD'},
-              {k:'new',e:'🌱',n:'Nouveaux',col:'#22C55E',bg:'#ECFDF5'},
-              {k:'occ',e:'👥',n:'Occasionnels',col:'#64748B',bg:'#F1F5F9'},
-              {k:'lost',e:'💔',n:'Perdus',col:'#EF4444',bg:'#FEF2F2'},
-              {k:'custom',e:'⚙️',n:'Personnalisé',col:'#7A3CFF',bg:'#F3E8FF'}
+              {k:'vip',n:'Clients VIP',col:'#F5C45E',bg:'#FEF3C7'},
+              {k:'recurrent',n:'Récurrents',col:'#1A56DB',bg:'#DBE5FD'},
+              {k:'business',n:'Business',col:'#7A3CFF',bg:'#F3E8FF'},
+              {k:'new',n:'Nouveaux',col:'#22C55E',bg:'#ECFDF5'},
+              {k:'occ',n:'Occasionnels',col:'#F59E0B',bg:'#FEF3C7'},
+              {k:'lost',n:'Perdus',col:'#EF4444',bg:'#FEF2F2'},
+              {k:'custom',n:'Personnalisé',col:'#EC4899',bg:'#FCE7F3'}
             ].map(seg=>{
               const count = seg.k==='vip'?this.state.clients.filter(c=>c.tags.includes('VIP')).length
                           :seg.k==='lost'?this.state.clients.filter(c=>c.status==='lost').length
                           :seg.k==='new'?this.state.clients.filter(c=>c.status==='prospect').length
                           :seg.k==='recurrent'?this.state.clients.filter(c=>c.tag==='rec').length
+                          :seg.k==='business'?this.state.clients.filter(c=>(c.tags||[]).includes('Business')).length
                           :seg.k==='custom'?'à choisir'
                           :Math.round(this.state.clients.filter(c=>c.status==='active').length*0.6);
               return `
                 <div onclick="Nx.openCampaignBuilder('Segment ${seg.n}','${seg.k}')" style="padding:16px;background:${seg.bg};border:1px solid ${seg.col}33;border-radius:12px;cursor:pointer;transition:all .2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px -8px ${seg.col}55'" onmouseout="this.style.transform='none';this.style.boxShadow='none'">
-                  <div style="font-size:24px;margin-bottom:6px">${seg.e}</div>
+                  <div style="width:36px;height:36px;border-radius:10px;background:${seg.col};margin-bottom:8px;box-shadow:0 4px 14px -3px ${seg.col}77;display:flex;align-items:center;justify-content:center"><div style="width:10px;height:10px;border-radius:50%;background:#fff;opacity:.95"></div></div>
                   <div style="font-weight:700;font-size:13px;color:${seg.col}">${seg.n}</div>
                   <div style="font-size:18px;font-weight:800;margin-top:4px;color:#0F172A" class="mono">${count}</div>
                   <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px">clients</div>
@@ -6346,7 +6429,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
             ${this.state.customSegments.map((s,i)=>`
               <div class="seg-card custom" onclick="Nx.openCampaignBuilder('Segment ${s.name}','custom_${i}')">
                 <button class="seg-card-del" onclick="event.stopPropagation();Nx.deleteCustomSegment(${i})" title="Supprimer">✕</button>
-                <div style="font-size:22px;margin-bottom:4px">📌</div>
+                <div style="width:36px;height:36px;border-radius:10px;background:var(--violet);margin-bottom:8px;box-shadow:0 4px 14px -3px rgba(122,60,255,.45);display:flex;align-items:center;justify-content:center"><div style="width:10px;height:10px;border-radius:50%;background:#fff;opacity:.95"></div></div>
                 <div style="font-weight:700;font-size:13px;color:var(--violet)">${s.name}</div>
                 <div style="font-size:11px;color:var(--muted);margin-top:2px">${s.criteria}</div>
                 <div style="font-size:14px;font-weight:800;margin-top:6px;color:#0F172A" class="mono">${s.clientIds.length} clients</div>
@@ -6874,16 +6957,25 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           </select>
           <div id="customClientPicker" class="hidden" style="margin-top:10px;border:1px solid var(--violet);border-radius:8px;padding:10px;background:var(--violet-soft)">
             <div style="font-size:11px;font-weight:700;color:var(--violet);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">📌 Sélection à la pince</div>
-            <!-- POINT CAMPAGNES (a) — barre de recherche par prénom -->
             <input type="text" class="form-ctrl" id="campClientSearch" placeholder="🔍 Rechercher par prénom…" style="margin-bottom:8px" oninput="Nx.filterCampClients(this.value)">
             <div id="campClientList" style="max-height:200px;overflow-y:auto">
             ${this.state.clients.map(c => `
               <label class="camp-client-item" data-name="${c.name.toLowerCase()}" style="display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:4px;cursor:pointer;font-size:12px">
-                <input type="checkbox" class="camp-client-pick" data-id="${c.id}">
+                <input type="checkbox" class="camp-client-pick" data-id="${c.id}" onchange="Nx.updateCampSelectedPreview()">
                 <span class="seg-pastille seg-${this.segOf(c)}"></span>
                 ${c.name}
               </label>
             `).join('')}
+            </div>
+            <!-- APERÇU CLIENTS COCHÉS (Augustin 21/05/2026) -->
+            <div id="campSelectedPreview" style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--violet)">
+              <div style="font-size:10.5px;font-weight:700;color:var(--violet);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between">
+                <span>✅ <span id="campSelectedCount">0</span> client(s) sélectionné(s)</span>
+                <button type="button" id="campClearAllBtn" style="font-size:10px;background:transparent;border:0;color:var(--muted);cursor:pointer;padding:2px 6px;border-radius:4px;display:none" onclick="Nx.clearCampSelection()">Tout désélectionner</button>
+              </div>
+              <div id="campSelectedChips" style="display:flex;flex-wrap:wrap;gap:5px;max-height:120px;overflow-y:auto;scrollbar-width:thin">
+                <div style="font-size:11.5px;color:var(--muted);font-style:italic;padding:6px 4px">Aucun client coché — sélectionne dans la liste ci-dessus.</div>
+              </div>
             </div>
           </div>
         </div>
@@ -6993,6 +7085,39 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       const name = (el.dataset.name || '');
       el.style.display = (!q || name.includes(q)) ? '' : 'none';
     });
+  },
+
+  // Aperçu live des clients cochés dans la pince (Augustin 21/05/2026)
+  updateCampSelectedPreview(){
+    const checkedIds = [...document.querySelectorAll('.camp-client-pick:checked')].map(cb => parseInt(cb.dataset.id));
+    const wrap = document.getElementById('campSelectedChips');
+    const countEl = document.getElementById('campSelectedCount');
+    const clearBtn = document.getElementById('campClearAllBtn');
+    if (!wrap || !countEl) return;
+    countEl.textContent = checkedIds.length;
+    if (clearBtn) clearBtn.style.display = checkedIds.length > 0 ? '' : 'none';
+    if (checkedIds.length === 0) {
+      wrap.innerHTML = `<div style="font-size:11.5px;color:var(--muted);font-style:italic;padding:6px 4px">Aucun client coché — sélectionne dans la liste ci-dessus.</div>`;
+      return;
+    }
+    const clients = this.state.clients.filter(c => checkedIds.includes(c.id));
+    wrap.innerHTML = clients.map(c => {
+      const segCol = { vip:'#F5C45E', rec:'#1A56DB', biz:'#7A3CFF', new:'#22C55E', occ:'#F59E0B', lost:'#EF4444' }[this.segOf(c)] || '#94A3B8';
+      return `<span style="display:inline-flex;align-items:center;gap:6px;padding:5px 10px 5px 8px;background:#fff;border:1px solid ${segCol}44;border-radius:999px;font-size:11.5px;color:var(--ink);font-weight:600">
+        <span style="width:8px;height:8px;border-radius:50%;background:${segCol};flex-shrink:0"></span>
+        ${c.name}
+        <button type="button" title="Retirer" style="background:transparent;border:0;cursor:pointer;color:var(--muted);font-size:12px;line-height:1;padding:0;margin-left:2px" onclick="Nx.toggleCampClient(${c.id})">✕</button>
+      </span>`;
+    }).join('');
+  },
+  toggleCampClient(id){
+    const cb = document.querySelector('.camp-client-pick[data-id="'+id+'"]');
+    if (cb) { cb.checked = false; this.updateCampSelectedPreview(); }
+  },
+  clearCampSelection(){
+    document.querySelectorAll('.camp-client-pick:checked').forEach(cb => cb.checked = false);
+    this.updateCampSelectedPreview();
+    this.toast('Sélection vidée','info');
   },
 
   // Nouveau calendrier intuitif (Augustin 19/05) — chips presets + datepicker stylisé + récurrence visuelle
