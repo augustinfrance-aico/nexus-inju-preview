@@ -349,7 +349,7 @@ body{
 .audio-times{display:flex;justify-content:space-between;width:100%;max-width:240px;font-size:10.5px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:-6px}
 
 /* Text body */
-.text-body{font-size:13.5px;line-height:1.65;color:var(--ink2);max-height:180px;overflow:hidden;position:relative}
+.text-body{font-size:13.5px;line-height:1.65;color:var(--ink2);max-height:180px;overflow:hidden;position:relative;word-wrap:break-word;overflow-wrap:break-word;hyphens:auto}
 .text-body.expanded{max-height:none}
 .text-body p{margin-bottom:8px}
 .text-body p b{color:var(--ink);font-weight:700}
@@ -1655,8 +1655,14 @@ body{
   document.getElementById('textExpand').addEventListener('click', (e) => {
     const tb = document.getElementById('textBody');
     tb.classList.toggle('expanded');
-    e.currentTarget.firstElementChild.style.transform = tb.classList.contains('expanded') ? 'rotate(180deg)' : 'rotate(0)';
-    e.currentTarget.lastChild.textContent = tb.classList.contains('expanded') ? ' Réduire' : ' Lire en entier';
+    const isExpanded = tb.classList.contains('expanded');
+    const ic = e.currentTarget.querySelector('svg');
+    const lblSpan = e.currentTarget.querySelector('span');
+    if (ic) ic.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0)';
+    if (lblSpan) {
+      const dict = {fr:{open:'Lire en entier',close:'Réduire'},es:{open:'Leer todo',close:'Reducir'},en:{open:'Read all',close:'Collapse'}}[curLang]||{open:'Lire en entier',close:'Réduire'};
+      lblSpan.textContent = isExpanded ? dict.close : dict.open;
+    }
   });
 
   // Copier le brief actif (jour OU semaine selon onglet) — Augustin 21/05/2026
