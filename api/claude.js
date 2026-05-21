@@ -35,8 +35,9 @@ export default async function handler(req, res) {
 
   try {
     const { question, history = [] } = req.body || {};
-    if (!question || typeof question !== 'string' || question.length > 800) {
-      return res.status(400).json({ error: 'Question invalide' });
+    // Limite étendue à 8000 chars (Augustin 20/05 : avant 800 trop court quand on injecte profil + CRM contexte)
+    if (!question || typeof question !== 'string' || question.length > 8000) {
+      return res.status(400).json({ error: 'Question invalide (max 8000 chars)', received: question?.length || 0 });
     }
 
     const anthropicKey = process.env.ANTHROPIC_API_KEY;
