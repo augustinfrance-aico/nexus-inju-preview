@@ -837,11 +837,6 @@ body{
     </div>
 
     <div class="top-actions">
-      <!-- Bouton Paiement (Augustin 28/05/2026) -->
-      <button class="settings-btn" id="paymentBtn" title="Paiement &amp; abonnement" aria-label="Paiement">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-        <span data-i18n="top.payment">Paiement</span>
-      </button>
       <!-- Bouton Réglages (engrenage) à GAUCHE des langues (Augustin 21/05/2026) -->
       <button class="settings-btn" id="settingsBtn" title="Réglages" aria-label="Réglages">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -2229,7 +2224,7 @@ body{
     fr: {
       // Topbar
       'top.home.title':'Nexus Core', 'top.home.sub':'Accueil',
-      'top.notif':'Notifications', 'top.settings':'Paramètres', 'top.menus':'Menus', 'top.payment':'Paiement', 'top.share':'Partager en 1 clic',
+      'top.notif':'Notifications', 'top.settings':'Paramètres', 'top.menus':'Menus', 'top.share':'Partager en 1 clic',
       'top.lang.tooltip':'Changer de langue', 'top.theme':'Basculer thème clair/sombre',
       // Hero banner
       'hero.greeting':'Bonne journée, Carlos.',
@@ -2319,7 +2314,7 @@ body{
     },
     es: {
       'top.home.title':'Nexus Core', 'top.home.sub':'Inicio',
-      'top.notif':'Notificaciones', 'top.settings':'Ajustes', 'top.menus':'Menús', 'top.payment':'Pago', 'top.share':'Compartir en 1 clic',
+      'top.notif':'Notificaciones', 'top.settings':'Ajustes', 'top.menus':'Menús', 'top.share':'Compartir en 1 clic',
       'top.lang.tooltip':'Cambiar idioma', 'top.theme':'Cambiar tema claro/oscuro',
       'hero.greeting':'Buen día, Carlos.',
       'hero.text':'Gracias a Nexus, tienes +28 % de ventas esta semana y 2 clientes perdidos recuperados. Sigue así, funciona.',
@@ -2395,7 +2390,7 @@ body{
     },
     en: {
       'top.home.title':'Nexus Core', 'top.home.sub':'Home',
-      'top.notif':'Notifications', 'top.settings':'Settings', 'top.menus':'Menus', 'top.payment':'Billing', 'top.share':'1-click share',
+      'top.notif':'Notifications', 'top.settings':'Settings', 'top.menus':'Menus', 'top.share':'1-click share',
       'top.lang.tooltip':'Change language', 'top.theme':'Toggle light/dark theme',
       'hero.greeting':'Good day, Carlos.',
       'hero.text':'Thanks to Nexus, you have +28% sales this week and 2 lost clients recovered. Keep going, it works.',
@@ -2570,14 +2565,6 @@ body{
   if (settingsBtn) {
     settingsBtn.addEventListener('click', () => {
       location.href = 'app.html#/settings';
-    });
-  }
-
-  // =========== Bouton Paiement (Augustin 28/05/2026)
-  const paymentBtn = document.getElementById('paymentBtn');
-  if (paymentBtn) {
-    paymentBtn.addEventListener('click', () => {
-      location.href = 'app.html#/payments';
     });
   }
 
