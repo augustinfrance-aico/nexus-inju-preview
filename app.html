@@ -1949,7 +1949,7 @@ const DEFAULT_STATE = {
   // Augustin 28/05/2026 : crédits dynamiques (avant : "253" hardcodé partout, incohérence avec achats)
   credits: { remaining: 253, total: 500, resetLabel: 'dimanche 25 mai' },
   business: {
-    name:'Panadería Don Carlos', owner:'Carlos Muñoz', city:'Santiago', country:'🇨🇱',
+    name:'Panadería Don Carlos', owner:'Carlos Muñoz', ownerPhone:'+56 9 7777 1234', city:'Santiago', country:'🇨🇱',
     logo:'🥖', logoType:'emoji',
     industry:'Panadería / Boulangerie artisanale',
     description:'Panadería familiar en el corazón de Providencia. Heredamos la receta de mi abuelo italiano que llegó a Chile en 1952. Especialidad : pan amasado al estilo chileno tradicional + dulces chilenos + tortas para eventos. Ambiente caluroso, clientela fiel del barrio.',
@@ -8259,10 +8259,31 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
               <label class="switch"><input type="checkbox" ${v.perm_calendar?'checked':''} onchange="Nx.updateVac('perm_calendar',this.checked)"><span class="slider"></span></label>
             </div>
             <div class="vac-toggle-row" style="flex-wrap:wrap;gap:10px">
-              <div class="lbl" style="flex:1;min-width:200px"><b>🚨 Escalader urgences <span style="font-size:10px;font-weight:700;background:#F59E0B;color:#fff;padding:2px 6px;border-radius:999px;margin-left:4px">BETA</span></b><small>Te notifier (SMS + push) si client VIP/Business ou mot-clé urgent (<i>urgente, ahora, importante, ayuda, emergencia</i>).</small></div>
+              <div class="lbl" style="flex:1;min-width:200px"><b>🚨 Escalader urgences <span style="font-size:10px;font-weight:700;background:#F59E0B;color:#fff;padding:2px 6px;border-radius:999px;margin-left:4px">BETA</span></b><small>Te notifier (WhatsApp + push) si client VIP/Business ou mot-clé urgent (<i>urgente, ahora, importante, ayuda, emergencia</i>). Envoi réel quand WhatsApp Business / WAHA sera branché.</small></div>
               <label class="switch"><input type="checkbox" ${v.perm_escalate?'checked':''} onchange="Nx.updateVac('perm_escalate',this.checked)"><span class="slider"></span></label>
               <button class="btn btn-s" style="font-size:11px;padding:6px 10px" onclick="Nx.simulateEscalation()" title="Simuler la réception d'un message urgent">🧪 Tester l'escalade</button>
             </div>
+            ${(this.state.escalationLog||[]).length ? `
+            <div style="margin-top:14px;padding:14px;background:#FEF3C7;border:1px solid #F59E0B44;border-radius:10px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                <b style="color:#78350F;font-size:12.5px">📋 Historique des escalades (${this.state.escalationLog.length})</b>
+                <button class="btn btn-s" style="font-size:10.5px;padding:3px 8px" onclick="if(confirm('Vider l\\'historique des escalades ?')){Nx.state.escalationLog=[];Nx.save();Nx.renderView();}">Vider</button>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;max-height:240px;overflow-y:auto">
+                ${this.state.escalationLog.slice(0,8).map(e => `
+                  <div style="padding:10px 12px;background:#fff;border-radius:8px;border-left:3px solid #F59E0B;font-size:11.5px">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                      <b style="color:#78350F">🚨 ${e.client}</b>
+                      <span style="font-size:10px;color:#92400E">${e.timeLabel}</span>
+                    </div>
+                    <div style="color:#92400E;margin-bottom:4px;font-style:italic">"${e.message}"</div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:10.5px">
+                      <span style="color:#92400E">Raison : ${e.reason} · Canal : ${e.channel}</span>
+                      <span style="padding:2px 6px;border-radius:999px;background:${e.status==='sent'?'#D1FAE5':'#FEF3C7'};color:${e.status==='sent'?'#065F46':'#78350F'};font-weight:700">${e.status==='sent'?'✓ Envoyé':'🧪 Simulé'}</span>
+                    </div>
+                  </div>`).join('')}
+              </div>
+            </div>`:''}
             <div class="vac-toggle-row">
               <div class="lbl"><b>Promo / réductions</b><small>L'IA peut offrir une remise jusqu'à -10% pour ne pas perdre un client.</small></div>
               <label class="switch"><input type="checkbox" ${v.perm_promo?'checked':''} onchange="Nx.updateVac('perm_promo',this.checked)"><span class="slider"></span></label>
@@ -8374,7 +8395,8 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     }
   },
 
-  // Augustin 28/05/2026 : Escalade d'urgences fonctionnelle (beta) — détection mots-clés + segment VIP/Business → SMS + push + +1 compteur
+  // Augustin 28/05/2026 : Escalade d'urgences (beta) — détection mots-clés + segment VIP/Business
+  // Update 28/05 #2 : preview modal + log persistant + hook WAHA/WhatsApp Business ready
   EMERGENCY_KEYWORDS: ['urgente','urgent','ahora','rápido','rapido','importante','ayuda','emergencia','help','asap','immediatement','immédiatement'],
   detectEmergency(text, client){
     const t = String(text||'').toLowerCase();
@@ -8382,32 +8404,133 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     const isImportant = client && (client.tag === 'vip' || client.tag === 'biz' || (client.tags||[]).includes('VIP') || (client.tags||[]).includes('Empresa'));
     return { matched: !!kw || isImportant, reason: kw ? ('mot-clé "' + kw + '"') : (isImportant ? 'client ' + ((client.tags||[]).includes('VIP') ? 'VIP' : 'Business') : null) };
   },
-  triggerEscalation(client, message, reason){
+  // Construit le message exact qui sera envoyé au patron (WhatsApp ou SMS selon provider)
+  buildEscalationPayload(client, message, reason){
+    const b = this.state.business || {};
+    const ownerPhone = b.ownerPhone || b.phone || '+56 9 0000 0000';
+    const ownerName = b.owner || 'Carlos';
+    const ts = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+    const body = `🚨 NEXUS · Message urgent\n\nClient : ${client.name}${client.phone ? ' (' + client.phone + ')' : ''}\nRaison : ${reason}\nReçu à : ${ts}\n\n« ${message} »\n\nRépondre direct ▸ https://wa.me/${(client.phone||'').replace(/[^\d]/g,'')}`;
+    return { to: ownerPhone, ownerName, body, channel: 'whatsapp' };
+  },
+  // Envoi réel : à brancher sur WhatsApp Business API ou WAHA. Pour l'instant : preview + log + push navigateur
+  async sendEscalation(payload){
+    // TODO PROD : décommenter quand WAHA / WhatsApp Business API sera branché
+    // try {
+    //   const r = await fetch('/api/whatsapp/send', {
+    //     method:'POST', headers:{'Content-Type':'application/json'},
+    //     body: JSON.stringify({ to: payload.to, body: payload.body })
+    //   });
+    //   const data = await r.json();
+    //   return { ok: !!data.messageId, messageId: data.messageId, error: data.error };
+    // } catch(e) { return { ok:false, error: String(e) }; }
+    return { ok: false, simulated: true, reason: 'Provider WAHA/WhatsApp Business non branché' };
+  },
+  async triggerEscalation(client, message, reason){
     if (!this.state.vacanceStats) this.state.vacanceStats = { received: 7, replied: 7, escalated: 0 };
+    if (!this.state.escalationLog) this.state.escalationLog = [];
     this.state.vacanceStats.escalated = (this.state.vacanceStats.escalated || 0) + 1;
-    // Tente une vraie notification push système (si autorisée)
+
+    const payload = this.buildEscalationPayload(client, message, reason);
+    const result  = await this.sendEscalation(payload);
+    const status  = result.ok ? 'sent' : 'simulated';
+
+    // Push navigateur (si autorisée)
+    let pushStatus = 'non-supporté';
     try {
       if ('Notification' in window) {
         if (Notification.permission === 'granted') {
           new Notification('🚨 Nexus · Escalade urgente', { body: client.name + ' : ' + String(message).slice(0,90), tag: 'nx-escalation-' + Date.now() });
-        } else if (Notification.permission !== 'denied') {
-          Notification.requestPermission();
-        }
+          pushStatus = 'envoyée';
+        } else if (Notification.permission === 'default') {
+          const perm = await Notification.requestPermission();
+          if (perm === 'granted') {
+            new Notification('🚨 Nexus · Escalade urgente', { body: client.name + ' : ' + String(message).slice(0,90), tag: 'nx-escalation-' + Date.now() });
+            pushStatus = 'envoyée (permission accordée)';
+          } else { pushStatus = 'refusée par l\'utilisateur'; }
+        } else { pushStatus = 'refusée précédemment'; }
       }
-    } catch(e){}
+    } catch(e){ pushStatus = 'erreur : ' + e.message; }
+
+    // Log persistant
+    const entry = {
+      ts: Date.now(),
+      timeLabel: new Date().toLocaleString('fr-FR', {weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}),
+      client: client.name,
+      clientPhone: client.phone || '',
+      message: String(message).slice(0,140),
+      reason,
+      channel: payload.channel === 'whatsapp' ? 'WhatsApp' : 'SMS',
+      to: payload.to,
+      status,
+      pushStatus,
+      simulationReason: result.simulated ? result.reason : null
+    };
+    this.state.escalationLog.unshift(entry);
+    if (this.state.escalationLog.length > 50) this.state.escalationLog = this.state.escalationLog.slice(0,50);
     this.save();
-    // Toast style SMS reçu
-    this.toast('📱 SMS + push envoyés à Carlos', 'warn', '🚨 ' + client.name + ' · ' + reason + ' · « ' + String(message).slice(0,60) + (message.length>60?'…':'') + ' »');
+    this.showEscalationPreview(entry, payload);
     this.renderView();
   },
+  // Modal preview : montre exactement ce qui serait envoyé au patron, avec statut réel
+  showEscalationPreview(entry, payload){
+    const ov = document.getElementById('modal-overlay');
+    const mc = document.getElementById('modal-content');
+    if (!ov || !mc) return;
+    ov.classList.remove('hidden');
+    const isSimulated = entry.status === 'simulated';
+    const bodyHtml = payload.body.replace(/\n/g,'<br>').replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:#1A56DB">$1</a>');
+    mc.innerHTML = `
+      <div class="modal-hd"><h3>🚨 Escalade d'urgence ${isSimulated?'<span style="font-size:10px;font-weight:700;background:#F59E0B;color:#fff;padding:3px 8px;border-radius:999px;margin-left:8px">🧪 SIMULATION</span>':'<span style="font-size:10px;font-weight:700;background:#10B981;color:#fff;padding:3px 8px;border-radius:999px;margin-left:8px">✓ ENVOYÉ</span>'}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-body" style="max-height:75vh;overflow-y:auto">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;font-size:12px">
+          <div style="padding:10px 12px;background:var(--bg2);border-radius:8px">
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700">Client à l'origine</div>
+            <div style="font-weight:700;margin-top:3px">${entry.client}</div>
+            ${entry.clientPhone?`<div style="color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace">${entry.clientPhone}</div>`:''}
+          </div>
+          <div style="padding:10px 12px;background:var(--bg2);border-radius:8px">
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700">Destinataire (patron)</div>
+            <div style="font-weight:700;margin-top:3px">${payload.ownerName}</div>
+            <div style="color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace">${payload.to}</div>
+          </div>
+          <div style="padding:10px 12px;background:var(--bg2);border-radius:8px">
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700">Raison de l'escalade</div>
+            <div style="font-weight:700;margin-top:3px">${entry.reason}</div>
+          </div>
+          <div style="padding:10px 12px;background:var(--bg2);border-radius:8px">
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700">Canal d'envoi</div>
+            <div style="font-weight:700;margin-top:3px">📱 ${entry.channel}</div>
+            <div style="color:var(--muted);font-size:11px">+ Push navigateur : ${entry.pushStatus}</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <div style="font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-bottom:6px">📨 Message exact envoyé au patron</div>
+          <div style="padding:14px 16px;background:#D1FAE5;border-radius:10px;border-left:3px solid #10B981;font-size:13px;line-height:1.6;color:#064E3B;font-family:-apple-system,system-ui,'Segoe UI',sans-serif">${bodyHtml}</div>
+        </div>
+
+        ${isSimulated ? `
+        <div style="padding:14px 16px;background:#FEF3C7;border:1px solid #F59E0B;border-radius:10px;color:#78350F;font-size:12.5px;line-height:1.55">
+          <b>🧪 Mode simulation</b> — ${entry.simulationReason||'aucun provider WhatsApp branché.'}<br>
+          Le mécanisme est en place : détection mot-clé + segment VIP/Business + payload formaté + log persistant + push navigateur.<br>
+          <b>Pour activer l'envoi réel</b> : brancher <b>WhatsApp Business API</b> ou <b>WAHA</b> (self-hosted gratuit) sur l'endpoint <code style="background:#fff;padding:1px 5px;border-radius:4px">/api/whatsapp/send</code>. Le hook est prêt dans <code style="background:#fff;padding:1px 5px;border-radius:4px">Nx.sendEscalation()</code>.
+        </div>` : `
+        <div style="padding:14px 16px;background:#D1FAE5;border:1px solid #10B981;border-radius:10px;color:#064E3B;font-size:12.5px">
+          ✓ Message envoyé via ${entry.channel} à ${payload.to}.
+        </div>`}
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-s" onclick="Nx.closeModal()">Fermer</button>
+        <button class="btn btn-p" onclick="Nx.closeModal()">OK, compris</button>
+      </div>`;
+  },
   simulateEscalation(){
-    // Pour la beta : déclenche immédiatement, même si vacances OFF (l'utilisateur veut tester le mécanisme)
     const vacRaw = localStorage.getItem('nexus_vacances');
     let v = null; try { v = vacRaw ? JSON.parse(vacRaw) : null; } catch(e){}
     if (v && v.perm_escalate === false) {
-      return this.toast('Active d\'abord le toggle "Escalader urgences"','warn','Sinon Nexus n\'enverra pas le SMS');
+      return this.toast('Active d\'abord le toggle "Escalader urgences"','warn','Sinon Nexus n\'enverra pas l\'alerte au patron');
     }
-    // Cherche un client VIP ou Business pour la démo
     const clients = this.state.clients || [];
     const vip = clients.find(c => (c.tags||[]).includes('VIP') || c.tag === 'vip') || clients.find(c => c.tag === 'biz') || clients[0];
     const scenarios = [
@@ -8416,7 +8539,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       { msg: 'Hola, necesito hablar contigo ahora, es importante para nuestro evento corporativo', reason: 'mot-clé "ahora" + client Business' }
     ];
     const sc = scenarios[Math.floor(Math.random() * scenarios.length)];
-    this.triggerEscalation(vip || { name: 'Client VIP test', tags:['VIP'], tag:'vip' }, sc.msg, sc.reason);
+    this.triggerEscalation(vip || { name: 'Client VIP test', tags:['VIP'], tag:'vip', phone:'+56 9 8765 4321' }, sc.msg, sc.reason);
   },
 
   defaultVacances(){
