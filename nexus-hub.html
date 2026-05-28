@@ -102,7 +102,7 @@ html[data-theme="light"] body{
   width:38px;height:38px;border-radius:11px;
   background:var(--panel);border:1px solid var(--line);color:var(--ink2);
   display:flex;align-items:center;justify-content:center;cursor:pointer;
-  transition:all .2s; backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  transition:all .2s; -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   position:relative;
 }
 .tb-btn:hover{background:var(--panel2);color:var(--cyan);border-color:var(--cyan);transform:translateY(-1px)}
@@ -124,7 +124,7 @@ html[data-theme="light"] body{
   display:inline-flex;align-items:center;gap:8px;padding:5px 12px;border-radius:999px;
   background:var(--panel);border:1px solid var(--line);
   font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);font-family:'JetBrains Mono',monospace;
-  margin-bottom:14px; backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  margin-bottom:14px; -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
 }
 .welcome .eye .dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
 .welcome h1{
@@ -182,7 +182,7 @@ html[data-theme="light"] .welcome h1{
   border-radius:30px;
   background:linear-gradient(180deg,var(--panel) 0%,var(--panel2) 100%);
   border:1px solid var(--line);
-  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   text-align:center;
 }
 .app:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.18)}
@@ -282,7 +282,7 @@ html[data-theme="light"] .welcome h1{
   background:rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.12);
   font-size:10.5px; font-weight:700; letter-spacing:.1em; color:var(--ink2);
   font-family:'JetBrains Mono',monospace; text-transform:uppercase;
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
   z-index:2;
 }
 .app.locked .lock-badge svg{width:11px;height:11px}
@@ -295,7 +295,7 @@ html[data-theme="light"] .welcome h1{
   background:var(--panel); border:1px solid var(--line); color:var(--ink);
   display:flex; align-items:center; justify-content:center; cursor:pointer;
   transition:all .2s; z-index:10;
-  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
 }
 .car-nav:hover{background:var(--panel2);border-color:var(--cyan);color:var(--cyan);transform:translateY(-50%) scale(1.06)}
 .car-nav:disabled{opacity:.25;cursor:not-allowed}
@@ -339,7 +339,7 @@ html[data-theme="light"] .welcome h1{
 .modal-bg{
   position:fixed;inset:0;z-index:300;
   background:rgba(11,15,26,.65);
-  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   display:none;align-items:center;justify-content:center;
   padding:24px;
   animation:fadeIn .25s ease;
@@ -432,7 +432,7 @@ html[data-theme="light"] .welcome h1{
   font-size:13px;color:var(--ink);
   display:flex;align-items:center;gap:10px;
   box-shadow:0 20px 60px -10px rgba(0,0,0,.5);
-  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   opacity:0;visibility:hidden;transition:all .3s; z-index:300;
 }
 .toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
@@ -480,20 +480,20 @@ html[data-theme="light"] .welcome h1{
       <div class="brand-name">Ne<b>xus</b></div>
     </div>
     <div class="toolbar">
-      <button class="tb-btn" title="Méthode de paiement" aria-label="Paiement">
+      <button class="tb-btn" id="payBtn" title="Méthode de paiement" aria-label="Paiement">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
       </button>
-      <button class="tb-btn" title="Configuration" aria-label="Configuration">
+      <button class="tb-btn" id="configBtn" title="Configuration" aria-label="Configuration">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
       <button class="tb-btn" id="theme-btn" title="Thème clair / sombre" aria-label="Thème">
         <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
-      <button class="tb-btn sos" title="SAV — Service Après-Vente" aria-label="SAV">
+      <button class="tb-btn sos" id="savBtn" title="SAV — Service Après-Vente" aria-label="SAV">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       </button>
       <span class="tb-divider"></span>
-      <div class="tb-avatar" title="Profil">CR</div>
+      <div class="tb-avatar" id="avatarBtn" title="Profil" role="button" tabindex="0">CR</div>
     </div>
   </div>
 
@@ -717,13 +717,42 @@ html[data-theme="light"] .welcome h1{
   const themeIcon = document.getElementById('theme-icon');
   const sunIcon   = '<path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/><circle cx="12" cy="12" r="5"/>';
   const moonIcon  = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  // Restaure le thème sauvegardé (cohérence avec core.html)
+  const savedTheme = localStorage.getItem('nexus_theme');
+  if (savedTheme === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    themeIcon.innerHTML = sunIcon;
+  }
   themeBtn.addEventListener('click', () => {
     const cur = document.documentElement.getAttribute('data-theme');
     const nxt = cur === 'light' ? '' : 'light';
     if (nxt) document.documentElement.setAttribute('data-theme', nxt);
     else document.documentElement.removeAttribute('data-theme');
     themeIcon.innerHTML = nxt === 'light' ? sunIcon : moonIcon;
+    try { localStorage.setItem('nexus_theme', nxt || 'dark'); } catch(e){}
+    showToast(nxt === 'light' ? '☀️ Thème clair' : '🌙 Thème sombre');
   });
+
+  // ===== Boutons topbar (Augustin 28/05/2026) — étaient morts (aucun handler)
+  const payBtn = document.getElementById('payBtn');
+  if (payBtn) payBtn.addEventListener('click', () => { location.href = 'app.html#/payments'; });
+
+  const configBtn = document.getElementById('configBtn');
+  if (configBtn) configBtn.addEventListener('click', () => { location.href = 'app.html#/settings'; });
+
+  const savBtn = document.getElementById('savBtn');
+  if (savBtn) savBtn.addEventListener('click', () => {
+    showToast('🆘 SAV : ouverture du support…');
+    setTimeout(() => { location.href = 'app.html#/tutorial'; }, 600);
+  });
+
+  const avatarBtn = document.getElementById('avatarBtn');
+  if (avatarBtn) {
+    const goProfile = () => { location.href = 'app.html#/profile'; };
+    avatarBtn.addEventListener('click', goProfile);
+    avatarBtn.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goProfile(); } });
+    avatarBtn.style.cursor = 'pointer';
+  }
 
   // ===== Pages swiper (single-card carousel)
   const pages = document.getElementById('pages');
@@ -929,13 +958,35 @@ html[data-theme="light"] .welcome h1{
     location.href = `preview.html?module=${encodeURIComponent(key)}`;
   });
 
-  // Share FAB
-  document.getElementById('shareBtn').addEventListener('click', () => {
-    if (navigator.share) {
-      navigator.share({ title: 'Nexus', text: 'Découvre Nexus, ma plateforme business pilotée par IA.', url: location.href }).catch(()=>{});
-    } else {
-      navigator.clipboard?.writeText(location.href);
-      showToast('Lien copié — partage-le où tu veux.');
+  // Share FAB (Augustin 28/05/2026) — avant : .catch(()=>{}) silencieux, aucun feedback à l'utilisateur
+  document.getElementById('shareBtn').addEventListener('click', async () => {
+    const payload = { title: 'Nexus', text: 'Découvre Nexus, ma plateforme business pilotée par IA.', url: location.href };
+    try {
+      if (navigator.share) {
+        await navigator.share(payload);
+        showToast('✅ Partagé');
+      } else if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(location.href);
+        showToast('📋 Lien copié — partage-le où tu veux');
+      } else {
+        // Fallback ultime : sélection manuelle
+        const ta = document.createElement('textarea');
+        ta.value = location.href;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); showToast('📋 Lien copié'); }
+        catch(e2) { showToast('❌ Copie indisponible — copie l\'URL manuellement'); }
+        document.body.removeChild(ta);
+      }
+    } catch(err) {
+      if (err && err.name === 'AbortError') return; // partage annulé par l'utilisateur, pas une erreur
+      // Fallback clipboard si navigator.share échoue
+      try {
+        await navigator.clipboard.writeText(location.href);
+        showToast('📋 Lien copié');
+      } catch(e3) {
+        showToast('❌ Partage échoué : ' + (err.message || err.name || 'erreur inconnue'));
+      }
     }
   });
 })();
