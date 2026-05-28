@@ -7900,8 +7900,8 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         id:'integrations',
         ic:'🔌',
         title:'Connecter tes intégrations',
-        desc:'Branche WhatsApp Business, Gmail, Instagram, Google Calendar, Stripe et Mercado Pago. C\'est ce qui permet à Nexus de répondre, encaisser et planifier pour toi.',
-        checks:['WhatsApp Business connecté','Gmail connecté','Google Calendar connecté','Instagram DM connecté','Stripe connecté'],
+        desc:'Branche WhatsApp Business, Gmail, Instagram, Stripe et Mercado Pago. C\'est ce qui permet à Nexus de répondre et encaisser pour toi.',
+        checks:['WhatsApp Business connecté','Gmail connecté','Instagram DM connecté','Stripe connecté'],
         cta:'Connecter mes intégrations',
         route:'onboarding-integrations'
       },
@@ -8557,18 +8557,23 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   },
 
   // Augustin 28/05/2026 : Intégrations sortent des Paramètres et deviennent partie intégrante de l'onboarding
+  // Update 28/05 : Google Calendar retiré (déjà retiré de la vue Pilotage côté Augustin)
   viewOnboardingIntegrations(){
     if (!this.state.integrations) {
       this.state.integrations = [
         {k:'whatsapp', n:'WhatsApp Business API', ic:'📱', s:'connected', critical:true,  desc:'Canal principal pour répondre aux clients.'},
         {k:'gmail',    n:'Gmail',                ic:'✉️',  s:'connected', critical:true,  desc:'Inbox unifiée avec les messages WhatsApp.'},
-        {k:'gcal',     n:'Google Calendar',      ic:'📅', s:'connected', critical:true,  desc:'Planifier RDV et réunions clients automatiquement.'},
         {k:'instagram',n:'Instagram DM',         ic:'📸', s:'pending',   critical:true,  desc:'Recevoir les DM Instagram dans la même inbox.'},
         {k:'stripe',   n:'Stripe',               ic:'💳', s:'connected', critical:true,  desc:'Encaisser ton abonnement Nexus + paiements clients.'},
         {k:'mercado',  n:'Mercado Pago',         ic:'🇨🇱', s:'available', critical:false, desc:'Encaisser en pesos chiliens (très utilisé LATAM).'},
         {k:'analytics',n:'Google Analytics',     ic:'📊', s:'available', critical:false, desc:'Lier les ventes à tes campagnes Nexus.'},
         {k:'zapier',   n:'Zapier',               ic:'⚡', s:'available', critical:false, desc:'Brancher Nexus à 5 000+ apps externes.'}
       ];
+      this.save();
+    }
+    // Cleanup auto pour les users qui avaient déjà chargé la version avec Google Calendar
+    if (Array.isArray(this.state.integrations) && this.state.integrations.some(i => i.k === 'gcal')) {
+      this.state.integrations = this.state.integrations.filter(i => i.k !== 'gcal');
       this.save();
     }
     const items = this.state.integrations;
