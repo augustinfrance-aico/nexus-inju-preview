@@ -228,7 +228,8 @@ html[data-theme="dark"] .bubble.me{background:#056162;color:#E8ECF3}
 .chat-draft .chat-draft-label{font-weight:600;display:inline-block;margin-right:4px}
 .chat-draft-actions{display:flex;gap:6px;margin-top:8px}
 .chat-input{display:flex;gap:8px;padding:14px 18px;border-top:1px solid var(--line2);background:var(--panel)}
-.chat-input input{flex:1;padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:var(--bg2);font-size:13px}
+.chat-input input{flex:1;padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:var(--bg2);font-size:13px;color:var(--ink);caret-color:var(--blue);font-family:inherit}
+.chat-input input::placeholder{color:var(--muted);opacity:1}
 .chat-input input:focus{outline:0;border-color:var(--blue)}
 
 /* MODAL */
@@ -971,6 +972,9 @@ html[data-theme="dark"] .chat-input textarea::placeholder{color:#8A94A6}
       <!-- Toggle dark/light dans la topbar (sidebar masquée) -->
       <button class="icon-btn topbar-theme-btn" onclick="Nx.toggleTheme()" title="Basculer thème clair/sombre" data-i18n-title="theme.toggle" id="topbarThemeBtn">
         <svg id="topbarThemeIc" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+      <button class="icon-btn" onclick="Nx.navigate('payments')" title="Paiement &amp; abonnement" aria-label="Paiement">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
       </button>
       <button class="icon-btn" onclick="Nx.showNotifs()" title="Notifications" id="notifBtn">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a2 2 0 003.4 0"/></svg>
@@ -1836,7 +1840,7 @@ const MOCK_CLIENTS = [
   {id:1,name:'María González',phone:'+56 9 8765 4321',avatar:'MG',color:'#1A56DB',score:94,orders:12,spent:184000,lastSeen:'Hace 4 min',channel:'whatsapp',tag:'vip',tags:['VIP','Amiga'],notes:'Cumpleaños 14 agosto. Le encanta pan amasado.',status:'active'},
   {id:2,name:'Diego Ramírez',phone:'+56 9 8888 1122',avatar:'DR',color:'#22C55E',score:87,orders:9,spent:142000,lastSeen:'Hace 18 min',channel:'whatsapp',tag:'rec',tags:['Récurrent'],notes:'Paga siempre por transferencia.',status:'active'},
   {id:3,name:'Ana Silva',phone:'+56 9 4532 7799',avatar:'AS',color:'#7A3CFF',score:82,orders:7,spent:98000,lastSeen:'Hace 2 h',channel:'whatsapp',tag:'rec',tags:['Récurrent'],notes:'Prefiere delivery después de las 18h.',status:'active'},
-  {id:4,name:'Pablo Herrera',phone:'+56 9 1234 5678',avatar:'PH',color:'#F59E0B',score:75,orders:6,spent:78000,lastSeen:'Ayer',channel:'instagram',tag:'',tags:['Instagram'],notes:'',status:'active'},
+  {id:4,name:'Pablo Herrera',phone:'+56 9 1234 5678',avatar:'PH',color:'#F59E0B',score:75,orders:6,spent:78000,lastSeen:'Ayer',channel:'instagram',instagram:'@pablo_herrera_cl',instagramFollowers:1840,tag:'',tags:['Instagram'],notes:'',status:'active'},
   {id:5,name:'Valentina Rojas',phone:'+56 9 7777 3333',avatar:'VR',color:'#EF4444',score:71,orders:5,spent:64000,lastSeen:'Hace 3 días',channel:'whatsapp',tag:'',tags:[],notes:'',status:'active'},
   {id:6,name:'Isabel Torres',phone:'+56 9 9988 7766',avatar:'IT',color:'#F59E0B',score:48,orders:1,spent:12000,lastSeen:'Hace 1 h',channel:'whatsapp',tag:'new',tags:['Nuevo'],notes:'Interesada en tortas de cumpleaños.',status:'prospect'},
   {id:7,name:'Luis Martínez',phone:'+56 9 5544 2211',avatar:'LM',color:'#EF4444',score:62,orders:2,spent:34000,lastSeen:'Hace 3 h',channel:'email',tag:'biz',tags:['Empresa'],notes:'Evento corporativo 25/04.',status:'prospect'},
@@ -1844,7 +1848,7 @@ const MOCK_CLIENTS = [
   {id:9,name:'Rodrigo Vega',phone:'+56 9 3344 5566',avatar:'RV',color:'#1A56DB',score:68,orders:4,spent:52000,lastSeen:'Hace 50 días',channel:'whatsapp',tag:'alert',tags:['Perdida'],notes:'Cliente fiel perdido.',status:'lost'},
   {id:10,name:'Carmen López',phone:'+56 9 2211 0099',avatar:'CL',color:'#22C55E',score:65,orders:5,spent:47000,lastSeen:'Hace 60 días',channel:'whatsapp',tag:'alert',tags:['Perdida','VIP'],notes:'Era VIP, ahora silencio.',status:'lost'},
   {id:11,name:'Andrés Fuentes',phone:'+56 9 8765 1234',avatar:'AF',color:'#7A3CFF',score:58,orders:3,spent:38000,lastSeen:'Hace 5 días',channel:'whatsapp',tag:'',tags:[],notes:'',status:'active'},
-  {id:12,name:'Paula Núñez',phone:'+56 9 1122 3344',avatar:'PN',color:'#F59E0B',score:51,orders:2,spent:22000,lastSeen:'Hace 7 días',channel:'instagram',tag:'',tags:['Instagram'],notes:'',status:'active'}
+  {id:12,name:'Paula Núñez',phone:'+56 9 1122 3344',avatar:'PN',color:'#F59E0B',score:51,orders:2,spent:22000,lastSeen:'Hace 7 días',channel:'instagram',instagram:'@paula.nunez',instagramFollowers:620,tag:'',tags:['Instagram'],notes:'',status:'active'}
 ];
 
 const MOCK_CONVERSATIONS = [
@@ -1940,10 +1944,13 @@ const DEFAULT_STATE = {
   onboarding: [
     {id:'profile',label:'Remplir ton profil entreprise',done:true},
     {id:'whatsapp',label:'Connecter WhatsApp Business',done:true},
+    {id:'integrations',label:'Connecter tes intégrations (Gmail, Google Calendar, Instagram, Stripe)',done:false},
     {id:'catalog',label:'Ajouter ton catalogue (5 produits mini)',done:true},
     {id:'faq',label:'Rédiger 3 FAQ',done:true},
     {id:'campaign',label:'Lancer ta 1ère campagne',done:false},
   ],
+  // Augustin 28/05/2026 : crédits dynamiques (avant : "253" hardcodé partout, incohérence avec achats)
+  credits: { remaining: 253, total: 500, resetLabel: 'dimanche 25 mai' },
   business: {
     name:'Panadería Don Carlos', owner:'Carlos Muñoz', city:'Santiago', country:'🇨🇱',
     logo:'🥖', logoType:'emoji',
@@ -2662,10 +2669,24 @@ const Nx = {
               ${editing ? `<input class="form-ctrl" id="editEmail" placeholder="email@…" value="${c.email||''}">` : `<div style="padding:8px 12px;background:var(--bg2);border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:12.5px">${c.email||'+ Ajouter un email'}</div>`}
             </div>
           </div>
-          <div style="padding:8px 12px;background:var(--green-soft);border-radius:6px;font-size:11px;color:var(--green);margin-bottom:8px">
-            ✓ Fiche unifiée : ce client sera fusionné automatiquement entre WhatsApp et Email s'il utilise les deux canaux.
+          <!-- Instagram (Augustin 28/05/2026) -->
+          <div class="form-row" style="margin-bottom:14px">
+            <label class="form-lbl">📸 Instagram ${c.instagram?'':' <span style="color:var(--muted);font-weight:400">(non renseigné)</span>'}</label>
+            ${editing
+              ? `<input class="form-ctrl" id="editInstagram" placeholder="@handle" value="${c.instagram||''}">`
+              : (c.instagram
+                  ? `<div style="display:flex;gap:10px;align-items:center;padding:8px 12px;background:var(--bg2);border-radius:6px">
+                       <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#E1306C;font-weight:700">${c.instagram}</span>
+                       ${c.instagramFollowers?`<span style="font-size:11px;color:var(--muted)">· ${c.instagramFollowers.toLocaleString('fr-FR')} abonnés</span>`:''}
+                       <a href="https://instagram.com/${(c.instagram||'').replace('@','')}" target="_blank" rel="noopener" style="margin-left:auto;font-size:11px;color:var(--blue);font-weight:700;text-decoration:none">Voir profil ↗</a>
+                     </div>`
+                  : `<div style="padding:8px 12px;background:var(--bg2);border-radius:6px;font-size:12.5px;color:var(--muted)">+ Ajouter un compte Instagram</div>`)
+            }
           </div>
-          <button class="btn btn-s" style="width:100%;margin-bottom:14px" onclick="Nx.unifyClientChannels(${c.id})">🔗 Unifier WhatsApp + Mail</button>
+          <div style="padding:8px 12px;background:var(--green-soft);border-radius:6px;font-size:11px;color:var(--green);margin-bottom:8px">
+            ✓ Fiche unifiée : ce client sera fusionné automatiquement entre WhatsApp, Email et Instagram s'il utilise plusieurs canaux.
+          </div>
+          <button class="btn btn-s" style="width:100%;margin-bottom:14px" onclick="Nx.unifyClientChannels(${c.id})">🔗 Unifier WhatsApp + Mail + Instagram</button>
 
           <!-- STATS -->
           <div class="grid3" style="margin-bottom:14px">
@@ -2886,11 +2907,17 @@ const Nx = {
     const editName = document.getElementById('editName');
     const editPhone = document.getElementById('editPhone');
     const editEmail = document.getElementById('editEmail');
+    const editInstagram = document.getElementById('editInstagram');
     const aiNotes = document.getElementById('aiNotes');
     const clientNotes = document.getElementById('clientNotes');
     if (editName) c.name = editName.value;
     if (editPhone) c.phone = editPhone.value;
     if (editEmail) c.email = editEmail.value;
+    if (editInstagram) {
+      let h = (editInstagram.value || '').trim();
+      if (h && !h.startsWith('@')) h = '@' + h;
+      c.instagram = h;
+    }
     if (aiNotes) c.aiNotes = aiNotes.value;
     if (clientNotes) c.notes = clientNotes.value;
     this.state.clientEditing = null;
@@ -3080,6 +3107,7 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
       else if (v === 'tutorial') html = this.viewTutorial();
       else if (v === 'vacances') html = this.viewVacances();
       else if (v === 'settings') html = this.viewSettings();
+      else if (v === 'onboarding-integrations') html = this.viewOnboardingIntegrations();
       else html = '<div class="view"><h1>Page introuvable</h1><p>Retourner au <a href="#/dashboard" style="color:var(--blue)">tableau de bord</a>.</p></div>';
     } catch(err) {
       console.error('[renderView crash] view='+v, err);
@@ -5889,8 +5917,8 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   // ---- Helpers Pilotage ----
   // Catégories → couleur + icône + label + route de redirection
   pilotageCategories(){
+    // Augustin 28/05/2026 : catégorie "Réunions" retirée (widget Google Calendar déplacé hors Pilotage, géré dans CRM)
     return {
-      meeting:  { color:'#1A56DB', ic:'📅', lbl:'Réunions',    route:'pilotage' },
       message:  { color:'#3B82F6', ic:'💬', lbl:'Messagerie',  route:'inbox' },
       inbox:    { color:'#10B981', ic:'📬', lbl:'Inbox',       route:'inbox' },
       social:   { color:'#EC4899', ic:'📸', lbl:'Réseaux',     route:'campaigns' },
@@ -5969,25 +5997,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
 
     const cats = this.pilotageCategories();
     const allItems = this.getAgendaItems();
-    // Merge réunions Google Calendar comme items agenda (Augustin 21/05/2026)
-    (this.state.meetings || []).forEach(m => {
-      const d = new Date(m.dateISO);
-      const isPast = d < new Date();
-      const placeIc = /visio|meet|zoom/i.test(m.place||'') ? '💻' : /caf[ée]/i.test(m.place||'') ? '☕' : /boutique/i.test(m.place||'') ? '🏪' : '📍';
-      const hm = String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-      allItems.push({
-        id: 'mtg_'+m.id,
-        icon: '📅',
-        title: 'Réunion · ' + (m.client||'Sans client'),
-        detail: (m.topic||'') + (m.place ? ' '+placeIc+' '+m.place : ''),
-        when: d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})+' '+hm,
-        dueDate: m.dateISO,
-        category: 'meeting',
-        status: isPast ? 'done' : 'scheduled',
-        isMeeting: true,
-        meetingId: m.id
-      });
-    });
+    // Augustin 28/05/2026 : widget Google Calendar retiré de la vue Pilotage (les réunions restent gérées dans CRM)
     // Filtrage statut + catégorie
     let items = allItems.filter(it => it.status === tab);
     if (cat !== 'all') items = items.filter(it => (it.category||'reminder') === cat);
@@ -6461,18 +6471,24 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           </div>
         </div>
 
-        <!-- CRÉDITS HEBDO — anti-abus -->
+        <!-- CRÉDITS HEBDO — anti-abus (Augustin 28/05/2026 : dynamique + cohérence prix) -->
+        ${(() => {
+          const cr = this.state.credits || { remaining: 253, total: 500, resetLabel: 'dimanche' };
+          const used = Math.max(0, cr.total - cr.remaining);
+          const pct = cr.total > 0 ? Math.min(100, (used / cr.total) * 100) : 0;
+          return `
         <div class="card" style="margin-bottom:16px;background:linear-gradient(135deg,#EFF6FF,#FEF3C7);padding:18px 22px;display:flex;align-items:center;gap:18px">
           <div style="width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,#1A56DB,#7A3CFF);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">⚡</div>
           <div style="flex:1">
             <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
               <div style="font-size:13px;font-weight:700">Crédits campagnes — semaine en cours</div>
-              <div class="mono" style="font-size:14px;font-weight:800"><span style="color:#1A56DB">247</span><span style="color:var(--muted)"> / 500</span></div>
+              <div class="mono" style="font-size:14px;font-weight:800"><span style="color:#1A56DB">${used}</span><span style="color:var(--muted)"> / ${cr.total}</span></div>
             </div>
-            <div style="height:8px;border-radius:999px;background:#E2E8F0;overflow:hidden;margin-bottom:6px"><div style="height:100%;width:49.4%;background:linear-gradient(90deg,#1A56DB,#7A3CFF);border-radius:999px"></div></div>
-            <div style="font-size:11px;color:var(--muted)">253 envois restants · reset dimanche · <a onclick="Nx.toast('Pack VIP +1000 envois pour 5€','info')" style="color:#1A56DB;cursor:pointer;font-weight:600">Booster (+1000 pour 5€)</a></div>
+            <div style="height:8px;border-radius:999px;background:#E2E8F0;overflow:hidden;margin-bottom:6px"><div style="height:100%;width:${pct.toFixed(1)}%;background:linear-gradient(90deg,#1A56DB,#7A3CFF);border-radius:999px"></div></div>
+            <div style="font-size:11px;color:var(--muted)">${cr.remaining} envois restants · reset ${cr.resetLabel} · <a onclick="Nx.buyCredits('100 crédits','5 €')" style="color:#1A56DB;cursor:pointer;font-weight:600">Booster (+100 pour 5€)</a></div>
           </div>
-        </div>
+        </div>`;
+        })()}
 
         <!-- CAMPAGNES AUTO (3 par défaut + custom-* créées via builder — Augustin 21/05/2026) -->
         <div class="card" style="margin-bottom:16px">
@@ -7126,9 +7142,9 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           </div>
         </div>
 
-        <!-- Coût en crédits -->
+        <!-- Coût en crédits (Augustin 28/05/2026 : dynamique) -->
         <div style="padding:12px 14px;background:linear-gradient(135deg,#EFF6FF,#FEF3C7);border-radius:10px;margin-top:14px;display:flex;justify-content:space-between;align-items:center;font-size:12.5px">
-          <span><b>Coût estimé</b> · <span class="mono">~85 envois</span> sur tes 253 crédits restants cette semaine</span>
+          <span><b>Coût estimé</b> · <span class="mono">~85 envois</span> sur tes ${(this.state.credits||{remaining:253}).remaining} crédits restants cette semaine</span>
           <span style="color:#1A56DB;font-weight:700">⚡ 85 crédits</span>
         </div>
 
@@ -7703,7 +7719,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           </div>
         </div>
 
-        <!-- RÉCAP CRÉDITS — Augustin 20/05 : "récap nombre crédits restants + utilisation" -->
+        <!-- RÉCAP CRÉDITS — Augustin 20/05 : "récap nombre crédits restants + utilisation" (28/05 : dynamique) -->
         <div class="card" style="margin-top:14px;padding:22px;background:linear-gradient(135deg,#FFFBEB,#FEF3C7);border:1px solid #F59E0B44">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:14px">
             <div>
@@ -7712,14 +7728,14 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
             </div>
             <div style="text-align:right">
               <div style="font-size:11px;color:#92400E;text-transform:uppercase;letter-spacing:.05em;font-weight:700">Restants ce mois</div>
-              <div style="font-size:30px;font-weight:900;color:#78350F;font-family:'JetBrains Mono',monospace">253 <span style="font-size:14px;opacity:.6">/ 500</span></div>
+              <div style="font-size:30px;font-weight:900;color:#78350F;font-family:'JetBrains Mono',monospace">${(this.state.credits||{remaining:253}).remaining} <span style="font-size:14px;opacity:.6">/ ${(this.state.credits||{total:500}).total}</span></div>
             </div>
           </div>
           <!-- Barre progression utilisation -->
           <div style="height:14px;background:#fff;border-radius:999px;overflow:hidden;border:1px solid #FCD34D;margin-bottom:6px">
-            <div style="height:100%;width:49.4%;background:linear-gradient(90deg,#F59E0B,#EF4444);border-radius:999px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;color:#fff;font-size:9px;font-weight:800">49%</div>
+            <div style="height:100%;width:${(() => { const cr=this.state.credits||{remaining:253,total:500}; const u=Math.max(0,cr.total-cr.remaining); return cr.total>0?Math.min(100,(u/cr.total)*100).toFixed(1):0; })()}%;background:linear-gradient(90deg,#F59E0B,#EF4444);border-radius:999px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;color:#fff;font-size:9px;font-weight:800">${(() => { const cr=this.state.credits||{remaining:253,total:500}; const u=Math.max(0,cr.total-cr.remaining); return cr.total>0?Math.round((u/cr.total)*100):0; })()}%</div>
           </div>
-          <div style="font-size:11px;color:#92400E;margin-bottom:18px">247 utilisés · 253 restants · reset dimanche 25 mai</div>
+          <div style="font-size:11px;color:#92400E;margin-bottom:18px">${Math.max(0,((this.state.credits||{remaining:253,total:500}).total-(this.state.credits||{remaining:253,total:500}).remaining))} utilisés · ${(this.state.credits||{remaining:253}).remaining} restants · reset ${(this.state.credits||{resetLabel:'dimanche 25 mai'}).resetLabel}</div>
 
           <!-- Breakdown utilisation par module -->
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px">
@@ -7800,10 +7816,17 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       </div>`;
   },
 
-  // POINT CAMPAGNES (f) — Acheter des crédits supplémentaires
+  // POINT CAMPAGNES (f) — Acheter des crédits supplémentaires (Augustin 28/05/2026 : vraie MAJ state.credits + bump total)
   buyCredits(pack, price){
     if (!confirm('Confirmer l\'achat du pack ' + pack + ' pour ' + price + ' ?')) return;
-    this.toast('✓ Pack ' + pack + ' acheté','success', 'Crédits crédités sur ton compte ('+price+')');
+    const m = String(pack).match(/(\d+)/);
+    const amount = m ? parseInt(m[1], 10) : 0;
+    if (!this.state.credits) this.state.credits = { remaining: 253, total: 500, resetLabel: 'dimanche 25 mai' };
+    this.state.credits.remaining += amount;
+    this.state.credits.total      += amount;
+    this.save();
+    this.renderView();
+    this.toast('✓ Pack ' + pack + ' acheté','success', '+' + amount + ' crédits ajoutés (' + price + '). Solde : ' + this.state.credits.remaining);
   },
 
   downloadAllInvoices(){
@@ -7832,10 +7855,10 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         id:'integrations',
         ic:'🔌',
         title:'Connecter tes intégrations',
-        desc:'Branche WhatsApp Business, Gmail et Google Calendar. C\'est ce qui permet à Nexus de répondre et planifier pour toi.',
-        checks:['WhatsApp Business connecté','Gmail connecté','Google Calendar connecté'],
-        cta:'Voir les intégrations',
-        route:'settings'
+        desc:'Branche WhatsApp Business, Gmail, Instagram, Google Calendar, Stripe et Mercado Pago. C\'est ce qui permet à Nexus de répondre, encaisser et planifier pour toi.',
+        checks:['WhatsApp Business connecté','Gmail connecté','Google Calendar connecté','Instagram DM connecté','Stripe connecté'],
+        cta:'Connecter mes intégrations',
+        route:'onboarding-integrations'
       },
       {
         id:'stats',
@@ -8190,9 +8213,10 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
               <div class="lbl"><b>Planifier RDV</b><small>Bloquer un créneau dans le Google Calendar.</small></div>
               <label class="switch"><input type="checkbox" ${v.perm_calendar?'checked':''} onchange="Nx.updateVac('perm_calendar',this.checked)"><span class="slider"></span></label>
             </div>
-            <div class="vac-toggle-row">
-              <div class="lbl"><b>Escalader urgences</b><small>Te notifier (SMS / push) si client important ou mot-clé urgent.</small></div>
+            <div class="vac-toggle-row" style="flex-wrap:wrap;gap:10px">
+              <div class="lbl" style="flex:1;min-width:200px"><b>🚨 Escalader urgences <span style="font-size:10px;font-weight:700;background:#F59E0B;color:#fff;padding:2px 6px;border-radius:999px;margin-left:4px">BETA</span></b><small>Te notifier (SMS + push) si client VIP/Business ou mot-clé urgent (<i>urgente, ahora, importante, ayuda, emergencia</i>).</small></div>
               <label class="switch"><input type="checkbox" ${v.perm_escalate?'checked':''} onchange="Nx.updateVac('perm_escalate',this.checked)"><span class="slider"></span></label>
+              <button class="btn btn-s" style="font-size:11px;padding:6px 10px" onclick="Nx.simulateEscalation()" title="Simuler la réception d'un message urgent">🧪 Tester l'escalade</button>
             </div>
             <div class="vac-toggle-row">
               <div class="lbl"><b>Promo / réductions</b><small>L'IA peut offrir une remise jusqu'à -10% pour ne pas perdre un client.</small></div>
@@ -8303,6 +8327,51 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     } catch(e) {
       resDiv.innerHTML = `<div style="padding:14px;background:#FEE2E2;border-radius:10px;color:var(--red)">⚠️ Erreur : ${String(e).slice(0,100)}</div>`;
     }
+  },
+
+  // Augustin 28/05/2026 : Escalade d'urgences fonctionnelle (beta) — détection mots-clés + segment VIP/Business → SMS + push + +1 compteur
+  EMERGENCY_KEYWORDS: ['urgente','urgent','ahora','rápido','rapido','importante','ayuda','emergencia','help','asap','immediatement','immédiatement'],
+  detectEmergency(text, client){
+    const t = String(text||'').toLowerCase();
+    const kw = this.EMERGENCY_KEYWORDS.find(k => t.includes(k));
+    const isImportant = client && (client.tag === 'vip' || client.tag === 'biz' || (client.tags||[]).includes('VIP') || (client.tags||[]).includes('Empresa'));
+    return { matched: !!kw || isImportant, reason: kw ? ('mot-clé "' + kw + '"') : (isImportant ? 'client ' + ((client.tags||[]).includes('VIP') ? 'VIP' : 'Business') : null) };
+  },
+  triggerEscalation(client, message, reason){
+    if (!this.state.vacanceStats) this.state.vacanceStats = { received: 7, replied: 7, escalated: 0 };
+    this.state.vacanceStats.escalated = (this.state.vacanceStats.escalated || 0) + 1;
+    // Tente une vraie notification push système (si autorisée)
+    try {
+      if ('Notification' in window) {
+        if (Notification.permission === 'granted') {
+          new Notification('🚨 Nexus · Escalade urgente', { body: client.name + ' : ' + String(message).slice(0,90), tag: 'nx-escalation-' + Date.now() });
+        } else if (Notification.permission !== 'denied') {
+          Notification.requestPermission();
+        }
+      }
+    } catch(e){}
+    this.save();
+    // Toast style SMS reçu
+    this.toast('📱 SMS + push envoyés à Carlos', 'warn', '🚨 ' + client.name + ' · ' + reason + ' · « ' + String(message).slice(0,60) + (message.length>60?'…':'') + ' »');
+    this.renderView();
+  },
+  simulateEscalation(){
+    // Pour la beta : déclenche immédiatement, même si vacances OFF (l'utilisateur veut tester le mécanisme)
+    const vacRaw = localStorage.getItem('nexus_vacances');
+    let v = null; try { v = vacRaw ? JSON.parse(vacRaw) : null; } catch(e){}
+    if (v && v.perm_escalate === false) {
+      return this.toast('Active d\'abord le toggle "Escalader urgences"','warn','Sinon Nexus n\'enverra pas le SMS');
+    }
+    // Cherche un client VIP ou Business pour la démo
+    const clients = this.state.clients || [];
+    const vip = clients.find(c => (c.tags||[]).includes('VIP') || c.tag === 'vip') || clients.find(c => c.tag === 'biz') || clients[0];
+    const scenarios = [
+      { msg: '¡URGENTE Carlos! Necesito 50 empanadas para esta noche, evento importante 🙏', reason: 'mot-clé "urgente" + client VIP' },
+      { msg: 'Ayuda, mi pedido de tortas no llegó y es para una boda hoy a las 18h', reason: 'mot-clé "ayuda" + livraison du jour' },
+      { msg: 'Hola, necesito hablar contigo ahora, es importante para nuestro evento corporativo', reason: 'mot-clé "ahora" + client Business' }
+    ];
+    const sc = scenarios[Math.floor(Math.random() * scenarios.length)];
+    this.triggerEscalation(vip || { name: 'Client VIP test', tags:['VIP'], tag:'vip' }, sc.msg, sc.reason);
   },
 
   defaultVacances(){
@@ -8442,6 +8511,76 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     this.renderView();
   },
 
+  // Augustin 28/05/2026 : Intégrations sortent des Paramètres et deviennent partie intégrante de l'onboarding
+  viewOnboardingIntegrations(){
+    if (!this.state.integrations) {
+      this.state.integrations = [
+        {k:'whatsapp', n:'WhatsApp Business API', ic:'📱', s:'connected', critical:true,  desc:'Canal principal pour répondre aux clients.'},
+        {k:'gmail',    n:'Gmail',                ic:'✉️',  s:'connected', critical:true,  desc:'Inbox unifiée avec les messages WhatsApp.'},
+        {k:'gcal',     n:'Google Calendar',      ic:'📅', s:'connected', critical:true,  desc:'Planifier RDV et réunions clients automatiquement.'},
+        {k:'instagram',n:'Instagram DM',         ic:'📸', s:'pending',   critical:true,  desc:'Recevoir les DM Instagram dans la même inbox.'},
+        {k:'stripe',   n:'Stripe',               ic:'💳', s:'connected', critical:true,  desc:'Encaisser ton abonnement Nexus + paiements clients.'},
+        {k:'mercado',  n:'Mercado Pago',         ic:'🇨🇱', s:'available', critical:false, desc:'Encaisser en pesos chiliens (très utilisé LATAM).'},
+        {k:'analytics',n:'Google Analytics',     ic:'📊', s:'available', critical:false, desc:'Lier les ventes à tes campagnes Nexus.'},
+        {k:'zapier',   n:'Zapier',               ic:'⚡', s:'available', critical:false, desc:'Brancher Nexus à 5 000+ apps externes.'}
+      ];
+      this.save();
+    }
+    const items = this.state.integrations;
+    const critical = items.filter(i => i.critical);
+    const connected = items.filter(i => i.s === 'connected').length;
+    const pct = Math.round((connected / items.length) * 100);
+    return `
+      <div class="view">
+        <div class="page-hd">
+          <div><h1>🔌 Connecter mes intégrations</h1><div class="sub">Étape de l'onboarding · ${connected}/${items.length} connectées · plus tu connectes, plus Nexus est précis.</div></div>
+          <div class="flex"><button class="btn btn-s" onclick="Nx.navigate('tutorial')">← Retour au tutoriel</button></div>
+        </div>
+
+        <div class="card" style="padding:20px;background:linear-gradient(135deg,var(--blue-soft),var(--cyan-soft));border:1px solid var(--blue);margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <b style="color:var(--blue-ink);font-size:14px">Progression onboarding</b>
+            <span class="mono" style="color:var(--blue-ink);font-weight:800">${pct}%</span>
+          </div>
+          <div style="height:10px;background:#fff;border-radius:999px;overflow:hidden"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--blue),var(--violet,#7A3CFF));border-radius:999px"></div></div>
+          <div style="font-size:11.5px;color:var(--blue-ink);margin-top:8px">Les 5 intégrations critiques (badge 🔴) sont indispensables pour activer toutes les automatisations.</div>
+        </div>
+
+        <div class="card" style="padding:0;overflow:hidden">
+          ${items.map(i => {
+            const statusColor = i.s==='connected' ? '#22C55E' : i.s==='pending' ? '#F59E0B' : '#94A3B8';
+            const statusLbl   = i.s==='connected' ? 'Connecté' : i.s==='pending' ? 'En attente' : 'À connecter';
+            const btnLbl      = i.s==='connected' ? 'Déconnecter' : 'Connecter maintenant';
+            const btnClass    = i.s==='connected' ? 'btn-s' : 'btn-p';
+            return `<div style="padding:16px 18px;display:flex;gap:14px;align-items:center;border-bottom:1px solid var(--line2)">
+              <div style="width:44px;height:44px;border-radius:12px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">${i.ic}</div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px"><b style="font-size:14px">${i.n}</b>${i.critical?'<span title="Intégration critique pour Nexus" style="font-size:10px">🔴</span>':''}</div>
+                <div style="font-size:12px;color:var(--muted)">${i.desc}</div>
+              </div>
+              <span class="chip" style="background:${statusColor}1A;color:${statusColor};border:1px solid ${statusColor}55;font-weight:700">${statusLbl}</span>
+              <button class="btn ${btnClass}" style="white-space:nowrap" onclick="Nx.toggleIntegration('${i.k}')">${btnLbl}</button>
+            </div>`;
+          }).join('')}
+        </div>
+
+        <div class="flex" style="gap:10px;margin-top:18px;justify-content:flex-end">
+          <button class="btn btn-s" onclick="Nx.navigate('tutorial')">Plus tard</button>
+          <button class="btn btn-p" onclick="Nx.toggleTutoStep('integrations');Nx.navigate('tutorial')">✓ Marquer l'étape comme faite</button>
+        </div>
+      </div>`;
+  },
+
+  toggleIntegration(k){
+    if (!this.state.integrations) return;
+    const it = this.state.integrations.find(x => x.k === k);
+    if (!it) return;
+    it.s = (it.s === 'connected') ? 'available' : 'connected';
+    this.save();
+    this.renderView();
+    this.toast(it.s === 'connected' ? '✓ ' + it.n + ' connecté' : it.n + ' déconnecté', it.s === 'connected' ? 'success' : 'info');
+  },
+
   viewSettings(){
     const p = this.state.preferences;
     return `
@@ -8482,21 +8621,10 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           </div>
 
           <div class="card" style="padding:22px">
-            <h3 style="margin-bottom:16px">🔌 Intégrations</h3>
-            ${[
-              {n:'WhatsApp Business API',s:'connected',ic:'📱'},
-              {n:'Google Calendar',s:'connected',ic:'📅'},
-              {n:'Gmail',s:'connected',ic:'✉️'},
-              {n:'Instagram DM',s:'pending',ic:'📸'},
-              {n:'Stripe',s:'connected',ic:'💳'},
-              {n:'Mercado Pago',s:'available',ic:'🇨🇱'},
-              {n:'Google Analytics',s:'available',ic:'📊'},
-              {n:'Zapier',s:'available',ic:'⚡'},
-            ].map(i=>`<div style="padding:10px 0;display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--line2)">
-              <span style="font-size:18px">${i.ic}</span>
-              <span style="flex:1;font-size:13px">${i.n}</span>
-              <span class="chip ${i.s==='connected'?'green':i.s==='pending'?'amber':''}">${i.s==='connected'?'Connecté':i.s==='pending'?'En attente':'Connecter'}</span>
-            </div>`).join('')}
+            <!-- Augustin 28/05/2026 : Intégrations déplacées dans l'onboarding (étape dédiée du tutoriel) -->
+            <h3 style="margin-bottom:10px">🔌 Intégrations</h3>
+            <p style="color:var(--muted);font-size:12.5px;margin-bottom:14px">Les intégrations font maintenant partie de l'onboarding Nexus. Tu peux les gérer dans la page dédiée, avec progression et badge "critique".</p>
+            <button class="btn btn-p" style="width:100%" onclick="Nx.navigate('onboarding-integrations')">🔌 Gérer mes intégrations (onboarding) →</button>
           </div>
         </div>
       </div>`;

@@ -661,6 +661,11 @@ body{
 .settings-btn:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(0,229,255,.06);transform:translateY(-1px)}
 .settings-btn svg{width:16px;height:16px;transition:transform .4s}
 .settings-btn:hover svg{transform:rotate(60deg)}
+/* FAB Partager en 1 clic (Augustin 28/05/2026) */
+.share-fab{position:fixed;right:24px;bottom:24px;display:inline-flex;align-items:center;gap:9px;padding:14px 20px 14px 17px;border-radius:999px;border:0;background:linear-gradient(135deg,#1F6FFF,#7A3CFF);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 18px 40px -10px rgba(122,60,255,.55);z-index:90;transition:transform .2s,box-shadow .2s}
+.share-fab:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 22px 50px -12px rgba(122,60,255,.7)}
+.share-fab svg{width:16px;height:16px}
+@media(max-width:520px){.share-fab{padding:12px 16px 12px 13px;font-size:12px;right:16px;bottom:16px}}
 /* Toggle thème */
 .theme-toggle{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--panel);color:var(--ink2);cursor:pointer;transition:all .18s;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);padding:0}
 .theme-toggle:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-1px)}
@@ -832,6 +837,11 @@ body{
     </div>
 
     <div class="top-actions">
+      <!-- Bouton Paiement (Augustin 28/05/2026) -->
+      <button class="settings-btn" id="paymentBtn" title="Paiement &amp; abonnement" aria-label="Paiement">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        <span data-i18n="top.payment">Paiement</span>
+      </button>
       <!-- Bouton Réglages (engrenage) à GAUCHE des langues (Augustin 21/05/2026) -->
       <button class="settings-btn" id="settingsBtn" title="Réglages" aria-label="Réglages">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -855,7 +865,7 @@ body{
           <button type="button" class="lang-dd-item" data-lang="en"><span>🇬🇧</span> English</button>
         </div>
       </div>
-      <button class="notif" data-i18n-title="top.notif" data-i18n-aria="top.notif" title="Notifications" aria-label="Notifications">
+      <button class="notif" id="notifBtn" data-i18n-title="top.notif" data-i18n-aria="top.notif" title="Notifications" aria-label="Notifications">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         <span class="badge">3</span>
       </button>
@@ -1417,6 +1427,12 @@ body{
     </div>
   </div>
 </div>
+
+<!-- FAB Partager en 1 clic (Augustin 28/05/2026) -->
+<button class="share-fab" id="shareFab" title="Partager en 1 clic" aria-label="Partager en 1 clic">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+  <span data-i18n="top.share">Partager en 1 clic</span>
+</button>
 
 <!-- Module traduction dynamique (Claude via /api/translate) -->
 <script src="nexusTranslate.js"></script>
@@ -2213,7 +2229,7 @@ body{
     fr: {
       // Topbar
       'top.home.title':'Nexus Core', 'top.home.sub':'Accueil',
-      'top.notif':'Notifications', 'top.settings':'Paramètres', 'top.menus':'Menus',
+      'top.notif':'Notifications', 'top.settings':'Paramètres', 'top.menus':'Menus', 'top.payment':'Paiement', 'top.share':'Partager en 1 clic',
       'top.lang.tooltip':'Changer de langue', 'top.theme':'Basculer thème clair/sombre',
       // Hero banner
       'hero.greeting':'Bonne journée, Carlos.',
@@ -2303,7 +2319,7 @@ body{
     },
     es: {
       'top.home.title':'Nexus Core', 'top.home.sub':'Inicio',
-      'top.notif':'Notificaciones', 'top.settings':'Ajustes', 'top.menus':'Menús',
+      'top.notif':'Notificaciones', 'top.settings':'Ajustes', 'top.menus':'Menús', 'top.payment':'Pago', 'top.share':'Compartir en 1 clic',
       'top.lang.tooltip':'Cambiar idioma', 'top.theme':'Cambiar tema claro/oscuro',
       'hero.greeting':'Buen día, Carlos.',
       'hero.text':'Gracias a Nexus, tienes +28 % de ventas esta semana y 2 clientes perdidos recuperados. Sigue así, funciona.',
@@ -2379,7 +2395,7 @@ body{
     },
     en: {
       'top.home.title':'Nexus Core', 'top.home.sub':'Home',
-      'top.notif':'Notifications', 'top.settings':'Settings', 'top.menus':'Menus',
+      'top.notif':'Notifications', 'top.settings':'Settings', 'top.menus':'Menus', 'top.payment':'Billing', 'top.share':'1-click share',
       'top.lang.tooltip':'Change language', 'top.theme':'Toggle light/dark theme',
       'hero.greeting':'Good day, Carlos.',
       'hero.text':'Thanks to Nexus, you have +28% sales this week and 2 lost clients recovered. Keep going, it works.',
@@ -2553,7 +2569,85 @@ body{
   const settingsBtn = document.getElementById('settingsBtn');
   if (settingsBtn) {
     settingsBtn.addEventListener('click', () => {
-      location.href = 'app.html#/profile';
+      location.href = 'app.html#/settings';
+    });
+  }
+
+  // =========== Bouton Paiement (Augustin 28/05/2026)
+  const paymentBtn = document.getElementById('paymentBtn');
+  if (paymentBtn) {
+    paymentBtn.addEventListener('click', () => {
+      location.href = 'app.html#/payments';
+    });
+  }
+
+  // =========== Bouton Notifications (cloche) — dropdown panel (Augustin 28/05/2026)
+  const notifBtn = document.getElementById('notifBtn');
+  if (notifBtn) {
+    notifBtn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      let panel = document.getElementById('notifPanel');
+      if (panel) { panel.remove(); return; }
+      panel = document.createElement('div');
+      panel.id = 'notifPanel';
+      panel.style.cssText = 'position:fixed;top:64px;right:20px;width:340px;max-width:calc(100vw - 32px);background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 24px 60px -16px rgba(0,0,0,.25);z-index:9999;overflow:hidden;font-family:inherit;animation:fadeIn .18s';
+      const items = curLang === 'es' ? [
+        {ic:'💬', t:'5 mensajes en espera', s:'María, Diego, Ana, Pablo, Sofía · responde antes de las 14h'},
+        {ic:'🎂', t:'Cumpleaños mañana', s:'Raviella Mendoza · envía un código −15%'},
+        {ic:'⚡', t:'253 créditos restantes', s:'Reset domingo 25 mayo'}
+      ] : curLang === 'en' ? [
+        {ic:'💬', t:'5 messages waiting', s:'María, Diego, Ana, Pablo, Sofía · reply before 2 pm'},
+        {ic:'🎂', t:'Birthday tomorrow', s:'Raviella Mendoza · send a −15% code'},
+        {ic:'⚡', t:'253 credits left', s:'Reset Sunday May 25'}
+      ] : [
+        {ic:'💬', t:'5 messages en attente', s:'María, Diego, Ana, Pablo, Sofía · réponds avant 14h'},
+        {ic:'🎂', t:'Anniversaire demain', s:'Raviella Mendoza · envoie un code −15%'},
+        {ic:'⚡', t:'253 crédits restants', s:'Reset dimanche 25 mai'}
+      ];
+      panel.innerHTML = `
+        <div style="padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center">
+          <b style="font-size:13.5px">Notifications</b>
+          <span style="font-size:11px;color:var(--muted)">${items.length} nouvelle(s)</span>
+        </div>
+        ${items.map(i => `
+          <div class="notif-item" style="padding:12px 16px;border-bottom:1px solid var(--line);display:flex;gap:10px;cursor:pointer;transition:background .15s" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''">
+            <div style="width:34px;height:34px;border-radius:10px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${i.ic}</div>
+            <div style="flex:1;min-width:0"><b style="font-size:12.5px;display:block">${i.t}</b><span style="font-size:11.5px;color:var(--muted)">${i.s}</span></div>
+          </div>`).join('')}
+        <button style="width:100%;padding:11px;background:var(--bg2);border:0;border-top:1px solid var(--line);font-size:12px;font-weight:600;color:var(--blue,#1A56DB);cursor:pointer;font-family:inherit" onclick="location.href='app.html#/inbox'">Tout voir →</button>`;
+      document.body.appendChild(panel);
+      const closeOnOut = (e) => {
+        if (!panel.contains(e.target) && e.target !== notifBtn && !notifBtn.contains(e.target)) {
+          panel.remove();
+          document.removeEventListener('click', closeOnOut);
+        }
+      };
+      setTimeout(() => document.addEventListener('click', closeOnOut), 50);
+    });
+  }
+
+  // =========== Bouton Partager en 1 clic (FAB bas-droite) — Augustin 28/05/2026
+  const shareFab = document.getElementById('shareFab');
+  if (shareFab) {
+    shareFab.addEventListener('click', async () => {
+      const shareData = {
+        title: 'Nexus · Panadería Don Carlos',
+        text: 'Voici ma fiche pro pilotée par Nexus.',
+        url: location.href
+      };
+      try {
+        if (navigator.share) {
+          await navigator.share(shareData);
+          showToast({fr:'✅ Partagé',es:'✅ Compartido',en:'✅ Shared'}[curLang]||'✅ Partagé');
+        } else if (navigator.clipboard) {
+          await navigator.clipboard.writeText(shareData.url);
+          showToast({fr:'📋 Lien copié',es:'📋 Enlace copiado',en:'📋 Link copied'}[curLang]||'📋 Lien copié');
+        } else {
+          showToast({fr:'❌ Partage indisponible',es:'❌ Compartir no disponible',en:'❌ Share unavailable'}[curLang]||'❌');
+        }
+      } catch(e) {
+        if (e.name !== 'AbortError') showToast('❌ ' + e.message);
+      }
     });
   }
 
@@ -2833,5 +2927,6 @@ body{
   document.getElementById('previewExpand').addEventListener('click', () => location.href = 'app.html#/inbox');
 })();
 </script>
+
 </body>
 </html>
