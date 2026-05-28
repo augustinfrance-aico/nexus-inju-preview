@@ -2666,18 +2666,23 @@ const Nx = {
               ${editing ? `<input class="form-ctrl" id="editEmail" placeholder="email@…" value="${c.email||''}">` : `<div style="padding:8px 12px;background:var(--bg2);border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:12.5px">${c.email||'+ Ajouter un email'}</div>`}
             </div>
           </div>
-          <!-- Instagram (Augustin 28/05/2026) -->
+          <!-- Instagram (Augustin 28/05/2026) — ajout vraiment fonctionnel sans devoir basculer toute la fiche en édition -->
           <div class="form-row" style="margin-bottom:14px">
             <label class="form-lbl">📸 Instagram ${c.instagram?'':' <span style="color:var(--muted);font-weight:400">(non renseigné)</span>'}</label>
             ${editing
               ? `<input class="form-ctrl" id="editInstagram" placeholder="@handle" value="${c.instagram||''}">`
               : (c.instagram
-                  ? `<div style="display:flex;gap:10px;align-items:center;padding:8px 12px;background:var(--bg2);border-radius:6px">
+                  ? `<div style="display:flex;gap:10px;align-items:center;padding:8px 12px;background:var(--bg2);border-radius:6px;flex-wrap:wrap">
                        <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#E1306C;font-weight:700">${c.instagram}</span>
                        ${c.instagramFollowers?`<span style="font-size:11px;color:var(--muted)">· ${c.instagramFollowers.toLocaleString('fr-FR')} abonnés</span>`:''}
                        <a href="https://instagram.com/${(c.instagram||'').replace('@','')}" target="_blank" rel="noopener" style="margin-left:auto;font-size:11px;color:var(--blue);font-weight:700;text-decoration:none">Voir profil ↗</a>
+                       <button class="btn btn-s" style="font-size:11px;padding:4px 10px" onclick="Nx.promptInstagram(${c.id})">✏️ Modifier</button>
+                       <button class="btn btn-s" style="font-size:11px;padding:4px 10px;background:#FEE2E2;color:#B91C1C;border-color:#FCA5A5" onclick="Nx.clearInstagram(${c.id})">✕ Retirer</button>
                      </div>`
-                  : `<div style="padding:8px 12px;background:var(--bg2);border-radius:6px;font-size:12.5px;color:var(--muted)">+ Ajouter un compte Instagram</div>`)
+                  : `<div style="display:flex;gap:8px;align-items:center" id="igAddRow_${c.id}">
+                       <input class="form-ctrl" id="igAddInput_${c.id}" placeholder="@son_handle_instagram" style="flex:1" onkeypress="if(event.key==='Enter')Nx.addInstagramInline(${c.id})">
+                       <button class="btn btn-p" style="white-space:nowrap" onclick="Nx.addInstagramInline(${c.id})">+ Ajouter</button>
+                     </div>`)
             }
           </div>
           <div style="padding:8px 12px;background:var(--green-soft);border-radius:6px;font-size:11px;color:var(--green);margin-bottom:8px">
@@ -4486,6 +4491,49 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   openClientCard(clientId){
     const c = this.state.clients.find(x=>x.id===clientId);
     if (c) this.openModal('client-v2', c);
+  },
+
+  // Augustin 28/05/2026 : Instagram vraiment ajoutable sans devoir basculer toute la fiche en édition
+  _normalizeIg(raw){
+    let h = String(raw||'').trim();
+    if (!h) return '';
+    h = h.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '').replace(/\/.*$/, '');
+    if (!h.startsWith('@')) h = '@' + h;
+    return h;
+  },
+  addInstagramInline(clientId){
+    const c = this.state.clients.find(x=>x.id===clientId);
+    if (!c) return;
+    const input = document.getElementById('igAddInput_'+clientId);
+    if (!input) return;
+    const h = this._normalizeIg(input.value);
+    if (!h || h === '@') { input.focus(); return this.toast('Saisis un handle Instagram','warn'); }
+    c.instagram = h;
+    this.save();
+    this.openModal('client-v2', c);
+    this.toast('✓ Instagram ajouté','success', h + ' lié à ' + c.name);
+  },
+  promptInstagram(clientId){
+    const c = this.state.clients.find(x=>x.id===clientId);
+    if (!c) return;
+    const cur = c.instagram || '';
+    const raw = window.prompt('Compte Instagram de ' + c.name + ' (handle ou URL)', cur);
+    if (raw === null) return;
+    const h = this._normalizeIg(raw);
+    c.instagram = h;
+    this.save();
+    this.openModal('client-v2', c);
+    this.toast(h ? '✓ Instagram mis à jour' : 'Instagram retiré', 'success', h || c.name);
+  },
+  clearInstagram(clientId){
+    const c = this.state.clients.find(x=>x.id===clientId);
+    if (!c) return;
+    if (!confirm('Retirer le compte Instagram de ' + c.name + ' ?')) return;
+    c.instagram = '';
+    c.instagramFollowers = 0;
+    this.save();
+    this.openModal('client-v2', c);
+    this.toast('Instagram retiré','info', c.name);
   },
 
   sendMessage(clientId){
