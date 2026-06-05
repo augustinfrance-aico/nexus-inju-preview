@@ -661,6 +661,27 @@ body{
 .settings-btn:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(0,229,255,.06);transform:translateY(-1px)}
 .settings-btn svg{width:16px;height:16px;transition:transform .4s}
 .settings-btn:hover svg{transform:rotate(60deg)}
+/* Bandeau "Grâce à Nexus tu as gagné" (Augustin 04/06/2026) */
+.gain-banner{display:flex;align-items:center;gap:18px;margin:0 24px 18px;padding:18px 22px;border-radius:16px;background:linear-gradient(135deg,#10B981,#059669);color:#fff;cursor:pointer;transition:transform .15s,box-shadow .2s;box-shadow:0 16px 32px -16px rgba(16,185,129,.45);border:1px solid rgba(255,255,255,.18);position:relative;overflow:hidden}
+.gain-banner::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 90% 20%,rgba(255,255,255,.18),transparent 60%);pointer-events:none}
+.gain-banner:hover{transform:translateY(-1px);box-shadow:0 22px 40px -14px rgba(16,185,129,.6)}
+.gain-banner:focus-visible{outline:3px solid rgba(255,255,255,.7);outline-offset:3px}
+.gain-left{flex:1;min-width:0;position:relative;z-index:1}
+.gain-eye{font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;font-weight:700;opacity:.85;margin-bottom:4px}
+.gain-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;line-height:1.15}
+.gain-prefix{font-size:14px;font-weight:600;opacity:.95}
+.gain-amount{font-size:clamp(26px,4vw,38px);font-weight:900;letter-spacing:-.01em;font-family:'JetBrains Mono','SF Mono',monospace}
+.gain-sub{font-size:11.5px;opacity:.85;margin-top:4px}
+.gain-right{flex-shrink:0;position:relative;z-index:1}
+.gain-cta{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;background:rgba(255,255,255,.18);font-size:12px;font-weight:700;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);transition:background .15s}
+.gain-banner:hover .gain-cta{background:rgba(255,255,255,.28)}
+.gain-cta svg{width:14px;height:14px}
+@media(max-width:640px){
+  .gain-banner{margin:0 16px 14px;padding:14px 16px;flex-direction:column;align-items:flex-start;gap:12px}
+  .gain-right{align-self:flex-end}
+}
+html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,129,.5)}
+
 /* FAB Partager en 1 clic (Augustin 28/05/2026) */
 .share-fab{position:fixed;right:24px;bottom:24px;display:inline-flex;align-items:center;gap:9px;padding:14px 20px 14px 17px;border-radius:999px;border:0;background:linear-gradient(135deg,#1F6FFF,#7A3CFF);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 18px 40px -10px rgba(122,60,255,.55);z-index:90;transition:transform .2s,box-shadow .2s}
 .share-fab:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 22px 50px -12px rgba(122,60,255,.7)}
@@ -887,6 +908,23 @@ body{
     </div>
     <div class="hero-banner-text">
       <b>Bonne journée, Carlos.</b> <span class="hl">Grâce à Nexus</span>, tu as <b>+28 % de ventes</b> cette semaine et <b>2 clients perdus récupérés</b>. Continue, ça marche.
+    </div>
+  </div>
+
+  <!-- ⭐ BANDEAU "Grâce à Nexus tu as gagné" (Augustin 04/06/2026 — tournure positive call 01/05) -->
+  <div id="gainBanner" class="gain-banner" role="button" tabindex="0" aria-label="Voir le détail">
+    <div class="gain-left">
+      <div class="gain-eye"><span data-i18n="gain.eye">Cette semaine</span></div>
+      <div class="gain-line">
+        <span class="gain-prefix" data-i18n="gain.prefix">Grâce à Nexus, tu as gagné</span>
+        <span class="gain-amount mono" id="gainAmount">$0 CLP</span>
+      </div>
+      <div class="gain-sub" id="gainSub" data-i18n="gain.sub">ventes détectées + clients récupérés + temps économisé</div>
+    </div>
+    <div class="gain-right">
+      <div class="gain-cta"><span data-i18n="gain.cta">Voir le détail</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </div>
     </div>
   </div>
 
@@ -2225,6 +2263,7 @@ body{
       // Topbar
       'top.home.title':'Nexus Core', 'top.home.sub':'Accueil',
       'top.notif':'Notifications', 'top.settings':'Paramètres', 'top.menus':'Menus', 'top.share':'Partager en 1 clic',
+      'gain.eye':'Cette semaine', 'gain.prefix':'Grâce à Nexus, tu as gagné', 'gain.sub':'ventes détectées + clients récupérés + temps économisé', 'gain.cta':'Voir le détail',
       'top.lang.tooltip':'Changer de langue', 'top.theme':'Basculer thème clair/sombre',
       // Hero banner
       'hero.greeting':'Bonne journée, Carlos.',
@@ -2315,6 +2354,7 @@ body{
     es: {
       'top.home.title':'Nexus Core', 'top.home.sub':'Inicio',
       'top.notif':'Notificaciones', 'top.settings':'Ajustes', 'top.menus':'Menús', 'top.share':'Compartir en 1 clic',
+      'gain.eye':'Esta semana', 'gain.prefix':'Gracias a Nexus, has ganado', 'gain.sub':'ventas detectadas + clientes recuperados + tiempo ahorrado', 'gain.cta':'Ver el detalle',
       'top.lang.tooltip':'Cambiar idioma', 'top.theme':'Cambiar tema claro/oscuro',
       'hero.greeting':'Buen día, Carlos.',
       'hero.text':'Gracias a Nexus, tienes +28 % de ventas esta semana y 2 clientes perdidos recuperados. Sigue así, funciona.',
@@ -2391,6 +2431,7 @@ body{
     en: {
       'top.home.title':'Nexus Core', 'top.home.sub':'Home',
       'top.notif':'Notifications', 'top.settings':'Settings', 'top.menus':'Menus', 'top.share':'1-click share',
+      'gain.eye':'This week', 'gain.prefix':'Thanks to Nexus, you earned', 'gain.sub':'detected sales + recovered clients + saved time', 'gain.cta':'See details',
       'top.lang.tooltip':'Change language', 'top.theme':'Toggle light/dark theme',
       'hero.greeting':'Good day, Carlos.',
       'hero.text':'Thanks to Nexus, you have +28% sales this week and 2 lost clients recovered. Keep going, it works.',
@@ -2912,6 +2953,65 @@ body{
   // =========== Messages "Voir tout" → drawer Messages
   document.getElementById('messagesMore').addEventListener('click', () => location.href = 'app.html#/inbox');
   document.getElementById('previewExpand').addEventListener('click', () => location.href = 'app.html#/inbox');
+
+  // =========== Bandeau "Grâce à Nexus tu as gagné" (Augustin 04/06/2026)
+  // Calcul agrégé sur les vraies données app.html si présentes en localStorage, sinon mock cohérent.
+  // Formules :
+  //  - ventes_iaq = (nb_conv_iaq * panier_moyen_estime * taux_conv_15pct)
+  //  - clients_recuperes = state.escalationLog + segments lost réactivés
+  //  - temps_economise = nb_conv_iaq * 3 min * tarif_horaire_implicite (~5 000 CLP/h pour PME)
+  function computeWeeklyGain(){
+    let conv = 0, recovered = 0, escalated = 0, panier = 14500; // CLP par défaut (panier moyen demo bakery)
+    try {
+      const raw = localStorage.getItem('nexus_app_state_v1') || localStorage.getItem('nexus_state');
+      if (raw) {
+        const st = JSON.parse(raw);
+        if (Array.isArray(st.conversations)) {
+          conv = st.conversations.reduce((acc, c) => acc + (c.messages?.length || 0), 0);
+        }
+        if (st.vacanceStats) { recovered = st.vacanceStats.replied || 0; escalated = st.vacanceStats.escalated || 0; }
+        if (Array.isArray(st.escalationLog)) { escalated = Math.max(escalated, st.escalationLog.length); }
+        if (Array.isArray(st.business?.catalog) && st.business.catalog.length) {
+          const prices = st.business.catalog.map(p => +p.price || 0).filter(Boolean);
+          if (prices.length) panier = Math.round(prices.reduce((a,b)=>a+b,0) / prices.length * 2.5);
+        }
+      }
+    } catch(e){}
+    // Fallback démo cohérent (panaderia Carlos)
+    if (!conv) conv = 612;          // mock 7j brief existant
+    if (!recovered) recovered = 7;  // mock vacanceStats existant
+    if (!escalated) escalated = 0;
+    const sales      = Math.round(conv * panier * 0.15);
+    const winback    = recovered * panier * 2;   // un client récupéré = 2 paniers en moy.
+    const timeSaved  = Math.round(conv * 0.05 * 5000); // 3 min/conv * 5000 CLP/h
+    const escalBonus = escalated * panier * 3;   // un VIP escaladé = 3 paniers évités
+    const total      = sales + winback + timeSaved + escalBonus;
+    return { total, sales, winback, timeSaved, escalBonus, panier };
+  }
+  function formatCLP(n){
+    try { return '$' + Number(n).toLocaleString('es-CL') + ' CLP'; }
+    catch(e){ return '$' + n + ' CLP'; }
+  }
+  const gainBanner = document.getElementById('gainBanner');
+  const gainAmount = document.getElementById('gainAmount');
+  const gainSub    = document.getElementById('gainSub');
+  if (gainBanner && gainAmount) {
+    const g = computeWeeklyGain();
+    gainAmount.textContent = formatCLP(g.total);
+    if (gainSub) {
+      const breakdown = curLang === 'es'
+        ? `${formatCLP(g.sales)} ventas IA · ${formatCLP(g.winback)} clientes recuperados · ${formatCLP(g.timeSaved)} tiempo ahorrado`
+        : curLang === 'en'
+          ? `${formatCLP(g.sales)} AI sales · ${formatCLP(g.winback)} recovered clients · ${formatCLP(g.timeSaved)} time saved`
+          : `${formatCLP(g.sales)} ventes IA · ${formatCLP(g.winback)} clients récupérés · ${formatCLP(g.timeSaved)} temps économisé`;
+      gainSub.textContent = breakdown;
+    }
+    const goStats = () => { location.href = 'app.html#/stats'; };
+    gainBanner.addEventListener('click', goStats);
+    gainBanner.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goStats(); }
+    });
+  }
 })();
 </script>
 

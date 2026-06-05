@@ -1949,7 +1949,7 @@ const DEFAULT_STATE = {
   // Augustin 28/05/2026 : crédits dynamiques (avant : "253" hardcodé partout, incohérence avec achats)
   credits: { remaining: 253, total: 500, resetLabel: 'dimanche 25 mai' },
   business: {
-    name:'Panadería Don Carlos', owner:'Carlos Muñoz', ownerPhone:'+56 9 7777 1234', city:'Santiago', country:'🇨🇱',
+    name:'Panadería Don Carlos', owner:'Carlos Muñoz', ownerPhone:'+56 9 7777 1234', mercadoPagoHandle:'don-carlos-cl', city:'Santiago', country:'🇨🇱',
     logo:'🥖', logoType:'emoji',
     industry:'Panadería / Boulangerie artisanale',
     description:'Panadería familiar en el corazón de Providencia. Heredamos la receta de mi abuelo italiano que llegó a Chile en 1952. Especialidad : pan amasado al estilo chileno tradicional + dulces chilenos + tortas para eventos. Ambiente caluroso, clientela fiel del barrio.',
@@ -2723,7 +2723,20 @@ const Nx = {
       // Coach Nexus combiné : conseils proactifs (depuis Conseil Nexus core) + chat IA + quick actions étendues
       // Augustin 19/05 : "combiner conseils généraux avec ceux du CRM, plus complet, plus joli, capable de plus"
       mc.style.maxWidth = '720px';
+      // 🇨🇱 FIESTAS CHILIENNAS (Augustin 04/06/2026) — tip injecté en tête si fiesta à <30j
+      const upcomingHoliday = this.getNextChileanHoliday ? this.getNextChileanHoliday(30) : null;
+      const fiestaTip = upcomingHoliday ? [{
+        ic: upcomingHoliday.emoji, accent: '#DC2626',
+        ctx: `Dans ${upcomingHoliday.daysLeft} jour${upcomingHoliday.daysLeft>1?'s':''} · ${upcomingHoliday.name}`,
+        text: `<b>${upcomingHoliday.name}</b> approche (${upcomingHoliday.dateLabel}). ${upcomingHoliday.pitch} Veux-tu que je rédige une campagne pour tes meilleurs clients avec une promo adaptée ?`,
+        actions: [
+          { lbl: '✍️ Générer la campagne via IA', cmd: `Nx.askAi('Rédige en espagnol chilien une campagne WhatsApp courte et chaleureuse pour ${upcomingHoliday.name} (${upcomingHoliday.dateLabel}). Cible : meilleurs clients (Récurrents + VIP). Promo : ${upcomingHoliday.suggestPromo}. Mentionne nos spécialités. Maximum 280 caractères.')` },
+          { lbl: '📅 Voir dans Pilotaje', cmd: `Nx.closeModal();Nx.navigate('pilotage');setTimeout(()=>{Nx.state.pilotageCategory='fiesta';Nx.save();Nx.renderView()},80)` },
+          { lbl: 'Pas cette fois', cmd: `Nx.toast('Conseil mis de côté','info')` }
+        ]
+      }] : [];
       const tips = [
+        ...fiestaTip,
         { ic:'🎂', accent:'#F59E0B', ctx:'Demain · Anniversaire client', text:'<b>Raviella Mendoza</b> fête ses 35 ans demain. Veux-tu envoyer un message avec un <b>code -15%</b> sur ses cookies préférés ?', actions:[
             { lbl:'💌 Programmer', cmd:`Nx.askAi('Programme un message anniversaire pour Raviella Mendoza avec -15% sur ses cookies préférés')` },
             { lbl:'Pas maintenant', cmd:`Nx.toast('Conseil mis de côté','info')` }
@@ -4396,6 +4409,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
               <button class="btn-g" onclick="Nx.createDraft(${activeClient.id})">📝 Brouillon</button>
               <button class="btn-g" onclick="Nx.translateMsg(${activeClient.id})">🌐 Traduire</button>
               <button class="btn-g" onclick="Nx.openModal('share-data')">🔌 Partage 1-clic</button>
+              <button class="btn-g" style="background:linear-gradient(135deg,#00B0FF,#0070B8);color:#fff;border-color:transparent" onclick="Nx.openMercadoPago(${activeClient.id})" title="Envoyer un lien Mercado Pago dans la conversation">💳 Mercado Pago</button>
             </div>
             <div class="chat-input">
               <button class="icon-btn" onclick="Nx.toast('Transcription vocale 🎙 (démo)','info')" title="Voice note">🎙</button>
@@ -4486,6 +4500,94 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     } catch(e) {
       mc.innerHTML = renderShell(`<div style="padding:30px;text-align:center;color:var(--red)">❌ Erreur : ${String(e).slice(0,100)}</div>`);
     }
+  },
+
+  // 🇨🇱 Mercado Pago lien paiement 1-clic dans le chat (Augustin 04/06/2026)
+  // Format URL démo : https://mpago.la/<userHandle>?amount=<montant>&desc=<libelle>
+  // Pour la prod : remplacer par un vrai call POST /v1/checkout/preferences (besoin token vendeur)
+  openMercadoPago(clientId){
+    const c = this.state.clients.find(x=>x.id===clientId);
+    if (!c) return;
+    const b = this.state.business || {};
+    const handle = (b.mercadoPagoHandle || 'don-carlos').replace(/^@/,'');
+    const presets = [4500, 9000, 14500, 28000, 42000];
+    this.openModal('ai-chat');
+    const mc = document.getElementById('modal-content');
+    mc.style.maxWidth = '520px';
+    mc.innerHTML = `
+      <div class="modal-hd"><h3>💳 Envoyer un lien Mercado Pago à ${c.name}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-body">
+        <div style="padding:12px 14px;background:linear-gradient(135deg,#E6F4FF,#D1E9FF);border-radius:10px;margin-bottom:14px;font-size:12.5px;color:#0369A1">
+          💡 Tape un montant en pesos chiliens, Nexus génère un lien Mercado Pago cliquable que ${c.name.split(' ')[0]} reçoit dans le chat. Paiement en 1 clic, pas de carte étrangère.
+        </div>
+        <div class="form-row">
+          <label class="form-lbl">Montant à demander (CLP)</label>
+          <input class="form-ctrl" id="mpAmount" type="number" min="500" step="500" placeholder="18000" value="14500" inputmode="numeric" oninput="Nx.refreshMercadoPagoPreview('${handle}')">
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+          ${presets.map(p => `<button class="btn-g" style="font-size:11.5px" onclick="document.getElementById('mpAmount').value=${p};Nx.refreshMercadoPagoPreview('${handle}')">$${p.toLocaleString('es-CL')} CLP</button>`).join('')}
+        </div>
+        <div class="form-row">
+          <label class="form-lbl">Libellé (visible par ${c.name.split(' ')[0]})</label>
+          <input class="form-ctrl" id="mpDesc" placeholder="Pedido Don Carlos" value="Pedido Don Carlos" oninput="Nx.refreshMercadoPagoPreview('${handle}')">
+        </div>
+        <div class="form-row">
+          <label class="form-lbl">Aperçu lien Mercado Pago</label>
+          <div id="mpPreview" style="padding:12px 14px;background:var(--bg2);border-radius:10px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+            <div style="width:54px;height:54px;border-radius:12px;background:linear-gradient(135deg,#00B0FF,#0070B8);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">💳</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:700;font-size:13px;color:var(--blue-ink)" id="mpLinkLabel">Pago Don Carlos · $14 500 CLP</div>
+              <div style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;word-break:break-all" id="mpLinkUrl">https://mpago.la/${handle}?amount=14500&desc=Pedido%20Don%20Carlos</div>
+            </div>
+            <a id="mpLinkOpen" target="_blank" rel="noopener" class="btn btn-s" style="white-space:nowrap">Tester ↗</a>
+          </div>
+        </div>
+        <div style="padding:10px 12px;background:#FEF3C7;border-left:3px solid #F59E0B;border-radius:6px;font-size:11.5px;color:#78350F">
+          🧪 <b>Mode démo</b> : le lien utilise le format public Mercado Pago. Pour activer l'encaissement réel, brancher l'API <code>/v1/checkout/preferences</code> avec le token vendeur de Carlos.
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-s" onclick="Nx.closeModal()">Annuler</button>
+        <button class="btn btn-p" onclick="Nx.sendMercadoPago(${clientId})">📨 Envoyer le lien dans la conversation</button>
+      </div>`;
+    this.refreshMercadoPagoPreview(handle);
+  },
+  refreshMercadoPagoPreview(handle){
+    const amtEl  = document.getElementById('mpAmount');
+    const descEl = document.getElementById('mpDesc');
+    if (!amtEl) return;
+    const amount = Math.max(500, parseInt(amtEl.value, 10) || 0);
+    const desc   = (descEl?.value || 'Pedido').trim();
+    const url    = `https://mpago.la/${handle}?amount=${amount}&desc=${encodeURIComponent(desc)}`;
+    const lblFmt = `${desc} · $${amount.toLocaleString('es-CL')} CLP`;
+    const lblEl  = document.getElementById('mpLinkLabel');
+    const urlEl  = document.getElementById('mpLinkUrl');
+    const openEl = document.getElementById('mpLinkOpen');
+    if (lblEl)  lblEl.textContent = lblFmt;
+    if (urlEl)  urlEl.textContent = url;
+    if (openEl) openEl.href = url;
+  },
+  sendMercadoPago(clientId){
+    const c = this.state.clients.find(x => x.id === clientId);
+    if (!c) return;
+    const b = this.state.business || {};
+    const handle = (b.mercadoPagoHandle || 'don-carlos').replace(/^@/,'');
+    const amtEl  = document.getElementById('mpAmount');
+    const descEl = document.getElementById('mpDesc');
+    const amount = Math.max(500, parseInt(amtEl?.value, 10) || 0);
+    const desc   = (descEl?.value || 'Pedido').trim();
+    const url    = `https://mpago.la/${handle}?amount=${amount}&desc=${encodeURIComponent(desc)}`;
+    const prenom = c.name.split(' ')[0];
+    const text   = `Hola ${prenom} 👋 Aquí tu link de pago Mercado Pago para ${desc} ($${amount.toLocaleString('es-CL')} CLP) : ${url}\n\nUn clic, listo. Cualquier problema me avisas 💛`;
+    const conv = this.state.conversations.find(co => co.clientId === clientId);
+    if (conv) {
+      conv.messages.push({ from:'me', text, time:"À l'instant", channel:'mercadopago' });
+      conv.unread = false;
+      this.save();
+    }
+    this.closeModal();
+    this.renderView();
+    this.toast('💳 Lien Mercado Pago envoyé', 'success', `${desc} · $${amount.toLocaleString('es-CL')} CLP`);
   },
 
   openClientCard(clientId){
@@ -5911,13 +6013,61 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   // Catégories → couleur + icône + label + route de redirection
   pilotageCategories(){
     // Augustin 28/05/2026 : catégorie "Réunions" retirée (widget Google Calendar déplacé hors Pilotage, géré dans CRM)
+    // Augustin 04/06/2026 : ajout catégorie "fiesta" pour Fiestas Chiliennas
     return {
       message:  { color:'#3B82F6', ic:'💬', lbl:'Messagerie',  route:'inbox' },
       inbox:    { color:'#10B981', ic:'📬', lbl:'Inbox',       route:'inbox' },
       social:   { color:'#EC4899', ic:'📸', lbl:'Réseaux',     route:'campaigns' },
       promo:    { color:'#F59E0B', ic:'🎁', lbl:'Promo',       route:'campaigns' },
       reminder: { color:'#7A3CFF', ic:'⏰', lbl:'Rappel',      route:'pilotage' },
-      profile:  { color:'#06B6D4', ic:'👤', lbl:'Profil',      route:'profile' }
+      profile:  { color:'#06B6D4', ic:'👤', lbl:'Profil',      route:'profile' },
+      fiesta:   { color:'#DC2626', ic:'🇨🇱', lbl:'Fiestas',     route:'pilotage' }
+    };
+  },
+
+  // 🇨🇱 FIESTAS CHILIENNAS (Augustin 04/06/2026)
+  // Calendrier des fêtes officielles + commerciales chiliennes 2026-2027 — utilisé par Coach Nexus + Pilotaje
+  getChileanHolidays(){
+    return [
+      // 2026
+      { date:'2026-06-21', name:'Día de los Pueblos Originarios', emoji:'🌄', pitch:"Jour férié national, journée des peuples autochtones.", suggestPromo:'10% de remise sur les produits artisanaux' },
+      { date:'2026-06-29', name:'San Pedro y San Pablo',          emoji:'⛪', pitch:'Jour férié religieux, beaucoup de familles en sortie.', suggestPromo:'Promo brunch / pan especial' },
+      { date:'2026-07-16', name:'Virgen del Carmen',               emoji:'🙏', pitch:'Patronne du Chili, jour férié national.', suggestPromo:'Pack famille -15%' },
+      { date:'2026-08-02', name:'Día del Niño',                   emoji:'🧒', pitch:"Très commercial au Chili, parents achètent pour leurs enfants.", suggestPromo:'Pack dulces enfants 2+1 gratuit' },
+      { date:'2026-08-15', name:'Asunción de la Virgen',          emoji:'🙏', pitch:'Jour férié, week-end prolongé probable.', suggestPromo:'Pack week-end famille' },
+      { date:'2026-09-18', name:'Fiestas Patrias 🇨🇱',             emoji:'🇨🇱', pitch:"LA fête nationale chilienne. Pic de ventes massif (empanadas, asado, dulces). 10 jours à l'avance c'est le bon moment.", suggestPromo:'Pack Fiestas Patrias (empanadas + chicha) -20%' },
+      { date:'2026-09-19', name:'Glorias del Ejército',            emoji:'🎖', pitch:"Suite des Fiestas Patrias, ambiance fête continue.", suggestPromo:'Continuation pack Fiestas Patrias' },
+      { date:'2026-10-12', name:'Encuentro de Dos Mundos',         emoji:'🌎', pitch:'Jour férié national.', suggestPromo:'Promo journée prolongée' },
+      { date:'2026-10-31', name:'Día de las Iglesias Evangélicas', emoji:'⛪', pitch:'Jour férié religieux.', suggestPromo:'Promo simple -10%' },
+      { date:'2026-11-01', name:'Día de Todos los Santos',         emoji:'🕯', pitch:'Jour férié, beaucoup de famille en visite.', suggestPromo:'Pack pour visites famille' },
+      { date:'2026-12-08', name:'Inmaculada Concepción',           emoji:'🙏', pitch:'Jour férié religieux.', suggestPromo:'Promo douceurs -10%' },
+      { date:'2026-12-25', name:'Navidad 🎄',                       emoji:'🎄', pitch:"Pic commercial majeur. Tortas, panettone, dulces. À anticiper 2 semaines avant.", suggestPromo:'Pack Navidad (torta + dulces) -15%' },
+      { date:'2026-12-31', name:'Año Nuevo',                       emoji:'🎆', pitch:'Soirées famille, plats à emporter prisés.', suggestPromo:'Pack Año Nuevo' },
+      // 2027 (pour la continuité après janvier 2027)
+      { date:'2027-01-01', name:'Año Nuevo',                       emoji:'🎆', pitch:'Premier jour de l\'année, jour férié.', suggestPromo:'Café + dulces du lendemain' },
+      { date:'2027-02-14', name:'San Valentín',                    emoji:'❤️', pitch:'Saint-Valentin, très commercial au Chili (couples + autoachat).', suggestPromo:'Pack couple (torta para 2) -15%' },
+      { date:'2027-03-29', name:'Viernes Santo',                   emoji:'✝️', pitch:"Vendredi saint, jour férié. Pas de viande pour les pratiquants.", suggestPromo:'Promo pan + pescado' },
+      { date:'2027-05-01', name:'Día del Trabajo',                 emoji:'⚒', pitch:'Jour férié, week-end prolongé.', suggestPromo:'Pack famille -10%' },
+      { date:'2027-05-09', name:'Día de la Madre',                 emoji:'💐', pitch:"La plus grosse fête commerciale du Chili. Tortas, fleurs, dulces. À préparer 2 semaines avant.", suggestPromo:'Pack Día de la Madre (torta personalizada) -10%' }
+    ];
+  },
+  getNextChileanHoliday(maxDaysAhead = 30){
+    const list = this.getChileanHolidays();
+    const now = new Date(); now.setHours(0,0,0,0);
+    let best = null, bestDiff = Infinity;
+    list.forEach(h => {
+      const d = new Date(h.date + 'T00:00:00');
+      const diffMs = d - now;
+      const diffDays = Math.ceil(diffMs / 86400000);
+      if (diffDays >= 0 && diffDays <= maxDaysAhead && diffDays < bestDiff) {
+        best = h; bestDiff = diffDays;
+      }
+    });
+    if (!best) return null;
+    return {
+      ...best,
+      daysLeft: bestDiff,
+      dateLabel: new Date(best.date + 'T00:00:00').toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' })
     };
   },
   // Parse "when" en Date best-effort (ex: "Vendredi 18 h", "Demain 9 h", "Dans 2 h", "À l'instant")
@@ -5991,6 +6141,27 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     const cats = this.pilotageCategories();
     const allItems = this.getAgendaItems();
     // Augustin 28/05/2026 : widget Google Calendar retiré de la vue Pilotage (les réunions restent gérées dans CRM)
+    // Augustin 04/06/2026 : injection des Fiestas Chiliennas comme items category 'fiesta'
+    this.getChileanHolidays().forEach(h => {
+      const d = new Date(h.date + 'T09:00:00');
+      const now = new Date();
+      const diffDays = Math.ceil((d - now) / 86400000);
+      // Afficher seulement les fiestas à venir + jusqu'à 1 mois après (mémoire culturelle)
+      if (diffDays < -31 || diffDays > 365) return;
+      const isPast = d < now;
+      allItems.push({
+        id: 'fiesta_' + h.date,
+        icon: h.emoji,
+        title: h.name,
+        detail: h.pitch + ' Suggestion : ' + h.suggestPromo + '.',
+        when: d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' }),
+        dueDate: d.toISOString(),
+        category: 'fiesta',
+        status: isPast ? 'done' : 'scheduled',
+        isFiesta: true,
+        suggestPromo: h.suggestPromo
+      });
+    });
     // Filtrage statut + catégorie
     let items = allItems.filter(it => it.status === tab);
     if (cat !== 'all') items = items.filter(it => (it.category||'reminder') === cat);
@@ -6483,10 +6654,37 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         </div>`;
         })()}
 
-        <!-- CAMPAGNES AUTO (3 par défaut + custom-* créées via builder — Augustin 21/05/2026) -->
+        <!-- 🛒 PANIER ABANDONNÉ — card hero (Augustin 04/06/2026, +20-30% conversion LATAM) -->
+        ${(() => {
+          const abandonedClients = this.detectAbandonedCarts ? this.detectAbandonedCarts() : [];
+          const count = abandonedClients.length;
+          return `
+          <div class="card" style="margin-bottom:16px;padding:20px 22px;background:linear-gradient(135deg,#F97316,#EA580C);color:#fff;border:0;position:relative;overflow:hidden">
+            <div style="position:absolute;inset:0;background:radial-gradient(circle at 85% 30%,rgba(255,255,255,.2),transparent 60%);pointer-events:none"></div>
+            <div style="display:flex;gap:18px;align-items:center;position:relative">
+              <div style="font-size:42px;line-height:1">🛒</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:800;opacity:.9">Récupération panier abandonné · automatique</div>
+                <div style="font-size:18px;font-weight:800;margin-top:4px;line-height:1.25">Nexus a détecté <b style="font-size:22px">${count}</b> conversation${count>1?'s':''} où le client a demandé tes prix puis a disparu sans commander.</div>
+                <div style="font-size:12.5px;opacity:.95;margin-top:6px">Relance auto dans 24h avec remise personnalisée. <b>20-30% des clients reviennent acheter</b> — c'est le cas d'usage le plus rentable en LATAM.</div>
+              </div>
+              <div style="text-align:center;flex-shrink:0">
+                <div style="font-size:clamp(38px,6vw,52px);font-weight:900;line-height:1;font-family:'JetBrains Mono',monospace">20-30%</div>
+                <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;opacity:.85;margin-top:2px">conversion</div>
+              </div>
+            </div>
+            <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;position:relative">
+              <button class="btn" style="background:#fff;color:#C2410C;border:0;font-weight:800" onclick="Nx.launchCartRecovery()">🛒 Lancer récup auto sur ces ${count} conv${count>1?'s':''}</button>
+              <button class="btn" style="background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.4);font-weight:700;backdrop-filter:blur(6px)" onclick="Nx.previewAbandonedCarts()">👀 Voir le détail</button>
+            </div>
+          </div>`;
+        })()}
+
+        <!-- CAMPAGNES AUTO (3 par défaut + cart-abandoned + custom-* créées via builder) -->
         <div class="card" style="margin-bottom:16px">
           <div class="card-hd"><h3>🤖 Campagnes automatiques</h3><div class="actions"><button class="btn-p" onclick="Nx.openAutoCampaign()">+ Nouvelle auto</button></div></div>
           <div class="card-body">
+            ${this.renderAutoCampaign('cart-abandoned','🛒','#F97316','Récupération panier abandonné','Quand client a demandé prix puis silence > 24h · cible prospects chauds · remise -10% personnalisée', this.state.cartRecoveryStatus || 'active')}
             ${this.renderAutoCampaign('promo-fin-mois','📅','#22C55E','Promo fin de mois — −15 %','Déclenchée le 28 de chaque mois · cible Récurrents · 2 derniers jours','active')}
             ${this.renderAutoCampaign('anniv-clients','🎂','#F59E0B','Anniversaires clients','La veille à 9h · cible chaque client · code promo personnalisé','active')}
             ${this.renderAutoCampaign('recovery-lost','💔','#EF4444','Récupération clients perdus','Quand silence > 45 j · cible Perdus · message chaleureux + −10 %', this.state.recoveryStatus || 'paused')}
@@ -6619,19 +6817,23 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   },
 
   toggleAutoStatus(id){
-    // POINT CAMPAGNES (e) — Activer/Pause fonctionnel pour les 3 auto-campagnes
+    // POINT CAMPAGNES (e) — Activer/Pause fonctionnel pour les auto-campagnes
     if (!this.state.autoCampaignStatus) this.state.autoCampaignStatus = {};
-    const labelMap = {'recovery-lost':'Récupération clients perdus','anniv-clients':'Anniversaires clients','promo-fin-mois':'Promo fin de mois'};
+    const labelMap = {'recovery-lost':'Récupération clients perdus','anniv-clients':'Anniversaires clients','promo-fin-mois':'Promo fin de mois','cart-abandoned':'Récupération panier abandonné'};
     if (id === 'recovery-lost') {
       this.state.recoveryStatus = (this.state.recoveryStatus === 'active') ? 'paused' : 'active';
       this.state.autoCampaignStatus[id] = this.state.recoveryStatus;
+    } else if (id === 'cart-abandoned') {
+      // Augustin 04/06 : statut dédié + miroir dans autoCampaignStatus
+      this.state.cartRecoveryStatus = (this.state.cartRecoveryStatus === 'active') ? 'paused' : 'active';
+      this.state.autoCampaignStatus[id] = this.state.cartRecoveryStatus;
     } else {
       const cur = this.state.autoCampaignStatus[id] || 'active';
       this.state.autoCampaignStatus[id] = (cur === 'active') ? 'paused' : 'active';
     }
     this.save();
     this.renderView();
-    const newState = this.state.autoCampaignStatus[id] || (id==='recovery-lost'?this.state.recoveryStatus:'active');
+    const newState = this.state.autoCampaignStatus[id] || (id==='recovery-lost'?this.state.recoveryStatus:id==='cart-abandoned'?this.state.cartRecoveryStatus:'active');
     this.toast(newState==='active'?'✓ '+(labelMap[id]||id)+' ACTIVÉE':'⏸ '+(labelMap[id]||id)+' mise en pause','success');
   },
   editAutoCampaign(id){
@@ -7491,9 +7693,87 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
 
   // Defaults par auto-campagne (utilisés si pas encore édités)
   _autoCampDefaults: {
+    'cart-abandoned': { name:'Récupération panier abandonné −10 %', trigger:'silence', target:'all', message:'Hola {prenom} 👋 Vi que preguntaste por nuestros productos hace poco y no pudiste cerrar tu pedido. Te dejo un −10% con el código {promo} para finalizarlo cuando quieras. ¡Te esperamos!', cfg:{silenceDays:1, promoCode:'CARRITO-10', detectKeywords:'precio,cuánto,cuesta,disponible,delivery,horario'}, antiAbusWeek:true, antiAbusCredits:true },
     'promo-fin-mois': { name:'Promo fin de mois −15 %', trigger:'monthly', target:'rec', message:"Hola {prenom} 👋 Petit clin d'œil de Don Carlos : −15 % sur ta prochaine commande jusqu'au 30. À très vite !", cfg:{day:28, time:'09:00'}, antiAbusWeek:true, antiAbusCredits:true },
     'anniv-clients':  { name:'Anniversaires clients', trigger:'birthday', target:'all', message:'¡Feliz cumpleaños {prenom}! 🎂 Te regalamos un {promo} para tu pedido de la semana. Disfruta!', cfg:{time:'09:00', promoCode:'HBD-{NOM}-15'}, antiAbusWeek:false, antiAbusCredits:true },
     'recovery-lost':  { name:'Récupération clients perdus −10 %', trigger:'silence', target:'lost', message:'Hola {prenom}, hace tiempo que no nos vemos 😊 Don Carlos te extraña — −10 % en tu próxima compra, código {promo}.', cfg:{silenceDays:45, promoCode:'MISS-YOU-10'}, antiAbusWeek:true, antiAbusCredits:true }
+  },
+
+  // 🛒 PANIER ABANDONNÉ — détection + lancement (Augustin 04/06/2026)
+  // Détecte les conversations où le client a demandé prix/dispo et qui sont restées sans suite côté client.
+  detectAbandonedCarts(){
+    const INTENT_KW = /precio|cuánto|cuanto|cuesta|disponible|delivery|hora|horario|cuánto|tiene|tienes|pedir|pedido|reservar|encargar/i;
+    const conv = this.state.conversations || [];
+    return conv.filter(c => {
+      const msgs = c.messages || [];
+      if (!msgs.length) return false;
+      const last = msgs[msgs.length - 1];
+      // Le dernier message ne doit PAS venir du patron (il a répondu = pas abandonné)
+      if (last.from === 'me') return false;
+      // L'intent achat doit apparaître dans au moins un message du client
+      return msgs.some(m => m.from === 'them' && INTENT_KW.test(m.text || ''));
+    }).map(c => {
+      const cl = (this.state.clients || []).find(x => x.id === c.clientId);
+      return { conv: c, client: cl };
+    }).filter(x => x.client);
+  },
+  launchCartRecovery(){
+    const list = this.detectAbandonedCarts();
+    if (!list.length) return this.toast('Aucun panier abandonné détecté pour le moment','info','Nexus surveille en continu');
+    const tmpl = this._autoCampDefaults['cart-abandoned'];
+    if (!this.state.cartRecoveryRuns) this.state.cartRecoveryRuns = [];
+    const runId = 'run_' + Date.now();
+    const recovered = list.map(({client, conv}) => {
+      const prenom = (client.name || '').split(' ')[0];
+      const text = tmpl.message
+        .replace('{prenom}', prenom)
+        .replace('{promo}', tmpl.cfg.promoCode);
+      conv.messages.push({ from:'me', text, time:"À l'instant", channel:'cart-recovery', runId });
+      conv.unread = false;
+      return { clientId: client.id, name: client.name };
+    });
+    this.state.cartRecoveryRuns.unshift({ id: runId, ts: Date.now(), count: recovered.length, items: recovered });
+    if (this.state.cartRecoveryRuns.length > 20) this.state.cartRecoveryRuns = this.state.cartRecoveryRuns.slice(0, 20);
+    this.state.cartRecoveryStatus = 'active';
+    this.save();
+    this.renderView();
+    this.toast(`🛒 ${recovered.length} relance${recovered.length>1?'s':''} envoyée${recovered.length>1?'s':''}`, 'success', `Estimation : ${Math.round(recovered.length * 0.25)} client${recovered.length>=4?'s':''} reviendront acheter (taux 20-30%)`);
+  },
+  previewAbandonedCarts(){
+    const list = this.detectAbandonedCarts();
+    this.openModal('ai-chat');
+    const mc = document.getElementById('modal-content');
+    mc.style.maxWidth = '640px';
+    if (!list.length) {
+      mc.innerHTML = `<div class="modal-hd"><h3>🛒 Paniers abandonnés détectés</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+        <div class="modal-body" style="text-align:center;padding:32px;color:var(--muted)">
+          <div style="font-size:42px;margin-bottom:8px">✨</div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:6px">Aucun panier abandonné pour le moment</div>
+          <div style="font-size:12px">Nexus surveille en continu les conversations où un client demande tes prix puis ne donne pas suite. Tu seras notifié dès qu'un cas est détecté.</div>
+        </div>
+        <div class="modal-foot"><button class="btn btn-p" onclick="Nx.closeModal()">OK</button></div>`;
+      return;
+    }
+    mc.innerHTML = `<div class="modal-hd"><h3>🛒 ${list.length} panier${list.length>1?'s':''} abandonné${list.length>1?'s':''} détecté${list.length>1?'s':''}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-body" style="max-height:70vh;overflow-y:auto">
+        <div style="padding:10px 12px;background:#FFF7ED;border-left:3px solid #F97316;border-radius:6px;font-size:12px;color:#9A3412;margin-bottom:14px">
+          Ces clients ont demandé tes prix ou ta disponibilité sans donner suite. Nexus va leur envoyer une relance personnalisée avec une remise de 10% via WhatsApp.
+        </div>
+        ${list.map(({client, conv}) => {
+          const last = conv.messages[conv.messages.length-1];
+          return `<div style="padding:12px 14px;background:var(--bg2);border-radius:10px;margin-bottom:8px;border-left:3px solid #F97316">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <b style="font-size:13px">${client.name}</b>
+              <span style="font-size:10.5px;color:var(--muted)">${last.time}</span>
+            </div>
+            <div style="font-size:12px;color:var(--ink2);font-style:italic;padding-left:8px;border-left:2px solid var(--line)">« ${(last.text||'').slice(0,140)}${(last.text||'').length>140?'…':''} »</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-s" onclick="Nx.closeModal()">Fermer</button>
+        <button class="btn btn-p" style="background:linear-gradient(135deg,#F97316,#EA580C);border:0" onclick="Nx.closeModal();Nx.launchCartRecovery()">🛒 Lancer la récup auto</button>
+      </div>`;
   },
 
   // openAutoCampaign(editingId?) — si editingId fourni, pré-remplit avec les valeurs existantes
