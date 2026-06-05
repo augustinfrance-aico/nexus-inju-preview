@@ -858,6 +858,12 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
     </div>
 
     <div class="top-actions">
+      <!-- ☁️ Bouton Cloud Supabase (Augustin 04/06/2026) -->
+      <button class="settings-btn" id="cloudBtn" title="Connexion cloud Nexus" aria-label="Connexion cloud" style="position:relative">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>
+        <span data-i18n="top.cloud">Cloud</span>
+        <span id="cloudDot" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:#10B981;box-shadow:0 0 0 2px var(--panel)"></span>
+      </button>
       <!-- Bouton Réglages (engrenage) à GAUCHE des langues (Augustin 21/05/2026) -->
       <button class="settings-btn" id="settingsBtn" title="Réglages" aria-label="Réglages">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -1469,6 +1475,17 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
 
 <!-- Module traduction dynamique (Claude via /api/translate) -->
 <script src="nexusTranslate.js"></script>
+
+<!-- ☁️ Cloud Modal (Augustin 04/06/2026) -->
+<div id="cloudOverlay" style="display:none;position:fixed;inset:0;background:rgba(5,7,10,.7);z-index:1000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)">
+  <div style="background:var(--panel);border-radius:16px;padding:24px 26px;max-width:440px;width:100%;box-shadow:0 30px 60px -20px rgba(0,0,0,.5);border:1px solid var(--line)">
+    <div id="cloudCardBody"></div>
+  </div>
+</div>
+
+<!-- Supabase Cloud Layer -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="supabase-client.js"></script>
 
 <script>
 (() => {
@@ -2262,7 +2279,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
     fr: {
       // Topbar
       'top.home.title':'Nexus Core', 'top.home.sub':'Accueil',
-      'top.notif':'Notifications', 'top.settings':'Paramètres', 'top.menus':'Menus', 'top.share':'Partager en 1 clic',
+      'top.notif':'Notifications', 'top.settings':'Paramètres', 'top.menus':'Menus', 'top.share':'Partager en 1 clic', 'top.cloud':'Cloud',
       'gain.eye':'Cette semaine', 'gain.prefix':'Grâce à Nexus, tu as gagné', 'gain.sub':'ventes détectées + clients récupérés + temps économisé', 'gain.cta':'Voir le détail',
       'top.lang.tooltip':'Changer de langue', 'top.theme':'Basculer thème clair/sombre',
       // Hero banner
@@ -2353,7 +2370,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
     },
     es: {
       'top.home.title':'Nexus Core', 'top.home.sub':'Inicio',
-      'top.notif':'Notificaciones', 'top.settings':'Ajustes', 'top.menus':'Menús', 'top.share':'Compartir en 1 clic',
+      'top.notif':'Notificaciones', 'top.settings':'Ajustes', 'top.menus':'Menús', 'top.share':'Compartir en 1 clic', 'top.cloud':'Nube',
       'gain.eye':'Esta semana', 'gain.prefix':'Gracias a Nexus, has ganado', 'gain.sub':'ventas detectadas + clientes recuperados + tiempo ahorrado', 'gain.cta':'Ver el detalle',
       'top.lang.tooltip':'Cambiar idioma', 'top.theme':'Cambiar tema claro/oscuro',
       'hero.greeting':'Buen día, Carlos.',
@@ -2430,7 +2447,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
     },
     en: {
       'top.home.title':'Nexus Core', 'top.home.sub':'Home',
-      'top.notif':'Notifications', 'top.settings':'Settings', 'top.menus':'Menus', 'top.share':'1-click share',
+      'top.notif':'Notifications', 'top.settings':'Settings', 'top.menus':'Menus', 'top.share':'1-click share', 'top.cloud':'Cloud',
       'gain.eye':'This week', 'gain.prefix':'Thanks to Nexus, you earned', 'gain.sub':'detected sales + recovered clients + saved time', 'gain.cta':'See details',
       'top.lang.tooltip':'Change language', 'top.theme':'Toggle light/dark theme',
       'hero.greeting':'Good day, Carlos.',
@@ -2953,6 +2970,98 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
   // =========== Messages "Voir tout" → drawer Messages
   document.getElementById('messagesMore').addEventListener('click', () => location.href = 'app.html#/inbox');
   document.getElementById('previewExpand').addEventListener('click', () => location.href = 'app.html#/inbox');
+
+  // =========== ☁️ CLOUD CONNECT (Augustin 04/06/2026)
+  const cloudBtn = document.getElementById('cloudBtn');
+  const cloudOverlay = document.getElementById('cloudOverlay');
+  const cloudCardBody = document.getElementById('cloudCardBody');
+  const cloudDot = document.getElementById('cloudDot');
+  const refreshCloudDot = () => {
+    if (!cloudDot) return;
+    const authed = (window.NxCloud && window.NxCloud.isAuthed && window.NxCloud.isAuthed());
+    cloudDot.style.display = authed ? 'block' : 'none';
+    if (cloudBtn) cloudBtn.title = authed ? 'Cloud connecté' : 'Connexion cloud Nexus';
+  };
+  const openCloudOverlay  = () => { if (cloudOverlay) cloudOverlay.style.display = 'flex'; };
+  const closeCloudOverlay = () => { if (cloudOverlay) cloudOverlay.style.display = 'none'; };
+  if (cloudOverlay) cloudOverlay.addEventListener('click', (e) => { if (e.target === cloudOverlay) closeCloudOverlay(); });
+
+  const renderLoginForm = () => {
+    cloudCardBody.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <h2 style="margin:0;font-size:18px;font-weight:800">☁️ Connexion Nexus Cloud</h2>
+        <button id="cloudClose" style="background:none;border:0;color:var(--ink2);font-size:22px;cursor:pointer">✕</button>
+      </div>
+      <div style="padding:12px 14px;background:var(--bg2);border-radius:10px;margin-bottom:14px;font-size:12.5px;line-height:1.55;color:var(--ink2)">
+        🔐 <b>Connexion sans mot de passe.</b> Email, lien magique, retour connecté.
+      </div>
+      <input id="cloudEmailCore" type="email" inputmode="email" placeholder="ton@email.com" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px;font-family:inherit;margin-bottom:10px">
+      <div id="cloudStatusCore" style="min-height:24px;margin-bottom:10px;font-size:12.5px"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button id="cloudCancelCore" style="padding:10px 16px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink2);cursor:pointer;font-weight:600;font-family:inherit">Annuler</button>
+        <button id="cloudSubmitCore" style="padding:10px 16px;border-radius:10px;border:0;background:linear-gradient(135deg,#1F6FFF,#7A3CFF);color:#fff;cursor:pointer;font-weight:700;font-family:inherit">📨 Recevoir le lien</button>
+      </div>`;
+    document.getElementById('cloudClose').onclick = closeCloudOverlay;
+    document.getElementById('cloudCancelCore').onclick = closeCloudOverlay;
+    const emailEl = document.getElementById('cloudEmailCore');
+    const btnSubmit = document.getElementById('cloudSubmitCore');
+    const statusEl = document.getElementById('cloudStatusCore');
+    const submit = async () => {
+      const email = emailEl.value.trim();
+      if (!email) { emailEl.focus(); return; }
+      if (!window.NxCloud) { statusEl.innerHTML = '<span style="color:#EF4444">⏳ Cloud pas prêt</span>'; return; }
+      btnSubmit.disabled = true; btnSubmit.textContent = 'Envoi…';
+      const res = await window.NxCloud.signInWithMagicLink(email);
+      btnSubmit.disabled = false; btnSubmit.textContent = '📨 Recevoir le lien';
+      if (!res.ok) { statusEl.innerHTML = '<span style="color:#EF4444">❌ '+res.error+'</span>'; return; }
+      statusEl.innerHTML = '<div style="padding:10px 12px;background:rgba(16,185,129,.15);border-left:3px solid #10B981;border-radius:6px;color:#065F46"><b>✅ Email envoyé</b><br>Clique le lien dans ta boîte mail.</div>';
+      showToast('📨 Lien magique envoyé');
+    };
+    btnSubmit.onclick = submit;
+    emailEl.onkeypress = (e) => { if (e.key === 'Enter') submit(); };
+    setTimeout(() => emailEl.focus(), 100);
+  };
+  const renderAccount = () => {
+    const user = (window.NxCloud && window.NxCloud._user) || {};
+    cloudCardBody.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <h2 style="margin:0;font-size:18px;font-weight:800">☁️ Mon compte Nexus Cloud</h2>
+        <button id="cloudClose" style="background:none;border:0;color:var(--ink2);font-size:22px;cursor:pointer">✕</button>
+      </div>
+      <div style="padding:14px 16px;background:linear-gradient(135deg,rgba(16,185,129,.18),rgba(16,185,129,.08));border-radius:10px;margin-bottom:14px;display:flex;gap:14px;align-items:center">
+        <div style="width:48px;height:48px;border-radius:12px;background:#10B981;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;flex-shrink:0">${(user.email||'?').slice(0,2).toUpperCase()}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:14px;word-break:break-all">${user.email||'?'}</div>
+          <div style="font-size:11.5px;color:var(--ink2);margin-top:2px">✅ Connecté · profil sync cloud</div>
+        </div>
+      </div>
+      <a href="app.html#/profile" style="display:block;padding:11px 14px;background:var(--bg2);border-radius:10px;color:var(--ink);text-decoration:none;font-weight:600;margin-bottom:8px;font-size:13px">📝 Modifier mon profil entreprise →</a>
+      <button id="cloudLogoutCore" style="width:100%;padding:11px 14px;border-radius:10px;border:1px solid #EF4444;background:transparent;color:#EF4444;font-weight:700;cursor:pointer;font-family:inherit">🚪 Se déconnecter</button>`;
+    document.getElementById('cloudClose').onclick = closeCloudOverlay;
+    document.getElementById('cloudLogoutCore').onclick = async () => {
+      if (!confirm('Se déconnecter ?')) return;
+      await window.NxCloud.signOut();
+      showToast('✓ Déconnecté');
+      closeCloudOverlay();
+      refreshCloudDot();
+    };
+  };
+  if (cloudBtn) {
+    cloudBtn.addEventListener('click', () => {
+      const authed = (window.NxCloud && window.NxCloud.isAuthed && window.NxCloud.isAuthed());
+      if (authed) renderAccount(); else renderLoginForm();
+      openCloudOverlay();
+    });
+  }
+  document.addEventListener('nx-cloud-ready', refreshCloudDot);
+  document.addEventListener('nx-cloud-auth', (e) => {
+    refreshCloudDot();
+    if (e.detail && e.detail.event === 'SIGNED_IN') {
+      showToast('☁️ Connecté à Nexus Cloud');
+      closeCloudOverlay();
+    }
+  });
+  setTimeout(refreshCloudDot, 500);
 
   // =========== Bandeau "Grâce à Nexus tu as gagné" (Augustin 04/06/2026)
   // Calcul agrégé sur les vraies données app.html si présentes en localStorage, sinon mock cohérent.
