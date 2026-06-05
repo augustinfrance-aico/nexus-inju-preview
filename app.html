@@ -973,6 +973,10 @@ html[data-theme="dark"] .chat-input textarea::placeholder{color:#8A94A6}
       <button class="icon-btn topbar-theme-btn" onclick="Nx.toggleTheme()" title="Basculer thème clair/sombre" data-i18n-title="theme.toggle" id="topbarThemeBtn">
         <svg id="topbarThemeIc" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
       </button>
+      <button class="icon-btn" onclick="Nx.openLogin()" title="Connexion cloud" id="cloudBtn" aria-label="Connexion cloud">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>
+        <span class="badge-dot" id="cloudBadge" style="display:none;background:#10B981" title="Connecté"></span>
+      </button>
       <button class="icon-btn" onclick="Nx.showNotifs()" title="Notifications" id="notifBtn">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a2 2 0 003.4 0"/></svg>
         <span class="badge-dot" id="notifBadge">3</span>
@@ -996,6 +1000,9 @@ html[data-theme="dark"] .chat-input textarea::placeholder{color:#8A94A6}
 
 <!-- Module traduction dynamique (Claude via /api/translate) -->
 <script src="nexusTranslate.js"></script>
+<!-- Supabase Cloud Layer (Augustin 04/06/2026 — Phase A : Auth + Profile) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="supabase-client.js"></script>
 
 <script>
 /* ============================================================
@@ -2504,6 +2511,54 @@ const Nx = {
           <button class="btn btn-s" onclick="Nx.downloadInvoicePdf('${data.id}')">📄 Télécharger facture PDF</button>
           <button class="btn btn-p" onclick="Nx.closeModal()">OK</button>
         </div>`;
+    } else if (type === 'cloud-login') {
+      mc.style.maxWidth = '440px';
+      html = `
+        <div class="modal-hd"><h3>☁️ Connexion Nexus Cloud</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+        <div class="modal-body">
+          <div style="padding:12px 14px;background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border-radius:10px;margin-bottom:14px;font-size:12.5px;color:#1E3A8A">
+            🔐 <b>Connexion sans mot de passe.</b> Tape ton email, on t'envoie un lien magique. Tu cliques dessus, tu reviens connecté automatiquement.
+          </div>
+          <div class="form-row">
+            <label class="form-lbl">Ton email</label>
+            <input class="form-ctrl" id="cloudLoginEmail" type="email" inputmode="email" autocomplete="email" placeholder="augustin@gmail.com" onkeypress="if(event.key==='Enter')Nx.cloudSubmitLogin()">
+          </div>
+          <div id="cloudLoginStatus" style="margin-top:10px;min-height:24px"></div>
+          <div style="margin-top:14px;padding:10px 12px;background:#FEF3C7;border-left:3px solid #F59E0B;border-radius:6px;font-size:11.5px;color:#78350F">
+            🧪 <b>Phase A bêta</b> : seul le profil entreprise est synchronisé en cloud pour l'instant. Le reste (CRM, conversations, campagnes…) suit dans les prochains commits. Mode démo non connecté = inchangé.
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-s" onclick="Nx.closeModal()">Annuler</button>
+          <button class="btn btn-p" id="cloudLoginBtn" onclick="Nx.cloudSubmitLogin()">📨 Recevoir le lien magique</button>
+        </div>`;
+    } else if (type === 'cloud-account') {
+      mc.style.maxWidth = '480px';
+      const user = (window.NxCloud && window.NxCloud._user) || {};
+      html = `
+        <div class="modal-hd"><h3>☁️ Mon compte Nexus Cloud</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+        <div class="modal-body">
+          <div style="padding:14px 16px;background:linear-gradient(135deg,#D1FAE5,#A7F3D0);border-radius:10px;margin-bottom:14px;display:flex;gap:14px;align-items:center">
+            <div style="width:48px;height:48px;border-radius:12px;background:#10B981;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;flex-shrink:0">${(user.email||'?').slice(0,2).toUpperCase()}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:700;font-size:14px;color:#064E3B;word-break:break-all">${user.email||'inconnu'}</div>
+              <div style="font-size:11.5px;color:#065F46;margin-top:2px">✅ Connecté à Nexus Cloud · profil entreprise synchronisé</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+            <div style="padding:10px 12px;background:var(--bg2);border-radius:8px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700">User ID</div><div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;margin-top:2px;word-break:break-all">${(user.id||'').slice(0,8)}…</div></div>
+            <div style="padding:10px 12px;background:var(--bg2);border-radius:8px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700">Dernière connexion</div><div style="font-size:11.5px;margin-top:2px">${user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString('fr-FR') : '—'}</div></div>
+          </div>
+          <button class="btn btn-s" style="width:100%;margin-bottom:8px" onclick="Nx.loadProfileFromCloud()">🔄 Recharger profil depuis le cloud</button>
+          <button class="btn btn-s" style="width:100%;margin-bottom:8px" onclick="Nx.pushProfileToCloud().then(()=>Nx.toast('☁️ Profil poussé en cloud','success'))">☁️ Pousser profil local vers cloud</button>
+          <div style="padding:10px 12px;background:#FEF3C7;border-left:3px solid #F59E0B;border-radius:6px;font-size:11.5px;color:#78350F">
+            🧪 <b>Phase A</b> : seule la table <code>business_profiles</code> est branchée. Vérifie dans Supabase → Table Editor que ton profil est bien là.
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-s" onclick="Nx.closeModal()">Fermer</button>
+          <button class="btn btn-danger" onclick="Nx.logoutCloud()">🚪 Se déconnecter</button>
+        </div>`;
     } else if (type === 'notifs') {
       html = `
         <div class="modal-hd"><h3>🔔 Notifications</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
@@ -2970,6 +3025,85 @@ const Nx = {
   },
 
   showNotifs(){ this.openModal('notifs'); },
+
+  // ============================================================
+  // ☁️ CLOUD SUPABASE — Phase A (Augustin 04/06/2026)
+  // Auth email magic link + sync profil entreprise vers/depuis Supabase
+  // Mode démo (non connecté) reste intact, zéro régression M1
+  // ============================================================
+  openLogin(){
+    const authed = (window.NxCloud && window.NxCloud.isAuthed && window.NxCloud.isAuthed());
+    const user   = (window.NxCloud && window.NxCloud._user) || null;
+    if (authed && user) {
+      this.openModal('cloud-account');
+      return;
+    }
+    this.openModal('cloud-login');
+  },
+  async cloudSubmitLogin(){
+    const input = document.getElementById('cloudLoginEmail');
+    const status = document.getElementById('cloudLoginStatus');
+    const btn = document.getElementById('cloudLoginBtn');
+    if (!input || !window.NxCloud) return;
+    const email = input.value.trim();
+    if (!email) { input.focus(); return; }
+    btn.disabled = true; btn.textContent = 'Envoi…';
+    if (status) status.innerHTML = '<span style="color:var(--muted)">⏳ Demande du lien magique…</span>';
+    const res = await window.NxCloud.signInWithMagicLink(email);
+    btn.disabled = false; btn.textContent = '📨 Recevoir le lien magique';
+    if (!res.ok) {
+      if (status) status.innerHTML = `<span style="color:var(--red)">❌ ${res.error}</span>`;
+      return;
+    }
+    if (status) status.innerHTML = `<div style="padding:12px 14px;background:#D1FAE5;border-left:3px solid #10B981;border-radius:8px;color:#065F46;font-size:12.5px;line-height:1.55"><b>✅ Email envoyé à ${email}</b><br>Ouvre ta boîte mail, clique sur le lien Nexus, tu reviendras automatiquement connecté ici.</div>`;
+    this.toast('📨 Lien magique envoyé', 'success', email);
+  },
+  async logoutCloud(){
+    if (!window.NxCloud) return;
+    if (!confirm('Se déconnecter de Nexus Cloud ?')) return;
+    const res = await window.NxCloud.signOut();
+    this.toast(res.ok ? '✓ Déconnecté' : '❌ Erreur déconnexion', res.ok ? 'success' : 'error');
+    this.closeModal();
+    this.refreshCloudUi();
+  },
+  refreshCloudUi(){
+    const badge = document.getElementById('cloudBadge');
+    const btn   = document.getElementById('cloudBtn');
+    if (!badge || !btn) return;
+    const authed = (window.NxCloud && window.NxCloud.isAuthed && window.NxCloud.isAuthed());
+    badge.style.display = authed ? 'block' : 'none';
+    btn.title = authed ? 'Cloud connecté · clic pour gérer' : 'Connexion cloud';
+  },
+  async loadProfileFromCloud(){
+    if (!window.NxCloud || !window.NxCloud.isAuthed()) return;
+    const cloudProfile = await window.NxCloud.getProfile();
+    if (cloudProfile && Object.keys(cloudProfile).length) {
+      // Merge non-destructif : on conserve les défauts du state sur les champs vides côté cloud
+      const merged = Object.assign({}, this.state.business, cloudProfile);
+      // Si le profil cloud existe mais est vide (1er login), on push le profil démo en cloud
+      const isEmptyCloud = !cloudProfile.name && !cloudProfile.description;
+      this.state.business = merged;
+      this.save();
+      if (isEmptyCloud) {
+        // Premier login : on seed avec le profil démo Carlos pour que Nexus marche immédiatement
+        await window.NxCloud.upsertProfile(this.state.business);
+        this.toast('☁️ Profil démo synchronisé en cloud', 'info', 'Tu peux modifier, ça sauvegarde auto');
+      } else {
+        this.toast('☁️ Profil chargé depuis le cloud', 'success', cloudProfile.name || '');
+      }
+      if (this.state.view === 'profile' || this.state.view === 'dashboard') this.renderView();
+    } else {
+      // Pas de profil en BDD → on seed avec le profil actuel (démo Carlos)
+      const res = await window.NxCloud.upsertProfile(this.state.business);
+      if (res.ok) this.toast('☁️ Profil créé en cloud', 'success');
+    }
+  },
+  async pushProfileToCloud(){
+    if (!window.NxCloud || !window.NxCloud.isAuthed()) return;
+    const res = await window.NxCloud.upsertProfile(this.state.business);
+    if (!res.ok) console.warn('[Cloud] upsertProfile', res.error);
+    return res;
+  },
 
   playVocal(){
     if ('speechSynthesis' in window) {
@@ -4284,7 +4418,15 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     this.renderView();
     this.toast(this.state.apiKeys.google.connected?'✓ Google connecté':'Google déconnecté', this.state.apiKeys.google.connected?'success':'info');
   },
-  updateBiz(k,v){ this.state.business[k] = v; this.save(); },
+  updateBiz(k,v){
+    this.state.business[k] = v;
+    this.save();
+    // ☁️ Push debounced vers Supabase si user connecté (Augustin 04/06/2026)
+    if (window.NxCloud && window.NxCloud.isAuthed && window.NxCloud.isAuthed()) {
+      clearTimeout(this._cloudPushTimer);
+      this._cloudPushTimer = setTimeout(() => { this.pushProfileToCloud(); }, 1200);
+    }
+  },
   updateBizHours(d,v){ this.state.business.hours[d] = v; this.save(); },
   applyTone(v){ this.state.business.tone = v; this.save(); this.renderView(); this.toast('Ton mis à jour','success'); },
 
@@ -9066,6 +9208,35 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
 
 // Boot
 window.addEventListener('DOMContentLoaded', () => Nx.init());
+
+// ============================================================
+// ☁️ CLOUD SUPABASE — Wiring boot + listeners (Augustin 04/06/2026)
+// ============================================================
+(function() {
+  function bindCloudUi() {
+    if (!window.Nx || !window.Nx.refreshCloudUi) { setTimeout(bindCloudUi, 100); return; }
+    Nx.refreshCloudUi();
+  }
+  document.addEventListener('nx-cloud-ready', (e) => {
+    bindCloudUi();
+    // Si user déjà connecté (session persistée), charger son profil cloud
+    if (e.detail && e.detail.user && window.Nx && window.Nx.loadProfileFromCloud) {
+      Nx.loadProfileFromCloud();
+    }
+  });
+  document.addEventListener('nx-cloud-auth', (e) => {
+    bindCloudUi();
+    // Quand l'utilisateur se connecte (magic link, signIn), on charge son profil cloud
+    if (e.detail && e.detail.event === 'SIGNED_IN' && window.Nx && window.Nx.loadProfileFromCloud) {
+      Nx.loadProfileFromCloud();
+    }
+    if (e.detail && e.detail.event === 'SIGNED_OUT' && window.Nx) {
+      // Optionnel : recharger la vue pour repasser en mode démo localStorage
+      try { Nx.renderView(); } catch(_) {}
+    }
+  });
+  bindCloudUi();
+})();
 </script>
 </body>
 </html>
