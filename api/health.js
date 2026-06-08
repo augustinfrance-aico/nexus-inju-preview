@@ -21,7 +21,11 @@ module.exports = async (req, res) => {
   // Test 1 : Supabase ping (anon key, accès très limité, RLS protège)
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/`, {
-      headers: { apikey: SUPABASE_ANON_KEY }
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
+        Accept: 'application/openapi+json'
+      }
     });
     if (r.ok) {
       checks.supabase = 'ok';
