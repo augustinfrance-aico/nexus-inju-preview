@@ -102,6 +102,13 @@
         if (error) return { ok: false, error: error.message };
         return { ok: true, data };
       },
+      async signInWithPassword(email, password) {
+        if (!email || !password) return { ok: false, error: 'Email et mot de passe requis' };
+        const { data, error } = await client.auth.signInWithPassword({ email: email.trim(), password });
+        if (error) return { ok: false, error: error.message };
+        this._user = data.user;
+        return { ok: true, data };
+      },
       async signOut() {
         const { error } = await client.auth.signOut();
         this._user = null;

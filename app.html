@@ -2516,16 +2516,22 @@ const Nx = {
       html = `
         <div class="modal-hd"><h3>☁️ Connexion Nexus Cloud</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
         <div class="modal-body">
-          <div style="padding:12px 14px;background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border-radius:10px;margin-bottom:14px;font-size:12.5px;color:#1E3A8A">
-            🔐 <b>Connexion sans mot de passe.</b> Tape ton email, on t'envoie un lien magique. Tu cliques dessus, tu reviens connecté automatiquement.
+          <div style="display:flex;gap:4px;margin-bottom:14px;padding:4px;background:var(--bg2);border-radius:10px">
+            <button id="appModeMagic" class="btn-g" style="flex:1;background:linear-gradient(135deg,#1F6FFF,#7A3CFF);color:#fff;border:0;font-weight:700;font-size:12px" onclick="Nx.cloudSwitchMode('magic')">📨 Magic Link</button>
+            <button id="appModePwd" class="btn-g" style="flex:1;background:transparent;color:var(--ink2);border:0;font-weight:600;font-size:12px" onclick="Nx.cloudSwitchMode('pwd')">🔑 Mot de passe</button>
           </div>
-          <div class="form-row">
-            <label class="form-lbl">Ton email</label>
-            <input class="form-ctrl" id="cloudLoginEmail" type="email" inputmode="email" autocomplete="email" placeholder="augustin@gmail.com" onkeypress="if(event.key==='Enter')Nx.cloudSubmitLogin()">
+          <div id="appCloudFormArea">
+            <div style="padding:12px 14px;background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border-radius:10px;margin-bottom:14px;font-size:12.5px;color:#1E3A8A">
+              🔐 <b>Connexion sans mot de passe.</b> Email, lien magique, retour connecté.
+            </div>
+            <div class="form-row">
+              <label class="form-lbl">Ton email</label>
+              <input class="form-ctrl" id="cloudLoginEmail" type="email" inputmode="email" autocomplete="email" placeholder="augustin@gmail.com" onkeypress="if(event.key==='Enter')Nx.cloudSubmitLogin()">
+            </div>
+            <div id="cloudLoginStatus" style="margin-top:10px;min-height:24px"></div>
           </div>
-          <div id="cloudLoginStatus" style="margin-top:10px;min-height:24px"></div>
           <div style="margin-top:14px;padding:10px 12px;background:#FEF3C7;border-left:3px solid #F59E0B;border-radius:6px;font-size:11.5px;color:#78350F">
-            🧪 <b>Phase A bêta</b> : seul le profil entreprise est synchronisé en cloud pour l'instant. Le reste (CRM, conversations, campagnes…) suit dans les prochains commits. Mode démo non connecté = inchangé.
+            🧪 <b>Phase A bêta</b> : profil entreprise sync cloud. Mode démo non connecté = inchangé.
           </div>
         </div>
         <div class="modal-foot">
@@ -3057,6 +3063,70 @@ const Nx = {
     }
     if (status) status.innerHTML = `<div style="padding:12px 14px;background:#D1FAE5;border-left:3px solid #10B981;border-radius:8px;color:#065F46;font-size:12.5px;line-height:1.55"><b>✅ Email envoyé à ${email}</b><br>Ouvre ta boîte mail, clique sur le lien Nexus, tu reviendras automatiquement connecté ici.</div>`;
     this.toast('📨 Lien magique envoyé', 'success', email);
+  },
+  cloudSwitchMode(mode){
+    const area = document.getElementById('appCloudFormArea');
+    const btnFoot = document.getElementById('cloudLoginBtn');
+    const btnMagic = document.getElementById('appModeMagic');
+    const btnPwd   = document.getElementById('appModePwd');
+    if (!area || !btnFoot) return;
+    if (mode === 'pwd') {
+      btnPwd.style.background = 'linear-gradient(135deg,#10B981,#059669)'; btnPwd.style.color = '#fff';
+      btnMagic.style.background = 'transparent'; btnMagic.style.color = 'var(--ink2)';
+      area.innerHTML = `
+        <div style="padding:12px 14px;background:#D1FAE5;border-radius:10px;margin-bottom:14px;font-size:12.5px;color:#065F46">
+          🔑 <b>Email + mot de passe.</b> Connexion instantanée, zéro mail.
+        </div>
+        <div class="form-row">
+          <label class="form-lbl">Email</label>
+          <input class="form-ctrl" id="cloudPwdEmailApp" type="email" inputmode="email" autocomplete="email" placeholder="augustin.france@gmail.com" onkeypress="if(event.key==='Enter')document.getElementById('cloudPwdPwdApp').focus()">
+        </div>
+        <div class="form-row">
+          <label class="form-lbl">Mot de passe</label>
+          <input class="form-ctrl" id="cloudPwdPwdApp" type="password" autocomplete="current-password" placeholder="NexusDev2026!" onkeypress="if(event.key==='Enter')Nx.cloudSubmitLoginPwd()">
+        </div>
+        <div id="cloudLoginStatus" style="margin-top:10px;min-height:24px"></div>`;
+      btnFoot.textContent = '🔑 Se connecter';
+      btnFoot.style.background = 'linear-gradient(135deg,#10B981,#059669)';
+      btnFoot.onclick = () => this.cloudSubmitLoginPwd();
+      setTimeout(() => document.getElementById('cloudPwdEmailApp')?.focus(), 100);
+    } else {
+      btnMagic.style.background = 'linear-gradient(135deg,#1F6FFF,#7A3CFF)'; btnMagic.style.color = '#fff';
+      btnPwd.style.background = 'transparent'; btnPwd.style.color = 'var(--ink2)';
+      area.innerHTML = `
+        <div style="padding:12px 14px;background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border-radius:10px;margin-bottom:14px;font-size:12.5px;color:#1E3A8A">
+          🔐 <b>Connexion sans mot de passe.</b> Email, lien magique, retour connecté.
+        </div>
+        <div class="form-row">
+          <label class="form-lbl">Ton email</label>
+          <input class="form-ctrl" id="cloudLoginEmail" type="email" inputmode="email" autocomplete="email" placeholder="augustin@gmail.com" onkeypress="if(event.key==='Enter')Nx.cloudSubmitLogin()">
+        </div>
+        <div id="cloudLoginStatus" style="margin-top:10px;min-height:24px"></div>`;
+      btnFoot.textContent = '📨 Recevoir le lien magique';
+      btnFoot.style.background = '';
+      btnFoot.onclick = () => this.cloudSubmitLogin();
+      setTimeout(() => document.getElementById('cloudLoginEmail')?.focus(), 100);
+    }
+  },
+  async cloudSubmitLoginPwd(){
+    const emailEl = document.getElementById('cloudPwdEmailApp');
+    const pwdEl   = document.getElementById('cloudPwdPwdApp');
+    const status  = document.getElementById('cloudLoginStatus');
+    const btn     = document.getElementById('cloudLoginBtn');
+    if (!emailEl || !pwdEl || !window.NxCloud) return;
+    const email = emailEl.value.trim();
+    const pwd   = pwdEl.value;
+    if (!email || !pwd) { (!email ? emailEl : pwdEl).focus(); return; }
+    btn.disabled = true; btn.textContent = 'Connexion…';
+    const res = await window.NxCloud.signInWithPassword(email, pwd);
+    btn.disabled = false; btn.textContent = '🔑 Se connecter';
+    if (!res.ok) {
+      if (status) status.innerHTML = `<span style="color:var(--red)">❌ ${res.error}</span>`;
+      return;
+    }
+    if (status) status.innerHTML = `<div style="padding:10px 12px;background:#D1FAE5;border-left:3px solid #10B981;border-radius:8px;color:#065F46;font-size:12.5px"><b>✅ Connecté</b></div>`;
+    this.toast('☁️ Connecté à Nexus Cloud', 'success', email);
+    setTimeout(() => this.closeModal(), 600);
   },
   async logoutCloud(){
     if (!window.NxCloud) return;

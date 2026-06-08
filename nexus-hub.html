@@ -792,37 +792,93 @@ html[data-theme="light"] .welcome h1{
         <h2 style="margin:0;font-size:18px;font-weight:800">☁️ Connexion Nexus Cloud</h2>
         <button id="cloudClose" style="background:none;border:0;color:var(--ink2);font-size:22px;cursor:pointer">✕</button>
       </div>
-      <div style="padding:12px 14px;background:linear-gradient(135deg,rgba(31,111,255,.12),rgba(122,60,255,.08));border-radius:10px;margin-bottom:14px;font-size:12.5px;line-height:1.55;color:var(--ink2)">
-        🔐 <b>Connexion sans mot de passe.</b> Tape ton email, on t'envoie un lien magique. Tu cliques dessus, tu reviens connecté automatiquement.
+      <div style="display:flex;gap:4px;margin-bottom:14px;padding:4px;background:var(--bg2);border-radius:10px">
+        <button id="modeMagic" style="flex:1;padding:8px;border-radius:8px;border:0;background:linear-gradient(135deg,#1F6FFF,#7A3CFF);color:#fff;cursor:pointer;font-weight:700;font-size:12px;font-family:inherit">📨 Magic Link</button>
+        <button id="modePwd" style="flex:1;padding:8px;border-radius:8px;border:0;background:transparent;color:var(--ink2);cursor:pointer;font-weight:600;font-size:12px;font-family:inherit">🔑 Mot de passe</button>
       </div>
-      <input id="cloudEmailHub" type="email" inputmode="email" autocomplete="email" placeholder="ton@email.com" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px;font-family:inherit;margin-bottom:10px">
-      <div id="cloudStatusHub" style="min-height:24px;margin-bottom:10px;font-size:12.5px"></div>
-      <div style="display:flex;gap:8px;justify-content:flex-end">
-        <button id="cloudCancelHub" style="padding:10px 16px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink2);cursor:pointer;font-weight:600;font-family:inherit">Annuler</button>
-        <button id="cloudSubmitHub" style="padding:10px 16px;border-radius:10px;border:0;background:linear-gradient(135deg,#1F6FFF,#7A3CFF);color:#fff;cursor:pointer;font-weight:700;font-family:inherit">📨 Recevoir le lien</button>
-      </div>
+      <div id="cloudFormArea"></div>
       <div style="margin-top:14px;padding:10px 12px;background:rgba(245,158,11,.12);border-left:3px solid #F59E0B;border-radius:6px;font-size:11px;color:var(--ink2)">
-        🧪 <b>Phase A bêta</b> : profil entreprise synchronisé en cloud. Le reste (CRM, conversations…) suit dans les prochains commits.
+        🧪 <b>Phase A bêta</b> : profil entreprise sync cloud. Le reste suit après validation.
       </div>`;
     document.getElementById('cloudClose').onclick = closeCloudOverlay;
-    document.getElementById('cloudCancelHub').onclick = closeCloudOverlay;
-    const emailEl = document.getElementById('cloudEmailHub');
-    const btnSubmit = document.getElementById('cloudSubmitHub');
-    const statusEl = document.getElementById('cloudStatusHub');
-    const submit = async () => {
-      const email = emailEl.value.trim();
-      if (!email) { emailEl.focus(); return; }
-      if (!window.NxCloud) { statusEl.innerHTML = '<span style="color:#EF4444">⏳ Cloud pas encore prêt, réessaie dans 2 sec</span>'; return; }
-      btnSubmit.disabled = true; btnSubmit.textContent = 'Envoi…';
-      const res = await window.NxCloud.signInWithMagicLink(email);
-      btnSubmit.disabled = false; btnSubmit.textContent = '📨 Recevoir le lien';
-      if (!res.ok) { statusEl.innerHTML = '<span style="color:#EF4444">❌ ' + res.error + '</span>'; return; }
-      statusEl.innerHTML = '<div style="padding:10px 12px;background:rgba(16,185,129,.15);border-left:3px solid #10B981;border-radius:6px;color:#065F46;line-height:1.45"><b>✅ Email envoyé à ' + email + '</b><br>Ouvre ta boîte mail, clique sur le lien Nexus, tu reviens connecté ici.</div>';
-      showToast('📨 Lien magique envoyé');
+    const formArea = document.getElementById('cloudFormArea');
+    const btnMagic = document.getElementById('modeMagic');
+    const btnPwd   = document.getElementById('modePwd');
+
+    const renderMagic = () => {
+      btnMagic.style.background = 'linear-gradient(135deg,#1F6FFF,#7A3CFF)'; btnMagic.style.color = '#fff';
+      btnPwd.style.background = 'transparent'; btnPwd.style.color = 'var(--ink2)';
+      formArea.innerHTML = `
+        <div style="padding:10px 12px;background:rgba(31,111,255,.1);border-radius:8px;margin-bottom:10px;font-size:11.5px;color:var(--ink2)">
+          🔐 Email seul · on t'envoie un lien magique · tu cliques · tu es connecté.
+        </div>
+        <input id="cloudEmailHub" type="email" inputmode="email" autocomplete="email" placeholder="ton@email.com" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px;font-family:inherit;margin-bottom:10px">
+        <div id="cloudStatusHub" style="min-height:24px;margin-bottom:10px;font-size:12.5px"></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button id="cloudCancelHub" style="padding:10px 16px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink2);cursor:pointer;font-weight:600;font-family:inherit">Annuler</button>
+          <button id="cloudSubmitHub" style="padding:10px 16px;border-radius:10px;border:0;background:linear-gradient(135deg,#1F6FFF,#7A3CFF);color:#fff;cursor:pointer;font-weight:700;font-family:inherit">📨 Recevoir le lien</button>
+        </div>`;
+      document.getElementById('cloudCancelHub').onclick = closeCloudOverlay;
+      const emailEl = document.getElementById('cloudEmailHub');
+      const btnSubmit = document.getElementById('cloudSubmitHub');
+      const statusEl = document.getElementById('cloudStatusHub');
+      const submit = async () => {
+        const email = emailEl.value.trim();
+        if (!email) { emailEl.focus(); return; }
+        if (!window.NxCloud) { statusEl.innerHTML = '<span style="color:#EF4444">⏳ Cloud pas prêt</span>'; return; }
+        btnSubmit.disabled = true; btnSubmit.textContent = 'Envoi…';
+        const res = await window.NxCloud.signInWithMagicLink(email);
+        btnSubmit.disabled = false; btnSubmit.textContent = '📨 Recevoir le lien';
+        if (!res.ok) { statusEl.innerHTML = '<span style="color:#EF4444">❌ ' + res.error + '</span>'; return; }
+        statusEl.innerHTML = '<div style="padding:10px 12px;background:rgba(16,185,129,.15);border-left:3px solid #10B981;border-radius:6px;color:#065F46;line-height:1.45"><b>✅ Email envoyé à ' + email + '</b><br>Ouvre ta boîte mail, clique sur le lien Nexus.</div>';
+        showToast('📨 Lien magique envoyé');
+      };
+      btnSubmit.onclick = submit;
+      emailEl.onkeypress = (e) => { if (e.key === 'Enter') submit(); };
+      setTimeout(() => emailEl.focus(), 100);
     };
-    btnSubmit.onclick = submit;
-    emailEl.onkeypress = (e) => { if (e.key === 'Enter') submit(); };
-    setTimeout(() => emailEl.focus(), 100);
+
+    const renderPwd = () => {
+      btnPwd.style.background = 'linear-gradient(135deg,#1F6FFF,#7A3CFF)'; btnPwd.style.color = '#fff';
+      btnMagic.style.background = 'transparent'; btnMagic.style.color = 'var(--ink2)';
+      formArea.innerHTML = `
+        <div style="padding:10px 12px;background:rgba(16,185,129,.1);border-radius:8px;margin-bottom:10px;font-size:11.5px;color:var(--ink2)">
+          🔑 Email + mot de passe · connexion instantanée · zéro mail.
+        </div>
+        <input id="cloudPwdEmail" type="email" inputmode="email" autocomplete="email" placeholder="ton@email.com" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px;font-family:inherit;margin-bottom:8px">
+        <input id="cloudPwdPwd" type="password" autocomplete="current-password" placeholder="Mot de passe" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px;font-family:inherit;margin-bottom:10px">
+        <div id="cloudStatusPwd" style="min-height:24px;margin-bottom:10px;font-size:12.5px"></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button id="cloudCancelPwd" style="padding:10px 16px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink2);cursor:pointer;font-weight:600;font-family:inherit">Annuler</button>
+          <button id="cloudSubmitPwd" style="padding:10px 16px;border-radius:10px;border:0;background:linear-gradient(135deg,#10B981,#059669);color:#fff;cursor:pointer;font-weight:700;font-family:inherit">🔑 Se connecter</button>
+        </div>`;
+      document.getElementById('cloudCancelPwd').onclick = closeCloudOverlay;
+      const emailEl = document.getElementById('cloudPwdEmail');
+      const pwdEl   = document.getElementById('cloudPwdPwd');
+      const btnSub  = document.getElementById('cloudSubmitPwd');
+      const statusEl = document.getElementById('cloudStatusPwd');
+      const submit = async () => {
+        const email = emailEl.value.trim();
+        const pwd   = pwdEl.value;
+        if (!email || !pwd) { (!email ? emailEl : pwdEl).focus(); return; }
+        if (!window.NxCloud) { statusEl.innerHTML = '<span style="color:#EF4444">⏳ Cloud pas prêt</span>'; return; }
+        btnSub.disabled = true; btnSub.textContent = 'Connexion…';
+        const res = await window.NxCloud.signInWithPassword(email, pwd);
+        btnSub.disabled = false; btnSub.textContent = '🔑 Se connecter';
+        if (!res.ok) { statusEl.innerHTML = '<span style="color:#EF4444">❌ ' + res.error + '</span>'; return; }
+        statusEl.innerHTML = '<span style="color:#10B981">✅ Connecté</span>';
+        showToast('☁️ Connecté à Nexus Cloud');
+        setTimeout(closeCloudOverlay, 600);
+      };
+      btnSub.onclick = submit;
+      pwdEl.onkeypress = (e) => { if (e.key === 'Enter') submit(); };
+      emailEl.onkeypress = (e) => { if (e.key === 'Enter') pwdEl.focus(); };
+      setTimeout(() => emailEl.focus(), 100);
+    };
+
+    btnMagic.onclick = renderMagic;
+    btnPwd.onclick   = renderPwd;
+    renderMagic();
   };
 
   const renderAccount = () => {
