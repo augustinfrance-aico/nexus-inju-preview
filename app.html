@@ -3182,9 +3182,35 @@ const Nx = {
   // ============================================================
   // ☁️ PHASE B — Sync bidirectionnelle pour les 10 tables restantes
   // ============================================================
+  // Helper UUID déterministe (Augustin 08/06/2026)
+  // Convertit un id local (integer) en UUID v4 valide format Postgres
+  // Pattern : 00000000-0000-4000-8000-{12 chars} → conserve l'id local en bout
+  // Reverse : _uuidToLocalId retrouve l'integer original
+  // Si l'id est déjà un vrai UUID Postgres, on passe transparent (round-trip safe)
+  _localIdToUuid(id, prefix){
+    if (id === null || id === undefined || id === '') return '00000000-0000-4000-8000-000000000000';
+    const s = String(id);
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s)) return s; // déjà UUID
+    const n = parseInt(s, 10);
+    if (isNaN(n)) return '00000000-0000-4000-8000-000000000000';
+    const p = (prefix || '8000'); // bits 4 réservés UUID v4, ici on profite des 4 chars pour identifier le type (8000 client, 8001 conv, etc.)
+    const padded = String(Math.abs(n)).padStart(12, '0').slice(-12);
+    return `00000000-0000-4000-${p}-${padded}`;
+  },
+  _uuidToLocalId(uuid){
+    if (typeof uuid !== 'string') return uuid;
+    const m = uuid.match(/^00000000-0000-4000-[0-9a-f]{4}-(\d{12})$/i);
+    if (m) {
+      const n = parseInt(m[1], 10);
+      return isNaN(n) ? uuid : n;
+    }
+    return uuid;
+  },
+
   // Mappers : JS state ↔ row Postgres (snake_case)
   _toRowClient(c){
-    return { id: c.id, name: c.name, phone: c.phone||'', email: c.email||'',
+    return { id: this._localIdToUuid(c.id, '8000'),
+      name: c.name, phone: c.phone||'', email: c.email||'',
       instagram: c.instagram||'', instagram_followers: c.instagramFollowers||0,
       avatar: c.avatar||'', color: c.color||'#94A3B8', score: c.score||0,
       orders: c.orders||0, spent: c.spent||0, last_seen: c.lastSeen||'',
@@ -3192,11 +3218,33 @@ const Nx = {
       notes: c.notes||'', ai_notes: c.aiNotes||'', status: c.status||'active' };
   },
   _fromRowClient(r){
-    return { id: r.id, name: r.name, phone: r.phone, email: r.email,
+    return { id: this._uuidToLocalId(r.id),
+      name: r.name, phone: r.phone, email: r.email,
       instagram: r.instagram, instagramFollowers: r.instagram_followers,
       avatar: r.avatar, color: r.color, score: r.score, orders: r.orders,
       spent: r.spent, lastSeen: r.last_seen, channel: r.channel, tag: r.tag,
       tags: r.tags||[], notes: r.notes, aiNotes: r.ai_notes, status: r.status };
+  },
+  // Conversations + Messages (relations FK)
+  _convCloudId(clientId){ return this._localIdToUuid(clientId, '8001'); },
+  _toRowConversation(conv){
+    const cl = (this.state.clients||[]).find(x => x.id === conv.clientId);
+    return { id: this._convCloudId(conv.clientId),
+      client_id: this._localIdToUuid(conv.clientId, '8000'),
+      channel: conv.channel||'whatsapp', unread: !!conv.unread, draft: conv.draft||null };
+  },
+  _toRowMessage(convId, msg, idx){
+    return { id: this._localIdToUuid(Date.parse(msg.time)||(Date.now()+idx), '8002'),
+      conversation_id: this._convCloudId(convId),
+      from_role: (msg.from === 'me') ? 'me' : (msg.from === 'ai') ? 'ai' : 'them',
+      text: msg.text||'', channel: msg.channel||'whatsapp', metadata: {} };
+  },
+  // Campagnes (vraies, non auto)
+  _toRowCampaign(c){
+    return { id: this._localIdToUuid(c.id, '8003'),
+      name: c.name||'', audience: c.audience||'', sent: c.sent||0,
+      opened: c.opened||0, replied: c.replied||0, status: c.status||'draft',
+      message: c.message||'', sent_at: null };
   },
   _toRowCredits(cr){ return { remaining: cr.remaining||0, total: cr.total||500, reset_label: cr.resetLabel||'' }; },
   _fromRowCredits(r){ return { remaining: r.remaining, total: r.total, resetLabel: r.reset_label }; },
@@ -3205,12 +3253,20 @@ const Nx = {
   _toRowAgenda(it){
     let dueDate = null;
     if (it.dueDate) { const d = new Date(it.dueDate); if (!isNaN(d)) dueDate = d.toISOString(); }
-    return { id: it.id, title: it.title||'', detail: it.detail||'', icon: it.icon||'🎯',
+    // Augustin 08/06 : id agenda peut être un string (fiesta_2026-09-18), un Date.now() ou un id custom. UUID déterministe si number.
+    let id = it.id;
+    if (typeof id === 'number' || (typeof id === 'string' && /^\d+$/.test(id))) id = this._localIdToUuid(id, '8004');
+    else if (typeof id === 'string' && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+      // String non-numérique (ex: 'fiesta_2026-09-18') : hash simple → UUID
+      let h = 0; for (let i = 0; i < id.length; i++) { h = ((h << 5) - h + id.charCodeAt(i)) | 0; }
+      id = this._localIdToUuid(Math.abs(h), '8004');
+    }
+    return { id, title: it.title||'', detail: it.detail||'', icon: it.icon||'🎯',
       category: it.category||'reminder', due_date: dueDate, when_label: it.when||'',
       status: it.status||'scheduled', metadata: it.metadata||{} };
   },
   _fromRowAgenda(r){
-    return { id: r.id, title: r.title, detail: r.detail, icon: r.icon, category: r.category,
+    return { id: this._uuidToLocalId(r.id), title: r.title, detail: r.detail, icon: r.icon, category: r.category,
       dueDate: r.due_date, when: r.when_label, status: r.status, metadata: r.metadata };
   },
   _toRowEscalation(e){
@@ -3304,22 +3360,37 @@ const Nx = {
   async syncToCloud(){
     if (!window.NxCloud || !window.NxCloud.isAuthed()) return;
     const NC = window.NxCloud;
+    const user = NC._user;
+    if (!user) return;
     try {
       const tasks = [];
+      // Profil entreprise (1:1)
       tasks.push(NC.upsertProfile(this.state.business));
-      if (this.state.clients?.length) tasks.push(NC.bulkUpsert('clients', this.state.clients.map(c => this._toRowClient(c)), 'id'));
-      if (this.state.credits) tasks.push(NC.upsertOne('credits', this._toRowCredits(this.state.credits), 'tenant_id'));
-      if (this.state.integrations?.length) tasks.push(NC.bulkUpsert('integrations', this.state.integrations.map(i => this._toRowIntegration(i)), 'tenant_id,key'));
-      if (this.state.escalationLog?.length) {
-        const rows = this.state.escalationLog.slice(0, 50).map(e => this._toRowEscalation(e));
-        tasks.push(NC.bulkUpsert('escalation_log', rows));
+      // Clients (bulk upsert avec UUID déterministe)
+      if (this.state.clients?.length) {
+        tasks.push(NC.bulkUpsert('clients', this.state.clients.map(c => this._toRowClient(c)), 'id'));
       }
-      // Vacances (lit depuis localStorage)
+      // Crédits (1:1)
+      if (this.state.credits) tasks.push(NC.upsertOne('credits', this._toRowCredits(this.state.credits), 'tenant_id'));
+      // Intégrations (PK composite tenant_id,key)
+      if (this.state.integrations?.length) {
+        tasks.push(NC.bulkUpsert('integrations', this.state.integrations.map(i => this._toRowIntegration(i)), 'tenant_id,key'));
+      }
+      // Auto-campagnes (PK composite tenant_id,id)
+      if (this.state.autoCampaignDetails) {
+        const autoRows = Object.keys(this.state.autoCampaignDetails).map(id => {
+          const det = this.state.autoCampaignDetails[id];
+          const status = (this.state.autoCampaignStatus||{})[id] || 'active';
+          return this._toRowAutoCamp(id, det, status);
+        });
+        if (autoRows.length) tasks.push(NC.bulkUpsert('auto_campaigns', autoRows, 'tenant_id,id'));
+      }
+      // Vacances (1:1)
       try {
         const vacRaw = localStorage.getItem('nexus_vacances');
         if (vacRaw) tasks.push(NC.upsertOne('vacances_config', this._toRowVacances(JSON.parse(vacRaw)), 'tenant_id'));
       } catch(_) {}
-      // Agenda items
+      // Agenda items (bulk upsert)
       try {
         const agRaw = localStorage.getItem('nx_agenda');
         if (agRaw) {
@@ -3327,7 +3398,55 @@ const Nx = {
           if (Array.isArray(items) && items.length) tasks.push(NC.bulkUpsert('agenda_items', items.map(it => this._toRowAgenda(it)), 'id'));
         }
       } catch(_) {}
+      // Campagnes envoyées (bulk upsert)
+      if (this.state.campaigns?.length) {
+        tasks.push(NC.bulkUpsert('campaigns', this.state.campaigns.map(c => this._toRowCampaign(c)), 'id'));
+      }
+
       await Promise.allSettled(tasks);
+
+      // Tables append-only sans clé d'idempotence : DELETE-then-INSERT pour éviter duplications
+      // (escalation_log + cart_recovery_runs)
+      try {
+        if (this.state.escalationLog?.length) {
+          await NC.client.from('escalation_log').delete().eq('tenant_id', user.id);
+          const rows = this.state.escalationLog.slice(0, 50).map(e => Object.assign(this._toRowEscalation(e), { tenant_id: user.id }));
+          if (rows.length) await NC.client.from('escalation_log').insert(rows);
+        }
+      } catch(e) { console.warn('[Cloud] escalation_log sync', e); }
+      try {
+        if (this.state.cartRecoveryRuns?.length) {
+          await NC.client.from('cart_recovery_runs').delete().eq('tenant_id', user.id);
+          const rows = this.state.cartRecoveryRuns.slice(0, 30).map(r => ({
+            tenant_id: user.id,
+            triggered_at: r.ts ? new Date(r.ts).toISOString() : new Date().toISOString(),
+            count: r.count||0,
+            items: r.items||[]
+          }));
+          if (rows.length) await NC.client.from('cart_recovery_runs').insert(rows);
+        }
+      } catch(e) { console.warn('[Cloud] cart_recovery_runs sync', e); }
+
+      // Conversations + Messages : DELETE-then-INSERT (cascade delete messages via FK)
+      try {
+        if (this.state.conversations?.length) {
+          // Filter conversations qui ont un client correspondant dans state.clients
+          const validConvs = this.state.conversations.filter(co => (this.state.clients||[]).some(cl => cl.id === co.clientId));
+          if (validConvs.length) {
+            await NC.client.from('conversations').delete().eq('tenant_id', user.id);
+            const convRows = validConvs.map(co => Object.assign(this._toRowConversation(co), { tenant_id: user.id }));
+            await NC.client.from('conversations').insert(convRows);
+            // Messages : flatten + insert
+            const msgRows = [];
+            validConvs.forEach(co => {
+              (co.messages || []).forEach((m, idx) => {
+                msgRows.push(Object.assign(this._toRowMessage(co.clientId, m, idx), { tenant_id: user.id }));
+              });
+            });
+            if (msgRows.length) await NC.client.from('messages').insert(msgRows);
+          }
+        }
+      } catch(e) { console.warn('[Cloud] conversations/messages sync', e); }
     } catch(e) {
       console.warn('[Cloud] syncToCloud', e);
     }
