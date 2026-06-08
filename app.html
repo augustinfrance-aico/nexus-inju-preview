@@ -2123,7 +2123,11 @@ const Nx = {
     }
   },
 
-  save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state)); },
+  save(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
+    // ☁️ Phase B : push debounced vers cloud si user connecté (Augustin 08/06/2026)
+    if (this._scheduleCloudSync) this._scheduleCloudSync();
+  },
   reset(){ localStorage.removeItem(STORAGE_KEY); location.reload(); },
 
   startLive(){
@@ -3173,6 +3177,160 @@ const Nx = {
     const res = await window.NxCloud.upsertProfile(this.state.business);
     if (!res.ok) console.warn('[Cloud] upsertProfile', res.error);
     return res;
+  },
+
+  // ============================================================
+  // ☁️ PHASE B — Sync bidirectionnelle pour les 10 tables restantes
+  // ============================================================
+  // Mappers : JS state ↔ row Postgres (snake_case)
+  _toRowClient(c){
+    return { id: c.id, name: c.name, phone: c.phone||'', email: c.email||'',
+      instagram: c.instagram||'', instagram_followers: c.instagramFollowers||0,
+      avatar: c.avatar||'', color: c.color||'#94A3B8', score: c.score||0,
+      orders: c.orders||0, spent: c.spent||0, last_seen: c.lastSeen||'',
+      channel: c.channel||'whatsapp', tag: c.tag||'', tags: c.tags||[],
+      notes: c.notes||'', ai_notes: c.aiNotes||'', status: c.status||'active' };
+  },
+  _fromRowClient(r){
+    return { id: r.id, name: r.name, phone: r.phone, email: r.email,
+      instagram: r.instagram, instagramFollowers: r.instagram_followers,
+      avatar: r.avatar, color: r.color, score: r.score, orders: r.orders,
+      spent: r.spent, lastSeen: r.last_seen, channel: r.channel, tag: r.tag,
+      tags: r.tags||[], notes: r.notes, aiNotes: r.ai_notes, status: r.status };
+  },
+  _toRowCredits(cr){ return { remaining: cr.remaining||0, total: cr.total||500, reset_label: cr.resetLabel||'' }; },
+  _fromRowCredits(r){ return { remaining: r.remaining, total: r.total, resetLabel: r.reset_label }; },
+  _toRowIntegration(i){ return { key: i.k, name: i.n, status: i.s, critical: !!i.critical, description: i.desc||'', config: i.config||{} }; },
+  _fromRowIntegration(r){ return { k: r.key, n: r.name, ic: '', s: r.status, critical: r.critical, desc: r.description, config: r.config }; },
+  _toRowAgenda(it){
+    let dueDate = null;
+    if (it.dueDate) { const d = new Date(it.dueDate); if (!isNaN(d)) dueDate = d.toISOString(); }
+    return { id: it.id, title: it.title||'', detail: it.detail||'', icon: it.icon||'🎯',
+      category: it.category||'reminder', due_date: dueDate, when_label: it.when||'',
+      status: it.status||'scheduled', metadata: it.metadata||{} };
+  },
+  _fromRowAgenda(r){
+    return { id: r.id, title: r.title, detail: r.detail, icon: r.icon, category: r.category,
+      dueDate: r.due_date, when: r.when_label, status: r.status, metadata: r.metadata };
+  },
+  _toRowEscalation(e){
+    return { client_name: e.client||'', client_phone: e.clientPhone||'',
+      message: e.message||'', reason: e.reason||'', channel: (e.channel||'whatsapp').toLowerCase(),
+      recipient_phone: e.to||'', status: e.status||'simulated',
+      push_status: e.pushStatus||'', triggered_at: e.ts ? new Date(e.ts).toISOString() : new Date().toISOString() };
+  },
+  _fromRowEscalation(r){
+    return { client: r.client_name, clientPhone: r.client_phone, message: r.message,
+      reason: r.reason, channel: r.channel === 'whatsapp' ? 'WhatsApp' : 'SMS',
+      to: r.recipient_phone, status: r.status, pushStatus: r.push_status,
+      ts: r.triggered_at ? new Date(r.triggered_at).getTime() : Date.now(),
+      timeLabel: r.triggered_at ? new Date(r.triggered_at).toLocaleString('fr-FR', {weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}) : '' };
+  },
+  _toRowAutoCamp(id, det, status){
+    return { id, name: det.name||'', trigger_type: det.trigger||'monthly',
+      target_segment: det.target||'all', message: det.message||'', cfg: det.cfg||{},
+      anti_abus_week: !!det.antiAbusWeek, anti_abus_credits: !!det.antiAbusCredits,
+      status: status || 'active' };
+  },
+  _toRowVacances(v){
+    return { active: !!v.active, start_date: v.startDate||null, end_date: v.endDate||null,
+      msg_short: v.msgShort||'', msg_long: v.msgLong||'', msg_urgent: v.msgUrgent||'',
+      lang: v.lang||'auto',
+      perm_orders: !!v.perm_orders, perm_prices: !!v.perm_prices, perm_calendar: !!v.perm_calendar,
+      perm_escalate: !!v.perm_escalate, perm_promo: !!v.perm_promo,
+      topics: v.topics||[], stats: v.stats||{} };
+  },
+  _fromRowVacances(r){
+    return Object.assign(this.defaultVacances(), { active: r.active, startDate: r.start_date,
+      endDate: r.end_date, msgShort: r.msg_short, msgLong: r.msg_long, msgUrgent: r.msg_urgent,
+      lang: r.lang, perm_orders: r.perm_orders, perm_prices: r.perm_prices, perm_calendar: r.perm_calendar,
+      perm_escalate: r.perm_escalate, perm_promo: r.perm_promo, topics: r.topics, stats: r.stats });
+  },
+
+  // Sync ALL : load toutes les tables au login, override state si données cloud présentes, seed sinon
+  async syncFromCloud(){
+    if (!window.NxCloud || !window.NxCloud.isAuthed()) return;
+    const NC = window.NxCloud;
+    try {
+      // Clients
+      const cli = await NC.listAll('clients');
+      if (cli.ok && cli.data.length) {
+        this.state.clients = cli.data.map(r => this._fromRowClient(r));
+      } else if (cli.ok && !cli.data.length && this.state.clients?.length) {
+        await NC.bulkUpsert('clients', this.state.clients.map(c => this._toRowClient(c)), 'id');
+      }
+      // Credits
+      const cr = await NC.listAll('credits');
+      if (cr.ok && cr.data.length) {
+        this.state.credits = this._fromRowCredits(cr.data[0]);
+      } else if (cr.ok && this.state.credits) {
+        await NC.upsertOne('credits', this._toRowCredits(this.state.credits), 'tenant_id');
+      }
+      // Integrations
+      const ig = await NC.listAll('integrations');
+      if (ig.ok && ig.data.length) {
+        this.state.integrations = ig.data.map(r => this._fromRowIntegration(r));
+      } else if (ig.ok && this.state.integrations?.length) {
+        await NC.bulkUpsert('integrations', this.state.integrations.map(i => this._toRowIntegration(i)), 'tenant_id,key');
+      }
+      // Agenda
+      const ag = await NC.listAll('agenda_items');
+      if (ag.ok && ag.data.length) {
+        try { localStorage.setItem('nx_agenda', JSON.stringify(ag.data.map(r => this._fromRowAgenda(r)))); } catch(_) {}
+      }
+      // Escalation log
+      const esc = await NC.listAll('escalation_log');
+      if (esc.ok && esc.data.length) {
+        this.state.escalationLog = esc.data.map(r => this._fromRowEscalation(r));
+      }
+      // Vacances
+      const vac = await NC.listAll('vacances_config');
+      if (vac.ok && vac.data.length) {
+        try { localStorage.setItem('nexus_vacances', JSON.stringify(this._fromRowVacances(vac.data[0]))); } catch(_) {}
+      }
+      this.save();
+      this.toast('☁️ Données cloud synchronisées', 'success', `${(cli.data||[]).length} clients · ${(esc.data||[]).length} escalades`);
+      this.renderView();
+    } catch(e) {
+      console.warn('[Cloud] syncFromCloud', e);
+    }
+  },
+  // Push debounced de tout ce qui peut être push
+  _scheduleCloudSync(){
+    if (!window.NxCloud || !window.NxCloud.isAuthed()) return;
+    clearTimeout(this._cloudSyncTimer);
+    this._cloudSyncTimer = setTimeout(() => this.syncToCloud(), 1500);
+  },
+  async syncToCloud(){
+    if (!window.NxCloud || !window.NxCloud.isAuthed()) return;
+    const NC = window.NxCloud;
+    try {
+      const tasks = [];
+      tasks.push(NC.upsertProfile(this.state.business));
+      if (this.state.clients?.length) tasks.push(NC.bulkUpsert('clients', this.state.clients.map(c => this._toRowClient(c)), 'id'));
+      if (this.state.credits) tasks.push(NC.upsertOne('credits', this._toRowCredits(this.state.credits), 'tenant_id'));
+      if (this.state.integrations?.length) tasks.push(NC.bulkUpsert('integrations', this.state.integrations.map(i => this._toRowIntegration(i)), 'tenant_id,key'));
+      if (this.state.escalationLog?.length) {
+        const rows = this.state.escalationLog.slice(0, 50).map(e => this._toRowEscalation(e));
+        tasks.push(NC.bulkUpsert('escalation_log', rows));
+      }
+      // Vacances (lit depuis localStorage)
+      try {
+        const vacRaw = localStorage.getItem('nexus_vacances');
+        if (vacRaw) tasks.push(NC.upsertOne('vacances_config', this._toRowVacances(JSON.parse(vacRaw)), 'tenant_id'));
+      } catch(_) {}
+      // Agenda items
+      try {
+        const agRaw = localStorage.getItem('nx_agenda');
+        if (agRaw) {
+          const items = JSON.parse(agRaw);
+          if (Array.isArray(items) && items.length) tasks.push(NC.bulkUpsert('agenda_items', items.map(it => this._toRowAgenda(it)), 'id'));
+        }
+      } catch(_) {}
+      await Promise.allSettled(tasks);
+    } catch(e) {
+      console.warn('[Cloud] syncToCloud', e);
+    }
   },
 
   playVocal(){
@@ -9289,19 +9447,20 @@ window.addEventListener('DOMContentLoaded', () => Nx.init());
   }
   document.addEventListener('nx-cloud-ready', (e) => {
     bindCloudUi();
-    // Si user déjà connecté (session persistée), charger son profil cloud
-    if (e.detail && e.detail.user && window.Nx && window.Nx.loadProfileFromCloud) {
-      Nx.loadProfileFromCloud();
+    // Si user déjà connecté (session persistée), charger profil + toutes les tables
+    if (e.detail && e.detail.user && window.Nx) {
+      Nx.loadProfileFromCloud && Nx.loadProfileFromCloud();
+      Nx.syncFromCloud      && Nx.syncFromCloud();
     }
   });
   document.addEventListener('nx-cloud-auth', (e) => {
     bindCloudUi();
-    // Quand l'utilisateur se connecte (magic link, signIn), on charge son profil cloud
-    if (e.detail && e.detail.event === 'SIGNED_IN' && window.Nx && window.Nx.loadProfileFromCloud) {
-      Nx.loadProfileFromCloud();
+    // Quand l'utilisateur se connecte (magic link OU password), on charge profil + tables
+    if (e.detail && e.detail.event === 'SIGNED_IN' && window.Nx) {
+      Nx.loadProfileFromCloud && Nx.loadProfileFromCloud();
+      Nx.syncFromCloud      && Nx.syncFromCloud();
     }
     if (e.detail && e.detail.event === 'SIGNED_OUT' && window.Nx) {
-      // Optionnel : recharger la vue pour repasser en mode démo localStorage
       try { Nx.renderView(); } catch(_) {}
     }
   });

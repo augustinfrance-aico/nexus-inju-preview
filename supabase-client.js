@@ -160,8 +160,46 @@
           return error ? { ok: false, error: error.message } : { ok: true };
         } catch(e) { return { ok: false, error: e.message }; }
       },
-      version: '1.0.0-A',
-      tablesScope: ['business_profiles']
+
+      // ============================================================
+      // PHASE B — CRUD générique pour les 10 tables restantes
+      // ============================================================
+      async listAll(tableName) {
+        const user = this._user || await this.getUser();
+        if (!user) return { ok: false, error: 'Pas connecté', data: [] };
+        const { data, error } = await client.from(tableName).select('*');
+        if (error) return { ok: false, error: error.message, data: [] };
+        return { ok: true, data: data || [] };
+      },
+      async upsertOne(tableName, row, onConflict) {
+        const user = this._user || await this.getUser();
+        if (!user) return { ok: false, error: 'Pas connecté' };
+        const payload = Object.assign({}, row, { tenant_id: user.id });
+        const opts = onConflict ? { onConflict } : undefined;
+        const { data, error } = await client.from(tableName).upsert(payload, opts).select().single();
+        if (error) return { ok: false, error: error.message };
+        return { ok: true, data };
+      },
+      async bulkUpsert(tableName, rows, onConflict) {
+        const user = this._user || await this.getUser();
+        if (!user) return { ok: false, error: 'Pas connecté' };
+        if (!rows || !rows.length) return { ok: true, data: [] };
+        const payload = rows.map(r => Object.assign({}, r, { tenant_id: user.id }));
+        const opts = onConflict ? { onConflict } : undefined;
+        const { data, error } = await client.from(tableName).upsert(payload, opts).select();
+        if (error) return { ok: false, error: error.message };
+        return { ok: true, data: data || [] };
+      },
+      async deleteOne(tableName, idField, idValue) {
+        const user = this._user || await this.getUser();
+        if (!user) return { ok: false, error: 'Pas connecté' };
+        const { error } = await client.from(tableName).delete().eq(idField, idValue);
+        if (error) return { ok: false, error: error.message };
+        return { ok: true };
+      },
+
+      version: '1.1.0-B',
+      tablesScope: ['business_profiles','clients','conversations','messages','auto_campaigns','campaigns','credits','cart_recovery_runs','escalation_log','integrations','agenda_items','vacances_config']
     };
 
     window.NxCloud = NxCloud;
