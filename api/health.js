@@ -18,28 +18,25 @@ module.exports = async (req, res) => {
   const started = Date.now();
   const checks = { app: 'ok', supabase: 'unknown', tables: 0, latency_ms: 0, errors: [] };
 
-  // Test 1 : Supabase ping (anon key, accès très limité, RLS protège)
+  // Test 1 : ping chaque table via HEAD/count (anon ne voit rien → 200 OK avec []
+  // mais la table doit exister, sinon 404). On compte les tables qui répondent 200/206.
   try {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/`, {
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
-        Accept: 'application/openapi+json'
-      }
-    });
-    if (r.ok) {
-      checks.supabase = 'ok';
-      const spec = await r.json();
-      // Compte les tables exposées dans le schéma public via OpenAPI
-      const paths = Object.keys(spec.paths || {});
-      checks.tables = paths.filter(p => {
-        const name = p.replace(/^\//, '');
-        return TABLES.includes(name);
-      }).length;
-    } else {
-      checks.supabase = 'http_' + r.status;
-      checks.errors.push('supabase_http_' + r.status);
-    }
+    const results = await Promise.all(TABLES.map(async (t) => {
+      try {
+        const r = await fetch(`${SUPABASE_URL}/rest/v1/${t}?select=tenant_id&limit=0`, {
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
+            Prefer: 'count=exact'
+          }
+        });
+        return r.ok;
+      } catch(_) { return false; }
+    }));
+    const accessible = results.filter(Boolean).length;
+    checks.tables = accessible;
+    checks.supabase = accessible === TABLES.length ? 'ok' : 'partial_' + accessible + '_of_' + TABLES.length;
+    if (accessible < TABLES.length) checks.errors.push(`${TABLES.length - accessible} table(s) inaccessibles`);
   } catch (e) {
     checks.supabase = 'unreachable';
     checks.errors.push('supabase_unreachable: ' + (e.message || 'unknown'));
