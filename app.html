@@ -3234,12 +3234,14 @@ const Nx = {
       channel: conv.channel||'whatsapp', unread: !!conv.unread, draft: conv.draft||null };
   },
   _toRowMessage(convId, msg, idx){
-    return { id: this._localIdToUuid(Date.parse(msg.time)||(Date.now()+idx), '8002'),
+    // Augustin 08/06 fix : pas d'id explicite, Postgres génère via default gen_random_uuid().
+    // Évite collisions entre messages de conversations différentes (DELETE-then-INSERT atomique).
+    return {
       conversation_id: this._convCloudId(convId),
       from_role: (msg.from === 'me') ? 'me' : (msg.from === 'ai') ? 'ai' : 'them',
       text: msg.text||'', channel: msg.channel||'whatsapp', metadata: {} };
   },
-  // Campagnes (vraies, non auto)
+  // Campagnes (vraies, non auto) — id déterministe pour upsert idempotent
   _toRowCampaign(c){
     return { id: this._localIdToUuid(c.id, '8003'),
       name: c.name||'', audience: c.audience||'', sent: c.sent||0,
