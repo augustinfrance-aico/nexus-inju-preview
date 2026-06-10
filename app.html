@@ -3393,6 +3393,19 @@ const Nx = {
       if (vac.ok && vac.data.length) {
         try { localStorage.setItem('nexus_vacances', JSON.stringify(this._fromRowVacances(vac.data[0]))); } catch(_) {}
       }
+      // V5.2 : tire les VRAIES campagnes (logs du robot n8n) — stats + historique réels
+      try {
+        const camp = await NC.listAll('campaigns');
+        if (camp.ok && camp.data.length) {
+          this.state.campaigns = camp.data
+            .sort((a,b)=>String(b.sent_at||b.created_at||'').localeCompare(String(a.sent_at||a.created_at||'')))
+            .slice(0,50)
+            .map(r => ({ id: this._uuidToLocalId(r.id), cloudId: r.id, name: r.name||'', audience: r.audience||'',
+              sent: r.sent||0, opened: r.opened||0, replied: r.replied||0, status: r.status||'sent',
+              message: r.message||'',
+              date: r.sent_at ? new Date(r.sent_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '' }));
+        }
+      } catch(_) {}
       this.save();
       if (!silent) this.toast('☁️ Données cloud synchronisées', 'success', `${(cli.data||[]).length} clients · ${(esc.data||[]).length} escalades`);
       this.renderView();
@@ -3461,7 +3474,10 @@ const Nx = {
       } catch(_) {}
       // Campagnes envoyées (bulk upsert)
       if (this.state.campaigns?.length) {
-        tasks.push(NC.bulkUpsert('campaigns', this.state.campaigns.map(c => this._toRowCampaign(c)), 'id'));
+        // V5.2 : ne JAMAIS re-pousser les campagnes venues du cloud (robot = proprietaire),
+        // sinon doublons a chaque cycle push+pull. On ne pousse que les locales (mode demo).
+        const localCamps = this.state.campaigns.filter(c => !c.cloudId);
+        if (localCamps.length) tasks.push(NC.bulkUpsert('campaigns', localCamps.map(c => this._toRowCampaign(c)), 'id'));
       }
 
       await Promise.allSettled(tasks);
@@ -4331,7 +4347,7 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
               <input class="form-ctrl" value="${b.industry}" oninput="Nx.updateBiz('industry',this.value)"></div>
             <div class="form-row"><label class="form-lbl">Baseline / tagline</label>
               <input class="form-ctrl" value="${b.tagline}" oninput="Nx.updateBiz('tagline',this.value)"></div>
-            <button class="btn btn-p" onclick="Nx.toast('Profil sauvegardé','success')">💾 Sauvegarder</button>
+            <button class="btn btn-p" onclick="Nx.saveVacancesNow()">💾 Sauvegarder</button>
           </div>
 
           <div class="card" style="padding:22px">
@@ -7099,36 +7115,41 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           </div>
         </div>
 
+        ${(() => {
+          // V5.2 : stats RÉELLES depuis les logs de campagnes (cloud) — plus de chiffres décor
+          const camps = this.state.campaigns || [];
+          const nb = camps.length;
+          const totSent = camps.reduce((s,c)=>s+(c.sent||0),0);
+          const totReplied = camps.reduce((s,c)=>s+(c.replied||0),0);
+          const replyRate = totSent ? Math.round(totReplied/totSent*100)+'%' : '—';
+          return `
         <div class="grid3">
           <div class="stat" onclick="Nx.toggleCampaignHistory()">
-            <div class="stat-ic">📢</div><div class="stat-lbl">Campagnes envoyées</div><div class="stat-val mono">12</div><div class="stat-sub">ce mois · clic = historique</div>
+            <div class="stat-ic">📢</div><div class="stat-lbl">Campagnes envoyées</div><div class="stat-val mono">${nb}</div><div class="stat-sub">total · clic = historique</div>
           </div>
           <div class="stat">
-            <div class="stat-ic g">📬</div><div class="stat-lbl">Ouverture moyenne</div><div class="stat-val mono">82%</div><div class="stat-sub">WhatsApp = +++ email</div>
+            <div class="stat-ic g">📬</div><div class="stat-lbl">Messages envoyés</div><div class="stat-val mono">${totSent}</div><div class="stat-sub">via WhatsApp (réel)</div>
           </div>
           <div class="stat">
-            <div class="stat-ic c">💬</div><div class="stat-lbl">Taux de réponse</div><div class="stat-val mono">19%</div><div class="stat-sub">via campagnes ce mois</div>
+            <div class="stat-ic c">💬</div><div class="stat-lbl">Taux de réponse</div><div class="stat-val mono">${replyRate}</div><div class="stat-sub">réponses / envois</div>
           </div>
-        </div>
+        </div>`;
+        })()}
 
         <!-- HISTORIQUE DÉTAILLÉ (toggle) -->
         ${showHistory ? `
           <div class="card" style="margin-bottom:16px">
             <div class="card-hd"><h3>📚 Historique campagnes envoyées · détaillé</h3><button class="btn-g" onclick="Nx.toggleCampaignHistory()">Masquer ▲</button></div>
             <div class="card-body">
-              ${this.state.campaigns.concat([
-                {id:99,name:'Promo Saint-Valentin',sent:180,opened:148,replied:42,status:'completed',date:'14 fév',audience:'Tous'},
-                {id:98,name:'Lancement nouveau pan integral',sent:240,opened:192,replied:31,status:'completed',date:'1 mar',audience:'Récurrents'},
-                {id:97,name:'Anniversaire boutique 25 ans',sent:340,opened:290,replied:88,status:'completed',date:'20 mar',audience:'Tous'},
-              ]).map(c=>`
+              ${(this.state.campaigns.length ? this.state.campaigns : []).map(c=>`
                 <div style="padding:14px 0;border-bottom:1px solid var(--line2);display:flex;gap:14px;align-items:center">
                   <div style="flex:1">
                     <div style="font-weight:600">${c.name}</div>
-                    <div style="font-size:11.5px;color:var(--muted)">${c.audience} · ${c.date}</div>
+                    <div style="font-size:11.5px;color:var(--muted)">${c.audience} · ${c.date||''}</div>
                   </div>
-                  <div style="text-align:center;min-width:60px"><div class="mono" style="font-weight:700">${c.sent}</div><div style="font-size:10px;color:var(--muted)">envoyés</div></div>
-                  <div style="text-align:center;min-width:80px"><div class="mono" style="font-weight:700;color:var(--blue)">${Math.round(c.opened/c.sent*100)}%</div><div style="font-size:10px;color:var(--muted)">ouverts</div></div>
-                  <div style="text-align:center;min-width:80px"><div class="mono" style="font-weight:700;color:var(--green)">${Math.round(c.replied/c.sent*100)}%</div><div style="font-size:10px;color:var(--muted)">réponses</div></div>
+                  <div style="text-align:center;min-width:60px"><div class="mono" style="font-weight:700">${c.sent||0}</div><div style="font-size:10px;color:var(--muted)">envoyés</div></div>
+                  <div style="text-align:center;min-width:80px"><div class="mono" style="font-weight:700;color:var(--blue)">${c.sent?Math.round((c.opened||0)/c.sent*100)+'%':'—'}</div><div style="font-size:10px;color:var(--muted)">ouverts</div></div>
+                  <div style="text-align:center;min-width:80px"><div class="mono" style="font-weight:700;color:var(--green)">${c.sent?Math.round((c.replied||0)/c.sent*100)+'%':'—'}</div><div style="font-size:10px;color:var(--muted)">réponses</div></div>
                   <button class="btn-g" onclick="Nx.openCampaignReport(${c.id})">📊 Rapport</button>
                   <button class="btn-g" onclick="Nx.resendCampaign(${c.id})">🔄 Renvoyer</button>
                 </div>`).join('')}
@@ -8494,19 +8515,37 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       recipientCount = this.state.customSegments[idx]?.clientIds.length || 0;
       audienceLabel = '📌 ' + (this.state.customSegments[idx]?.name||'Segment custom');
     }
+    const onb = this.state.onboarding.find(s=>s.id==='campaign');
+    if (onb) onb.done = true;
+    // V5.2 : ENVOI RÉEL via robot n8n signé (WhatsApp). Garde-fou beta côté serveur :
+    // seuls les numéros de la liste blanche reçoivent ; sinon preview au patron.
+    const message = (document.getElementById('campMsg')?.value||'').trim().slice(0,500);
+    if (window.NxCloud && NxCloud.isAuthed()) {
+      if (!message) { this.toast('Message vide','warn'); return; }
+      const targetMap = { vip:'vip', lost:'lost', recurrent:'rec', new:'new', occ:'all', custom:'all' };
+      const mapped = target.startsWith('custom') ? 'all' : (targetMap[target] || 'all');
+      this.closeModal();
+      this.toast('🚀 Envoi de la campagne…','info');
+      this._signedPost('nexus-campaign-send', ['campaign-send', message], { name, message, target: mapped })
+        .then(res => {
+          if (res.ok) {
+            this.toast('✅ Campagne envoyée par le robot','success','WhatsApp en cours — actualise (↻) dans ~30 s pour le log réel');
+            this.save();
+          } else {
+            this.toast('⚠️ Échec envoi robot','warn', res.error);
+          }
+        });
+      return;
+    }
+    // Mode démo (pas connecté au cloud) : simulation comme avant
     this.state.campaigns.unshift({id:Date.now(),name,sent:0,opened:0,replied:0,status:'running',date:'Aujourd\'hui',audience:audienceLabel});
     this.save();
     this.closeModal();
-    this.toast('🚀 Campagne lancée','success', recipientCount+' destinataires · suivi temps réel');
-    const onb = this.state.onboarding.find(s=>s.id==='campaign');
-    if (onb) onb.done = true;
-    this.save();
-    // Simulate live counter
+    this.toast('🚀 Campagne lancée (démo)','success', recipientCount+' destinataires simulés');
     const opened = Math.round(recipientCount * 0.82);
     const replied = Math.round(recipientCount * 0.20);
-    setTimeout(()=>this.toast('📬 '+recipientCount+' messages envoyés','info'),1000);
-    setTimeout(()=>{this.toast('👀 '+opened+' ouverts ('+Math.round(opened/recipientCount*100)+'%)','info');this.state.campaigns[0].sent=recipientCount;this.state.campaigns[0].opened=opened;this.save();},2500);
-    setTimeout(()=>{this.toast('💬 '+replied+' réponses reçues','success');this.state.campaigns[0].replied=replied;this.save();},4000);
+    setTimeout(()=>{this.state.campaigns[0].sent=recipientCount;this.state.campaigns[0].opened=opened;this.save();},2500);
+    setTimeout(()=>{this.state.campaigns[0].replied=replied;this.save();},4000);
   },
 
   // ---------- PAYMENTS VIEW ----------
