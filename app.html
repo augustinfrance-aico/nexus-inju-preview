@@ -3406,7 +3406,10 @@ const Nx = {
       this.toast('☁️ Pas connecté au cloud', 'warn', 'Connecte-toi pour actualiser');
       return;
     }
-    this.toast('🔄 Actualisation...', 'info');
+    // V5 fix persistance : POUSSER les modifs locales D'ABORD, tirer le cloud ENSUITE.
+    // Avant : pull seul -> le cloud (plus vieux) écrasait ce que l'utilisateur venait de taper.
+    this.toast('🔄 Sauvegarde + actualisation...', 'info');
+    try { await this.syncToCloud(); } catch(_){}
     await this.syncFromCloud(); // affiche le toast "synchronisées" a la fin
   },
   // Push debounced de tout ce qui peut être push
@@ -8801,6 +8804,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
             <h1>✈️ Mode vacances</h1>
             <div class="sub">${isOn?'🟢 Actif — l\'IA gère tes conversations pendant ton absence.':'Configure l\'IA pour qu\'elle réponde à ta place pendant tes absences.'}</div>
           </div>
+          <button class="btn btn-p" onclick="Nx.saveVacancesNow()">💾 Sauvegarder</button>
         </div>
 
         <!-- POINT MODE VACANCES (b) — Note explicative en haut -->
@@ -9492,6 +9496,13 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     // Re-render pour UI affectée
     if (['preset','dailyRange','allDay'].includes(key)) this.renderView();
   },
+  // V5 : sauvegarde explicite de la config vacances vers le cloud (bouton 💾)
+  async saveVacancesNow(){
+    if (!window.NxCloud || !NxCloud.isAuthed()) return this.toast('💾 Sauvegardé en local','success','Connecte le cloud pour synchroniser');
+    this.toast('💾 Sauvegarde...','info');
+    try { await this.syncToCloud(); this.toast('✅ Configuration sauvegardée','success','Local + cloud à jour'); }
+    catch(e){ this.toast('⚠️ Sauvegarde cloud échouée','warn', String(e).slice(0,100)); }
+  },
 
   // Applique un preset de durée : calcule auto startDate/endDate/heures
   applyVacPreset(presetId){
@@ -9754,6 +9765,8 @@ window.addEventListener('DOMContentLoaded', () => Nx.init());
       if (!window.Nx || !window.NxCloud || !window.NxCloud.isAuthed()) return;
       if (_nxSyncing) return;
       _nxSyncing = true;
+      // V5 fix persistance : push d'abord (sinon le pull écrase les modifs locales)
+      try { await Nx.syncToCloud(); } catch(_) {}
       await Nx.syncFromCloud(true); // silent
     } catch(_) {} finally { _nxSyncing = false; }
   }, 1800000); // 30 min
