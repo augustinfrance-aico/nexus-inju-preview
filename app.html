@@ -8435,21 +8435,32 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     this.toast('✨ Message suggéré','success');
   },
 
-  onAutoTriggerChange(trigger){
+  // V5.1 fix : les champs portent data-cfg-key (sinon la sauvegarde ne les lit pas
+  // et l'heure/jour retombaient aux valeurs d'usine) + pré-remplissage depuis cfg sauvé.
+  onAutoTriggerChange(trigger, cfg){
     const fields = document.getElementById('autoTriggerFields');
     if (!fields) return;
+    const c = cfg || (this.state.autoCampaignDetails && this.state.editingAutoCampaign
+      ? (this.state.autoCampaignDetails[this.state.editingAutoCampaign]||{}).cfg : null) || {};
+    const esc = v => String(v==null?'':v).replace(/"/g,'&quot;');
     if (trigger === 'monthly') {
-      fields.innerHTML = `<div><label style="font-size:11px;color:var(--muted)">Jour du mois</label><input class="form-ctrl" type="number" min="1" max="31" value="28"></div><div><label style="font-size:11px;color:var(--muted)">Heure</label><input class="form-ctrl" type="time" value="09:00"></div>`;
+      fields.innerHTML = `<div><label style="font-size:11px;color:var(--muted)">Jour du mois</label><input class="form-ctrl" data-cfg-key="day" type="number" min="1" max="31" value="${esc(c.day||28)}"></div><div><label style="font-size:11px;color:var(--muted)">Heure</label><input class="form-ctrl" data-cfg-key="time" type="time" value="${esc(c.time||'09:00')}"></div>`;
     } else if (trigger === 'weekly') {
-      fields.innerHTML = `<div><label style="font-size:11px;color:var(--muted)">Jour de la semaine</label><select class="form-ctrl"><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option selected>Vendredi</option><option>Samedi</option><option>Dimanche</option></select></div><div><label style="font-size:11px;color:var(--muted)">Heure</label><input class="form-ctrl" type="time" value="17:00"></div>`;
+      const days = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+      const sel = c.weekday || 'Vendredi';
+      fields.innerHTML = `<div><label style="font-size:11px;color:var(--muted)">Jour de la semaine</label><select class="form-ctrl" data-cfg-key="weekday">${days.map(d=>`<option ${d===sel?'selected':''}>${d}</option>`).join('')}</select></div><div><label style="font-size:11px;color:var(--muted)">Heure</label><input class="form-ctrl" data-cfg-key="time" type="time" value="${esc(c.time||'17:00')}"></div>`;
     } else if (trigger === 'birthday') {
-      fields.innerHTML = `<div style="grid-column:span 2;padding:10px;background:var(--blue-soft);border-radius:8px;font-size:12px;color:var(--blue-ink)">🎂 Sera envoyée automatiquement la veille de chaque anniversaire client.</div><div><label style="font-size:11px;color:var(--muted)">Heure d'envoi</label><input class="form-ctrl" type="time" value="09:00"></div><div><label style="font-size:11px;color:var(--muted)">Code promo personnalisé</label><input class="form-ctrl" placeholder="BIRTHDAY-{NOM}" value="HBD-{NOM}-15"></div>`;
+      fields.innerHTML = `<div style="grid-column:span 2;padding:10px;background:var(--blue-soft);border-radius:8px;font-size:12px;color:var(--blue-ink)">🎂 Sera envoyée automatiquement la veille de chaque anniversaire client.</div><div><label style="font-size:11px;color:var(--muted)">Heure d'envoi</label><input class="form-ctrl" data-cfg-key="time" type="time" value="${esc(c.time||'09:00')}"></div><div><label style="font-size:11px;color:var(--muted)">Code promo personnalisé</label><input class="form-ctrl" data-cfg-key="promoCode" placeholder="BIRTHDAY-{NOM}" value="${esc(c.promoCode||'HBD-{NOM}-15')}"></div>`;
     } else if (trigger === 'silence') {
-      fields.innerHTML = `<div><label style="font-size:11px;color:var(--muted)">Silence depuis (jours)</label><input class="form-ctrl" type="number" min="7" max="365" value="45"></div><div><label style="font-size:11px;color:var(--muted)">Code promo</label><input class="form-ctrl" placeholder="WELCOME-BACK-15" value="MISS-YOU-10"></div>`;
+      fields.innerHTML = `<div><label style="font-size:11px;color:var(--muted)">Silence depuis (jours)</label><input class="form-ctrl" data-cfg-key="silenceDays" type="number" min="1" max="365" value="${esc(c.silenceDays||45)}"></div><div><label style="font-size:11px;color:var(--muted)">Code promo</label><input class="form-ctrl" data-cfg-key="promoCode" placeholder="WELCOME-BACK-15" value="${esc(c.promoCode||'MISS-YOU-10')}"></div>`;
     } else if (trigger === 'weather') {
-      fields.innerHTML = `<div><label style="font-size:11px;color:var(--muted)">Condition météo</label><select class="form-ctrl"><option>☔ Pluie</option><option>☀️ Beau temps</option><option>🌡️ Chaleur > 28°C</option><option>❄️ Froid < 10°C</option></select></div><div><label style="font-size:11px;color:var(--muted)">Ville</label><input class="form-ctrl" value="Santiago"></div>`;
+      const conds = ['☔ Pluie','☀️ Beau temps','🌡️ Chaleur > 28°C','❄️ Froid < 10°C'];
+      const selc = c.condition || '☔ Pluie';
+      fields.innerHTML = `<div><label style="font-size:11px;color:var(--muted)">Condition météo</label><select class="form-ctrl" data-cfg-key="condition">${conds.map(x=>`<option ${x===selc?'selected':''}>${x}</option>`).join('')}</select></div><div><label style="font-size:11px;color:var(--muted)">Ville</label><input class="form-ctrl" data-cfg-key="city" value="${esc(c.city||'Santiago')}"></div>`;
     } else if (trigger === 'stat') {
-      fields.innerHTML = `<div><label style="font-size:11px;color:var(--muted)">Métrique</label><select class="form-ctrl"><option>CA semaine</option><option>Conversations / jour</option><option>Taux de réponse</option></select></div><div><label style="font-size:11px;color:var(--muted)">Seuil (CLP ou %)</label><input class="form-ctrl" type="number" value="500000"></div>`;
+      const mets = ['CA semaine','Conversations / jour','Taux de réponse'];
+      const selm = c.metric || 'CA semaine';
+      fields.innerHTML = `<div><label style="font-size:11px;color:var(--muted)">Métrique</label><select class="form-ctrl" data-cfg-key="metric">${mets.map(x=>`<option ${x===selm?'selected':''}>${x}</option>`).join('')}</select></div><div><label style="font-size:11px;color:var(--muted)">Seuil (CLP ou %)</label><input class="form-ctrl" data-cfg-key="threshold" type="number" value="${esc(c.threshold||500000)}"></div>`;
     }
   },
 
