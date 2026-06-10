@@ -56,11 +56,10 @@
       };
     }
     function profileToDb(p, tenantId) {
-      return {
+      const row = {
         tenant_id: tenantId,
         name: p.name || '',
         owner: p.owner || '',
-        owner_phone: p.ownerPhone || '',
         mercado_pago_handle: p.mercadoPagoHandle || '',
         city: p.city || '',
         country: p.country || '',
@@ -80,6 +79,11 @@
         delivery: p.delivery || '',
         tagline: p.tagline || ''
       };
+      // V5 fix (10/06) : owner_phone n'a PAS de champ d'édition dans l'app — si on pousse
+      // une valeur vide, on écrase celle posée en base (et l'escalade WhatsApp casse).
+      // On n'envoie le champ que s'il est rempli ; sinon la base garde sa valeur.
+      if (p.ownerPhone) row.owner_phone = p.ownerPhone;
+      return row;
     }
 
     // ============================================================
