@@ -4320,6 +4320,8 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
               <input class="form-ctrl" value="${b.name}" oninput="Nx.updateBiz('name',this.value)"></div>
             <div class="form-row"><label class="form-lbl">Gérant</label>
               <input class="form-ctrl" value="${b.owner}" oninput="Nx.updateBiz('owner',this.value)"></div>
+            <div class="form-row"><label class="form-lbl">📱 WhatsApp du gérant <span style="font-size:10px;color:var(--muted)">(alertes urgences)</span></label>
+              <input class="form-ctrl" value="${b.ownerPhone||''}" placeholder="Ex : 33612352625 ou +56 9 1234 5678" oninput="Nx.updateBiz('ownerPhone',this.value)"></div>
             <div class="form-row"><label class="form-lbl">Ville · Pays</label>
               <div class="flex"><input class="form-ctrl" value="${b.city}" oninput="Nx.updateBiz('city',this.value)"><input class="form-ctrl" style="max-width:70px;font-size:22px;text-align:center" value="${b.country}" oninput="Nx.updateBiz('country',this.value)"></div></div>
             <div class="form-row"><label class="form-lbl">Secteur d'activité</label>
