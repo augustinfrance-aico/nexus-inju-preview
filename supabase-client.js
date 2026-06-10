@@ -198,7 +198,17 @@
         return { ok: true };
       },
 
-      version: '1.1.0-B',
+      // V5 (10/06) — appel RPC Postgres authentifié (ex: nexus_sign_action pour signer
+      // les ordres app -> n8n sans exposer le secret dans le navigateur)
+      async rpc(fnName, args) {
+        const user = this._user || await this.getUser();
+        if (!user) return { ok: false, error: 'Pas connecté' };
+        const { data, error } = await client.rpc(fnName, args || {});
+        if (error) return { ok: false, error: error.message };
+        return { ok: true, data };
+      },
+
+      version: '1.2.0-V5',
       tablesScope: ['business_profiles','clients','conversations','messages','auto_campaigns','campaigns','credits','cart_recovery_runs','escalation_log','integrations','agenda_items','vacances_config']
     };
 

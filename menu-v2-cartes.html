@@ -27,7 +27,8 @@ body{
   position:fixed;top:0;left:0;right:0;z-index:200;
   height:calc(56px + var(--safe-top));padding:var(--safe-top) 16px 0;
   display:flex;align-items:center;gap:12px;
-  background:rgba(11,15,26,.85);backdrop-filter:blur(16px);
+  background:rgba(11,15,26,.85);-webkit-backdrop-filter:blur(16px);
+  background:rgba(11,15,26,.85);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
   border-bottom:1px solid var(--line);
 }
 .tb-back{
@@ -90,7 +91,8 @@ body{
 .mr-chev{color:var(--muted);flex-shrink:0;position:relative;z-index:1}
 .mr-chev svg{width:16px;height:16px}
 
-.swap-bar{position:fixed;bottom:calc(8px + var(--safe-bot));left:50%;transform:translateX(-50%);display:flex;gap:6px;padding:6px;background:rgba(11,15,26,.95);border:1px solid var(--line);border-radius:999px;z-index:300;backdrop-filter:blur(12px)}
+.swap-bar{position:fixed;bottom:calc(8px + var(--safe-bot));left:50%;transform:translateX(-50%);display:flex;gap:6px;padding:6px;background:rgba(11,15,26,.95);border:1px solid var(--line);border-radius:999px;z-index:300;-webkit-backdrop-filter:blur(12px)}
+.swap-bar{position:fixed;bottom:calc(8px + var(--safe-bot));left:50%;transform:translateX(-50%);display:flex;gap:6px;padding:6px;background:rgba(11,15,26,.95);border:1px solid var(--line);border-radius:999px;z-index:300;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
 .swap-bar a{padding:8px 14px;border-radius:999px;color:var(--muted);font-size:11px;font-weight:700;text-decoration:none;letter-spacing:.04em}
 .swap-bar a.on{background:linear-gradient(135deg,#8B5CFF,#FF6B9D);color:#fff}
 </style>

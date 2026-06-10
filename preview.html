@@ -34,7 +34,7 @@ body{
   padding:14px 24px;
   background:rgba(11,15,26,.85);
   border-bottom:1px solid var(--line);
-  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
 }
 .teaser-back{
   width:36px;height:36px;border-radius:10px;
@@ -105,7 +105,7 @@ body{
   background:linear-gradient(180deg,var(--panel) 0%,var(--panel2) 100%);
   border:1px solid var(--line);
   position:relative;overflow:hidden;
-  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   min-height:200px;
 }
 .mock-card::before{
@@ -157,7 +157,7 @@ body{
   width:38px;height:38px;border-radius:50%;
   background:rgba(255,255,255,.06);border:1px solid var(--line);
   display:flex;align-items:center;justify-content:center;color:var(--gold);
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
 }
 .mock-locked .lock svg{width:16px;height:16px}
 .mock-locked b{font-size:13px;color:var(--ink);font-weight:700}
@@ -169,7 +169,7 @@ body{
   background:linear-gradient(180deg,var(--panel) 0%,var(--panel2) 100%);
   border:1px solid var(--line);
   margin-bottom:32px;
-  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
 }
 .feat-list h2{
   font-size:18px;font-weight:800;letter-spacing:-.01em;margin-bottom:18px;
@@ -208,7 +208,8 @@ body{
 }
 .btn-w.primary{background:#fff;color:#0F172A}
 .btn-w.primary:hover{transform:translateY(-2px)}
-.btn-w.ghost{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(8px)}
+.btn-w.ghost{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.25);-webkit-backdrop-filter:blur(8px)}
+.btn-w.ghost{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.25);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .btn-w.ghost:hover{background:rgba(255,255,255,.25);transform:translateY(-2px)}
 .btn-w svg{width:14px;height:14px}
 

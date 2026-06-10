@@ -954,6 +954,10 @@ html[data-theme="dark"] .chat-input textarea::placeholder{color:#8A94A6}
         <span data-i18n="topbar.search">Rechercher…</span>
         <span class="kbd">⌘K</span>
       </button>
+      <!-- V4.2 : bouton Actualiser GLOBAL — recharge clients/conversations/messages depuis Supabase sur TOUTES les pages -->
+      <button class="icon-btn" onclick="Nx.refreshFromCloud()" title="Actualiser depuis le cloud (Supabase)" aria-label="Actualiser" style="flex-shrink:0">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+      </button>
       <!-- ICÔNE FENÊTRE — toujours visible dans la topbar, ouvre le pop-up des 6 modules superposé sur le Nexus Core -->
       <button class="topbar-iface-btn" onclick="Nx.openHubOverlay()" title="Menus — accéder aux modules" data-i18n-title="iface.title" aria-label="Menus">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -3202,14 +3206,24 @@ const Nx = {
     const m = uuid.match(/^00000000-0000-4000-[0-9a-f]{4}-(\d{12})$/i);
     if (m) {
       const n = parseInt(m[1], 10);
-      return isNaN(n) ? uuid : n;
+      if (!isNaN(n)) return n;
     }
-    return uuid;
+    // V4.3 : vrai UUID aleatoire (client cree par le workflow n8n) -> entier STABLE.
+    // Avant : on renvoyait l'UUID string -> les onclick "Nx.x(${c.id})" plantaient (pas de quotes).
+    // Maintenant tous les id sont des entiers -> tous les onclick marchent (inbox, CRM, fiche).
+    return this._hashId(uuid);
+  },
+  _hashId(s){
+    let h = 0;
+    for (let i = 0; i < s.length; i++) { h = ((h << 5) - h + s.charCodeAt(i)) | 0; }
+    return Math.abs(h) + 1000000; // +offset : evite collision avec les petits id mock (1..999999)
   },
 
   // Mappers : JS state ↔ row Postgres (snake_case)
   _toRowClient(c){
-    return { id: this._localIdToUuid(c.id, '8000'),
+    // V5 : si le client vient du cloud avec un vrai UUID (créé par le robot WhatsApp),
+    // on réutilise cet UUID — sinon le hash local créerait un DOUBLON en base à chaque sync.
+    return { id: c.cloudId || this._localIdToUuid(c.id, '8000'),
       name: c.name, phone: c.phone||'', email: c.email||'',
       instagram: c.instagram||'', instagram_followers: c.instagramFollowers||0,
       avatar: c.avatar||'', color: c.color||'#94A3B8', score: c.score||0,
@@ -3218,7 +3232,7 @@ const Nx = {
       notes: c.notes||'', ai_notes: c.aiNotes||'', status: c.status||'active' };
   },
   _fromRowClient(r){
-    return { id: this._uuidToLocalId(r.id),
+    return { id: this._uuidToLocalId(r.id), cloudId: r.id,
       name: r.name, phone: r.phone, email: r.email,
       instagram: r.instagram, instagramFollowers: r.instagram_followers,
       avatar: r.avatar, color: r.color, score: r.score, orders: r.orders,
@@ -3250,6 +3264,26 @@ const Nx = {
   },
   _toRowCredits(cr){ return { remaining: cr.remaining||0, total: cr.total||500, reset_label: cr.resetLabel||'' }; },
   _fromRowCredits(r){ return { remaining: r.remaining, total: r.total, resetLabel: r.reset_label }; },
+  // V4.2 : descente cloud -> app des conversations + messages (avant : push seulement).
+  // Map client_id (UUID cloud) -> id local via le meme _uuidToLocalId que les clients => le clientId matche.
+  _fromRowMessage(r){
+    // V4.3 : alignement chat du point de vue du patron.
+    // Client (them) = GAUCHE. Tout ce que la boulangerie envoie (IA OU manuel) = DROITE (vert) = 'me'.
+    const from = (r.from_role === 'them') ? 'them' : 'me';
+    // champ 'time' formate (HH:MM) attendu par le rendu — sinon affichage "undefined"
+    let time = '';
+    if (r.created_at) { const d = new Date(r.created_at); if (!isNaN(d)) time = d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}); }
+    return { from, text: r.text || '', channel: r.channel || 'whatsapp', time: time || 'récent', ts: r.created_at || null };
+  },
+  _fromRowConversation(convRow, msgRows){
+    return {
+      clientId: this._uuidToLocalId(convRow.client_id),
+      channel: convRow.channel || 'whatsapp',
+      unread: !!convRow.unread,
+      draft: convRow.draft || null,
+      messages: (msgRows || []).map(m => this._fromRowMessage(m))
+    };
+  },
   _toRowIntegration(i){ return { key: i.k, name: i.n, status: i.s, critical: !!i.critical, description: i.desc||'', config: i.config||{} }; },
   _fromRowIntegration(r){ return { k: r.key, n: r.name, ic: '', s: r.status, critical: r.critical, desc: r.description, config: r.config }; },
   _toRowAgenda(it){
@@ -3306,7 +3340,8 @@ const Nx = {
   },
 
   // Sync ALL : load toutes les tables au login, override state si données cloud présentes, seed sinon
-  async syncFromCloud(){
+  // V4.2 : param silent=true pour la synchro auto periodique (pas de toast spam toutes les 15s)
+  async syncFromCloud(silent){
     if (!window.NxCloud || !window.NxCloud.isAuthed()) return;
     const NC = window.NxCloud;
     try {
@@ -3316,6 +3351,18 @@ const Nx = {
         this.state.clients = cli.data.map(r => this._fromRowClient(r));
       } else if (cli.ok && !cli.data.length && this.state.clients?.length) {
         await NC.bulkUpsert('clients', this.state.clients.map(c => this._toRowClient(c)), 'id');
+      }
+      // V4.2 : Conversations + Messages (descente cloud -> app, pour la Messagerie)
+      const cv = await NC.listAll('conversations');
+      const ms = await NC.listAll('messages');
+      if (cv.ok && cv.data.length) {
+        const msgsByConv = {};
+        (ms.ok ? ms.data : []).forEach(m => {
+          (msgsByConv[m.conversation_id] = msgsByConv[m.conversation_id] || []).push(m);
+        });
+        // tri chronologique des messages par conversation
+        Object.values(msgsByConv).forEach(arr => arr.sort((a,b) => new Date(a.created_at||0) - new Date(b.created_at||0)));
+        this.state.conversations = cv.data.map(c => this._fromRowConversation(c, msgsByConv[c.id]));
       }
       // Credits
       const cr = await NC.listAll('credits');
@@ -3347,11 +3394,20 @@ const Nx = {
         try { localStorage.setItem('nexus_vacances', JSON.stringify(this._fromRowVacances(vac.data[0]))); } catch(_) {}
       }
       this.save();
-      this.toast('☁️ Données cloud synchronisées', 'success', `${(cli.data||[]).length} clients · ${(esc.data||[]).length} escalades`);
+      if (!silent) this.toast('☁️ Données cloud synchronisées', 'success', `${(cli.data||[]).length} clients · ${(esc.data||[]).length} escalades`);
       this.renderView();
     } catch(e) {
       console.warn('[Cloud] syncFromCloud', e);
     }
+  },
+  // V4.2 : actualisation a la demande (bouton CRM) — sync + toast confirmation
+  async refreshFromCloud(){
+    if (!window.NxCloud || !window.NxCloud.isAuthed()) {
+      this.toast('☁️ Pas connecté au cloud', 'warn', 'Connecte-toi pour actualiser');
+      return;
+    }
+    this.toast('🔄 Actualisation...', 'info');
+    await this.syncFromCloud(); // affiche le toast "synchronisées" a la fin
   },
   // Push debounced de tout ce qui peut être push
   _scheduleCloudSync(){
@@ -3429,26 +3485,12 @@ const Nx = {
         }
       } catch(e) { console.warn('[Cloud] cart_recovery_runs sync', e); }
 
-      // Conversations + Messages : DELETE-then-INSERT (cascade delete messages via FK)
-      try {
-        if (this.state.conversations?.length) {
-          // Filter conversations qui ont un client correspondant dans state.clients
-          const validConvs = this.state.conversations.filter(co => (this.state.clients||[]).some(cl => cl.id === co.clientId));
-          if (validConvs.length) {
-            await NC.client.from('conversations').delete().eq('tenant_id', user.id);
-            const convRows = validConvs.map(co => Object.assign(this._toRowConversation(co), { tenant_id: user.id }));
-            await NC.client.from('conversations').insert(convRows);
-            // Messages : flatten + insert
-            const msgRows = [];
-            validConvs.forEach(co => {
-              (co.messages || []).forEach((m, idx) => {
-                msgRows.push(Object.assign(this._toRowMessage(co.clientId, m, idx), { tenant_id: user.id }));
-              });
-            });
-            if (msgRows.length) await NC.client.from('messages').insert(msgRows);
-          }
-        }
-      } catch(e) { console.warn('[Cloud] conversations/messages sync', e); }
+      // V4.2 : PUSH conversations/messages DESACTIVE cote app.
+      // Raison : les workflows n8n (WhatsApp Inbound) sont PROPRIETAIRES des conversations.
+      // L'ancien code faisait DELETE-then-INSERT -> il EFFACAIT les conversations creees par
+      // le workflow et les remplacait par les mocks locaux (bug : conversations WhatsApp perdues).
+      // Desormais l'app LIT les conversations (syncFromCloud) mais ne les ECRASE plus.
+      // (Si besoin futur de push depuis l'app : upsert par id, jamais DELETE global.)
     } catch(e) {
       console.warn('[Cloud] syncToCloud', e);
     }
@@ -5371,6 +5413,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         <div class="card">
           <div class="card-hd"><h3>Tous les clients · ${clients.length}</h3>
             <div class="actions">
+              <button class="form-ctrl" style="max-width:140px;padding:6px 10px;font-size:12px;cursor:pointer" onclick="Nx.refreshFromCloud()" title="Recharger les donnees depuis le cloud">🔄 Actualiser</button>
               <select class="form-ctrl" style="max-width:180px;padding:6px 10px;font-size:12px" onchange="Nx.state.crmSort=this.value;Nx.renderView()">
                 <option value="score" ${sortMode==='score'?'selected':''}>Trier par score ▾</option>
                 <option value="name" ${sortMode==='name'?'selected':''}>Trier par nom A-Z</option>
@@ -6867,9 +6910,12 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
             <h1 style="margin:0;display:flex;align-items:center;gap:10px"><span style="font-size:30px">🎯</span>${t('pilotage.title')}</h1>
             <div style="color:var(--muted);font-size:13.5px;margin-top:6px;max-width:600px;line-height:1.5">${t('pilotage.sub')}</div>
           </div>
-          <div class="pn-view-toggle">
-            <button class="${view==='calendar'?'on':''}" onclick="Nx.setPilotageView('calendar')"><span>📅</span>Calendrier</button>
-            <button class="${view==='list'?'on':''}" onclick="Nx.setPilotageView('list')"><span>📋</span>Liste</button>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <button class="btn btn-p" onclick="Nx.openRdvModal()">📅 Planifier RDV</button>
+            <div class="pn-view-toggle">
+              <button class="${view==='calendar'?'on':''}" onclick="Nx.setPilotageView('calendar')"><span>📅</span>Calendrier</button>
+              <button class="${view==='list'?'on':''}" onclick="Nx.setPilotageView('list')"><span>📋</span>Liste</button>
+            </div>
           </div>
         </div>
         <div class="pn-tabs-row">
@@ -7042,7 +7088,10 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       <div class="view">
         <div class="page-hd">
           <div><h1>📢 Campagnes marketing</h1><div class="sub">Promos, relances, annonces — en 60 secondes, prêtes à envoyer.</div></div>
-          <button class="btn btn-p" onclick="Nx.openCampaignBuilder()">+ ${t('campaigns.create')}</button>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-s" onclick="Nx.runCampaignsNow()" title="Déclenche les campagnes automatiques (panier abandonné, etc.) via le robot n8n">🚀 Lancer les auto-campagnes</button>
+            <button class="btn btn-p" onclick="Nx.openCampaignBuilder()">+ ${t('campaigns.create')}</button>
+          </div>
         </div>
 
         <div class="grid3">
@@ -9114,6 +9163,101 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     }
   },
 
+  // ============================================================
+  // V5 (10/06/2026) — PONT APP -> ROBOTS N8N (signé, secret côté serveur)
+  // L'app demande une signature à la RPC Supabase nexus_sign_action
+  // (authentifiée, le secret HMAC ne quitte jamais le serveur), puis
+  // appelle le webhook n8n avec ts+signature dans le body (anti-rejeu ±5min).
+  // ============================================================
+  N8N_WEBHOOK_BASE: 'https://augustin-aico.app.n8n.cloud/webhook',
+  async _signedPost(path, parts, body){
+    if (!window.NxCloud || !NxCloud.isAuthed()) return { ok:false, error:'Connecte-toi au cloud d\'abord (bouton ☁️)' };
+    const sig = await NxCloud.rpc('nexus_sign_action', { p_parts: parts });
+    if (!sig.ok) return { ok:false, error:'Signature refusée : ' + (sig.error||'') };
+    const payload = Object.assign({}, body, { tenant_id: sig.data.tenant_id, ts: sig.data.ts, signature: sig.data.signature });
+    try {
+      const r = await fetch(this.N8N_WEBHOOK_BASE + '/' + path, {
+        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
+      });
+      const txt = await r.text();
+      if (!r.ok) return { ok:false, error:'Robot n8n : HTTP ' + r.status + ' — ' + txt.slice(0,140) };
+      return { ok:true, raw: txt };
+    } catch(e){ return { ok:false, error:'Réseau : ' + String(e).slice(0,140) }; }
+  },
+
+  // --- PONT 1 : Planifier un RDV -> Google Calendar (workflow Nexus — Google Calendar Sync) ---
+  openRdvModal(){
+    const ov = document.getElementById('modal-overlay');
+    const mc = document.getElementById('modal-content');
+    if (!ov || !mc) return;
+    ov.classList.remove('hidden');
+    const today = new Date().toISOString().slice(0,10);
+    mc.innerHTML = `
+      <div class="modal-hd"><h3>📅 Planifier un RDV</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-body">
+        <div style="display:grid;gap:12px">
+          <div><label style="font-size:12px;font-weight:700;color:var(--muted)">Titre *</label>
+            <input class="form-ctrl" id="rdvTitle" placeholder="Ex : Dégustation tortas — Sra. Pérez" maxlength="200"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+            <div><label style="font-size:12px;font-weight:700;color:var(--muted)">Date *</label>
+              <input class="form-ctrl" type="date" id="rdvDate" min="${today}" value="${today}"></div>
+            <div><label style="font-size:12px;font-weight:700;color:var(--muted)">Heure</label>
+              <input class="form-ctrl" type="time" id="rdvTime" value="10:00"></div>
+            <div><label style="font-size:12px;font-weight:700;color:var(--muted)">Durée</label>
+              <select class="form-ctrl" id="rdvDur"><option value="30">30 min</option><option value="60" selected>1 h</option><option value="90">1 h 30</option><option value="120">2 h</option></select></div>
+          </div>
+          <div><label style="font-size:12px;font-weight:700;color:var(--muted)">Détail (optionnel)</label>
+            <textarea class="form-ctrl" id="rdvDetail" rows="2" placeholder="Notes, adresse, contexte…" maxlength="500"></textarea></div>
+          <div style="font-size:11.5px;color:var(--muted);background:var(--bg2);padding:10px 12px;border-radius:8px">☁️ Le RDV est ajouté au Pilotage Nexus <b>et</b> créé dans ton Google Calendar.</div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-s" onclick="Nx.closeModal()">Annuler</button>
+        <button class="btn btn-p" onclick="Nx.submitRdv()">📅 Créer le RDV</button>
+      </div>`;
+    setTimeout(()=>{ try { document.getElementById('rdvTitle').focus(); } catch(_){} }, 60);
+  },
+  async submitRdv(){
+    const title  = (document.getElementById('rdvTitle')?.value||'').trim().slice(0,200);
+    const date   = document.getElementById('rdvDate')?.value;
+    const time   = document.getElementById('rdvTime')?.value || '10:00';
+    const dur    = parseInt(document.getElementById('rdvDur')?.value||'60',10);
+    const detail = (document.getElementById('rdvDetail')?.value||'').trim().slice(0,500);
+    if (!title) return this.toast('Titre obligatoire','warn');
+    if (!date)  return this.toast('Date obligatoire','warn');
+    const start = new Date(date + 'T' + time);
+    if (isNaN(start)) return this.toast('Date invalide','warn');
+    const end = new Date(start.getTime() + dur*60000);
+    // 1. Agenda local (visible immédiatement dans Pilotage)
+    const item = {
+      id: Date.now(), title, detail, icon:'📅', category:'reminder',
+      when: start.toLocaleString('fr-FR',{weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}),
+      status:'scheduled', dueDate: start.toISOString(), createdAt: new Date().toISOString()
+    };
+    const items = this.getAgendaItems(); items.push(item); this.saveAgendaItems(items);
+    this.closeModal(); this.renderView();
+    // 2. Ligne cloud (le robot la marquera "synced" après création Google Calendar)
+    if (!window.NxCloud || !NxCloud.isAuthed()) return this.toast('📅 RDV local créé','warn','Connecte le cloud pour Google Calendar');
+    const row = this._toRowAgenda(item);
+    const up = await NxCloud.upsertOne('agenda_items', row, 'id');
+    if (!up.ok) return this.toast('⚠️ RDV local seulement','warn','Cloud : ' + (up.error||''));
+    // 3. Pont signé -> robot n8n -> Google Calendar
+    this.toast('📅 Création dans Google Calendar…','info');
+    const res = await this._signedPost('nexus-calendar-out', [row.id, title],
+      { id: row.id, title, detail, start: start.toISOString(), end: end.toISOString() });
+    if (res.ok) this.toast('✅ RDV créé dans Google Calendar','success', title);
+    else this.toast('⚠️ RDV enregistré, mais Google Calendar a échoué','warn', res.error);
+  },
+
+  // --- PONT 3 : Lancer les auto-campagnes maintenant (workflow Nexus — Campagnes Auto Daily) ---
+  async runCampaignsNow(){
+    if (!confirm('Lancer les campagnes automatiques MAINTENANT ?\n\nLes messages partiront réellement sur WhatsApp aux clients éligibles.')) return;
+    this.toast('🚀 Lancement des campagnes…','info');
+    const res = await this._signedPost('nexus-campaigns-run', ['run-campaigns'], {});
+    if (res.ok) this.toast('✅ Campagnes lancées','success','Envois en cours — actualise (↻) dans ~30 s pour voir le log');
+    else this.toast('⚠️ Échec du lancement','warn', res.error);
+  },
+
   // Augustin 28/05/2026 : Escalade d'urgences (beta) — détection mots-clés + segment VIP/Business
   // Update 28/05 #2 : preview modal + log persistant + hook WAHA/WhatsApp Business ready
   EMERGENCY_KEYWORDS: ['urgente','urgent','ahora','rápido','rapido','importante','ayuda','emergencia','help','asap','immediatement','immédiatement'],
@@ -9132,18 +9276,20 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     const body = `🚨 NEXUS · Message urgent\n\nClient : ${client.name}${client.phone ? ' (' + client.phone + ')' : ''}\nRaison : ${reason}\nReçu à : ${ts}\n\n« ${message} »\n\nRépondre direct ▸ https://wa.me/${(client.phone||'').replace(/[^\d]/g,'')}`;
     return { to: ownerPhone, ownerName, body, channel: 'whatsapp' };
   },
-  // Envoi réel : à brancher sur WhatsApp Business API ou WAHA. Pour l'instant : preview + log + push navigateur
-  async sendEscalation(payload){
-    // TODO PROD : décommenter quand WAHA / WhatsApp Business API sera branché
-    // try {
-    //   const r = await fetch('/api/whatsapp/send', {
-    //     method:'POST', headers:{'Content-Type':'application/json'},
-    //     body: JSON.stringify({ to: payload.to, body: payload.body })
-    //   });
-    //   const data = await r.json();
-    //   return { ok: !!data.messageId, messageId: data.messageId, error: data.error };
-    // } catch(e) { return { ok:false, error: String(e) }; }
-    return { ok: false, simulated: true, reason: 'Provider WAHA/WhatsApp Business non branché' };
+  // V5 (10/06) — PONT 2 : envoi RÉEL via robot n8n signé (Nexus — Escalade Urgences -> WAHA -> WhatsApp patron).
+  // Fallback simulation si pas connecté au cloud ou robot éteint.
+  async sendEscalation(payload, client, message, reason){
+    try {
+      if (!client) return { ok:false, simulated:true, reason:'client manquant' };
+      // UUID cloud du client : vrai UUID si créé par le robot WhatsApp, sinon mapping local déterministe
+      const clientCloudId = client.cloudId || this._localIdToUuid(client.id, '8000');
+      const msg = String(message||'').slice(0,500);
+      const rsn = String(reason||'').slice(0,200);
+      const res = await this._signedPost('nexus-escalate', [clientCloudId, msg, rsn],
+        { client_id: clientCloudId, message: msg, reason: rsn });
+      if (res.ok) return { ok:true };
+      return { ok:false, simulated:true, reason: res.error };
+    } catch(e){ return { ok:false, simulated:true, reason: String(e).slice(0,140) }; }
   },
   async triggerEscalation(client, message, reason){
     if (!this.state.vacanceStats) this.state.vacanceStats = { received: 7, replied: 7, escalated: 0 };
@@ -9151,7 +9297,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     this.state.vacanceStats.escalated = (this.state.vacanceStats.escalated || 0) + 1;
 
     const payload = this.buildEscalationPayload(client, message, reason);
-    const result  = await this.sendEscalation(payload);
+    const result  = await this.sendEscalation(payload, client, message, reason);
     const status  = result.ok ? 'sent' : 'simulated';
 
     // Push navigateur (si autorisée)
@@ -9185,7 +9331,18 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       pushStatus,
       simulationReason: result.simulated ? result.reason : null
     };
-    this.state.escalationLog.unshift(entry);
+    // V5 : si l'envoi est passé par le robot n8n, c'est LUI qui logge dans escalation_log (cloud).
+    // On rafraîchit depuis le cloud au lieu d'ajouter un doublon local.
+    if (result.ok && window.NxCloud && NxCloud.isAuthed()) {
+      try {
+        await new Promise(r => setTimeout(r, 2500)); // laisse le robot finir son log
+        const esc = await NxCloud.listAll('escalation_log');
+        if (esc.ok && esc.data.length) this.state.escalationLog = esc.data.map(r => this._fromRowEscalation(r));
+        else this.state.escalationLog.unshift(entry);
+      } catch(_) { this.state.escalationLog.unshift(entry); }
+    } else {
+      this.state.escalationLog.unshift(entry);
+    }
     if (this.state.escalationLog.length > 50) this.state.escalationLog = this.state.escalationLog.slice(0,50);
     this.save();
     this.showEscalationPreview(entry, payload);
@@ -9586,6 +9743,18 @@ window.addEventListener('DOMContentLoaded', () => Nx.init());
     }
   });
   bindCloudUi();
+
+  // V4.2 : filet de securite — re-sync silencieux toutes les 30 min (pas de spam).
+  // L'actualisation a la demande se fait via le bouton "Actualiser" du CRM (Nx.refreshFromCloud).
+  let _nxSyncing = false;
+  setInterval(async () => {
+    try {
+      if (!window.Nx || !window.NxCloud || !window.NxCloud.isAuthed()) return;
+      if (_nxSyncing) return;
+      _nxSyncing = true;
+      await Nx.syncFromCloud(true); // silent
+    } catch(_) {} finally { _nxSyncing = false; }
+  }, 1800000); // 30 min
 })();
 </script>
 </body>
