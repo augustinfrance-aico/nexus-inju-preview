@@ -5938,10 +5938,15 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       const replies = msgs.filter(m=>m.from!=='them');
       const convActive = convs.filter(c => (c.messages||[]).some(m=>inRange(m.ts))).length;
       const newClients = clients.filter(c => inRange(c.createdAt)).length;
-      const responseRate = them.length ? Math.round(replies.length/them.length*100) : null;
+      // Taux de réponse = % de conversations où un client a écrit ET a reçu une réponse (toujours <= 100)
+      let convThem=0, convAns=0;
+      convs.forEach(c=>{ const ms=(c.messages||[]).filter(m=>m.ts && inRange(m.ts)).map(m=>({from:m.from,t:new Date(m.ts).getTime()})).filter(m=>!isNaN(m.t)).sort((a,b)=>a.t-b.t); const fi=ms.findIndex(m=>m.from==='them'); if(fi>=0){ convThem++; if(ms.slice(fi+1).some(m=>m.from!=='them')) convAns++; } });
+      const responseRate = convThem ? Math.round(convAns/convThem*100) : null;
       let deltas=[];
       convs.forEach(c=>{ const ms=(c.messages||[]).filter(m=>m.ts).map(m=>({from:m.from,t:new Date(m.ts).getTime()})).filter(m=>!isNaN(m.t)).sort((a,b)=>a.t-b.t); for(let i=0;i<ms.length;i++){ if(ms[i].from==='them'){ for(let j=i+1;j<ms.length;j++){ if(ms[j].from!=='them'){ const dl=ms[j].t-ms[i].t; if(dl>=0 && dl<86400000 && (!days||ms[j].t>=cutoff)) deltas.push(dl); break; } } } } });
-      const avgRespMin = deltas.length ? Math.round(deltas.reduce((a,b)=>a+b,0)/deltas.length/60000) : null;
+      const avgMs = deltas.length ? deltas.reduce((a,b)=>a+b,0)/deltas.length : null;
+      const avgRespMin = avgMs!=null ? Math.round(avgMs/60000) : null;
+      const avgRespLabel = avgMs==null ? null : (avgMs<60000 ? '< 1 min' : Math.round(avgMs/60000)+' min');
       const slot={}; them.forEach(m=>{ const d=new Date(m.t); const k=d.getDay()+'_'+d.getHours(); slot[k]=(slot[k]||0)+1; });
       let top=null; Object.entries(slot).forEach(([k,n])=>{ if(!top||n>top.n) top={k,n}; });
       let peak=null; if(top){ const J=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi']; const parts=top.k.split('_').map(Number); peak={day:J[parts[0]],hour:parts[1],n:top.n}; }
@@ -5950,7 +5955,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       const topQuestions=Object.values(freq).sort((a,b)=>b.c-a.c).slice(0,5).map(o=>({q:o.disp,count:o.c}));
       const dayMap={}; msgs.forEach(m=>{ const key=new Date(m.t).toISOString().slice(0,10); dayMap[key]=(dayMap[key]||0)+1; });
       const dayKeys=Object.keys(dayMap).sort();
-      return { convActive, msgCount:msgs.length, thems:them.length, replies:replies.length, newClients, responseRate, avgRespMin, peak, hourBuckets, topQuestions, convPerDay:dayKeys.map(k=>dayMap[k]), dayLabels:dayKeys.map(k=>k.slice(5)), hasData:(msgs.length>0||clients.length>0), hasMsg:msgs.length>0 };
+      return { convActive, msgCount:msgs.length, thems:them.length, replies:replies.length, newClients, responseRate, avgRespMin, avgRespLabel, peak, hourBuckets, topQuestions, convPerDay:dayKeys.map(k=>dayMap[k]), dayLabels:dayKeys.map(k=>k.slice(5)), hasData:(msgs.length>0||clients.length>0), hasMsg:msgs.length>0 };
     } catch(e){ return { error:String(e), convActive:0, newClients:0, responseRate:null, avgRespMin:null, peak:null, hourBuckets:[], topQuestions:[], convPerDay:[], dayLabels:[], hasData:false, hasMsg:false }; }
   },
   _statsSegDefs(){
@@ -6008,7 +6013,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     const d = { conv: String(S.convActive||0), clients: S.newClients||0,
                 response: (S.responseRate!=null? S.responseRate+'%':'—'),
                 delta_conv:'', delta_clients:'', delta_response:'' };
-    const avgTimeStr = (S.avgRespMin!=null? S.avgRespMin+' min':'—');
+    const avgTimeStr = (S.avgRespLabel||'—');
     return `
       <div class="view">
         <div class="page-hd">
@@ -6327,7 +6332,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       if (S.newClients) parts.push(`${S.newClients} nouveau${S.newClients>1?'x':''} client${S.newClients>1?'s':''}`);
       if (S.responseRate!=null) parts.push(`un taux de réponse de ${S.responseRate} pour cent`);
       let txt = "Voici ton brief Nexus. " + parts.join(', ') + ".";
-      if (S.avgRespMin!=null) txt += ` Temps de réponse moyen : ${S.avgRespMin} minute${S.avgRespMin>1?'s':''}.`;
+      if (S.avgRespLabel) txt += ` Temps de réponse moyen : ${S.avgRespLabel}.`;
       if (S.peak) txt += ` Ton pic d'activité est le ${S.peak.day} vers ${S.peak.hour} heures.`;
       if (S.topQuestions && S.topQuestions.length) txt += ` Question la plus fréquente de tes clients : ${S.topQuestions[0].q}.`;
       return txt;
@@ -6498,7 +6503,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       conv: String(S.convActive||0),
       clients: S.newClients||0,
       response: (S.responseRate!=null? S.responseRate+'%':'—'),
-      avgTime: (S.avgRespMin!=null? S.avgRespMin+' min':'—'),
+      avgTime: (S.avgRespLabel||'—'),
       revenue: revenueSum ? revenueSum.toLocaleString('fr-FR').replace(/,/g,' ') : '—',
       prevLabel: periodLabel
     };
