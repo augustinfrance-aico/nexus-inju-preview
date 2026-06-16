@@ -2665,7 +2665,7 @@ const Nx = {
             <div style="color:var(--muted);font-size:12px;margin-top:4px">Écoutable en voiture</div>
           </div>
           <div style="padding:16px;background:var(--bg2);border-radius:10px;font-size:13px;line-height:1.7;color:var(--ink2)">
-            "Salut Carlos, voici ton résumé Nexus du 21 avril. <b>47 conversations</b> aujourd'hui, dont 12 automatisées. <b>María González</b>, ta cliente VIP, veut 3 kilos de pan amasado pour demain — elle attend ta réponse depuis 4 minutes. <b>3 clientes fidèles</b> sont silencieuses depuis 45 jours, pense à lancer la campagne de récupération. CA du jour estimé : <b>284 000 pesos</b>. Ton streak est à <b>12 jours</b>. Passe une bonne journée 🥖."
+            ${Nx.getBriefText('today', Nx.state.lang||'fr')}
           </div>
         </div>
         <div class="modal-foot">
@@ -3536,8 +3536,9 @@ const Nx = {
 
   playVocal(){
     if ('speechSynthesis' in window) {
-      const msg = new SpeechSynthesisUtterance("Salut Carlos ! Voici ton résumé Nexus. 47 conversations aujourd'hui, dont 12 automatisées par l'IA. María González attend une réponse depuis 4 minutes. Ton streak est à 12 jours. Passe une bonne journée !");
-      msg.lang = 'fr-FR';
+      const lang = this.state.lang||'fr';
+      const msg = new SpeechSynthesisUtterance(this.getBriefText('today', lang));
+      msg.lang = (lang==='es'?'es-ES':lang==='en'?'en-US':'fr-FR');
       speechSynthesis.speak(msg);
       this.toast('🎙 Lecture en cours','info');
     } else this.toast('Synthèse vocale non supportée','warn');
