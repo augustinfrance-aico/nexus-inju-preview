@@ -5978,9 +5978,13 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       {l:'Perdus', c:'#FF6B6B', test:c=>c.status==='lost'}
     ];
   },
-  _statsSegments(){
+  _statsSegments(range){
     try {
-      const clients=this.state.clients||[]; const defs=this._statsSegDefs(); const used=new Set();
+      const days = range==='7d'?7 : range==='30d'?30 : range==='90d'?90 : null;
+      const cutoff = days ? Date.now()-days*86400000 : 0;
+      let clients=this.state.clients||[];
+      if (days) clients = clients.filter(c=>{ if(!c.createdAt) return false; const t=new Date(c.createdAt).getTime(); return !isNaN(t)&&t>=cutoff; });
+      const defs=this._statsSegDefs(); const used=new Set();
       const segs=defs.map(d=>{ const list=clients.filter(c=>!used.has(c)&&d.test(c)); list.forEach(c=>used.add(c)); return {label:d.l,color:d.c,count:list.length}; });
       const total=clients.length;
       return { segs:segs.filter(s=>s.count>0).map(s=>({label:s.label,color:s.color,count:s.count,pct: total?Math.round(s.count/total*100):0})), total };
@@ -6182,10 +6186,12 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   // POINT 8(a) — Répartition clients selon range (mois/trimestre/depuis le début)
   // Augustin 21/05/2026 : ajout VIP + Business segments
   renderRepartition(){
-    // V5.4 : répartition RÉELLE des clients par segment (plus de mock).
-    const { segs, total } = this._statsSegments();
+    // V5.4 : répartition RÉELLE des clients par segment, filtrée par période (acquisition).
+    const range = this.state.repRange || 'month';
+    const days = range==='month'?'30d' : range==='quarter'?'90d' : null;
+    const { segs, total } = this._statsSegments(days);
     if (!total) {
-      return `<div style="padding:12px;color:var(--muted);font-size:12.5px;line-height:1.6">Aucun client pour l'instant.<br>La répartition par segment s'affichera dès que tu auras des clients.</div>`;
+      return `<div style="padding:12px;color:var(--muted);font-size:12.5px;line-height:1.6">Aucun client sur cette période.<br>(Essaie "Depuis le début" pour voir tous tes clients.)</div>`;
     }
     return segs.map(x=>`
       <div class="flex" style="padding:6px 0;gap:8px"><span style="width:10px;height:10px;background:${x.color};border-radius:2px"></span><span style="font-size:12px">${x.label}</span><span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">${x.count}</span><b style="font-size:12px">${x.pct}%</b></div>
@@ -6589,8 +6595,10 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
 
   // Donut dynamique selon repRange (Augustin 19/05 + 21/05/2026 : VIP + Business)
   donutSvg(){
-    // V5.4 : donut RÉEL (mêmes segments que renderRepartition).
-    const { segs, total } = this._statsSegments();
+    // V5.4 : donut RÉEL (mêmes segments + même période que renderRepartition).
+    const range = this.state.repRange || 'month';
+    const days = range==='month'?'30d' : range==='quarter'?'90d' : null;
+    const { segs, total } = this._statsSegments(days);
     if (!total) {
       return `<svg width="140" height="140" viewBox="0 0 42 42"><circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#E5E7EB" stroke-width="4"/><text x="21" y="22" text-anchor="middle" dominant-baseline="middle" font-size="4" fill="#94A3B8">0</text><text x="21" y="28" text-anchor="middle" dominant-baseline="middle" font-size="2.5" fill="#8A94A6">client</text></svg>`;
     }
