@@ -1321,7 +1321,7 @@ const I18N = {
     'stats.card.newclients':'Nouveaux clients',
     'stats.card.newclients.sub':'clic = liste CRM',
     'stats.card.response':'Taux de réponse',
-    'stats.card.response.sub':'temps moyen 2:18 min',
+    'stats.card.response.sub':'conversations avec réponse',
     'stats.card.avgtime':'Temps moyen',
     'stats.card.avgtime.sub':'< 5 min = Excellent',
     'stats.note.revenue':'💰 <b>Note :</b> les stats <i>Revenu</i> arrivent dans Nexus Finance (prochain module). Pour l\'instant on garde les métriques liées au <b>core</b> : conversations, clients, messages.',
@@ -1518,7 +1518,7 @@ const I18N = {
     'stats.card.newclients':'Nuevos clientes',
     'stats.card.newclients.sub':'clic = lista CRM',
     'stats.card.response':'Tasa de respuesta',
-    'stats.card.response.sub':'tiempo medio 2:18 min',
+    'stats.card.response.sub':'conversaciones con respuesta',
     'stats.card.avgtime':'Tiempo medio',
     'stats.card.avgtime.sub':'< 5 min = Excelente',
     'stats.note.revenue':'💰 <b>Nota:</b> las stats <i>Ingresos</i> llegan en Nexus Finance (próximo módulo). Por ahora mantenemos las métricas del <b>core</b>: conversaciones, clientes, mensajes.',
@@ -1700,7 +1700,7 @@ const I18N = {
     'stats.card.newclients':'New clients',
     'stats.card.newclients.sub':'click = CRM list',
     'stats.card.response':'Response rate',
-    'stats.card.response.sub':'avg time 2:18 min',
+    'stats.card.response.sub':'conversations answered',
     'stats.card.avgtime':'Average time',
     'stats.card.avgtime.sub':'< 5 min = Excellent',
     'stats.note.revenue':'💰 <b>Note:</b> <i>Revenue</i> stats are coming in Nexus Finance (next module). For now we keep the <b>core</b> metrics: conversations, clients, messages.',
@@ -5955,7 +5955,17 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       const topQuestions=Object.values(freq).sort((a,b)=>b.c-a.c).slice(0,5).map(o=>({q:o.disp,count:o.c}));
       const dayMap={}; msgs.forEach(m=>{ const key=new Date(m.t).toISOString().slice(0,10); dayMap[key]=(dayMap[key]||0)+1; });
       const dayKeys=Object.keys(dayMap).sort();
-      return { convActive, msgCount:msgs.length, thems:them.length, replies:replies.length, newClients, responseRate, avgRespMin, avgRespLabel, peak, hourBuckets, topQuestions, convPerDay:dayKeys.map(k=>dayMap[k]), dayLabels:dayKeys.map(k=>k.slice(5)), hasData:(msgs.length>0||clients.length>0), hasMsg:msgs.length>0 };
+      // taux de réponse par jour (proxy réponses/messages-client, plafonné 100)
+      const dThem={}, dRep={}; msgs.forEach(m=>{ const k=new Date(m.t).toISOString().slice(0,10); if(m.from==='them') dThem[k]=(dThem[k]||0)+1; else dRep[k]=(dRep[k]||0)+1; });
+      const respKeys=Object.keys(dThem).sort();
+      const respPerDay=respKeys.map(k=>Math.min(100,Math.round(((dRep[k]||0)/dThem[k])*100)));
+      const respLabels=respKeys.map(k=>k.slice(5));
+      // nouveaux clients par jour
+      const ncMap={}; clients.forEach(c=>{ if(!c.createdAt) return; const t=new Date(c.createdAt).getTime(); if(isNaN(t)||(days&&t<cutoff)) return; const k=new Date(t).toISOString().slice(0,10); ncMap[k]=(ncMap[k]||0)+1; });
+      const ncKeys=Object.keys(ncMap).sort();
+      const newPerDay=ncKeys.map(k=>ncMap[k]); const newLabels=ncKeys.map(k=>k.slice(5));
+      const lostCount=clients.filter(c=>c.status==='lost').length;
+      return { convActive, msgCount:msgs.length, thems:them.length, replies:replies.length, newClients, responseRate, avgRespMin, avgRespLabel, peak, hourBuckets, topQuestions, convPerDay:dayKeys.map(k=>dayMap[k]), dayLabels:dayKeys.map(k=>k.slice(5)), respPerDay, respLabels, newPerDay, newLabels, lostCount, hasData:(msgs.length>0||clients.length>0), hasMsg:msgs.length>0 };
     } catch(e){ return { error:String(e), convActive:0, newClients:0, responseRate:null, avgRespMin:null, peak:null, hourBuckets:[], topQuestions:[], convPerDay:[], dayLabels:[], hasData:false, hasMsg:false }; }
   },
   _statsSegDefs(){
@@ -5993,14 +6003,26 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         const hl=[0,3,6,9,12,15,18,21].map(h=>`<text x="${h*bw+bw/2-8}" y="${H-6}" font-family="JetBrains Mono,monospace" font-size="10" fill="#94A3B8">${h}h</text>`).join('');
         return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px">${yLines}${bars}${hl}</svg>`;
       }
-      if(type!=='conv') return empty("Ce graphique sera basé sur tes vraies données — bientôt.<br>Pour l'instant, l'onglet « Conversations » montre ton activité réelle.");
-      const vals=S.convPerDay||[], labels=S.dayLabels||[];
-      if(!vals.length) return empty("Pas encore de messages sur cette période.");
-      const max=Math.max(...vals),min=Math.min(...vals),span=(max-min)||1;
-      const pts=vals.map((v,i)=>[ vals.length>1?(i/(vals.length-1))*W:W/2, 20+(1-(v-min)/span)*innerH ]);
-      const stepN=Math.max(1,Math.ceil(labels.length/8));
-      const xlab=labels.map((l,i)=> i%stepN===0?`<text x="${Math.max(2,(labels.length>1?(i/(labels.length-1))*W:W/2)-8)}" y="${H-6}" font-family="JetBrains Mono,monospace" font-size="10" fill="#94A3B8">${l}</text>`:'').join('');
-      return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px"><defs><linearGradient id="gstr" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#1A56DB" stop-opacity=".30"/><stop offset="100%" stop-color="#1A56DB" stop-opacity="0"/></linearGradient></defs>${yLines}<path d="${pathFromPts(pts,true)}" fill="url(#gstr)"/><path d="${pathFromPts(pts,false)}" fill="none" stroke="#1A56DB" stroke-width="2.5" stroke-linecap="round"/>${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#1A56DB"/>`).join('')}${xlab}<text x="${W-90}" y="22" font-family="JetBrains Mono,monospace" font-size="11" fill="#1A56DB" font-weight="700">${vals[vals.length-1]} msg/j</text></svg>`;
+      const lineChart=(vals,labels,color,unit)=>{
+        if(!vals||!vals.length) return empty("Pas encore de données sur cette période. Ça se remplira avec l'activité réelle.");
+        const max=Math.max(...vals),min=Math.min(...vals),span=(max-min)||1;
+        const pts=vals.map((v,i)=>[ vals.length>1?(i/(vals.length-1))*W:W/2, 20+(1-(v-min)/span)*innerH ]);
+        const stepN=Math.max(1,Math.ceil(labels.length/8));
+        const xlab=labels.map((l,i)=> i%stepN===0?`<text x="${Math.max(2,(labels.length>1?(i/(labels.length-1))*W:W/2)-8)}" y="${H-6}" font-family="JetBrains Mono,monospace" font-size="10" fill="#94A3B8">${l}</text>`:'').join('');
+        return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px"><defs><linearGradient id="gstr" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="${color}" stop-opacity=".30"/><stop offset="100%" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>${yLines}<path d="${pathFromPts(pts,true)}" fill="url(#gstr)"/><path d="${pathFromPts(pts,false)}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="${color}"/>`).join('')}${xlab}<text x="${W-90}" y="22" font-family="JetBrains Mono,monospace" font-size="11" fill="${color}" font-weight="700">${vals[vals.length-1]}${unit}</text></svg>`;
+      };
+      const barChart=(items)=>{
+        if(!items||!items.length) return empty("Pas encore de données pour ce graphique.");
+        const max=Math.max(1,...items.map(it=>it.value||0));
+        const n=items.length, gap=14, bw=Math.min(80,(W-gap*(n+1))/n), innerH2=H-PAD_BOTTOM-20;
+        const bars=items.map((it,i)=>{ const h=((it.value||0)/max)*innerH2; const x=gap+i*(bw+gap); const y=20+innerH2-Math.max(h,1); return `<g><rect x="${x}" y="${y}" width="${bw}" height="${Math.max(h,1)}" fill="${it.color||'#1A56DB'}" rx="4"><title>${it.label}: ${it.value}${it.suffix||''}</title></rect><text x="${x+bw/2}" y="${20+innerH2+14}" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#64748B">${String(it.label||'').slice(0,11)}</text><text x="${x+bw/2}" y="${y-4}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="${it.color||'#1A56DB'}">${it.value}${it.suffix||''}</text></g>`; }).join('');
+        return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px">${bars}</svg>`;
+      };
+      if(type==='resp')    return lineChart(S.respPerDay||[], S.respLabels||[], '#22C55E', '%');
+      if(type==='newlost') return lineChart(S.newPerDay||[], S.newLabels||[], '#22C55E', ' nouv./j');
+      if(type==='seg')     { const sg=this._statsSegments(); return barChart((sg.segs||[]).map(s=>({label:s.label,value:s.count,color:s.color}))); }
+      if(type==='camp')    { const cs=(this.state.campaigns||[]).slice(0,8).map(c=>({label:c.name||'?',value:c.sent||0,color:'#7A3CFF'})); return barChart(cs); }
+      return lineChart(S.convPerDay||[], S.dayLabels||[], '#1A56DB', ' msg/j');
     } catch(e){ return `<div style="padding:24px;color:var(--muted);text-align:center">Graphique momentanément indisponible.</div>`; }
   },
 
