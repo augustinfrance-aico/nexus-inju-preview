@@ -2460,10 +2460,12 @@ const Nx = {
           </div>
           <h4 style="font-size:13px;font-weight:700;margin:20px 0 10px">📅 Timeline des échanges</h4>
           <div class="timeline">
-            <div class="tl-item"><div class="tl-time">Il y a 4 min · WhatsApp</div><div class="tl-body">Demande 3kg pan amasado pour demain</div></div>
-            <div class="tl-item alt"><div class="tl-time">Il y a 3 jours · Commande</div><div class="tl-body">12 empanadas + 2kg pan · 18 400 CLP</div></div>
-            <div class="tl-item amb"><div class="tl-time">Il y a 1 semaine · WhatsApp</div><div class="tl-body">Question sur les horaires du samedi</div></div>
-            <div class="tl-item"><div class="tl-time">Il y a 2 semaines · Commande</div><div class="tl-body">Torte cumpleaños 30p · 42 000 CLP</div></div>
+            ${(() => {
+              const conv = (this.state.conversations||[]).find(cv => cv.clientId === c.id);
+              const msgs = conv && conv.messages ? conv.messages.slice(-8).reverse() : [];
+              if (!msgs.length) return '<div style="padding:14px;color:var(--muted);font-size:12.5px">Aucun échange enregistré pour ce client pour le moment.</div>';
+              return msgs.map((m,i) => `<div class="tl-item ${i%2?'alt':''}"><div class="tl-time">${m.time||'récent'} · ${m.from==='them'?'Client':'Nexus / Toi'}</div><div class="tl-body">${(m.text||'').slice(0,140)}</div></div>`).join('');
+            })()}
           </div>
         </div>
         <div class="modal-foot">
@@ -2757,9 +2759,9 @@ const Nx = {
             }
           </div>
           <div style="padding:8px 12px;background:var(--green-soft);border-radius:6px;font-size:11px;color:var(--green);margin-bottom:8px">
-            ✓ Fiche unifiée : ce client sera fusionné automatiquement entre WhatsApp, Email et Instagram s'il utilise plusieurs canaux.
+            ✓ Cette fiche regroupe les coordonnées de ce client (WhatsApp, Email, Instagram) au même endroit.
           </div>
-          <button class="btn btn-s" style="width:100%;margin-bottom:14px" onclick="Nx.unifyClientChannels(${c.id})">🔗 Unifier WhatsApp + Mail + Instagram</button>
+          <button class="btn btn-s" style="width:100%;margin-bottom:14px" onclick="Nx.unifyClientChannels(${c.id})">🔗 Vérifier les doublons de ce contact</button>
 
           <!-- STATS -->
           <div class="grid3" style="margin-bottom:14px">
@@ -2780,10 +2782,12 @@ const Nx = {
 
           <h4 style="font-size:13px;font-weight:700;margin:20px 0 10px">📅 Timeline des échanges</h4>
           <div class="timeline">
-            <div class="tl-item"><div class="tl-time">Il y a 4 min · WhatsApp</div><div class="tl-body">Demande 3kg pan amasado pour demain</div></div>
-            <div class="tl-item alt"><div class="tl-time">Il y a 3 jours · Commande</div><div class="tl-body">12 empanadas + 2kg pan · 18 400 CLP</div></div>
-            <div class="tl-item amb"><div class="tl-time">Il y a 1 semaine · WhatsApp</div><div class="tl-body">Question sur les horaires du samedi</div></div>
-            <div class="tl-item"><div class="tl-time">Il y a 2 semaines · Commande</div><div class="tl-body">Torte cumpleaños 30p · 42 000 CLP</div></div>
+            ${(() => {
+              const conv = (this.state.conversations||[]).find(cv => cv.clientId === c.id);
+              const msgs = conv && conv.messages ? conv.messages.slice(-8).reverse() : [];
+              if (!msgs.length) return '<div style="padding:14px;color:var(--muted);font-size:12.5px">Aucun échange enregistré pour ce client pour le moment.</div>';
+              return msgs.map((m,i) => `<div class="tl-item ${i%2?'alt':''}"><div class="tl-time">${m.time||'récent'} · ${m.from==='them'?'Client':'Nexus / Toi'}</div><div class="tl-body">${(m.text||'').slice(0,140)}</div></div>`).join('');
+            })()}
           </div>
         </div>
         <div class="modal-foot">
@@ -2951,16 +2955,28 @@ const Nx = {
     const ov = document.getElementById('modal-overlay');
     const mc = document.getElementById('modal-content');
     ov.classList.remove('hidden');
-    const detectedEmail = c.email || (c.name.split(' ')[0].toLowerCase() + '@gmail.com');
+    // V5.5 : vrai scan de doublons (même tel/email/instagram), plus de mail inventé.
+    const norm = s => String(s||'').replace(/[^0-9a-zA-Z@.]/g,'').toLowerCase();
+    const dups = this.state.clients.filter(x => x.id!==c.id && (
+      (c.phone && norm(x.phone)===norm(c.phone)) ||
+      (c.email && norm(x.email)===norm(c.email)) ||
+      (c.instagram && norm(x.instagram)===norm(c.instagram))
+    ));
+    const body = dups.length
+      ? `<p style="font-size:13px;line-height:1.6;color:var(--ink2)"><b>${dups.length} fiche(s) en double</b> détectée(s) pour <b>${c.name}</b> (même téléphone, email ou Instagram) :</p>
+         <ul style="font-size:12.5px;color:var(--ink2);margin:8px 0 0;padding-left:18px">${dups.map(d=>`<li>${d.name} · ${d.phone||d.email||d.instagram||''}</li>`).join('')}</ul>
+         <p style="font-size:12px;color:var(--muted);margin-top:10px">La fusion définitive est irréversible — dis-le moi et on la fera proprement.</p>`
+      : `<p style="font-size:13px;line-height:1.6;color:var(--ink2)">✓ Aucun doublon détecté. Cette fiche regroupe déjà <b>tous les canaux</b> de ${c.name} au même endroit.</p>`;
     mc.innerHTML = `
-      <div class="modal-hd"><h3>🔗 Unifier WhatsApp + Mail</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-hd"><h3>🔗 Canaux du contact — ${c.name}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
       <div class="modal-body">
-        <p style="font-size:13px;line-height:1.6;color:var(--ink2)">L'IA détecte que <b>${c.name}</b> utilise WhatsApp <b>(${c.phone||'numéro inconnu'})</b> ET le mail <b>${detectedEmail}</b>.</p>
-        <p style="font-size:13px;line-height:1.6;color:var(--ink2);margin-top:10px">Voulez-vous unifier les 2 dans une seule fiche ? L'historique des deux canaux sera fusionné.</p>
+        ${body}
+        <div style="margin-top:12px;padding:10px 12px;background:var(--bg2);border-radius:8px;font-size:12px;color:var(--ink2)">
+          📱 WhatsApp : ${c.phone||'—'}<br>📧 Email : ${c.email||'—'}<br>📸 Instagram : ${c.instagram||'—'}
+        </div>
       </div>
       <div class="modal-foot">
-        <button class="btn btn-s" onclick="Nx.closeModal()">Non</button>
-        <button class="btn btn-p" onclick="Nx.confirmUnifyChannels(${c.id}, '${detectedEmail}')">Oui, unifier</button>
+        <button class="btn btn-p" onclick="Nx.closeModal()">OK</button>
       </div>`;
   },
   confirmUnifyChannels(clientId, email){
@@ -3233,11 +3249,25 @@ const Nx = {
       channel: c.channel||'whatsapp', tag: c.tag||'', tags: c.tags||[],
       notes: c.notes||'', ai_notes: c.aiNotes||'', status: c.status||'active' };
   },
+  // V5.5 : score client CALCULÉ (réel) — commandes + CA + statut + VIP. Fini le score figé.
+  clientScore(c){
+    try {
+      if (!c) return 0;
+      let s = 10;
+      s += Math.min(40, (c.orders||0) * 4);
+      s += Math.min(35, Math.round((c.spent||0)/5000));
+      if (c.status==='active') s += 10;
+      else if (c.status==='lost') s -= 20;
+      else if (c.status==='prospect') s -= 5;
+      if ((c.tags||[]).some(t=>/vip/i.test(String(t)))) s += 15;
+      return Math.max(0, Math.min(100, Math.round(s)));
+    } catch(e){ return 0; }
+  },
   _fromRowClient(r){
     return { id: this._uuidToLocalId(r.id), cloudId: r.id,
       name: r.name, phone: r.phone, email: r.email,
       instagram: r.instagram, instagramFollowers: r.instagram_followers,
-      avatar: r.avatar, color: r.color, score: r.score, orders: r.orders,
+      avatar: r.avatar, color: r.color, score: this.clientScore({orders:r.orders, spent:r.spent, status:r.status, tags:r.tags||[]}), orders: r.orders,
       spent: r.spent, lastSeen: r.last_seen, channel: r.channel, tag: r.tag,
       tags: r.tags||[], notes: r.notes, aiNotes: r.ai_notes, status: r.status,
       createdAt: r.created_at, cloudId: r.id };
@@ -3996,6 +4026,8 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
     if (!c) return;
     if (!confirm(`Confirmer la suppression de ${c.name} ?`)) return;
     this.state.clients = this.state.clients.filter(x=>x.id!==id);
+    // V5.5 : retire l'id des segments perso (plus d'orphelin)
+    this.state.customSegments = (this.state.customSegments||[]).map(seg => Object.assign({}, seg, { clientIds: (seg.clientIds||[]).filter(cid=>cid!==id) }));
     this.save();
     this.closeModal();
     this.toast(`✅ ${c.name} supprimé`, 'success', 'Le client a été retiré du CRM');
@@ -5732,10 +5764,10 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     const filter = document.getElementById('csvFilter').value;
     const fmt = this.state._csvFmt || 'excel';
     let list = this.state.clients;
-    if (filter === 'vip') list = list.filter(c=>c.tags.includes('VIP'));
+    if (filter === 'vip') list = list.filter(c=>(c.tags||[]).includes('VIP'));
     else if (filter === 'lost') list = list.filter(c=>c.status==='lost');
     else if (filter === 'rec') list = list.filter(c=>c.tag==='rec');
-    else if (filter === 'occ') list = list.filter(c=>c.tag==='');
+    else if (filter === 'occ') list = list.filter(c=>c.tag==='occ');
     else if (filter === 'biz') list = list.filter(c=>c.tag==='biz');
     else if (filter === 'new') list = list.filter(c=>c.tag==='new'||c.status==='prospect');
 
@@ -7491,7 +7523,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
               <label class="seg-client-item" data-name="${c.name.toLowerCase()}" style="display:flex;align-items:center;gap:10px;padding:6px;border-radius:6px;cursor:pointer" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''">
                 <input type="checkbox" class="seg-client-check" data-id="${c.id}" onchange="Nx.updateSegSelectedPreview()">
                 <span class="seg-pastille seg-${this.segOf(c)}"></span>
-                <div style="flex:1"><div style="font-size:13px;font-weight:600">${c.name}</div><div style="font-size:11px;color:var(--muted)">Score ${c.score} · ${c.tags.join(', ')||'standard'}</div></div>
+                <div style="flex:1"><div style="font-size:13px;font-weight:600">${c.name}</div><div style="font-size:11px;color:var(--muted)">Score ${c.score} · ${(c.tags||[]).join(', ')||'standard'}</div></div>
               </label>
             `).join('')}
           </div>
@@ -7851,7 +7883,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     const mc = document.getElementById('modal-content');
     // Segments unifiés couleur (Augustin 21/05/2026) — Business ajouté, ordre cohérent partout
     const segOpts = [
-      {k:'vip',      n:'Clients VIP',                 col:'#F5C45E', c:this.state.clients.filter(x=>x.tags.includes('VIP')).length},
+      {k:'vip',      n:'Clients VIP',                 col:'#F5C45E', c:this.state.clients.filter(x=>(x.tags||[]).includes('VIP')).length},
       {k:'recurrent',n:'Récurrents',                  col:'#1A56DB', c:this.state.clients.filter(x=>x.tag==='rec').length},
       {k:'biz',      n:'Business',                    col:'#7A3CFF', c:this.state.clients.filter(x=>(x.tags||[]).includes('Business')||x.tag==='biz').length},
       {k:'new',      n:'Nouveaux',                    col:'#22C55E', c:this.state.clients.filter(x=>x.status==='prospect').length},
