@@ -3797,13 +3797,8 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
 
   // Affiche un modal "origine de la donnée" + bouton aller à la section
   openStatOrigin(route, statKey){
-    const labelMap = {
-      'stats.conv':'47 conversations aujourd\'hui',
-      'stats.clients':'21 nouveaux clients ce mois',
-      'stats.response':'Taux de réponse 94% sur 7 derniers jours',
-      'Campagnes actives':'3 campagnes actives'
-    };
-    const heading = labelMap[statKey] || statKey;
+    // V5.4 : libellé propre depuis i18n (plus de chiffres inventés "47 conversations" etc.)
+    const heading = (typeof t==='function' ? t(statKey) : statKey) || statKey;
     let originList = '';
     if (route === 'crm') {
       const newClients = this.state.clients.slice(0,5);
