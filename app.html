@@ -3239,7 +3239,8 @@ const Nx = {
       instagram: r.instagram, instagramFollowers: r.instagram_followers,
       avatar: r.avatar, color: r.color, score: r.score, orders: r.orders,
       spent: r.spent, lastSeen: r.last_seen, channel: r.channel, tag: r.tag,
-      tags: r.tags||[], notes: r.notes, aiNotes: r.ai_notes, status: r.status };
+      tags: r.tags||[], notes: r.notes, aiNotes: r.ai_notes, status: r.status,
+      createdAt: r.created_at, cloudId: r.id };
   },
   // Conversations + Messages (relations FK)
   _convCloudId(clientId){ return this._localIdToUuid(clientId, '8001'); },
@@ -3786,7 +3787,7 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
       <div class="stat" onclick="Nx.openStatOrigin('${target}','${i18nKey}')">
         <div class="stat-top">
           <div class="stat-ic ${kind||''}">${icon}</div>
-          <span class="delta ${deltaClass}">${deltaSign} ${Math.abs(delta)}%</span>
+          ${(delta===''||delta==null)?'':`<span class="delta ${deltaClass}">${deltaSign} ${Math.abs(delta)}%</span>`}
         </div>
         <div class="stat-lbl">${typeof t==='function'?t(i18nKey):i18nKey}</div>
         <div class="stat-val mono">${val}</div>
@@ -4078,6 +4079,8 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
 
   // Graphique dynamique selon chartType + chartRange (Augustin 19/05 + 21/05/2026)
   chartSvg(){
+    // V5.4 : graphique branché sur les VRAIES données (voir _chartSvgReal). Ancien mock ci-dessous = inerte.
+    return this._chartSvgReal();
     const type = this.state.chartType || 'conv';
     const chartRange = this.state.chartRange || '30d';
     const W = 760, H = 220, PAD_BOTTOM = 30;
@@ -5917,17 +5920,95 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     this.toast('✓ Correction enregistrée','success','Claude s\'en rappellera');
   },
 
+  // ============================================================
+  // V5.4 — STATISTIQUES RÉELLES (calculées depuis les données Supabase synchronisées)
+  // Aucune donnée inventée : si pas de données -> 0 / vide. Tout en try/catch.
+  // ============================================================
+  _statsCompute(range){
+    try {
+      const days = range==='7d'?7 : range==='30d'?30 : range==='90d'?90 : null;
+      const cutoff = days ? Date.now() - days*86400000 : 0;
+      const convs = this.state.conversations || [];
+      const clients = this.state.clients || [];
+      const inRange = (ts) => { if(!ts) return false; const t=new Date(ts).getTime(); return !isNaN(t) && (!days || t>=cutoff); };
+      let msgs = [];
+      convs.forEach(c => (c.messages||[]).forEach(m => { if(m.ts){ const t=new Date(m.ts).getTime(); if(!isNaN(t) && (!days || t>=cutoff)) msgs.push({from:m.from, text:m.text||'', t}); } }));
+      msgs.sort((a,b)=>a.t-b.t);
+      const them = msgs.filter(m=>m.from==='them');
+      const replies = msgs.filter(m=>m.from!=='them');
+      const convActive = convs.filter(c => (c.messages||[]).some(m=>inRange(m.ts))).length;
+      const newClients = clients.filter(c => inRange(c.createdAt)).length;
+      const responseRate = them.length ? Math.round(replies.length/them.length*100) : null;
+      let deltas=[];
+      convs.forEach(c=>{ const ms=(c.messages||[]).filter(m=>m.ts).map(m=>({from:m.from,t:new Date(m.ts).getTime()})).filter(m=>!isNaN(m.t)).sort((a,b)=>a.t-b.t); for(let i=0;i<ms.length;i++){ if(ms[i].from==='them'){ for(let j=i+1;j<ms.length;j++){ if(ms[j].from!=='them'){ const dl=ms[j].t-ms[i].t; if(dl>=0 && dl<86400000 && (!days||ms[j].t>=cutoff)) deltas.push(dl); break; } } } } });
+      const avgRespMin = deltas.length ? Math.round(deltas.reduce((a,b)=>a+b,0)/deltas.length/60000) : null;
+      const slot={}; them.forEach(m=>{ const d=new Date(m.t); const k=d.getDay()+'_'+d.getHours(); slot[k]=(slot[k]||0)+1; });
+      let top=null; Object.entries(slot).forEach(([k,n])=>{ if(!top||n>top.n) top={k,n}; });
+      let peak=null; if(top){ const J=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi']; const parts=top.k.split('_').map(Number); peak={day:J[parts[0]],hour:parts[1],n:top.n}; }
+      const hourBuckets=Array(24).fill(0); them.forEach(m=>hourBuckets[new Date(m.t).getHours()]++);
+      const freq={}; them.forEach(m=>{ const disp=(m.text||'').trim().replace(/\s+/g,' ').slice(0,90); if(!disp) return; const k=disp.toLowerCase(); if(!freq[k]) freq[k]={c:0,disp}; freq[k].c++; });
+      const topQuestions=Object.values(freq).sort((a,b)=>b.c-a.c).slice(0,5).map(o=>({q:o.disp,count:o.c}));
+      const dayMap={}; msgs.forEach(m=>{ const key=new Date(m.t).toISOString().slice(0,10); dayMap[key]=(dayMap[key]||0)+1; });
+      const dayKeys=Object.keys(dayMap).sort();
+      return { convActive, msgCount:msgs.length, thems:them.length, replies:replies.length, newClients, responseRate, avgRespMin, peak, hourBuckets, topQuestions, convPerDay:dayKeys.map(k=>dayMap[k]), dayLabels:dayKeys.map(k=>k.slice(5)), hasData:(msgs.length>0||clients.length>0), hasMsg:msgs.length>0 };
+    } catch(e){ return { error:String(e), convActive:0, newClients:0, responseRate:null, avgRespMin:null, peak:null, hourBuckets:[], topQuestions:[], convPerDay:[], dayLabels:[], hasData:false, hasMsg:false }; }
+  },
+  _statsSegDefs(){
+    return [
+      {l:'VIP', c:'#F5C45E', test:c=>(c.tags||[]).some(x=>String(x).toLowerCase()==='vip')},
+      {l:'Récurrents', c:'#1A56DB', test:c=>c.tag==='rec' || (c.tags||[]).some(x=>/recurr/i.test(String(x)))},
+      {l:'Business', c:'#7A3CFF', test:c=>(c.tags||[]).some(x=>/business|empresa/i.test(String(x)))},
+      {l:'Nouveaux', c:'#22C55E', test:c=>c.status==='prospect'},
+      {l:'Actifs', c:'#F59E0B', test:c=>c.status==='active'},
+      {l:'Perdus', c:'#FF6B6B', test:c=>c.status==='lost'}
+    ];
+  },
+  _statsSegments(){
+    try {
+      const clients=this.state.clients||[]; const defs=this._statsSegDefs(); const used=new Set();
+      const segs=defs.map(d=>{ const list=clients.filter(c=>!used.has(c)&&d.test(c)); list.forEach(c=>used.add(c)); return {label:d.l,color:d.c,count:list.length}; });
+      const total=clients.length;
+      return { segs:segs.filter(s=>s.count>0).map(s=>({label:s.label,color:s.color,count:s.count,pct: total?Math.round(s.count/total*100):0})), total };
+    } catch(e){ return {segs:[],total:0}; }
+  },
+  _chartSvgReal(){
+    try {
+      const type=this.state.chartType||'conv';
+      const rangeKey=this.state.chartRange||'30d';
+      const range= rangeKey==='quarter'?'90d': rangeKey==='all'?null:'30d';
+      const S=this._statsCompute(range);
+      const W=760,H=220,PAD_BOTTOM=30,innerH=H-PAD_BOTTOM-20;
+      const empty=(msg)=>`<div style="height:${H}px;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--muted);font-size:13px;padding:24px;line-height:1.6">${msg}</div>`;
+      if(!S.hasMsg) return empty("📊 Pas encore assez de données.<br>Le graphique se construit tout seul avec tes vraies conversations.");
+      const yLines=`<g stroke="#F1F5F9" stroke-width="1"><line x1="0" y1="50" x2="${W}" y2="50"/><line x1="0" y1="110" x2="${W}" y2="110"/><line x1="0" y1="170" x2="${W}" y2="170"/></g>`;
+      const pathFromPts=(p,closed)=>{ if(!p.length) return ''; let d=`M${p[0][0]},${p[0][1]}`; for(let i=1;i<p.length;i++){ const a=p[i-1],b=p[i]; d+=` C${a[0]+(b[0]-a[0])*.5},${a[1]} ${b[0]-(b[0]-a[0])*.5},${b[1]} ${b[0]},${b[1]}`; } if(closed) d+=` L${p[p.length-1][0]},${H-PAD_BOTTOM} L${p[0][0]},${H-PAD_BOTTOM} Z`; return d; };
+      if(type==='hours'){
+        const hours=S.hourBuckets||[]; const max=Math.max(1,...hours); const bw=W/24;
+        const bars=hours.map((v,i)=>{ const h=(v/max)*innerH; const x=i*bw+2; const y=20+innerH-h; const it=v/max; const fill=it>.7?'#EF4444':it>.4?'#F59E0B':it>.15?'#3B82F6':'#CBD5E1'; return `<rect x="${x}" y="${y}" width="${bw-4}" height="${h}" fill="${fill}" rx="3"><title>${i}h : ${v} messages</title></rect>`; }).join('');
+        const hl=[0,3,6,9,12,15,18,21].map(h=>`<text x="${h*bw+bw/2-8}" y="${H-6}" font-family="JetBrains Mono,monospace" font-size="10" fill="#94A3B8">${h}h</text>`).join('');
+        return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px">${yLines}${bars}${hl}</svg>`;
+      }
+      if(type!=='conv') return empty("Ce graphique sera basé sur tes vraies données — bientôt.<br>Pour l'instant, l'onglet « Conversations » montre ton activité réelle.");
+      const vals=S.convPerDay||[], labels=S.dayLabels||[];
+      if(!vals.length) return empty("Pas encore de messages sur cette période.");
+      const max=Math.max(...vals),min=Math.min(...vals),span=(max-min)||1;
+      const pts=vals.map((v,i)=>[ vals.length>1?(i/(vals.length-1))*W:W/2, 20+(1-(v-min)/span)*innerH ]);
+      const stepN=Math.max(1,Math.ceil(labels.length/8));
+      const xlab=labels.map((l,i)=> i%stepN===0?`<text x="${Math.max(2,(labels.length>1?(i/(labels.length-1))*W:W/2)-8)}" y="${H-6}" font-family="JetBrains Mono,monospace" font-size="10" fill="#94A3B8">${l}</text>`:'').join('');
+      return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px"><defs><linearGradient id="gstr" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#1A56DB" stop-opacity=".30"/><stop offset="100%" stop-color="#1A56DB" stop-opacity="0"/></linearGradient></defs>${yLines}<path d="${pathFromPts(pts,true)}" fill="url(#gstr)"/><path d="${pathFromPts(pts,false)}" fill="none" stroke="#1A56DB" stroke-width="2.5" stroke-linecap="round"/>${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#1A56DB"/>`).join('')}${xlab}<text x="${W-90}" y="22" font-family="JetBrains Mono,monospace" font-size="11" fill="#1A56DB" font-weight="700">${vals[vals.length-1]} msg/j</text></svg>`;
+    } catch(e){ return `<div style="padding:24px;color:var(--muted);text-align:center">Graphique momentanément indisponible.</div>`; }
+  },
+
   // ---------- STATS VIEW ----------
   viewStats(){
     const a = this.state.analytics;
     const range = this.state.statsRange || '30d';
-    // Données par range
-    const dataByRange = {
-      '7d': { conv:'612', clients:8, response:'92%', delta_conv:12, delta_clients:5, delta_response:2 },
-      '30d': { conv:'2 840', clients:21, response:'94%', delta_conv:18, delta_clients:6, delta_response:5 },
-      'always': { conv:'24 380', clients:342, response:'93%', delta_conv:0, delta_clients:0, delta_response:0 }
-    };
-    const d = dataByRange[range];
+    // V5.4 : chiffres RÉELS depuis Supabase (plus de mock). Vide = 0/—, jamais inventé.
+    const S = this._statsCompute(range==='always'?null:range);
+    const d = { conv: String(S.convActive||0), clients: S.newClients||0,
+                response: (S.responseRate!=null? S.responseRate+'%':'—'),
+                delta_conv:'', delta_clients:'', delta_response:'' };
+    const avgTimeStr = (S.avgRespMin!=null? S.avgRespMin+' min':'—');
     return `
       <div class="view">
         <div class="page-hd">
@@ -5947,7 +6028,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           ${this.statCard('💬',t('stats.card.conv'),d.conv,d.delta_conv,t('stats.card.conv.sub'),'','inbox')}
           ${this.statCard('👥',t('stats.card.newclients'),d.clients,d.delta_clients,t('stats.card.newclients.sub'),'g','crm')}
           ${this.statCard('✓',t('stats.card.response'),d.response,d.delta_response,t('stats.card.response.sub'),'p','stats')}
-          ${this.statCard('⚡',t('stats.card.avgtime'),a.avgResponseTime+' min',-15,t('stats.card.avgtime.sub'),'c','stats')}
+          ${this.statCard('⚡',t('stats.card.avgtime'),avgTimeStr,'',t('stats.card.avgtime.sub'),'c','stats')}
         </div>
         <div style="padding:10px 14px;background:var(--amber-soft);border-radius:8px;font-size:12px;color:#B45309;margin-bottom:14px">
           ${t('stats.note.revenue')}
@@ -6074,35 +6155,13 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   // POINT 8(a) — Répartition clients selon range (mois/trimestre/depuis le début)
   // Augustin 21/05/2026 : ajout VIP + Business segments
   renderRepartition(){
-    const range = this.state.repRange || 'month';
-    const data = {
-      month: [
-        {c:'#F5C45E',l:'VIP',v:'7%',n:24,delta:'+15%',cls:'trend-up'},
-        {c:'#1A56DB',l:'Récurrents',v:'55%',n:188,delta:'+50%',cls:'trend-up'},
-        {c:'#7A3CFF',l:'Business',v:'8%',n:27,delta:'+22%',cls:'trend-up'},
-        {c:'#22C55E',l:'Nouveaux',v:'16%',n:55,delta:'+8%',cls:'trend-up'},
-        {c:'#F59E0B',l:'Occasionnels',v:'10%',n:34,delta:'−2%',cls:'trend-dn'},
-        {c:'#FF6B6B',l:'Perdus',v:'4%',n:14,delta:'+5%',cls:'trend-dn'}
-      ],
-      quarter: [
-        {c:'#F5C45E',l:'VIP',v:'6%',n:66,delta:'+12%',cls:'trend-up'},
-        {c:'#1A56DB',l:'Récurrents',v:'50%',n:548,delta:'+32%',cls:'trend-up'},
-        {c:'#7A3CFF',l:'Business',v:'8%',n:87,delta:'+18%',cls:'trend-up'},
-        {c:'#22C55E',l:'Nouveaux',v:'20%',n:219,delta:'+18%',cls:'trend-up'},
-        {c:'#F59E0B',l:'Occasionnels',v:'11%',n:120,delta:'+4%',cls:'trend-up'},
-        {c:'#FF6B6B',l:'Perdus',v:'5%',n:55,delta:'+2%',cls:'trend-dn'}
-      ],
-      all: [
-        {c:'#F5C45E',l:'VIP',v:'5%',n:170,delta:'—',cls:'trend-eq'},
-        {c:'#1A56DB',l:'Récurrents',v:'48%',n:1638,delta:'—',cls:'trend-eq'},
-        {c:'#7A3CFF',l:'Business',v:'7%',n:240,delta:'—',cls:'trend-eq'},
-        {c:'#22C55E',l:'Nouveaux',v:'22%',n:751,delta:'—',cls:'trend-eq'},
-        {c:'#F59E0B',l:'Occasionnels',v:'12%',n:410,delta:'—',cls:'trend-eq'},
-        {c:'#FF6B6B',l:'Perdus',v:'6%',n:206,delta:'—',cls:'trend-eq'}
-      ]
-    };
-    return (data[range]||data.month).map(x=>`
-      <div class="flex" style="padding:6px 0;gap:8px"><span style="width:10px;height:10px;background:${x.c};border-radius:2px"></span><span style="font-size:12px">${x.l}</span><span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">${x.n}</span><b style="font-size:12px">${x.v}</b><span class="chip ${x.cls==='trend-up'?'green':x.cls==='trend-dn'?'red':''}" style="font-size:10px">${x.delta}</span></div>
+    // V5.4 : répartition RÉELLE des clients par segment (plus de mock).
+    const { segs, total } = this._statsSegments();
+    if (!total) {
+      return `<div style="padding:12px;color:var(--muted);font-size:12.5px;line-height:1.6">Aucun client pour l'instant.<br>La répartition par segment s'affichera dès que tu auras des clients.</div>`;
+    }
+    return segs.map(x=>`
+      <div class="flex" style="padding:6px 0;gap:8px"><span style="width:10px;height:10px;background:${x.color};border-radius:2px"></span><span style="font-size:12px">${x.label}</span><span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">${x.count}</span><b style="font-size:12px">${x.pct}%</b></div>
     `).join('');
   },
 
@@ -6111,11 +6170,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     const ov = document.getElementById('modal-overlay');
     const mc = document.getElementById('modal-content');
     ov.classList.remove('hidden');
-    const snaps = [
-      { period:'Il y a 1 semaine', date:'10 mai 2026', vip:{v:7,d:'+1%'}, rec:{v:54,d:'+4%'}, biz:{v:8,d:'+1%'}, neu:{v:17,d:'−1%'}, occ:{v:10,d:'+1%'}, lost:{v:4,d:'−2%'} },
-      { period:'Il y a 1 mois',    date:'17 avr. 2026', vip:{v:6,d:'+2%'}, rec:{v:50,d:'+10%'}, biz:{v:7,d:'+2%'}, neu:{v:19,d:'−3%'}, occ:{v:12,d:'−3%'}, lost:{v:6,d:'−4%'} },
-      { period:'Il y a 3 mois',    date:'17 fév. 2026', vip:{v:4,d:'+5%'}, rec:{v:42,d:'+23%'}, biz:{v:5,d:'+4%'}, neu:{v:28,d:'−12%'}, occ:{v:14,d:'−5%'}, lost:{v:7,d:'−6%'} }
-    ];
+    const snaps = []; // V5.4 : plus de faux historique — se constituera avec le temps réel
     // Segments : code couleur (au lieu d'icônes — Augustin 21/05)
     const segs = [
       { k:'vip', l:'VIP',         col:'#F5C45E' },
@@ -6128,7 +6183,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     mc.innerHTML = `
       <div class="modal-hd"><h3>📜 Snapshots historiques — répartition clients</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
       <div class="modal-body">
-        <p style="color:var(--muted);font-size:12.5px;margin-bottom:14px">Compare ta photo client à 3 moments du passé (delta vs aujourd'hui).</p>
+        <p style="color:var(--muted);font-size:12.5px;margin-bottom:14px">L'historique des photos clients se constituera automatiquement au fil des semaines. Pas encore d'historique à comparer pour l'instant.</p>
         ${snaps.map(s => `
           <div style="padding:14px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;margin-bottom:10px">
             <div style="display:flex;justify-content:space-between;margin-bottom:10px">
@@ -6154,72 +6209,43 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   },
 
   renderBestHours(){
-    // POINT 7(a) — Le contenu varie selon heatRange (7j / 30j)
+    // V5.4 : pic d'activité RÉEL calculé depuis les vrais messages (plus de mock).
     const range = this.state.heatRange || '30d';
-    const insightsByRange = {
-      '7d': [
-        { title:'<b>Vendredi 17h–19h</b> = pic semaine (52% du volume). Réponds vite ou programme auto.', cta:{label:'Activer auto vendredi soir', fn:'Nx.openAutoMessagingSpace()'} },
-        { title:'<b>Samedi 10h–12h</b> = 2e pic (28%). Mets en avant le pan frais.', cta:{label:'Créer campagne samedi 10h', fn:"Nx.openCampaignBuilder('Promo samedi 10h')"} },
-        { title:'Creux : <b>lundi avant 11h</b> et <b>mardi 14h–16h</b>. Pas de promo à ces moments.', cta:null }
-      ],
-      '30d': [
-        { title:'<b>Vendredi 17h–19h</b> = pic absolu (60% du volume hebdo). Sois disponible ou prépare des réponses auto.', cta:{label:'Activer auto vendredi soir', fn:'Nx.openAutoMessagingSpace()'} },
-        { title:'<b>Tes clients ne répondent JAMAIS le lundi</b> avant 11h. → Écris le <b>vendredi 13h</b> pour campagnes week-end.', cta:{label:'Créer campagne vendredi 13h', fn:"Nx.openCampaignBuilder('Promo week-end vendredi 13h')"} },
-        { title:'Trous dans la semaine : <b>mardi 14h–16h</b> (silence total). Ne lance pas de promo à ce moment.', cta:null }
-      ]
-    };
-    const insights = insightsByRange[range] || insightsByRange['30d'];
+    const S = this._statsCompute(range === '7d' ? '7d' : '30d');
+    let body;
+    if (S.peak) {
+      body = `<div class="insight"><div class="badge">🔥</div><div style="flex:1">Ton pic d'activité : <b>${S.peak.day} vers ${S.peak.hour}h</b> (${S.peak.n} message${S.peak.n>1?'s':''} reçu${S.peak.n>1?'s':''}). C'est le meilleur moment pour être réactif ou programmer une campagne.
+        <div class="act"><button onclick="Nx.openCampaignBuilder('Promo ${S.peak.day}')">Créer une campagne ${S.peak.day}</button></div>
+      </div></div>`;
+    } else {
+      body = `<div class="insight"><div class="badge">·</div><div style="flex:1">Pas encore assez de messages pour détecter tes heures de pointe. Cet encart se remplira tout seul avec l'activité réelle de tes clients.</div></div>`;
+    }
     return `
       <div class="best-hours">
-        <h4>💡 Best hours — insights actionnables <span style="font-size:11px;font-weight:500;color:var(--muted);margin-left:6px">· période ${range==='7d'?'7 jours':'30 jours'}</span></h4>
-        ${insights.map((ins,i)=>`
-        <div class="insight">
-          <div class="badge">${i+1}</div>
-          <div style="flex:1">
-            ${ins.title}
-            ${ins.cta?`<div class="act"><button onclick="${ins.cta.fn}">${ins.cta.label}</button></div>`:''}
-          </div>
-        </div>`).join('')}
+        <h4>💡 Best hours — basé sur tes vrais messages <span style="font-size:11px;font-weight:500;color:var(--muted);margin-left:6px">· période ${range==='7d'?'7 jours':'30 jours'}</span></h4>
+        ${body}
       </div>`;
   },
 
   // POINT 6 — Top questions filtré par range (week/month/all)
   renderTopQuestions(){
+    // V5.4 : questions RÉELLES extraites des messages clients (plus de mock).
     const range = this.state.faqRange || 'week';
-    const dataByRange = {
-      week: [
-        {q:'¿Hacen delivery?', count:40, trend:{a:'▲',c:'trend-up',v:'+2'}},
-        {q:'¿Cuáles son los horarios?', count:34, trend:{a:'▼',c:'trend-dn',v:'−1'}},
-        {q:'¿Aceptan transferencia?', count:28, trend:{a:'▲',c:'trend-up',v:'NEW'}},
-        {q:'¿Tienen pan amasado?', count:22, trend:{a:'–',c:'trend-eq',v:'='}},
-        {q:'¿Hacen tortas por encargo?', count:16, trend:{a:'▼',c:'trend-dn',v:'−3'}}
-      ],
-      month: [
-        {q:'¿Cuáles son los horarios?', count:142, trend:{a:'▲',c:'trend-up',v:'+12'}},
-        {q:'¿Hacen delivery?', count:128, trend:{a:'▲',c:'trend-up',v:'+8'}},
-        {q:'¿Hacen tortas por encargo?', count:96, trend:{a:'▲',c:'trend-up',v:'+22'}},
-        {q:'¿Aceptan transferencia?', count:71, trend:{a:'–',c:'trend-eq',v:'='}},
-        {q:'¿Tienen pan amasado?', count:58, trend:{a:'▼',c:'trend-dn',v:'−4'}}
-      ],
-      all: [
-        {q:'¿Cuáles son los horarios?', count:1820, trend:{a:'–',c:'trend-eq',v:'='}},
-        {q:'¿Hacen delivery?', count:1640, trend:{a:'▲',c:'trend-up',v:'+5%'}},
-        {q:'¿Aceptan transferencia?', count:1208, trend:{a:'▲',c:'trend-up',v:'+9%'}},
-        {q:'¿Hacen tortas por encargo?', count:984, trend:{a:'▲',c:'trend-up',v:'+18%'}},
-        {q:'¿Tienen pan amasado?', count:760, trend:{a:'▼',c:'trend-dn',v:'−6%'}}
-      ]
-    };
-    const list = dataByRange[range] || dataByRange.week;
-    const subLabel = {week:'cette semaine', month:'ce mois', all:'historique complet'}[range];
+    const days = range==='week'?'7d' : range==='month'?'30d' : null;
+    const S = this._statsCompute(days);
+    const list = S.topQuestions || [];
+    if (!list.length) {
+      return `<div style="padding:16px;color:var(--muted);font-size:12.5px;text-align:center;line-height:1.6">Pas encore de questions clients enregistrées.<br>Les questions les plus fréquentes de tes clients apparaîtront ici automatiquement.</div>`;
+    }
+    const max = list[0].count || 1;
     return `${list.map((item,i)=>`
       <div style="padding:10px 0;border-bottom:1px dashed var(--line);display:flex;align-items:center;gap:10px">
         <div style="width:24px;height:24px;border-radius:50%;background:var(--blue-soft);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px">${i+1}</div>
         <div style="flex:1;font-size:13px">${item.q}</div>
-        <span class="${item.trend.c}" style="font-size:13px">${item.trend.a}</span>
-        <span class="chip ${item.trend.c==='trend-up'?'green':item.trend.c==='trend-dn'?'red':''}" style="font-size:10px">${item.trend.v}</span>
         <span class="chip">${item.count}×</span>
       </div>`).join('')}
-      <div style="padding:14px;background:var(--green-soft);border-radius:10px;margin-top:10px;font-size:12px">💡 <b>Insight ${subLabel} :</b> ${range==='week'?'"Hacen tortas por encargo" est passée de #5 à #2 cette semaine — pense à booster la production.':range==='month'?'Forte hausse sur les tortas (+22%) ce mois — la demande grimpe.':'Sur l\'historique complet, les horaires restent la question #1 depuis le début.'}</div>`;
+      <div style="height:6px;background:var(--bg2);border-radius:3px;margin-top:10px;overflow:hidden"><div style="height:100%;width:${Math.round((list[0].count/max)*100)}%;background:var(--blue)"></div></div>
+      <div style="padding:10px;color:var(--muted);font-size:11.5px;margin-top:8px">📊 Calculé en temps réel sur les vrais messages de tes clients (${range==='week'?'7 jours':range==='month'?'30 jours':'tout l\'historique'}).</div>`;
   },
 
   // POINT 7(b) — Espace gestion messages auto (créneaux automatiques)
@@ -6290,31 +6316,22 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   },
   // Helper texte brief par période × langue (Augustin 21/05/2026)
   getBriefText(range, lang){
-    const r = range || (this.state.briefRange || 'today');
-    const L = lang || (this.state.lang || 'fr');
-    const dict = {
-      today: {
-        fr: "Salut Carlos, brief Nexus du jour. 47 conversations aujourd'hui, dont 12 automatisées. María González, ta cliente VIP, attend ta réponse. 3 clients à relancer cette semaine. Streak à 12 jours. Bonne journée !",
-        es: "Hola Carlos, brief Nexus del día. 47 conversaciones hoy, 12 automatizadas. María González, tu cliente VIP, espera tu respuesta. 3 clientes para reactivar esta semana. Racha de 12 días. ¡Buen día!",
-        en: "Hi Carlos, your Nexus brief for today. 47 conversations today, 12 automated. María González, your VIP client, is waiting for your reply. 3 clients to reach out to this week. 12-day streak. Have a great day!"
-      },
-      '7d': {
-        fr: "Brief des 7 derniers jours. 612 conversations gérées, plus 12 pour cent par rapport à la semaine précédente. 8 nouveaux clients dont 2 VIP. Taux de réponse 92 pour cent. Pic d'activité vendredi soir entre 17h et 19h. Les 3 questions les plus posées : prix des tortas, livraison Providencia, horaires samedi. Bonne dynamique, on garde le rythme.",
-        es: "Brief de los últimos 7 días. 612 conversaciones gestionadas, más 12 por ciento vs la semana anterior. 8 nuevos clientes, 2 VIP. Tasa de respuesta 92 por ciento. Pico viernes noche entre 17 y 19h. Las 3 preguntas más frecuentes: precio de tortas, entrega Providencia, horarios sábado. Buena dinámica, mantenemos el ritmo.",
-        en: "Last 7-day brief. 612 conversations handled, up 12 percent vs the previous week. 8 new clients, 2 VIP. 92 percent response rate. Peak Friday evening between 5 and 7 pm. Top 3 questions: cake prices, Providencia delivery, Saturday hours. Good momentum, keep it going."
-      },
-      '30d': {
-        fr: "Brief des 30 derniers jours. 2 840 conversations, plus 18 pour cent par rapport au mois précédent. 21 nouveaux clients dont 5 entrés en VIP. Taux de réponse moyen 94 pour cent. Temps moyen de réponse 2 minutes 18 secondes. Top question : prix des tortas. CA estimé 2 840 000 pesos chiliens. Pic vendredi soir confirmé. Mardi 14h-16h reste creux : à éviter pour les promos.",
-        es: "Brief de los últimos 30 días. 2 840 conversaciones, más 18 por ciento vs el mes anterior. 21 nuevos clientes, 5 pasaron a VIP. Tasa de respuesta media 94 por ciento. Tiempo medio de respuesta 2 minutos 18 segundos. Top pregunta: precio de tortas. Ingresos estimados 2 840 000 pesos chilenos. Pico viernes noche confirmado. Martes 14-16h queda flojo: evitar para promos.",
-        en: "Last 30-day brief. 2,840 conversations, up 18 percent vs the previous month. 21 new clients, 5 became VIP. 94 percent average response rate. Average response time 2 minutes 18 seconds. Top question: cake prices. Estimated revenue 2,840,000 Chilean pesos. Friday evening peak confirmed. Tuesday 2 to 4 pm stays slow: avoid for promos."
-      },
-      always: {
-        fr: "Bilan depuis le début. 24 380 conversations gérées avec Nexus, 342 clients dans le CRM dont 38 en VIP. Taux de réponse moyen 93 pour cent. Tu as économisé environ 280 heures de travail commercial sur cette période. Top 3 produits : empanadas, pan amasado, tortas de cumpleaños. Saisonnalité forte sur les anniversaires en mai-juin. Continue, c'est solide.",
-        es: "Balance desde el inicio. 24 380 conversaciones gestionadas con Nexus, 342 clientes en el CRM, 38 VIP. Tasa de respuesta media 93 por ciento. Ahorraste cerca de 280 horas de trabajo comercial en este período. Top 3 productos: empanadas, pan amasado, tortas de cumpleaños. Fuerte estacionalidad de cumpleaños en mayo-junio. Sigue así, está sólido.",
-        en: "All-time recap. 24,380 conversations handled with Nexus, 342 clients in the CRM, 38 VIP. 93 percent average response rate. You saved about 280 hours of sales work over this period. Top 3 products: empanadas, pan amasado, birthday cakes. Strong birthday seasonality in May and June. Keep going, it's solid."
-      }
-    };
-    return (dict[r] && dict[r][L]) || (dict[r] && dict[r].fr) || dict.today.fr;
+    // V5.4 : brief généré depuis les VRAIS chiffres (plus de texte inventé).
+    try {
+      const r = range || (this.state.briefRange || 'today');
+      const days = r==='7d'?'7d' : r==='30d'?'30d' : r==='always'?null : '7d';
+      const S = this._statsCompute(days);
+      if (!S.hasData) return "Pas encore de données à résumer. Dès que tes clients t'écrivent, je te ferai un vrai brief de ton activité.";
+      const parts = [];
+      parts.push(`${S.convActive} conversation${S.convActive>1?'s':''} active${S.convActive>1?'s':''}`);
+      if (S.newClients) parts.push(`${S.newClients} nouveau${S.newClients>1?'x':''} client${S.newClients>1?'s':''}`);
+      if (S.responseRate!=null) parts.push(`un taux de réponse de ${S.responseRate} pour cent`);
+      let txt = "Voici ton brief Nexus. " + parts.join(', ') + ".";
+      if (S.avgRespMin!=null) txt += ` Temps de réponse moyen : ${S.avgRespMin} minute${S.avgRespMin>1?'s':''}.`;
+      if (S.peak) txt += ` Ton pic d'activité est le ${S.peak.day} vers ${S.peak.hour} heures.`;
+      if (S.topQuestions && S.topQuestions.length) txt += ` Question la plus fréquente de tes clients : ${S.topQuestions[0].q}.`;
+      return txt;
+    } catch(e) { return "Brief momentanément indisponible."; }
   },
 
   setBriefRange(r){
@@ -6474,14 +6491,17 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     const date = new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
     const periodKey = ['7d','30d','always'].includes(period) ? period : '30d';
     const periodLabel = {'7d':'7 derniers jours','30d':'30 derniers jours','always':'Depuis le début'}[periodKey];
-    // Données chiffrées par période — alignées avec viewStats() dataByRange
+    // V5.4 : chiffres RÉELS depuis Supabase (plus de mock)
+    const S = this._statsCompute(periodKey==='always'?null:periodKey);
+    const revenueSum = (this.state.clients||[]).reduce((s,c)=>s+(Number(c.spent)||0),0);
     const data = {
-      '7d':     { conv:'612',    clients:8,   response:'92%', avgTime:'2:24', revenue:'690 000',  saved:'58',  prevLabel:'semaine précédente' },
-      '30d':    { conv:'2 840',  clients:21,  response:'94%', avgTime:'2:18', revenue:'2 840 000', saved:'248', prevLabel:'mois précédent' },
-      'always': { conv:'24 380', clients:342, response:'93%', avgTime:'2:21', revenue:'18 600 000', saved:'2 134', prevLabel:'à date' }
-    }[periodKey];
-    // Frequences top questions ajustées
-    const freqMul = {'7d':0.25, '30d':1, 'always':6.8}[periodKey];
+      conv: String(S.convActive||0),
+      clients: S.newClients||0,
+      response: (S.responseRate!=null? S.responseRate+'%':'—'),
+      avgTime: (S.avgRespMin!=null? S.avgRespMin+' min':'—'),
+      revenue: revenueSum ? revenueSum.toLocaleString('fr-FR').replace(/,/g,' ') : '—',
+      prevLabel: periodLabel
+    };
     let html = `
       <div class="pdf-page">
         <div class="pdf-h1">📊 Rapport Nexus — ${b.name}</div>
@@ -6496,33 +6516,19 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           <div class="pdf-stat"><div class="v">${data.response}</div><div class="l">Taux réponse</div></div>
           <div class="pdf-stat"><div class="v">${data.avgTime}</div><div class="l">Temps moyen</div></div>
         </div>
-        <div class="pdf-h2">💰 Estimation économique — ${periodLabel}</div>
+        <div class="pdf-h2">💰 Économique — ${periodLabel}</div>
         <ul style="font-size:12.5px;line-height:1.8;color:#0F172A">
-          <li>CA estimé via conversations Nexus : <b>${data.revenue} CLP</b></li>
-          <li>Heures de travail commercial économisées : <b>~${data.saved} h</b></li>
-          <li>Comparaison : ${data.prevLabel}</li>
+          <li>Chiffre d'affaires cumulé (fiches clients) : <b>${data.revenue} CLP</b></li>
+          <li>Période : ${data.prevLabel}</li>
         </ul>
-        <div class="pdf-h2">🔥 Best hours — ${periodLabel}</div>
+        <div class="pdf-h2">🔥 Heure de pointe — ${periodLabel}</div>
         <ul style="font-size:12.5px;line-height:1.8;color:#0F172A">
-          ${periodKey === '7d' ? `
-            <li><b>Vendredi 18h–19h</b> = pic de la semaine (37% du volume).</li>
-            <li>Mardi creux : 14h–16h.</li>
-            <li>Pic secondaire : samedi 11h–12h.</li>` :
-          periodKey === '30d' ? `
-            <li><b>Vendredi 17h–19h</b> = pic absolu (60% du volume hebdo).</li>
-            <li>Clients silencieux le <b>lundi avant 11h</b> → privilégier vendredi 13h.</li>
-            <li>Trou : <b>mardi 14h–16h</b>, à éviter pour les promos.</li>` : `
-            <li><b>Vendredi soir</b> = pic constant toute l'année (62% volume hebdo cumulé).</li>
-            <li>Saisonnalité forte : <b>mai–juin</b> (anniversaires), <b>décembre</b> (Noël).</li>
-            <li>Trou structurel : mardi 14h–16h et dimanche matin avant 11h.</li>`}
+          ${S.peak ? `<li>Pic d'activité : <b>${S.peak.day} vers ${S.peak.hour}h</b> (${S.peak.n} message${S.peak.n>1?'s':''}).</li>` : `<li>Pas encore assez de données pour détecter les heures de pointe.</li>`}
         </ul>
         <div class="pdf-h2">❓ Top questions ${periodKey==='7d'?'semaine':periodKey==='30d'?'mois':'depuis le début'}</div>
         <table class="pdf-table">
           <thead><tr><th>#</th><th>Question</th><th>Fréquence</th><th>Tendance</th></tr></thead>
-          <tbody>${this.state.analytics.topQuestions.map((q,i)=>{
-            const freq = Math.max(1, Math.round((40-i*6) * freqMul));
-            return `<tr><td>${i+1}</td><td>${q}</td><td>${freq.toLocaleString('fr-FR').replace(/,/g,' ')}×</td><td>${['↑','↓','↑','=','↓'][i]||'='}</td></tr>`;
-          }).join('')}</tbody>
+          <tbody>${(S.topQuestions||[]).length ? S.topQuestions.map((q,i)=>`<tr><td>${i+1}</td><td>${q.q}</td><td>${q.count}×</td><td>—</td></tr>`).join('') : '<tr><td colspan="4" style="text-align:center;color:#64748B">Pas encore de questions clients enregistrées</td></tr>'}</tbody>
         </table>`;
     }
     if (scope === 'clients' || scope === 'all') {
@@ -6556,23 +6562,18 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
 
   // Donut dynamique selon repRange (Augustin 19/05 + 21/05/2026 : VIP + Business)
   donutSvg(){
-    const range = this.state.repRange || 'month';
-    // Doit matcher exactement renderRepartition() pour cohérence visuelle
-    const data = {
-      month:   { segs:[{c:'#F5C45E',p:7},{c:'#1A56DB',p:55},{c:'#7A3CFF',p:8},{c:'#22C55E',p:16},{c:'#F59E0B',p:10},{c:'#FF6B6B',p:4}], total:342 },
-      quarter: { segs:[{c:'#F5C45E',p:6},{c:'#1A56DB',p:50},{c:'#7A3CFF',p:8},{c:'#22C55E',p:20},{c:'#F59E0B',p:11},{c:'#FF6B6B',p:5}], total:1095 },
-      all:     { segs:[{c:'#F5C45E',p:5},{c:'#1A56DB',p:48},{c:'#7A3CFF',p:7},{c:'#22C55E',p:22},{c:'#F59E0B',p:12},{c:'#FF6B6B',p:6}], total:3415 }
-    };
-    const d = data[range] || data.month;
-    // Calcule offsets cumulatifs (chaque segment commence où le précédent finit)
-    // stroke-dasharray = "longueur 100-longueur" ; stroke-dashoffset = -cumulatif
-    let cumul = 25; // décalage initial pour partir en haut (rotate -90 + offset 25)
-    const circles = d.segs.map(s => {
-      const c = `<circle cx="21" cy="21" r="15.915" fill="transparent" stroke="${s.c}" stroke-width="4" stroke-dasharray="${s.p} ${100-s.p}" stroke-dashoffset="${cumul}" transform="rotate(-90 21 21)"/>`;
-      cumul -= s.p;
+    // V5.4 : donut RÉEL (mêmes segments que renderRepartition).
+    const { segs, total } = this._statsSegments();
+    if (!total) {
+      return `<svg width="140" height="140" viewBox="0 0 42 42"><circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#E5E7EB" stroke-width="4"/><text x="21" y="22" text-anchor="middle" dominant-baseline="middle" font-size="4" fill="#94A3B8">0</text><text x="21" y="28" text-anchor="middle" dominant-baseline="middle" font-size="2.5" fill="#8A94A6">client</text></svg>`;
+    }
+    let cumul = 25;
+    const circles = segs.map(s => {
+      const c = `<circle cx="21" cy="21" r="15.915" fill="transparent" stroke="${s.color}" stroke-width="4" stroke-dasharray="${s.pct} ${100-s.pct}" stroke-dashoffset="${cumul}" transform="rotate(-90 21 21)"/>`;
+      cumul -= s.pct;
       return c;
     }).join('');
-    const totalStr = d.total.toLocaleString('fr-FR').replace(',', ' ');
+    const totalStr = String(total);
     return `<svg width="140" height="140" viewBox="0 0 42 42">
       <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#F1F5F9" stroke-width="4"/>
       ${circles}
