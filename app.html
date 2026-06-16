@@ -8714,6 +8714,9 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     // Load progress from localStorage
     let prog = {};
     try { prog = JSON.parse(localStorage.getItem('nexus_tutorial_progress') || '{}'); } catch(e){ prog = {}; }
+    // V5 : cases cochables une par une (à son rythme), mémorisées séparément
+    let checks = {};
+    try { checks = JSON.parse(localStorage.getItem('nexus_tutorial_checks') || '{}'); } catch(e){ checks = {}; }
     const steps = [
       {
         id:'profile',
@@ -8761,7 +8764,9 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         route:'vacances'
       }
     ];
-    const doneCount = steps.filter(s => prog[s.id]).length;
+    // Étape "faite" = marquée manuellement OU toutes ses cases cochées
+    const stepDone = (s) => !!prog[s.id] || (s.checks.length > 0 && s.checks.every((c,ci) => checks[s.id+'::'+ci]));
+    const doneCount = steps.filter(stepDone).length;
     const pct = Math.round(doneCount / steps.length * 100);
 
     return `
@@ -8784,7 +8789,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         </div>
 
         ${steps.map((s,i) => {
-          const done = !!prog[s.id];
+          const done = stepDone(s);
           return `
           <div class="tuto-step ${done?'done':''}">
             <div class="tuto-num">${done?'✓':(i+1)}</div>
@@ -8792,7 +8797,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
               <h4>${s.ic} ${s.title}</h4>
               <div class="desc">${s.desc}</div>
               <div class="tuto-checks">
-                ${s.checks.map(c => `<div class="tuto-check ${done?'on':''}"><span class="box">✓</span>${c}</div>`).join('')}
+                ${s.checks.map((c,ci) => { const ck = !!checks[s.id+'::'+ci]; return `<div class="tuto-check ${ck?'on':''}" onclick="Nx.toggleTutoCheck('${s.id}',${ci})" style="cursor:pointer" title="Cocher / décocher"><span class="box">${ck?'✓':'○'}</span>${c}</div>`; }).join('')}
               </div>
               <div class="flex" style="gap:8px">
                 <button class="tuto-btn" onclick="Nx.navigate('${s.route}')">${s.cta} →</button>
@@ -8831,6 +8836,16 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     prog[id] = !prog[id];
     localStorage.setItem('nexus_tutorial_progress', JSON.stringify(prog));
     this.toast(prog[id] ? 'Étape marquée comme faite ✓' : 'Étape ré-ouverte', 'success');
+    this.renderView();
+  },
+
+  // V5 : coche/décoche UNE case du tutoriel (à son rythme), mémorisée
+  toggleTutoCheck(stepId, idx){
+    let checks = {};
+    try { checks = JSON.parse(localStorage.getItem('nexus_tutorial_checks') || '{}'); } catch(e){ checks = {}; }
+    const key = stepId + '::' + idx;
+    checks[key] = !checks[key];
+    localStorage.setItem('nexus_tutorial_checks', JSON.stringify(checks));
     this.renderView();
   },
 
