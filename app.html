@@ -3684,6 +3684,9 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
       </div>` + html;
     }
     vc.innerHTML = html;
+    // V5 fix #2 messagerie : la conversation reste scrollée EN BAS (dernier message visible)
+    // après chaque rendu/envoi — avant, l'envoi faisait remonter la vue en haut.
+    if (v === 'inbox') { const _cb = document.getElementById('chatBody'); if (_cb) _cb.scrollTop = _cb.scrollHeight; }
     // === DYNAMIC TRANSLATE post-render via Groq (gratuit)
     // Cache hit = instant zéro API. Cache miss = 1 batch Groq (~1-2s, $0)
     const _lang = (this.state && this.state.lang) || localStorage.getItem('nexus_core_lang') || 'fr';
@@ -6876,8 +6879,8 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         .pn-redirect-btn b{font-weight:800}
         /* CALENDRIER */
         .pn-cal{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.04)}
-        .pn-cal-hd{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);background:linear-gradient(135deg,rgba(122,60,255,.05),rgba(0,229,255,.03))}
-        .pn-cal-title{font-size:18px;font-weight:800;color:var(--ink);text-transform:capitalize;letter-spacing:-.01em}
+        .pn-cal-hd{display:flex;align-items:center;gap:10px;padding:18px 20px;border-bottom:2px solid var(--blue);background:linear-gradient(135deg,rgba(122,60,255,.14),rgba(0,229,255,.08))}
+        .pn-cal-title{font-size:23px;font-weight:900;color:var(--ink);text-transform:capitalize;letter-spacing:-.02em}
         .pn-cal-nav{width:34px;height:34px;border:1px solid var(--line);background:var(--bg);border-radius:10px;cursor:pointer;font-size:18px;font-weight:700;color:var(--ink2);transition:all .15s;display:flex;align-items:center;justify-content:center}
         .pn-cal-nav:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-soft)}
         .pn-cal-today{margin-left:auto;padding:8px 14px;background:var(--blue-soft);color:var(--blue);border:1px solid color-mix(in srgb,var(--blue) 30%,transparent);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;font-family:inherit}
