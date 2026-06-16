@@ -3395,6 +3395,16 @@ const Nx = {
       if (vac.ok && vac.data.length) {
         try { localStorage.setItem('nexus_vacances', JSON.stringify(this._fromRowVacances(vac.data[0]))); } catch(_) {}
       }
+      // V5.3 : données app perso (segments CRM, corrections IA CRM, templates) — suivent le compte
+      try {
+        const tad = await NC.listAll('tenant_app_data');
+        if (tad.ok && tad.data.length) {
+          const d = tad.data[0];
+          if (Array.isArray(d.custom_segments)) this.state.customSegments = d.custom_segments;
+          if (Array.isArray(d.crm_corrections)) this.state.crmCorrections = d.crm_corrections;
+          if (Array.isArray(d.user_templates))  this.state.userTemplates  = d.user_templates;
+        }
+      } catch(_) {}
       // V5.2 : tire les VRAIES campagnes (logs du robot n8n) — stats + historique réels
       try {
         const camp = await NC.listAll('campaigns');
@@ -3466,6 +3476,12 @@ const Nx = {
         const vacRaw = localStorage.getItem('nexus_vacances');
         if (vacRaw) tasks.push(NC.upsertOne('vacances_config', this._toRowVacances(JSON.parse(vacRaw)), 'tenant_id'));
       } catch(_) {}
+      // V5.3 : données app perso (segments CRM, corrections IA CRM, templates) → suivent le compte
+      tasks.push(NC.upsertOne('tenant_app_data', {
+        custom_segments: this.state.customSegments || [],
+        crm_corrections: this.state.crmCorrections || [],
+        user_templates: this.state.userTemplates || []
+      }, 'tenant_id'));
       // Agenda items (bulk upsert)
       try {
         const agRaw = localStorage.getItem('nx_agenda');
