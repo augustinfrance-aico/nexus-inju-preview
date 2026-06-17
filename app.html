@@ -3442,6 +3442,9 @@ const Nx = {
         // tri chronologique des messages par conversation
         Object.values(msgsByConv).forEach(arr => arr.sort((a,b) => new Date(a.created_at||0) - new Date(b.created_at||0)));
         this.state.conversations = cv.data.map(c => this._fromRowConversation(c, msgsByConv[c.id]));
+      } else if (cv.ok && !cv.data.length) {
+        // V5.6 : compte vierge -> messagerie vide (pas de fausses conversations de demo)
+        this.state.conversations = [];
       }
       // Credits
       const cr = await NC.listAll('credits');
@@ -5082,33 +5085,37 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   setInboxDeno(d){ this.state.inboxDeno = d; this.renderView(); },
 
   // Suggestions IA fonctionnelles
-  suggestAiReply(clientId){
+  // V5.6 : generateur de message IA REEL (catalogue + profil reels) — partage par Suggestion/Brouillon/Reformuler.
+  async _genAiMessage(clientId, instruction){
     const conv = this.state.conversations.find(c=>c.clientId===clientId);
     const c = this.state.clients.find(x=>x.id===clientId);
-    const lastMsg = conv.messages[conv.messages.length-1].text.toLowerCase();
-    let suggestion = '';
-    if (lastMsg.includes('hora') || lastMsg.includes('horario')) {
-      suggestion = `Hola ${c.name.split(' ')[0]}! Estamos abiertos lunes a sábado de 7h a 20h. Domingo cerrado. ¿Te puedo guardar algo? 🥖`;
-    } else if (lastMsg.includes('precio') || lastMsg.includes('cuánto') || lastMsg.includes('cuanto')) {
-      suggestion = `Hola ${c.name.split(' ')[0]}! Te paso los precios actuales : pan amasado 3 500 CLP/kg, empanadas 2 200 CLP, tortas desde 28 000 CLP. ¿Algo te interesa?`;
-    } else if (lastMsg.includes('delivery') || lastMsg.includes('entrega')) {
-      suggestion = `Sí ${c.name.split(' ')[0]}, hacemos delivery gratis sobre 15 000 CLP en Providencia y Santiago centro. ¿Dónde te lo enviamos?`;
-    } else if (lastMsg.includes('gracias') || lastMsg.includes('merci')) {
-      suggestion = `¡A ti ${c.name.split(' ')[0]}! Cualquier cosa estoy aquí. Buen día 💛`;
-    } else {
-      suggestion = `Hola ${c.name.split(' ')[0]}! Gracias por tu mensaje 😊 ¿En qué te puedo ayudar hoy?`;
-    }
-    document.getElementById('chatInputField').value = suggestion;
-    this.toast('✨ Suggestion IA prête','success','Modifie ou envoie tel quel');
+    const lastMsg = (conv && conv.messages && conv.messages.length) ? conv.messages[conv.messages.length-1].text : '';
+    const biz = this.state.business || {};
+    const catalogStr = (biz.catalog||[]).map(p=>`${p.name} (${p.price} CLP/${p.unit||'un'})`).join(', ');
+    const prompt = `Tu es l'assistant WhatsApp de "${biz.name||'ce commerce'}". ${instruction}\nDernier message du client${c?' ('+c.name+')':''} : "${lastMsg}".\nBase-toi UNIQUEMENT sur ces infos commerce — Catalogue : ${catalogStr||'non renseigné'} ; Livraison : ${biz.delivery||'—'} ; Paiement : ${biz.payment||'—'}.\nStyle : ${biz.tone||'chaleureux, naturel'}. Reponds dans la LANGUE du client. Donne UNIQUEMENT le message a envoyer, sans guillemets ni preambule.`;
+    const r = await fetch('/api/claude', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ question: prompt, history: [] }) });
+    const data = await r.json();
+    return (data.answer||'').trim();
   },
-
-  createDraft(clientId){
-    const conv = this.state.conversations.find(c=>c.clientId===clientId);
-    const c = this.state.clients.find(x=>x.id===clientId);
-    conv.draft = `Hola ${c.name.split(' ')[0]} 👋 Brouillon généré par l'IA basé sur ton ton "${this.state.business.tone.split(',')[0]}". Modifie-moi avant d'envoyer.`;
-    this.save();
-    this.renderView();
-    this.toast('📝 Brouillon créé','success');
+  async suggestAiReply(clientId){
+    const input = document.getElementById('chatInputField');
+    this.toast('✨ Génération de la suggestion…','info');
+    try {
+      const txt = await this._genAiMessage(clientId, 'Redige UNE reponse courte et utile a ce client.');
+      if (!txt) return this.toast('IA momentanément indisponible','warn','Réessaie dans un instant');
+      if (input) input.value = txt;
+      this.toast('✨ Suggestion prête','success','Modifie ou envoie');
+    } catch(e){ this.toast('IA indisponible','warn', String(e).slice(0,60)); }
+  },
+  async createDraft(clientId){
+    this.toast('📝 Génération du brouillon…','info');
+    try {
+      const txt = await this._genAiMessage(clientId, 'Redige un brouillon de reponse a ce client.');
+      if (!txt) return this.toast('IA momentanément indisponible','warn','Réessaie dans un instant');
+      const conv = this.state.conversations.find(c=>c.clientId===clientId);
+      if (conv) { conv.draft = txt; this.save(); this.renderView(); }
+      this.toast('📝 Brouillon IA créé','success');
+    } catch(e){ this.toast('IA indisponible','warn', String(e).slice(0,60)); }
   },
 
   // Vraie traduction du dernier message — multi-langues (Augustin 19/05/2026)
@@ -5295,38 +5302,20 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
 
   sendMessage(clientId){
     const input = document.getElementById('chatInputField');
-    const txt = input.value.trim();
+    const txt = (input && input.value.trim()) || '';
     if (!txt) return;
-    const conv = this.state.conversations.find(c=>c.clientId===clientId);
-    conv.messages.push({from:'me',text:txt,time:'À l\'instant'});
-    conv.unread = false;
-    conv.draft = null;
-    this.save();
-    input.value = '';
-    this.renderView();
-    this.toast('Message envoyé','success');
-
-    // Simulate AI response 2s later
-    setTimeout(() => {
-      const autoReplies = ['Perfecto, gracias Carlos! 😊','Dale, lo anoto.','Mil gracias! Nos vemos mañana 🥖','Genial, ¿a qué hora?'];
-      conv.messages.push({from:'them',text:autoReplies[Math.floor(Math.random()*autoReplies.length)],time:'À l\'instant'});
-      conv.unread = true;
-      this.save();
-      if (this.state.view === 'inbox' && this.state.activeConv === clientId) this.renderView();
-      this.toast('💬 Nouvelle réponse','info');
-    }, 2000);
+    // V5.6 : plus de faux envoi ni de fausse reponse simulee. L'envoi WhatsApp manuel reel
+    // passera par le pont n8n signe (temps 2). Le robot (WF1) repond deja automatiquement aux clients.
+    this.toast('🔜 Envoi manuel bientôt disponible', 'info', 'Le robot répond déjà à tes clients · branchement WhatsApp en cours');
   },
 
   sendDraft(clientId){
+    // V5.6 : pas de faux envoi tant que le pont n'est pas branche. On bascule le brouillon
+    // dans la zone de saisie pour edition; l'envoi reel arrivera via le pont n8n (temps 2).
     const conv = this.state.conversations.find(c=>c.clientId===clientId);
-    if (conv.draft) {
-      conv.messages.push({from:'me',text:conv.draft,time:'À l\'instant'});
-      conv.draft = null;
-      conv.unread = false;
-      this.save();
-      this.renderView();
-      this.toast('✓ Brouillon envoyé','success');
-    }
+    const input = document.getElementById('chatInputField');
+    if (conv && conv.draft && input) input.value = conv.draft;
+    this.toast('🔜 Envoi manuel bientôt disponible', 'info', 'Brouillon copié dans la zone de saisie · branchement WhatsApp en cours');
   },
 
   editDraft(clientId){
@@ -5337,17 +5326,15 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     this.renderView();
   },
 
-  regenDraft(clientId){
-    const conv = this.state.conversations.find(c=>c.clientId===clientId);
-    const alts = [
-      'Hola! Con gusto te guardo lo que necesitas para mañana 🥖',
-      'Claro que sí! Pásame la hora y lo dejo listo 😊',
-      'Perfecto, te lo confirmo. Nos vemos mañana!'
-    ];
-    conv.draft = alts[Math.floor(Math.random()*alts.length)];
-    this.save();
-    this.renderView();
-    this.toast('🔄 Brouillon reformulé','info');
+  async regenDraft(clientId){
+    this.toast('🔄 Reformulation…','info');
+    try {
+      const txt = await this._genAiMessage(clientId, 'Reformule differemment une reponse a ce client (autre tournure, meme intention).');
+      if (!txt) return this.toast('IA momentanément indisponible','warn','Réessaie');
+      const conv = this.state.conversations.find(c=>c.clientId===clientId);
+      if (conv) { conv.draft = txt; this.save(); this.renderView(); }
+      this.toast('🔄 Brouillon reformulé','info');
+    } catch(e){ this.toast('IA indisponible','warn', String(e).slice(0,60)); }
   },
 
   // Vraie traduction des 5 derniers messages — multi-langues (FR/ES/EN/PT/IT/DE/+)
