@@ -3483,6 +3483,9 @@ const Nx = {
           if (Array.isArray(d.custom_segments)) this.state.customSegments = d.custom_segments;
           if (Array.isArray(d.crm_corrections)) this.state.crmCorrections = d.crm_corrections;
           if (Array.isArray(d.user_templates))  this.state.userTemplates  = d.user_templates;
+          // V5.7 : progression tutoriel suit le compte (cloud -> localStorage)
+          try { if (d.tutorial_progress && typeof d.tutorial_progress==='object') localStorage.setItem('nexus_tutorial_progress', JSON.stringify(d.tutorial_progress)); } catch(_){}
+          try { if (d.tutorial_checks && typeof d.tutorial_checks==='object') localStorage.setItem('nexus_tutorial_checks', JSON.stringify(d.tutorial_checks)); } catch(_){}
         }
       } catch(_) {}
       // V5.2 : tire les VRAIES campagnes (logs du robot n8n) — stats + historique réels
@@ -3557,10 +3560,15 @@ const Nx = {
         if (vacRaw) tasks.push(NC.upsertOne('vacances_config', this._toRowVacances(JSON.parse(vacRaw)), 'tenant_id'));
       } catch(_) {}
       // V5.3 : données app perso (segments CRM, corrections IA CRM, templates) → suivent le compte
+      let _tutoProg = {}, _tutoChecks = {};
+      try { _tutoProg = JSON.parse(localStorage.getItem('nexus_tutorial_progress')||'{}'); } catch(_){}
+      try { _tutoChecks = JSON.parse(localStorage.getItem('nexus_tutorial_checks')||'{}'); } catch(_){}
       tasks.push(NC.upsertOne('tenant_app_data', {
         custom_segments: this.state.customSegments || [],
         crm_corrections: this.state.crmCorrections || [],
-        user_templates: this.state.userTemplates || []
+        user_templates: this.state.userTemplates || [],
+        tutorial_progress: _tutoProg,
+        tutorial_checks: _tutoChecks
       }, 'tenant_id'));
       // Agenda items (bulk upsert)
       try {
@@ -9011,6 +9019,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     try { prog = JSON.parse(localStorage.getItem('nexus_tutorial_progress') || '{}'); } catch(e){ prog = {}; }
     prog[id] = !prog[id];
     localStorage.setItem('nexus_tutorial_progress', JSON.stringify(prog));
+    this.save(); // V5.7 : pousse la progression vers le cloud (suit le compte)
     this.toast(prog[id] ? 'Étape marquée comme faite ✓' : 'Étape ré-ouverte', 'success');
     this.renderView();
   },
@@ -9022,6 +9031,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     const key = stepId + '::' + idx;
     checks[key] = !checks[key];
     localStorage.setItem('nexus_tutorial_checks', JSON.stringify(checks));
+    this.save(); // V5.7 : pousse la progression vers le cloud (suit le compte)
     this.renderView();
   },
 
