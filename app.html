@@ -2453,7 +2453,7 @@ const Nx = {
           <div class="grid3" style="margin-bottom:20px">
             <div class="card" style="padding:14px"><div class="stat-lbl">Commandes</div><div class="stat-val mono">${c.orders}</div></div>
             <div class="card" style="padding:14px"><div class="stat-lbl">Total dépensé</div><div class="stat-val mono">${(c.spent/1000).toFixed(0)}k <small style="font-size:12px;color:var(--muted)">CLP</small></div></div>
-            <div class="card" style="padding:14px"><div class="stat-lbl">Panier moyen</div><div class="stat-val mono">${Math.round(c.spent/c.orders/100)/10}k</div></div>
+            <div class="card" style="padding:14px"><div class="stat-lbl">Panier moyen</div><div class="stat-val mono">${c.orders ? Math.round(c.spent/c.orders/100)/10 : 0}k</div></div>
           </div>
           <div class="form-row"><label class="form-lbl">Notes privées (non lues par l'IA)</label>
             <textarea class="form-ctrl" id="clientNotes">${c.notes||''}</textarea>
@@ -2758,6 +2758,12 @@ const Nx = {
                      </div>`)
             }
           </div>
+          ${(c.birthday||c.preferences||c.address) ? `
+          <div style="padding:10px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:8px;margin-bottom:10px;font-size:12.5px;line-height:1.7">
+            ${c.birthday?`<div>🎂 <b>Anniversaire :</b> ${(()=>{try{const d=new Date(c.birthday);return isNaN(d.getTime())?c.birthday:d.toLocaleDateString('fr-FR',{day:'numeric',month:'long'});}catch(e){return c.birthday;}})()}</div>`:''}
+            ${c.preferences?`<div>🎯 <b>Préférences :</b> ${c.preferences}</div>`:''}
+            ${c.address?`<div>📍 <b>Adresse :</b> ${c.address}</div>`:''}
+          </div>` : ''}
           <div style="padding:8px 12px;background:var(--green-soft);border-radius:6px;font-size:11px;color:var(--green);margin-bottom:8px">
             ✓ Cette fiche regroupe les coordonnées de ce client (WhatsApp, Email, Instagram) au même endroit.
           </div>
@@ -2767,7 +2773,7 @@ const Nx = {
           <div class="grid3" style="margin-bottom:14px">
             <div class="card" style="padding:14px"><div class="stat-lbl">Commandes</div><div class="stat-val mono">${c.orders}</div></div>
             <div class="card" style="padding:14px"><div class="stat-lbl">Total dépensé</div><div class="stat-val mono">${(c.spent/1000).toFixed(0)}k <small style="font-size:12px;color:var(--muted)">CLP</small></div></div>
-            <div class="card" style="padding:14px"><div class="stat-lbl">Panier moyen</div><div class="stat-val mono">${Math.round(c.spent/c.orders/100)/10}k</div></div>
+            <div class="card" style="padding:14px"><div class="stat-lbl">Panier moyen</div><div class="stat-val mono">${c.orders ? Math.round(c.spent/c.orders/100)/10 : 0}k</div></div>
           </div>
 
           <!-- NOTES IA + NOTES PRIVÉES -->
@@ -3283,7 +3289,8 @@ const Nx = {
       avatar: c.avatar||'', color: c.color||'#94A3B8', score: c.score||0,
       orders: c.orders||0, spent: c.spent||0, last_seen: c.lastSeen||'',
       channel: c.channel||'whatsapp', tag: c.tag||'', tags: c.tags||[],
-      notes: c.notes||'', ai_notes: c.aiNotes||'', status: c.status||'active' };
+      notes: c.notes||'', ai_notes: c.aiNotes||'', status: c.status||'active',
+      birthday: c.birthday||'', preferences: c.preferences||'', address: c.address||'' };
   },
   // V5.5 : score client CALCULÉ (réel) — commandes + CA + statut + VIP. Fini le score figé.
   clientScore(c){
@@ -3306,6 +3313,7 @@ const Nx = {
       avatar: r.avatar, color: r.color, score: this.clientScore({orders:r.orders, spent:r.spent, status:r.status, tags:r.tags||[]}), orders: r.orders,
       spent: r.spent, lastSeen: r.last_seen, channel: r.channel, tag: r.tag,
       tags: r.tags||[], notes: r.notes, aiNotes: r.ai_notes, status: r.status,
+      birthday: r.birthday, preferences: r.preferences, address: r.address,
       createdAt: r.created_at, cloudId: r.id };
   },
   // Conversations + Messages (relations FK)
