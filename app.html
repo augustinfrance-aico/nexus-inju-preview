@@ -4365,7 +4365,7 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
       <div class="view">
         <div class="page-hd">
           <div><h1>👤 Profil de ton entreprise</h1><div class="sub">Plus tu donnes d'infos à Nexus, meilleures sont les réponses de l'IA.</div></div>
-          <span class="chip green">✓ 80% complété</span>
+          ${(()=>{ const f=[b.name,b.description,b.tone,b.city,b.country,b.industry,b.tagline,b.delivery,b.payment,b.webPage,b.composition,b.dataArchives,(b.catalog||[]).length,(b.faq||[]).length]; const fill=f.filter(x=>x&&(typeof x==='number'?x>0:String(x).trim())).length; const pct=Math.round(fill/f.length*100); return `<span class="chip ${pct>=70?'green':'amber'}">✓ ${pct}% complété</span>`; })()}
         </div>
 
         <!-- BLOC DESCRIPTION ENRICHIE -->
@@ -4451,7 +4451,7 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
               <div style="display:flex;gap:10px;align-items:center">
                 <div style="font-size:40px">${b.logo}</div>
                 <input class="form-ctrl" style="max-width:100px;font-size:22px;text-align:center" value="${b.logo}" oninput="Nx.updateBiz('logo',this.value)">
-                <button class="btn btn-s" onclick="Nx.toast('Upload simulé','success','PNG 512×512 conseillé')">📎 Importer PNG</button>
+                <button class="btn btn-s" onclick="Nx.toast('🔜 Import du logo bientôt','info','En attendant, mets un emoji en logo (ex 🥖 🏪 ☕) — ça marche déjà.')">📎 Importer PNG</button>
               </div></div>
             <div class="form-row"><label class="form-lbl">Nom commercial</label>
               <input class="form-ctrl" value="${b.name}" oninput="Nx.updateBiz('name',this.value)"></div>
@@ -4919,18 +4919,14 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   scrapeWebPage(){
     const url = this.state.business.webPage;
     if (!url) { this.toast('Renseigne d\'abord ton URL','warn'); return; }
-    this.toast('🔍 Scan en cours…','info', url);
-    setTimeout(() => {
-      this.toast('✓ Site scanné','success','L\'IA connaît maintenant ton ADN — section À propos, services, mentions client.');
-    }, 1500);
+    // V5.7 : le scan automatique du site (lecture par l'IA) arrive avant le lancement. Plus de faux "site scanné".
+    this.toast('🔜 Scan automatique bientôt disponible','info','Ton URL est déjà enregistrée — l\'IA pourra la lire à la prochaine mise à jour.');
   },
   scrapeCatalog(){
     const url = this.state.business.catalogUrl;
     if (!url) { this.toast('Renseigne d\'abord un lien catalogue','warn'); return; }
-    this.toast('✨ Pré-remplissage du catalogue…','info', url);
-    setTimeout(() => {
-      this.toast('✓ 3 produits détectés','success','Vérifie et complète les infos manuellement.');
-    }, 1500);
+    // V5.7 : pre-remplissage auto du catalogue depuis l'URL = avant le lancement. Plus de faux "3 produits detectes".
+    this.toast('🔜 Pré-remplissage auto bientôt','info','En attendant, ajoute tes produits avec « + Ajouter un produit ».');
   },
   testApiKey(provider){
     const k = this.state.apiKeys[provider];
