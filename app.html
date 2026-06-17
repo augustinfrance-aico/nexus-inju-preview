@@ -3382,8 +3382,10 @@ const Nx = {
       const cli = await NC.listAll('clients');
       if (cli.ok && cli.data.length) {
         this.state.clients = cli.data.map(r => this._fromRowClient(r));
-      } else if (cli.ok && !cli.data.length && this.state.clients?.length) {
-        await NC.bulkUpsert('clients', this.state.clients.map(c => this._toRowClient(c)), 'id');
+      } else if (cli.ok && !cli.data.length) {
+        // Compte vierge (beta) : CRM VIDE, jamais de seed des clients de demo dans un vrai compte.
+        // Regle Augustin : compte neuf = zero faux. Les MOCK_CLIENTS ne servent qu'a la vitrine non-connectee.
+        this.state.clients = [];
       }
       // V4.2 : Conversations + Messages (descente cloud -> app, pour la Messagerie)
       const cv = await NC.listAll('conversations');
@@ -5418,6 +5420,24 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     else if (sortMode === 'orders') clients.sort((a,b)=>b.orders-a.orders);
 
     const visible = this.state.crmShowAll ? clients : clients.slice(0, 8);
+
+    // Compte vierge (beta) : etat vide honnete — pas de podium casse "-3 clients", pas de faux.
+    if (!this.state.clients.length) {
+      return `
+      <div class="view">
+        <div class="page-hd">
+          <div><h1>👥 Clients & CRM</h1><div class="sub">Aucun client pour le moment</div></div>
+          <div class="flex"><button class="btn btn-p" onclick="Nx.openAddClientModal()">+ Ajouter un client</button></div>
+        </div>
+        <div class="card" style="padding:48px 24px;text-align:center">
+          <div style="font-size:48px;margin-bottom:12px">👥</div>
+          <h3 style="margin-bottom:8px">Ta base clients est vide</h3>
+          <div style="color:var(--muted);max-width:440px;margin:0 auto 20px;line-height:1.6">Tes clients apparaîtront ici automatiquement dès qu'ils écriront sur WhatsApp — ou ajoute-les à la main.</div>
+          <button class="btn btn-p" onclick="Nx.openAddClientModal()">+ Ajouter mon premier client</button>
+          <button class="btn btn-s" style="margin-left:8px" onclick="Nx.refreshFromCloud()">🔄 Actualiser</button>
+        </div>
+      </div>`;
+    }
 
     return `
       <div class="view">
