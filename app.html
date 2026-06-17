@@ -2976,8 +2976,44 @@ const Nx = {
         </div>
       </div>
       <div class="modal-foot">
-        <button class="btn btn-p" onclick="Nx.closeModal()">OK</button>
+        ${dups.length ? `<button class="btn btn-s" onclick="Nx.closeModal()">Annuler</button><button class="btn btn-p" onclick="Nx.mergeClientDuplicates(${c.id})">🔗 Fusionner ${dups.length} fiche(s)</button>` : `<button class="btn btn-p" onclick="Nx.closeModal()">OK</button>`}
       </div>`;
+  },
+  // V5.6 : fusion REELLE des doublons dans la fiche principale (coordonnees recuperees + orders/spent cumules),
+  // puis suppression des doublons + remappage des segments. Confirmation explicite, n'agit que sur doublons detectes.
+  mergeClientDuplicates(clientId){
+    const c = this.state.clients.find(x => x.id === clientId);
+    if (!c) return;
+    const norm = s => String(s||'').replace(/[^0-9a-zA-Z@.]/g,'').toLowerCase();
+    const dups = this.state.clients.filter(x => x.id!==c.id && (
+      (c.phone && norm(x.phone)===norm(c.phone)) ||
+      (c.email && norm(x.email)===norm(c.email)) ||
+      (c.instagram && norm(x.instagram)===norm(c.instagram))
+    ));
+    if (!dups.length) { this.closeModal(); return; }
+    if (!confirm(`Fusionner ${dups.length} fiche(s) en double dans « ${c.name} » ?\n\nLes coordonnées manquantes seront récupérées et les commandes/CA additionnés. Les fiches en double seront supprimées (action définitive).`)) return;
+    const dupIds = dups.map(d => d.id);
+    dups.forEach(d => {
+      if (!c.email && d.email) c.email = d.email;
+      if (!c.instagram && d.instagram) c.instagram = d.instagram;
+      if (!c.phone && d.phone) c.phone = d.phone;
+      if (d.notes && !String(c.notes||'').includes(d.notes)) c.notes = [c.notes, d.notes].filter(Boolean).join(' · ');
+      if (d.aiNotes && !String(c.aiNotes||'').includes(d.aiNotes)) c.aiNotes = [c.aiNotes, d.aiNotes].filter(Boolean).join(' · ');
+      c.orders = (c.orders||0) + (d.orders||0);
+      c.spent = (c.spent||0) + (d.spent||0);
+    });
+    c.score = this.clientScore(c);
+    c.unified = true;
+    this.state.clients = this.state.clients.filter(x => !dupIds.includes(x.id));
+    // remappe les segments : remplace les ids doublons par l'id principal (sans doublon)
+    this.state.customSegments = (this.state.customSegments||[]).map(seg => {
+      const ids = (seg.clientIds||[]).map(id => dupIds.includes(id) ? c.id : id);
+      return Object.assign({}, seg, { clientIds: [...new Set(ids)] });
+    });
+    this.save();
+    this.closeModal();
+    this.renderView();
+    this.toast(`✓ ${dups.length+1} fiches fusionnées`, 'success', c.name);
   },
   confirmUnifyChannels(clientId, email){
     const c = this.state.clients.find(x => x.id === clientId);
@@ -3012,7 +3048,7 @@ const Nx = {
     const editInstagram = document.getElementById('editInstagram');
     const aiNotes = document.getElementById('aiNotes');
     const clientNotes = document.getElementById('clientNotes');
-    if (editName) c.name = editName.value;
+    if (editName && editName.value.trim()) c.name = editName.value.trim(); // V5.6 : ne jamais vider le nom
     if (editPhone) c.phone = editPhone.value;
     if (editEmail) c.email = editEmail.value;
     if (editInstagram) {
@@ -3531,7 +3567,10 @@ const Nx = {
         if (localCamps.length) tasks.push(NC.bulkUpsert('campaigns', localCamps.map(c => this._toRowCampaign(c)), 'id'));
       }
 
-      await Promise.allSettled(tasks);
+      const _syncResults = await Promise.allSettled(tasks);
+      // V5.6 : ne plus echouer en silence — prevenir si une sauvegarde cloud a rate
+      const _syncFailed = _syncResults.filter(r => r.status === 'rejected' || (r.value && r.value.ok === false));
+      if (_syncFailed.length) this.toast('⚠️ Sauvegarde cloud partielle', 'warn', _syncFailed.length + ' élément(s) non enregistré(s) — vérifie ta connexion');
 
       // Tables append-only sans clé d'idempotence : DELETE-then-INSERT pour éviter duplications
       // (escalation_log + cart_recovery_runs)
@@ -5363,6 +5402,8 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     if (!c) return;
     if (!confirm(`Éliminer ${c.name} du CRM ?\n\nNexus se trompe parfois. Tu peux retirer ce client si ce n'en est pas un (ex : ta mère, un fournisseur, une erreur).\n\nL'historique sera conservé 30 jours en cas de regret.`)) return;
     this.state.clients = this.state.clients.filter(x => x.id !== id);
+    // V5.6 : retire l'id des segments perso (plus d'orphelin / compteur faux apres suppression)
+    this.state.customSegments = (this.state.customSegments||[]).map(seg => Object.assign({}, seg, { clientIds: (seg.clientIds||[]).filter(cid=>cid!==id) }));
     this.save();
     this.renderView();
     this.toast(`✓ ${c.name} retiré du CRM`, 'success', 'Tu peux le restaurer dans Paramètres > Corbeille pendant 30 jours');
@@ -5703,6 +5744,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       preferences: c1, address: c2,
       createdAt: new Date().toISOString()
     };
+    newClient.score = this.clientScore(newClient); // V5.6 : score reel des la creation (coherent avec le recalcul au sync)
     if (!this.state.clients) this.state.clients = [];
     this.state.clients.unshift(newClient);
     // Switch automatique vers le filtre correspondant pour que l'user voit son nouveau client
