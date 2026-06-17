@@ -9818,11 +9818,12 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   // Update 28/05 : Google Calendar retiré (déjà retiré de la vue Pilotage côté Augustin)
   viewOnboardingIntegrations(){
     if (!this.state.integrations) {
+      // V5.7 : statuts HONNETES — rien n'est connecte tant que les vraies cles API (OAuth) ne sont pas branchees.
       this.state.integrations = [
-        {k:'whatsapp', n:'WhatsApp Business API', ic:'📱', s:'connected', critical:true,  desc:'Canal principal pour répondre aux clients.'},
-        {k:'gmail',    n:'Gmail',                ic:'✉️',  s:'connected', critical:true,  desc:'Inbox unifiée avec les messages WhatsApp.'},
-        {k:'instagram',n:'Instagram DM',         ic:'📸', s:'pending',   critical:true,  desc:'Recevoir les DM Instagram dans la même inbox.'},
-        {k:'stripe',   n:'Stripe',               ic:'💳', s:'connected', critical:true,  desc:'Encaisser ton abonnement Nexus + paiements clients.'},
+        {k:'whatsapp', n:'WhatsApp Business API', ic:'📱', s:'available', critical:true,  desc:'Canal principal pour répondre aux clients.'},
+        {k:'gmail',    n:'Gmail',                ic:'✉️',  s:'available', critical:true,  desc:'Inbox unifiée avec les messages WhatsApp.'},
+        {k:'instagram',n:'Instagram DM',         ic:'📸', s:'available', critical:true,  desc:'Recevoir les DM Instagram dans la même inbox.'},
+        {k:'stripe',   n:'Stripe',               ic:'💳', s:'available', critical:true,  desc:'Encaisser ton abonnement Nexus + paiements clients.'},
         {k:'mercado',  n:'Mercado Pago',         ic:'🇨🇱', s:'available', critical:false, desc:'Encaisser en pesos chiliens (très utilisé LATAM).'},
         {k:'analytics',n:'Google Analytics',     ic:'📊', s:'available', critical:false, desc:'Lier les ventes à tes campagnes Nexus.'},
         {k:'zapier',   n:'Zapier',               ic:'⚡', s:'available', critical:false, desc:'Brancher Nexus à 5 000+ apps externes.'}
@@ -9883,10 +9884,13 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     if (!this.state.integrations) return;
     const it = this.state.integrations.find(x => x.k === k);
     if (!it) return;
-    it.s = (it.s === 'connected') ? 'available' : 'connected';
-    this.save();
-    this.renderView();
-    this.toast(it.s === 'connected' ? '✓ ' + it.n + ' connecté' : it.n + ' déconnecté', it.s === 'connected' ? 'success' : 'info');
+    // V5.7 : pas de fausse connexion. La vraie connexion (OAuth + cles API client) se branche avant le lancement beta.
+    if (it.s === 'connected') {
+      it.s = 'available'; this.save(); this.renderView();
+      this.toast(it.n + ' déconnecté', 'info');
+    } else {
+      this.toast('🔜 Connexion sécurisée bientôt', 'info', it.n + ' — les accès se branchent avant le lancement de la beta');
+    }
   },
 
   viewSettings(){
@@ -9996,6 +10000,8 @@ window.addEventListener('DOMContentLoaded', () => Nx.init());
     if (e.detail && e.detail.event === 'SIGNED_IN' && window.Nx) {
       Nx.loadProfileFromCloud && Nx.loadProfileFromCloud();
       Nx.syncFromCloud      && Nx.syncFromCloud();
+      // V5.7 : onboarding mis en avant a la 1ere connexion (une seule fois, non bloquant)
+      try { if (!localStorage.getItem('nexus_onboarding_seen')) { localStorage.setItem('nexus_onboarding_seen','1'); setTimeout(()=>{ try{ Nx.navigate('tutorial'); }catch(_){} }, 900); } } catch(_){}
     }
     if (e.detail && e.detail.event === 'SIGNED_OUT' && window.Nx) {
       try { Nx.renderView(); } catch(_) {}
