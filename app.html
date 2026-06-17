@@ -7171,7 +7171,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     this.renderView();
   },
   openAgendaDetail(id){
-    const it = this.getAgendaItems().find(x => x.id === id);
+    const it = this.getAgendaItems().find(x => String(x.id) === String(id));
     if (!it) return;
     const cats = this.pilotageCategories();
     const meta = cats[it.category] || { color:'#7A3CFF', ic:'🎯', lbl:it.category||'Item' };
@@ -7244,7 +7244,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
 
   cancelAgendaItem(id){
     const items = this.getAgendaItems();
-    const idx = items.findIndex(i => i.id === id);
+    const idx = items.findIndex(i => String(i.id) === String(id));
     if (idx < 0) return;
     items[idx].status = 'cancelled';
     items[idx].cancelledAt = new Date().toISOString();
@@ -7254,7 +7254,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   },
   reactivateAgendaItem(id){
     const items = this.getAgendaItems();
-    const idx = items.findIndex(i => i.id === id);
+    const idx = items.findIndex(i => String(i.id) === String(id));
     if (idx < 0) return;
     items[idx].status = 'scheduled';
     delete items[idx].cancelledAt;
@@ -7264,7 +7264,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   },
   modifyAgendaItem(id){
     const items = this.getAgendaItems();
-    const it = items.find(i => i.id === id);
+    const it = items.find(i => String(i.id) === String(id));
     if (!it) return;
     const newWhen = prompt('Nouvelle date/heure (ex: Vendredi 19h) :', it.when || '');
     if (newWhen === null) return;
@@ -7276,7 +7276,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   },
   duplicateAgendaItem(id){
     const items = this.getAgendaItems();
-    const src = items.find(i => i.id === id);
+    const src = items.find(i => String(i.id) === String(id));
     if (!src) return;
     const copy = Object.assign({}, src, {
       id: 'agd_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
