@@ -3567,7 +3567,13 @@ const Nx = {
         const agRaw = localStorage.getItem('nx_agenda');
         if (agRaw) {
           const items = JSON.parse(agRaw);
-          if (Array.isArray(items) && items.length) tasks.push(NC.bulkUpsert('agenda_items', items.map(it => this._toRowAgenda(it)), 'id'));
+          if (Array.isArray(items) && items.length) {
+            // V5.7 : dedup par id final — sinon Postgres "ON CONFLICT cannot affect row a second time"
+            // quand 2 items d'agenda mappent vers le meme UUID (ex fiestas re-generees).
+            const seen = {}; const uniq = [];
+            for (const it of items) { const row = this._toRowAgenda(it); if (row && row.id && !seen[row.id]) { seen[row.id] = 1; uniq.push(row); } }
+            if (uniq.length) tasks.push(NC.bulkUpsert('agenda_items', uniq, 'id'));
+          }
         }
       } catch(_) {}
       // Campagnes envoyées (bulk upsert)
