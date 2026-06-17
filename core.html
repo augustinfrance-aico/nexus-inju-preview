@@ -1289,7 +1289,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       <span class="drawer-item-lbl">Messages</span>
       <span class="drawer-item-meta">12</span>
     </a>
-    <a class="drawer-item" href="app.html#/marketing">
+    <a class="drawer-item" href="app.html#/campaigns">
       <span class="drawer-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8v18l-18-8v-2z"/></svg></span>
       <span class="drawer-item-lbl">Campagnes</span>
     </a>
@@ -1298,11 +1298,11 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       <span class="drawer-item-lbl">Clients CRM</span>
       <span class="drawer-item-meta">147</span>
     </a>
-    <a class="drawer-item" href="app.html#/tips">
+    <a class="drawer-item" href="app.html#/pilotage">
       <span class="drawer-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h4M9 11V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6M9 11h6m0 0h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4m0-9v9m-6 0h6"/></svg></span>
       <span class="drawer-item-lbl">Tips IA</span>
     </a>
-    <a class="drawer-item" href="app.html#/profil">
+    <a class="drawer-item" href="app.html#/profile">
       <span class="drawer-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
       <span class="drawer-item-lbl">Profil entreprise</span>
     </a>
@@ -2638,19 +2638,40 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       panel = document.createElement('div');
       panel.id = 'notifPanel';
       panel.style.cssText = 'position:fixed;top:64px;right:20px;width:340px;max-width:calc(100vw - 32px);background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 24px 60px -16px rgba(0,0,0,.25);z-index:9999;overflow:hidden;font-family:inherit;animation:fadeIn .18s';
-      const items = curLang === 'es' ? [
-        {ic:'💬', t:'5 mensajes en espera', s:'María, Diego, Ana, Pablo, Sofía · responde antes de las 14h'},
-        {ic:'🎂', t:'Cumpleaños mañana', s:'Raviella Mendoza · envía un código −15%'},
-        {ic:'⚡', t:'253 créditos restantes', s:'Reset domingo 25 mayo'}
-      ] : curLang === 'en' ? [
-        {ic:'💬', t:'5 messages waiting', s:'María, Diego, Ana, Pablo, Sofía · reply before 2 pm'},
-        {ic:'🎂', t:'Birthday tomorrow', s:'Raviella Mendoza · send a −15% code'},
-        {ic:'⚡', t:'253 credits left', s:'Reset Sunday May 25'}
-      ] : [
-        {ic:'💬', t:'5 messages en attente', s:'María, Diego, Ana, Pablo, Sofía · réponds avant 14h'},
-        {ic:'🎂', t:'Anniversaire demain', s:'Raviella Mendoza · envoie un code −15%'},
-        {ic:'⚡', t:'253 crédits restants', s:'Reset dimanche 25 mai'}
-      ];
+      // V5.8 : notifs RÉELLES depuis le state app.html (nexus_mvp_state_v1) — fini la démo en dur (María/Raviella/253).
+      const _L = (fr,es,en)=> curLang==='es'?es : curLang==='en'?en : fr;
+      let _st = {};
+      try { _st = JSON.parse(localStorage.getItem('nexus_mvp_state_v1')||localStorage.getItem('nexus_app_state_v1')||'{}') || {}; } catch(e){ _st = {}; }
+      const _convs = Array.isArray(_st.conversations) ? _st.conversations : [];
+      const _clients = Array.isArray(_st.clients) ? _st.clients : [];
+      const _unread = _convs.filter(c => c && c.unread);
+      const items = [];
+      // 1) Vrais messages non lus + vrais prénoms
+      if (_unread.length) {
+        const _names = _unread.map(c => { const cl = _clients.find(x => String(x.id) === String(c.clientId)); return cl ? String(cl.name||'').split(' ')[0] : null; }).filter(Boolean).slice(0,5).join(', ');
+        items.push({ic:'💬', t:_L(_unread.length+' message(s) en attente', _unread.length+' mensaje(s) en espera', _unread.length+' message(s) waiting'), s:_names||_L('À traiter','Por atender','To handle')});
+      }
+      // 2) Vrai anniversaire client dans les 2 prochains jours (formats JJ/MM, JJ-MM, JJ.MM)
+      try {
+        const _now = new Date();
+        for (const cl of _clients) {
+          if (!cl || !cl.birthday) continue;
+          const m = String(cl.birthday).match(/(\d{1,2})[\/.\-](\d{1,2})/);
+          if (!m) continue;
+          const _d = parseInt(m[1],10), _mo = parseInt(m[2],10);
+          let _hit = -1;
+          for (let k=0;k<=2;k++){ const dd=new Date(_now.getFullYear(),_now.getMonth(),_now.getDate()+k); if (dd.getDate()===_d && (dd.getMonth()+1)===_mo){ _hit=k; break; } }
+          if (_hit>=0){ items.push({ic:'🎂', t:_L('Anniversaire client','Cumpleaños cliente','Client birthday'), s:String(cl.name||'')+' · '+(_hit===0?_L("aujourd'hui",'hoy','today'):_hit===1?_L('demain','mañana','tomorrow'):_L('dans 2 jours','en 2 días','in 2 days'))}); break; }
+        }
+      } catch(e){}
+      // 3) Vrais crédits restants (source app.html)
+      if (_st.credits && typeof _st.credits.remaining === 'number') {
+        items.push({ic:'⚡', t:_L(_st.credits.remaining+' crédits restants', _st.credits.remaining+' créditos restantes', _st.credits.remaining+' credits left'), s:_st.credits.resetLabel?('Reset '+_st.credits.resetLabel):''});
+      }
+      // 4) État vide honnête (compte vierge / rien à signaler)
+      if (!items.length) {
+        items.push({ic:'✅', t:_L('Rien de neuf','Nada nuevo','Nothing new'), s:_L('Tu es à jour 🎉','Estás al día 🎉','All caught up 🎉')});
+      }
       panel.innerHTML = `
         <div style="padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center">
           <b style="font-size:13.5px">Notifications</b>
@@ -2661,7 +2682,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
             <div style="width:34px;height:34px;border-radius:10px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${i.ic}</div>
             <div style="flex:1;min-width:0"><b style="font-size:12.5px;display:block">${i.t}</b><span style="font-size:11.5px;color:var(--muted)">${i.s}</span></div>
           </div>`).join('')}
-        <button style="width:100%;padding:11px;background:var(--bg2);border:0;border-top:1px solid var(--line);font-size:12px;font-weight:600;color:var(--blue,#1A56DB);cursor:pointer;font-family:inherit" onclick="location.href='app.html#/inbox'">Tout voir →</button>`;
+        <button style="width:100%;padding:11px;background:var(--bg2);border:0;border-top:1px solid var(--line);font-size:12px;font-weight:600;color:var(--blue,#1A56DB);cursor:pointer;font-family:inherit" onclick="location.href='app.html#/inbox'">Voir les messages →</button>`;
       document.body.appendChild(panel);
       const closeOnOut = (e) => {
         if (!panel.contains(e.target) && e.target !== notifBtn && !notifBtn.contains(e.target)) {
@@ -3126,7 +3147,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
   function computeWeeklyGain(){
     let conv = 0, recovered = 0, escalated = 0, panier = 14500; // CLP par défaut (panier moyen demo bakery)
     try {
-      const raw = localStorage.getItem('nexus_app_state_v1') || localStorage.getItem('nexus_state');
+      const raw = localStorage.getItem('nexus_mvp_state_v1') || localStorage.getItem('nexus_app_state_v1') || localStorage.getItem('nexus_state');
       if (raw) {
         const st = JSON.parse(raw);
         if (Array.isArray(st.conversations)) {
@@ -3140,16 +3161,15 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
         }
       }
     } catch(e){}
-    // Fallback démo cohérent (panaderia Carlos)
-    if (!conv) conv = 612;          // mock 7j brief existant
-    if (!recovered) recovered = 7;  // mock vacanceStats existant
+    // V5.8 : plus de mock 612/7. Si aucune vraie conversation -> compte vierge, gain non calculable (honnête).
+    const hasReal = conv > 0;
     if (!escalated) escalated = 0;
     const sales      = Math.round(conv * panier * 0.15);
     const winback    = recovered * panier * 2;   // un client récupéré = 2 paniers en moy.
     const timeSaved  = Math.round(conv * 0.05 * 5000); // 3 min/conv * 5000 CLP/h
     const escalBonus = escalated * panier * 3;   // un VIP escaladé = 3 paniers évités
     const total      = sales + winback + timeSaved + escalBonus;
-    return { total, sales, winback, timeSaved, escalBonus, panier };
+    return { total, sales, winback, timeSaved, escalBonus, panier, hasReal };
   }
   function formatCLP(n){
     try { return '$' + Number(n).toLocaleString('es-CL') + ' CLP'; }
@@ -3160,6 +3180,9 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
   const gainSub    = document.getElementById('gainSub');
   if (gainBanner && gainAmount) {
     const g = computeWeeklyGain();
+    // Compte vierge / pas encore d'activité : on masque le bandeau plutôt que d'afficher un faux gain
+    if (!g.hasReal || g.total <= 0) { gainBanner.style.display = 'none'; }
+    else { gainBanner.style.display = ''; }
     gainAmount.textContent = formatCLP(g.total);
     if (gainSub) {
       const breakdown = curLang === 'es'
@@ -3175,6 +3198,36 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goStats(); }
     });
   }
+
+  // =========== V5.8 : Aperçu messages RÉEL (state app.html) — fini María/Diego en dur, état vide honnête
+  try {
+    const _msgList = document.querySelector('.preview-section .msg-list');
+    if (_msgList) {
+      let _ms = {};
+      try { _ms = JSON.parse(localStorage.getItem('nexus_mvp_state_v1')||localStorage.getItem('nexus_app_state_v1')||'{}')||{}; } catch(e){ _ms = {}; }
+      const _mc = Array.isArray(_ms.conversations) ? _ms.conversations : [];
+      const _mcl = Array.isArray(_ms.clients) ? _ms.clients : [];
+      const _esc = (s)=> String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+      const _ini = (n)=> (String(n||'?').trim().split(/\s+/).map(w=>w[0]||'').join('').slice(0,2).toUpperCase()) || '?';
+      const _emptyTxt = (curLang==='es'?'Sin mensajes recientes':curLang==='en'?'No recent messages':'Aucun message récent');
+      if (_mc.length) {
+        const _sorted = _mc.slice().sort((a,b)=> ((b&&b.unread)?1:0)-((a&&a.unread)?1:0));
+        const _html = _sorted.slice(0,5).map(conv => {
+          const cl = _mcl.find(x=>String(x.id)===String(conv.clientId)) || {};
+          const name = cl.name || conv.name || (curLang==='es'?'Cliente':'Client');
+          const last = (conv.messages && conv.messages.length) ? conv.messages[conv.messages.length-1] : null;
+          const text = last ? String(last.text||'') : '';
+          const time = (last && last.time) ? String(last.time) : (conv.time||'');
+          const av = cl.avatar ? _esc(cl.avatar) : _ini(name);
+          const color = cl.color || '#2E7BFF';
+          return '<div class="msg"><div class="msg-avatar" style="--av:'+_esc(color)+'">'+av+'</div><div class="msg-meta"><div class="msg-name">'+_esc(name)+'</div><div class="msg-text">'+_esc(text.slice(0,70))+'</div></div><div class="msg-time">'+_esc(time)+'</div>'+((conv&&conv.unread)?'<div class="msg-unread"></div>':'')+'</div>';
+        }).join('');
+        _msgList.innerHTML = _html || ('<div style="padding:18px;text-align:center;color:var(--muted);font-size:12.5px">'+_emptyTxt+'</div>');
+      } else {
+        _msgList.innerHTML = '<div style="padding:18px;text-align:center;color:var(--muted);font-size:12.5px">'+_emptyTxt+'</div>';
+      }
+    }
+  } catch(e){}
 })();
 </script>
 
