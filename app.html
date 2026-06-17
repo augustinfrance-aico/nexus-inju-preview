@@ -6026,6 +6026,22 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       {l:'Perdus', c:'#FF6B6B', test:c=>c.status==='lost'}
     ];
   },
+  // Repere d'historique : explique pourquoi les periodes affichent la meme chose quand peu de donnees. Lecture pure.
+  _histSpanDays(){
+    try {
+      let oldest = null;
+      (this.state.conversations||[]).forEach(c=>(c.messages||[]).forEach(m=>{ if(m.ts){ const t=new Date(m.ts).getTime(); if(!isNaN(t)&&(oldest==null||t<oldest)) oldest=t; }}));
+      (this.state.clients||[]).forEach(c=>{ if(c.createdAt){ const t=new Date(c.createdAt).getTime(); if(!isNaN(t)&&(oldest==null||t<oldest)) oldest=t; }});
+      if(oldest==null) return null;
+      return Math.max(1, Math.ceil((Date.now()-oldest)/86400000));
+    } catch(e){ return null; }
+  },
+  _histHint(compact){
+    const d = this._histSpanDays();
+    if(d==null || d>90) return '';
+    if(compact) return `<div style="font-size:10.5px;color:var(--muted);margin:2px 0 8px;font-style:italic">📅 ~${d} j d'historique — les périodes se différencieront avec le temps.</div>`;
+    return `<div style="font-size:11.5px;color:var(--muted);background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-bottom:14px;line-height:1.5">📅 Tu as ~${d} jour${d>1?'s':''} d'historique pour l'instant — c'est pourquoi les vues par période (semaine / mois / trimestre) affichent encore la même chose. Elles se différencieront à mesure que l'activité s'accumule.</div>`;
+  },
   _statsSegments(range){
     try {
       const days = range==='7d'?7 : range==='30d'?30 : range==='90d'?90 : null;
@@ -6102,6 +6118,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           <button class="filter-pill ${range==='always'?'on':''}" onclick="Nx.setStatsRange('always')">${t('stats.always')}</button>
           <span style="margin-left:auto;font-size:11px;color:var(--muted)">${t('stats.click.origin')}</span>
         </div>
+        ${this._histHint(false)}
 
         <div class="stats">
           ${this.statCard('💬',t('stats.card.conv'),d.conv,d.delta_conv,t('stats.card.conv.sub'),'','inbox')}
@@ -6147,7 +6164,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
                 <button class="btn-g" style="${(this.state.heatRange||'30d')==='30d'?'color:var(--blue);border-color:var(--blue)':''}" onclick="Nx.state.heatRange='30d';Nx.renderView()">30j</button>
               </div></div>
             <div class="card-body">
-              ${this.renderBestHours()}
+              ${this._histHint(true)}${this.renderBestHours()}
             </div>
           </div>
 
@@ -6190,7 +6207,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
                 <button class="filter-pill ${this.state.chartRange==='all'?'on':''}" style="font-size:11.5px;padding:5px 11px" onclick="Nx.setChartRange('all')">Depuis le début</button>
               </div>
               <div style="font-size:11px;color:var(--muted);margin-bottom:8px"><b>${({conv:t('stats.chart.sub.conv'), seg:t('stats.chart.sub.seg'), resp:t('stats.chart.sub.resp'), hours:t('stats.chart.sub.hours'), camp:t('stats.chart.sub.camp'), newlost:t('stats.chart.sub.newlost')})[this.state.chartType||'conv']}</b> · ${({'30d':'30 derniers jours','quarter':'Dernier trimestre','all':'Depuis le début'})[this.state.chartRange||'30d']}</div>
-              ${this.chartSvg()}
+              ${this._histHint(true)}${this.chartSvg()}
             </div>
           </div>
 
@@ -6208,7 +6225,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
                   ${this.donutSvg()}
                 </div>
                 <div>
-                  ${this.renderRepartition()}
+                  ${this._histHint(true)}${this.renderRepartition()}
                 </div>
               </div>
               <div style="padding:12px;background:var(--bg2);border-radius:8px;margin-top:12px;font-size:12px">
