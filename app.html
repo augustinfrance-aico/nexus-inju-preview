@@ -7238,6 +7238,8 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   },
   saveAgendaItems(items){
     try { localStorage.setItem('nx_agenda', JSON.stringify(items)); } catch(e){}
+    // V5.7 : pousse l'agenda vers le cloud (sinon Annuler/Reactiver/Modifier perdus au prochain sync)
+    this.save();
   },
 
   cancelAgendaItem(id){
