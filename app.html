@@ -5300,22 +5300,38 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     this.toast('Instagram retiré','info', c.name);
   },
 
-  sendMessage(clientId){
+  // V5.7 : envoi WhatsApp manuel REEL via le pont n8n signe (Nexus — Envoi WhatsApp Manuel -> WAHA + Supabase).
+  async sendMessage(clientId){
     const input = document.getElementById('chatInputField');
     const txt = (input && input.value.trim()) || '';
     if (!txt) return;
-    // V5.6 : plus de faux envoi ni de fausse reponse simulee. L'envoi WhatsApp manuel reel
-    // passera par le pont n8n signe (temps 2). Le robot (WF1) repond deja automatiquement aux clients.
-    this.toast('🔜 Envoi manuel bientôt disponible', 'info', 'Le robot répond déjà à tes clients · branchement WhatsApp en cours');
+    const c = this.state.clients.find(x=>x.id===clientId);
+    if (!c) return this.toast('Client introuvable','warn');
+    const clientCloudId = c.cloudId || this._localIdToUuid(c.id, '8000');
+    this.toast('📤 Envoi en cours…','info');
+    const res = await this._signedPost('nexus-send-message', [clientCloudId, txt], { client_id: clientCloudId, text: txt });
+    if (!res.ok) return this.toast('⚠️ Envoi échoué','warn', res.error);
+    const conv = this.state.conversations.find(cv=>cv.clientId===clientId);
+    if (conv) { conv.messages.push({from:'me',text:txt,time:'À l\'instant'}); conv.unread=false; conv.draft=null; this.save(); }
+    if (input) input.value='';
+    this.renderView();
+    this.toast('✅ Message envoyé','success','Le client le reçoit sur WhatsApp');
   },
 
-  sendDraft(clientId){
-    // V5.6 : pas de faux envoi tant que le pont n'est pas branche. On bascule le brouillon
-    // dans la zone de saisie pour edition; l'envoi reel arrivera via le pont n8n (temps 2).
-    const conv = this.state.conversations.find(c=>c.clientId===clientId);
-    const input = document.getElementById('chatInputField');
-    if (conv && conv.draft && input) input.value = conv.draft;
-    this.toast('🔜 Envoi manuel bientôt disponible', 'info', 'Brouillon copié dans la zone de saisie · branchement WhatsApp en cours');
+  // V5.7 : envoi reel du brouillon via le pont n8n signe.
+  async sendDraft(clientId){
+    const conv = this.state.conversations.find(cv=>cv.clientId===clientId);
+    if (!conv || !conv.draft) return;
+    const txt = conv.draft;
+    const c = this.state.clients.find(x=>x.id===clientId);
+    if (!c) return this.toast('Client introuvable','warn');
+    const clientCloudId = c.cloudId || this._localIdToUuid(c.id, '8000');
+    this.toast('📤 Envoi du brouillon…','info');
+    const res = await this._signedPost('nexus-send-message', [clientCloudId, txt], { client_id: clientCloudId, text: txt });
+    if (!res.ok) return this.toast('⚠️ Envoi échoué','warn', res.error);
+    conv.messages.push({from:'me',text:txt,time:'À l\'instant'}); conv.draft=null; conv.unread=false; this.save();
+    this.renderView();
+    this.toast('✅ Brouillon envoyé','success','Le client le reçoit sur WhatsApp');
   },
 
   editDraft(clientId){
