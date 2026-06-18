@@ -7927,15 +7927,14 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   },
 
   resendCampaign(campaignId){
-    const c = this.state.campaigns.find(x=>x.id===campaignId);
+    const c = this.state.campaigns.find(x=>String(x.id)===String(campaignId));
     if (!c) { this.toast('Campagne introuvable','warn'); return; }
-    if (!confirm('Renvoyer "'+c.name+'" à la même cible ('+c.audience+') ?')) return;
-    const newC = {...c, id: Date.now(), date: 'Aujourd\'hui', status:'running', sent:0, opened:0, replied:0};
-    this.state.campaigns.unshift(newC);
-    this.save();
-    this.toast('🔄 Campagne relancée','success', c.name);
-    this.renderView();
-    setTimeout(()=>this.toast('📬 '+c.sent+' messages en cours d\'envoi','info'),1200);
+    // V5.9 : "Renvoyer" RÉEL = rouvre le builder pre-rempli (nom + message + cible) -> tu verifies et tu renvoies
+    // via le vrai robot (garde-fou inclus). Fini le clone-decor qui n'envoyait rien.
+    const segMap = { 'VIP':'vip', 'Récurrents':'recurrent', 'Recurrents':'recurrent', 'Nouveaux':'new', 'Clients perdus':'lost', 'Perdus':'lost', 'Business':'biz', 'Occasionnels':'occ' };
+    const seg = segMap[c.audience] || '';
+    this.openCampaignBuilder('Renvoi — ' + (c.name||'campagne'), seg);
+    if (c.message) { setTimeout(() => { const el = document.getElementById('campMsg'); if (el) el.value = c.message; }, 120); }
   },
 
   // IMPORT TEMPLATE
