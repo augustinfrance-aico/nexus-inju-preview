@@ -7933,8 +7933,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     // via le vrai robot (garde-fou inclus). Fini le clone-decor qui n'envoyait rien.
     const segMap = { 'VIP':'vip', 'Récurrents':'recurrent', 'Recurrents':'recurrent', 'Nouveaux':'new', 'Clients perdus':'lost', 'Perdus':'lost', 'Business':'biz', 'Occasionnels':'occ' };
     const seg = segMap[c.audience] || '';
-    this.openCampaignBuilder('Renvoi — ' + (c.name||'campagne'), seg);
-    if (c.message) { setTimeout(() => { const el = document.getElementById('campMsg'); if (el) el.value = c.message; }, 120); }
+    this.openCampaignBuilder('Renvoi — ' + (c.name||'campagne'), seg, c.message||'');
   },
 
   // IMPORT TEMPLATE
@@ -7979,7 +7978,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     this.toast('✓ Template importé','success', name);
   },
 
-  openCampaignBuilder(templateName, presetSegment){
+  openCampaignBuilder(templateName, presetSegment, presetMessage){
     this.openModal('ai-chat');
     const mc = document.getElementById('modal-content');
     // Segments unifiés couleur (Augustin 21/05/2026) — Business ajouté, ordre cohérent partout
@@ -8030,7 +8029,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           </div>
         </div>
         <div class="form-row"><label class="form-lbl">Message</label>
-          <textarea class="form-ctrl" id="campMsg" rows="4">Hola 👋 Este fin de semana en Don Carlos: 3kg de pan amasado por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! 🥖</textarea>
+          <textarea class="form-ctrl" id="campMsg" rows="4">${presetMessage!=null?String(presetMessage).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):'Hola 👋 Este fin de semana en Don Carlos: 3kg de pan amasado por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! 🥖'}</textarea>
           <div class="flex mt8"><button class="btn-g" onclick="Nx.generateCampMsg()">✨ Générer une suggestion IA</button></div></div>
         <!-- POINT CAMPAGNES (g) — Warning anti-BAN WhatsApp -->
         <div style="padding:10px 14px;background:var(--amber-soft);border-left:3px solid #F59E0B;border-radius:6px;font-size:12px;color:#B45309;margin-bottom:14px">
@@ -8394,11 +8393,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   useUserTemplate(id){
     const t = (this.state.userTemplates||[]).find(x=>x.id===id);
     if (!t) return;
-    this.openCampaignBuilder(t.name, t.target);
-    setTimeout(() => {
-      const msgEl = document.getElementById('campMsg');
-      if (msgEl && t.msg) msgEl.value = t.msg;
-    }, 60);
+    this.openCampaignBuilder(t.name, t.target, t.msg||'');
   },
   deleteUserTemplate(id){
     if (!confirm('Supprimer cet élément ?')) return;
