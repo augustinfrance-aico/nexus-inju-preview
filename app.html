@@ -7999,7 +7999,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       <div class="modal-hd"><h3>📢 Nouvelle campagne ${templateName?`— ${templateName}`:''}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
       <div class="modal-body">
         <div class="form-row"><label class="form-lbl">Nom de la campagne</label>
-          <input class="form-ctrl" id="campName" value="${templateName||'Promo pan amasado week-end'}"></div>
+          <input class="form-ctrl" id="campName" value="${templateName||'Promo pan amasado week-end'}" oninput="var _s=document.getElementById('campSubjectPreview'); if(_s)_s.textContent=this.value;"></div>
         <div class="form-row"><label class="form-lbl">Cibler par segment <span style="color:var(--muted);font-weight:400">· cohérent avec ton CRM</span></label>
           <select class="form-ctrl" id="campTarget" onchange="Nx.onCampTargetChange(this.value)">
             ${segOpts.map((s,i)=>`<option value="${s.k}" style="color:${s.col};font-weight:600" ${i===(presetIdx>=0?presetIdx:1)?'selected':''}>● ${s.n} ${s.c!=='sélection'?'('+s.c+')':''}</option>`).join('')}
@@ -8029,7 +8029,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           </div>
         </div>
         <div class="form-row"><label class="form-lbl">Message</label>
-          <textarea class="form-ctrl" id="campMsg" rows="4">${presetMessage!=null?String(presetMessage).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):'Hola 👋 Este fin de semana en Don Carlos: 3kg de pan amasado por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! 🥖'}</textarea>
+          <textarea class="form-ctrl" id="campMsg" rows="4" oninput="var _b=document.getElementById('campBodyPreview'); if(_b)_b.textContent=this.value;">${presetMessage!=null?String(presetMessage).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):'Hola 👋 Este fin de semana en Don Carlos: 3kg de pan amasado por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! 🥖'}</textarea>
           <div class="flex mt8"><button class="btn-g" onclick="Nx.generateCampMsg()">✨ Générer une suggestion IA</button></div></div>
         <!-- POINT CAMPAGNES (g) — Warning anti-BAN WhatsApp -->
         <div style="padding:10px 14px;background:var(--amber-soft);border-left:3px solid #F59E0B;border-radius:6px;font-size:12px;color:#B45309;margin-bottom:14px">
@@ -8106,7 +8106,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
               <span>19:00</span>
             </div>
             <div style="font-size:13px;color:#0F172A;font-weight:700;margin-bottom:8px">Objet : <span id="campSubjectPreview" style="font-weight:600;color:#334155">${document.getElementById('campName')?.value || 'Promo pan amasado week-end'}</span></div>
-            <div style="font-size:13px;color:#1E293B;line-height:1.55;white-space:pre-wrap" id="campBodyPreview">Hola 👋 Este fin de semana en Don Carlos: 3kg de pan amasado por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! 🥖</div>
+            <div style="font-size:13px;color:#1E293B;line-height:1.55;white-space:pre-wrap" id="campBodyPreview">${presetMessage!=null?String(presetMessage).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):'Hola 👋 Este fin de semana en Don Carlos: 3kg de pan amasado por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! 🥖'}</div>
             <div style="margin-top:14px;padding-top:10px;border-top:1px solid #F1F5F9;font-size:11px;color:#94A3B8">
               ✂️ Si tu ne souhaites plus recevoir ces emails, <a style="color:#1A56DB">se désinscrire</a> · Panadería Don Carlos · Las Condes, Santiago
             </div>
@@ -8680,7 +8680,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       const r = await fetch('/api/claude', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ question: prompt, history: [] }) });
       const data = await r.json();
       const txt = (data.answer||'').trim();
-      if (txt) { el.value = txt; this.toast('✨ Suggestion générée','success'); }
+      if (txt) { el.value = txt; const _b=document.getElementById('campBodyPreview'); if(_b)_b.textContent=txt; this.toast('✨ Suggestion générée','success'); }
       else { this.toast('⚠️ Pas de suggestion','warn','Réessaie dans un instant'); }
     } catch(e) {
       this.toast('⚠️ Erreur de génération','warn', String(e).slice(0,80));
