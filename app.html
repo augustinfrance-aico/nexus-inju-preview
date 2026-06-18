@@ -8031,7 +8031,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         </div>
         <div class="form-row"><label class="form-lbl">Message</label>
           <textarea class="form-ctrl" id="campMsg" rows="4">Hola 👋 Este fin de semana en Don Carlos: 3kg de pan amasado por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! 🥖</textarea>
-          <div class="flex mt8"><button class="btn-g" onclick="Nx.generateCampMsg()">✨ Générer 3 versions IA</button></div></div>
+          <div class="flex mt8"><button class="btn-g" onclick="Nx.generateCampMsg()">✨ Générer une suggestion IA</button></div></div>
         <!-- POINT CAMPAGNES (g) — Warning anti-BAN WhatsApp -->
         <div style="padding:10px 14px;background:var(--amber-soft);border-left:3px solid #F59E0B;border-radius:6px;font-size:12px;color:#B45309;margin-bottom:14px">
           ⚠️ <b>WhatsApp limite à 250 envois/jour</b> pour éviter le ban. Privilégie le mail pour les gros volumes (> 200).
@@ -8671,14 +8671,27 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     }
   },
 
-  generateCampMsg(){
-    const options = [
-      'Hola 👋 Este fin de semana en Don Carlos: 3kg de pan amasado por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! 🥖',
-      'Panadería Don Carlos · El sábado pan amasado a 3 500 CLP/kg (precio lanzamiento). Solo por WhatsApp, reserva antes del viernes 18h 💛',
-      'Fin de semana especial 🥖 Pack de 3kg pan amasado recién horneado por 10 lucas. Te lo dejamos listo a la hora que quieras. Escríbeme!'
-    ];
-    document.getElementById('campMsg').value = options[Math.floor(Math.random()*options.length)];
-    this.toast('✨ 3 versions générées','success');
+  async generateCampMsg(){
+    const el = document.getElementById('campMsg');
+    if (!el) return;
+    const btn = document.querySelector('button[onclick="Nx.generateCampMsg()"]');
+    const campName = (document.getElementById('campName')||{}).value || '';
+    const biz = this.state.business || {};
+    const catalogStr = (biz.catalog||[]).map(p=>`${p.name} (${p.price} CLP/${p.unit||'un'})`).join(', ');
+    if (btn) { btn.disabled = true; btn.textContent = '✨ Génération…'; }
+    try {
+      // V5.9 : vraie suggestion IA UNIQUE (via /api/claude, prio Groq), basee sur le VRAI profil — fini les 3 phrases en dur.
+      const prompt = `Tu es l'assistant marketing de "${biz.name||'ce commerce'}" (${biz.industry||''}${biz.city?', '+biz.city:''}).\nRedige UN SEUL message de campagne WhatsApp court (2 phrases max), chaleureux, pret a envoyer.\nTheme de la campagne : "${campName||'promotion du moment'}".\nBase-toi sur le commerce — Catalogue : ${catalogStr||'non renseigne'} ; Livraison : ${biz.delivery||'—'} ; Paiement : ${biz.payment||'—'}.\nStyle : ${biz.tone||'chaleureux, naturel'}. Ecris dans la LANGUE du commerce. Donne UNIQUEMENT le message, sans guillemets ni preambule.`;
+      const r = await fetch('/api/claude', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ question: prompt, history: [] }) });
+      const data = await r.json();
+      const txt = (data.answer||'').trim();
+      if (txt) { el.value = txt; this.toast('✨ Suggestion générée','success'); }
+      else { this.toast('⚠️ Pas de suggestion','warn','Réessaie dans un instant'); }
+    } catch(e) {
+      this.toast('⚠️ Erreur de génération','warn', String(e).slice(0,80));
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = '✨ Générer une suggestion IA'; }
+    }
   },
 
   sendCampaign(){
