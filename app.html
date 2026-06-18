@@ -8716,8 +8716,10 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       this._signedPost('nexus-campaign-send', ['campaign-send', message], { name, message, target: mapped })
         .then(res => {
           if (res.ok) {
-            this.toast('✅ Campagne envoyée par le robot','success','WhatsApp en cours — actualise (↻) dans ~30 s pour le log réel');
+            this.toast('✅ Campagne envoyée par le robot','success','Mise à jour de l\'historique…');
             this.save();
+            // V5.9 : re-synchro auto apres l'envoi (le robot vient d'ecrire la campagne en base) — fini le ↻ manuel
+            setTimeout(() => { try { this.syncFromCloud(true); } catch(_){} }, 4000);
           } else {
             this.toast('⚠️ Échec envoi robot','warn', res.error);
           }
