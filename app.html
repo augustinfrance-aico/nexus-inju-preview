@@ -3337,7 +3337,7 @@ const Nx = {
     return { id: this._localIdToUuid(c.id, '8003'),
       name: c.name||'', audience: c.audience||'', sent: c.sent||0,
       opened: c.opened||0, replied: c.replied||0, status: c.status||'draft',
-      message: c.message||'', sent_at: null };
+      message: c.message||'', sent_at: null, scheduled_at: c.scheduled_at||null };
   },
   _toRowCredits(cr){ return { remaining: cr.remaining||0, total: cr.total||500, reset_label: cr.resetLabel||'' }; },
   _fromRowCredits(r){ return { remaining: r.remaining, total: r.total, resetLabel: r.reset_label }; },
@@ -8719,6 +8719,24 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     // V5.2 : ENVOI RÉEL via robot n8n signé (WhatsApp). Garde-fou beta côté serveur :
     // seuls les numéros de la liste blanche reçoivent ; sinon preview au patron.
     const message = (document.getElementById('campMsg')?.value||'').trim().slice(0,500);
+    // V5.9 : PLANIFICATION — si une date FUTURE est choisie, on PROGRAMME (plus d'envoi immediat surprise)
+    const _schedMode = document.getElementById('campSchedule')?.value || 'now';
+    if (_schedMode !== 'now' && _schedMode !== 'recurring') {
+      if (!message) { this.toast('Message vide','warn'); return; }
+      let _when = null; const _t = new Date();
+      if (_schedMode === 'dimanche19') { _when=new Date(_t); _when.setDate(_when.getDate()+((7-_when.getDay())%7||7)); _when.setHours(19,0,0,0); }
+      else if (_schedMode === 'demain9') { _when=new Date(_t); _when.setDate(_when.getDate()+1); _when.setHours(9,0,0,0); }
+      else if (_schedMode === 'custom') { const _d=document.getElementById('campCustomDate')?.value; const _h=document.getElementById('campCustomTime')?.value||'09:00'; if(_d) _when=new Date(_d+'T'+_h); }
+      if (!_when || isNaN(_when.getTime())) { this.toast('Choisis une date valide','warn'); return; }
+      if (_when.getTime() <= Date.now()+30000) { this.toast('Choisis une heure dans le futur','warn'); return; }
+      this.state.campaigns.unshift({ id: Date.now(), name: name||'Campagne', audience: audienceLabel, message, status:'scheduled', scheduled_at: _when.toISOString(), sent:0, opened:0, replied:0, date: _when.toLocaleString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) });
+      const _onbS = this.state.onboarding.find(s=>s.id==='campaign'); if (_onbS) _onbS.done = true;
+      this.save(); this.closeModal();
+      this.toast('🗓️ Campagne programmée','success','Pour le '+_when.toLocaleString('fr-FR',{weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}));
+      if (window.NxCloud && NxCloud.isAuthed()) { try { this.syncToCloud(); } catch(_){} }
+      this.renderView();
+      return;
+    }
     if (window.NxCloud && NxCloud.isAuthed()) {
       if (!message) { this.toast('Message vide','warn'); return; }
       const targetMap = { vip:'vip', lost:'lost', recurrent:'rec', new:'new', occ:'all', custom:'all' };
