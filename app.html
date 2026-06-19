@@ -2259,18 +2259,9 @@ const Nx = {
   },
 
   toggleVacation(){
-    // Si on active, ouvre le modal de configuration
-    if (!this.state.vacation) {
-      this.openVacationModal();
-    } else {
-      this.state.vacation = false;
-      this.state.vacationDetails.enabled = false;
-      this.save();
-      this.toast('Mode vacances désactivé','success','Tu es de retour aux commandes');
-      document.getElementById('vacationRow').classList.remove('warn');
-      const t = document.getElementById('vacationToggle');
-      if (t) t.checked = false;
-    }
+    // V5.9 : UNIFIE — le toggle barre reutilise la meme logique que la page Vacances
+    // (synchronise nexus_vacances + state.vacation + le toggle + le cloud). Fini le vieux modal separe.
+    this.toggleVacancesActive();
   },
 
   openVacationModal(){
@@ -4103,19 +4094,9 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
   },
 
   popToggleVacation(){
-    // Active/désactive le mode vacances depuis le pop-up — ouvre le modal complet si activation
+    // V5.9 : UNIFIE — meme logique partout (synchronise nexus_vacances + state.vacation + cloud).
     this.closeHubOverlay();
-    if (this.state.vacation) {
-      // Si déjà actif, désactive direct
-      this.state.vacation = false;
-      const vt = document.getElementById('vacationToggle');
-      if (vt) vt.checked = false;
-      this.save();
-      this.toast('🟢 Mode vacances désactivé', 'success', 'Tu es de retour aux commandes');
-    } else {
-      // Si non actif, ouvre le modal de configuration complète
-      this.toggleVacation();
-    }
+    this.toggleVacancesActive();
   },
 
   quickActionCard(icon,title,sub,onclick){
