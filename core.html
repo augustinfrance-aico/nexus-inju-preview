@@ -3202,6 +3202,8 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       // audio + brief portent du data-i18n / sont réinitialisés après ce point : on retire l'attribut i18n et on ré-applique en différé.
       const _applyDemo = function(){
         try {
+          // cartes stats : on garde les cartes (le carousel les indexe) mais on remplace le tag "Top du jour" par "Exemple" -> aucun chiffre ne passe pour réel.
+          document.querySelectorAll('.stat-tag').forEach(function(t){ t.removeAttribute('data-i18n'); t.textContent = _L({fr:'★ Exemple',es:'★ Ejemplo',en:'★ Example'}); });
           const _ad = document.getElementById('audioDuration'); if (_ad) _ad.textContent = _L({fr:'Aperçu de démonstration',es:'Vista de demostración',en:'Demo preview'});
           const _tb = document.getElementById('textBody'); if (_tb) _tb.querySelectorAll('.text-content').forEach(function(c){ c.removeAttribute('data-i18n-html'); c.innerHTML = '<p style="color:var(--muted)">' + _L({fr:"Ton brief s'affichera ici dès tes premières ventes et conversations. Pour l'instant, c'est un aperçu de démonstration.",es:'Tu resumen aparecerá aquí con tus primeras ventas. Por ahora es una vista de demostración.',en:'Your brief will appear here once you have your first sales. For now this is a demo preview.'}) + '</p>'; });
         } catch(e){}

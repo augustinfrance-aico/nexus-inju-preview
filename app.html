@@ -2449,7 +2449,7 @@ const Nx = {
           <div style="display:flex;gap:16px;margin-bottom:20px;align-items:center">
             <div class="msg-av" style="width:56px;height:56px;font-size:18px;background:${c.color}">${c.avatar}</div>
             <div style="flex:1"><div style="font-weight:700;font-size:16px">${Nx._h(c.name)}</div><div style="color:var(--muted);font-size:13px">${c.phone} · ${c.lastSeen}</div>
-              <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">${c.tags.map(tg=>`<span class="chip blue">${tg}</span>`).join('')}</div></div>
+              <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">${c.tags.map(tg=>`<span class="chip blue">${Nx._h(tg)}</span>`).join('')}</div></div>
             <div style="text-align:right"><div style="font-size:clamp(20px,4vw,28px);font-weight:800;color:var(--blue);font-family:'JetBrains Mono',monospace;line-height:1.15">${c.score}</div><div style="font-size:10px;color:var(--muted)">SCORE</div></div>
           </div>
           <div class="grid3" style="margin-bottom:20px">
@@ -2586,7 +2586,7 @@ const Nx = {
           ${this.state.notifications.map(n => `
             <div style="padding:14px 20px;border-bottom:1px solid var(--line2);display:flex;gap:12px;${n.unread?'background:var(--blue-soft)':''}">
               <div style="font-size:22px">${n.icon}</div>
-              <div style="flex:1"><div style="font-weight:600;font-size:13px">${n.title}</div><div style="color:var(--muted);font-size:12px;margin-top:2px">${n.body}</div><div style="color:var(--muted);font-size:11px;margin-top:4px">${n.time}</div></div>
+              <div style="flex:1"><div style="font-weight:600;font-size:13px">${Nx._h(n.title)}</div><div style="color:var(--muted);font-size:12px;margin-top:2px">${Nx._h(n.body)}</div><div style="color:var(--muted);font-size:11px;margin-top:4px">${n.time}</div></div>
             </div>`).join('')}
         </div>
         <div class="modal-foot">
@@ -2693,7 +2693,7 @@ const Nx = {
             <div style="flex:1">
               ${editing ? `<input class="form-ctrl" id="editName" value="${Nx._h(c.name)}" style="font-weight:700;font-size:16px;margin-bottom:4px">` : `<div style="font-weight:700;font-size:16px">${Nx._h(c.name)}</div>`}
               <div style="font-size:12px;color:var(--muted)">${c.lastSeen}</div>
-              <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">${c.tags.map(tg=>`<span class="chip blue">${tg}</span>`).join('')}</div>
+              <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">${c.tags.map(tg=>`<span class="chip blue">${Nx._h(tg)}</span>`).join('')}</div>
             </div>
             <button class="icon-btn" title="${editing?'Sauvegarder':'Modifier les infos'}" onclick="Nx.toggleClientEdit(${c.id})">${editing?'💾':'✏️'}</button>
             <div style="text-align:right"><div style="font-size:24px;font-weight:800;color:var(--blue);font-family:'JetBrains Mono',monospace">${c.score}</div><div style="font-size:10px;color:var(--muted)">SCORE</div></div>
@@ -5553,7 +5553,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
                   <div style="text-align:center"><div style="font-size:18px;font-weight:800;color:var(--green)" class="mono">${c.orders}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Commandes</div></div>
                   <div style="text-align:center"><div style="font-size:14px;font-weight:800" class="mono">${(c.spent/1000).toFixed(0)}k</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">CLP</div></div>
                 </div>
-                ${c.tags.length?`<div style="margin-top:10px;display:flex;gap:4px;flex-wrap:wrap">${c.tags.map(tg=>`<span class="chip blue" style="font-size:10px;padding:2px 7px">${tg}</span>`).join('')}</div>`:''}
+                ${c.tags.length?`<div style="margin-top:10px;display:flex;gap:4px;flex-wrap:wrap">${c.tags.map(tg=>`<span class="chip blue" style="font-size:10px;padding:2px 7px">${Nx._h(tg)}</span>`).join('')}</div>`:''}
               </div>`).join('')}
           </div>
           <div style="margin-top:14px;font-size:12px;color:#78350F;text-align:center"><b>${this.state.clients.filter(c=>c.status==='active').length - 3}</b> autres clients actifs · <a style="color:#92400E;text-decoration:underline;cursor:pointer;font-weight:600" onclick="Nx.viewAllActiveClients()">voir tous →</a></div>
@@ -6964,12 +6964,12 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
             <div class="pn-card-hd">
               <div class="pn-card-ic">${it.icon||(cats[it.category]?.ic)||'🎯'}</div>
               <div class="pn-card-meta">
-                <div class="pn-card-title">${it.title}</div>
+                <div class="pn-card-title">${Nx._h(it.title)}</div>
                 ${it.category ? `<div class="pn-card-cat">${(cats[it.category]?.lbl)||it.category}</div>` : ''}
               </div>
               <span class="pn-status" style="--pn-stcolor:${colorMap[it.status]}">${statusLbl[it.status]}</span>
             </div>
-            ${it.detail ? `<div class="pn-card-detail">${it.detail}</div>` : ''}
+            ${it.detail ? `<div class="pn-card-detail">${Nx._h(it.detail)}</div>` : ''}
             <div class="pn-card-when">
               <span class="pn-when-ic">📅</span>
               <span><b>Quand :</b> ${it.when || '—'}</span>
@@ -7170,13 +7170,13 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     const mc = document.getElementById('modal-content');
     ov.classList.remove('hidden');
     mc.innerHTML = `
-      <div class="modal-hd" style="border-bottom:3px solid ${meta.color}"><h3>${it.icon||meta.ic} ${it.title}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-hd" style="border-bottom:3px solid ${meta.color}"><h3>${it.icon||meta.ic} ${Nx._h(it.title)}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
       <div class="modal-body">
         <div style="display:flex;gap:8px;margin-bottom:14px">
           <span class="chip" style="background:${meta.color}1A;color:${meta.color};border:1px solid ${meta.color}55">${meta.ic} ${meta.lbl}</span>
           <span class="chip">${statusLbl}</span>
         </div>
-        ${it.detail ? `<div style="padding:14px;background:var(--bg2);border-radius:10px;margin-bottom:14px;font-size:13.5px;line-height:1.6;color:var(--ink2)">${it.detail}</div>` : ''}
+        ${it.detail ? `<div style="padding:14px;background:var(--bg2);border-radius:10px;margin-bottom:14px;font-size:13.5px;line-height:1.6;color:var(--ink2)">${Nx._h(it.detail)}</div>` : ''}
         <div style="font-size:12.5px;color:var(--muted)"><b>📅 Quand :</b> ${it.when || '—'}</div>
         ${it.createdAt ? `<div style="font-size:11px;color:var(--muted);margin-top:6px"><b>Créé :</b> ${new Date(it.createdAt).toLocaleString('fr-FR')}</div>` : ''}
       </div>
@@ -7205,7 +7205,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           items.map(it => {
             const meta = cats[it.category] || { color:'#7A3CFF', ic:'🎯', lbl:'—' };
             return `<div style="padding:12px 14px;background:var(--bg2);border-left:3px solid ${meta.color};border-radius:8px;margin-bottom:8px;cursor:pointer" onclick="Nx.closeModal();Nx.openAgendaDetail('${it.id}')">
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:16px">${it.icon||meta.ic}</span><b style="font-size:13px">${it.title}</b></div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:16px">${it.icon||meta.ic}</span><b style="font-size:13px">${Nx._h(it.title)}</b></div>
               <div style="font-size:11.5px;color:var(--muted);margin-left:24px">${meta.lbl} · ${it.when||'—'}</div>
             </div>`;
           }).join('')}
