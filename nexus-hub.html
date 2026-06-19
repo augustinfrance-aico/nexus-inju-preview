@@ -700,7 +700,7 @@ html[data-theme="light"] .welcome h1{
     </button>
     <div class="modal-foot">
       <span>Activable en 1 clic dans Nexus Core</span>
-      <a id="modalLearn">En savoir +</a>
+      <a id="modalLearn" style="cursor:pointer">En savoir +</a>
     </div>
   </div>
 </div>
@@ -1128,6 +1128,11 @@ html[data-theme="light"] .welcome h1{
 
   // Preview button → navigate to preview page (no data, just features teaser)
   document.getElementById('modalPreview').addEventListener('click', () => {
+    const key = mCta.dataset.module;
+    location.href = `preview.html?module=${encodeURIComponent(key)}`;
+  });
+  // "En savoir +" : était inerte (ni href ni handler) → ouvre l'aperçu du module
+  document.getElementById('modalLearn').addEventListener('click', () => {
     const key = mCta.dataset.module;
     location.href = `preview.html?module=${encodeURIComponent(key)}`;
   });
