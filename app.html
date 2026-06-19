@@ -9083,8 +9083,16 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
             <div class="form-row">
               <label class="form-lbl">📅 Quand répondre (créneau actif)</label>
               <div class="grid2" style="gap:8px">
-                <input type="datetime-local" class="form-ctrl" value="${v.cfg_when_start||''}" oninput="Nx.updateVac('cfg_when_start',this.value)" onchange="Nx.updateVac('cfg_when_start',this.value)">
-                <input type="datetime-local" class="form-ctrl" value="${v.cfg_when_end||''}" oninput="Nx.updateVac('cfg_when_end',this.value)" onchange="Nx.updateVac('cfg_when_end',this.value)">
+                <div>
+                  <div style="font-size:11px;color:#6b7280;margin-bottom:3px;font-weight:600">Début</div>
+                  <input type="date" class="form-ctrl" value="${v.cfg_when_start_date||''}" oninput="Nx.updateVacWhen('start','date',this.value)">
+                  <input type="time" class="form-ctrl" style="margin-top:4px" value="${v.cfg_when_start_time||''}" oninput="Nx.updateVacWhen('start','time',this.value)">
+                </div>
+                <div>
+                  <div style="font-size:11px;color:#6b7280;margin-bottom:3px;font-weight:600">Fin</div>
+                  <input type="date" class="form-ctrl" value="${v.cfg_when_end_date||''}" oninput="Nx.updateVacWhen('end','date',this.value)">
+                  <input type="time" class="form-ctrl" style="margin-top:4px" value="${v.cfg_when_end_time||''}" oninput="Nx.updateVacWhen('end','time',this.value)">
+                </div>
               </div>
               <small style="color:var(--muted);font-size:11px;display:block;margin-top:4px">Début → Fin de la période où l'IA répond à ta place.</small>
             </div>
@@ -9693,6 +9701,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       active:false,
       // POINT MODE VACANCES (a) — Champs personnalisables au lieu de toggles
       cfg_when_start:'', cfg_when_end:'',
+      cfg_when_start_date:'', cfg_when_start_time:'', cfg_when_end_date:'', cfg_when_end_time:'',
       cfg_how_text:'Décontracté et chaleureux avec emojis, comme moi. Tutoiement, phrases courtes.',
       cfg_what_text:'Horaires, prix du catalogue, disponibilité produits, commandes simples. Ne pas s\'engager sur les gros événements.',
       // Legacy (gardé pour compat) :
@@ -9759,6 +9768,17 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     localStorage.setItem('nexus_vacances', JSON.stringify(vac));
     // Re-render pour UI affectée
     if (['preset','dailyRange','allDay'].includes(key)) this.renderView();
+  },
+  // V5 : créneau "quand répondre" via date+heure séparés (datetime-local ne capturait pas de façon fiable)
+  updateVacWhen(which, part, value){
+    let vac = {};
+    try { vac = JSON.parse(localStorage.getItem('nexus_vacances') || 'null') || this.defaultVacances(); }
+    catch(e){ vac = this.defaultVacances(); }
+    vac['cfg_when_'+which+'_'+part] = value;
+    const _d = vac['cfg_when_'+which+'_date'] || '';
+    const _t = vac['cfg_when_'+which+'_time'] || '';
+    vac['cfg_when_'+which] = (_d && _t) ? (_d + 'T' + _t) : _d;
+    localStorage.setItem('nexus_vacances', JSON.stringify(vac));
   },
   // V5 : sauvegarde explicite de la config vacances vers le cloud (bouton 💾)
   async saveVacancesNow(){
