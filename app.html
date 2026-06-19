@@ -2016,6 +2016,9 @@ const STORAGE_KEY = 'nexus_mvp_state_v1';
 const Nx = {
   state: null,
 
+  // ANTI-XSS (Sprint 1) : échappe le HTML d'un contenu contrôlé par les clients (texte de message, nom) avant injection innerHTML.
+  _h(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); },
+
   init(){
     // ⚡ FAILSAFE BOOT-HIDE (Augustin 19/05 : "loading en boucle")
     // Force-hide boot après 2.5s MAX même si init plante quelque part en route
@@ -3896,7 +3899,7 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
     } else if (route === 'inbox') {
       originList = this.state.conversations.slice(0,6).map(conv => {
         const c = this.state.clients.find(x=>x.id===conv.clientId);
-        return `<div class="inv-row"><span style="width:30px;height:30px;border-radius:50%;background:${c.color};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px">${c.avatar}</span><div style="flex:1"><b style="font-size:13px">${c.name}</b><div style="font-size:11px;color:var(--muted)">${conv.messages[conv.messages.length-1].text.slice(0,60)}…</div></div><span class="chip ${conv.unread?'blue':''}">${conv.unread?'Non lu':'Lu'}</span></div>`;
+        return `<div class="inv-row"><span style="width:30px;height:30px;border-radius:50%;background:${c.color};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px">${c.avatar}</span><div style="flex:1"><b style="font-size:13px">${c.name}</b><div style="font-size:11px;color:var(--muted)">${Nx._h(conv.messages[conv.messages.length-1].text.slice(0,60))}…</div></div><span class="chip ${conv.unread?'blue':''}">${conv.unread?'Non lu':'Lu'}</span></div>`;
       }).join('');
     } else if (route === 'campaigns') {
       originList = this.state.campaigns.map(c=>`<div class="inv-row"><span style="font-size:18px">📢</span><div style="flex:1"><b style="font-size:13px">${c.name}</b><div style="font-size:11px;color:var(--muted)">${c.audience} · ${c.date} · ${c.sent} envoyés</div></div><span class="chip ${c.status==='completed'?'green':'blue'}">${c.status==='completed'?'Terminée':'En cours'}</span></div>`).join('');
@@ -4134,10 +4137,10 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
       <div class="msg-pastille-wrap"><span class="seg-pastille seg-${segKey}" title="Segment ${segKey.toUpperCase()}"></span></div>
       <div class="msg-body">
         <div class="msg-row">
-          <div><span class="msg-name">${c.name}</span><span class="ch">${chMap[conv.channel]}</span></div>
+          <div><span class="msg-name">${Nx._h(c.name)}</span><span class="ch">${chMap[conv.channel]}</span></div>
           <div class="msg-right"><span class="msg-time">${lastMsg.time}</span>${conv.unread?'<span class="msg-unread-dot"></span>':''}</div>
         </div>
-        <div class="msg-txt">${lastMsg.text}</div>
+        <div class="msg-txt">${Nx._h(lastMsg.text)}</div>
         ${c.tag?`<span class="msg-tag ${c.tag}">${c.tag.toUpperCase()}</span>`:''}
       </div>
     </div>`;
@@ -5030,9 +5033,9 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
                 return `<div class="msg ${conv.unread?'unread':''} ${c.id===activeId?'active':''}" onclick="Nx.state.activeConv=${c.id};Nx.renderView()">
                   <div class="msg-pastille-wrap"><span class="seg-pastille seg-${segKey}" title="Segment ${segKey.toUpperCase()}"></span></div>
                   <div class="msg-body">
-                    <div class="msg-row"><div><span class="msg-name">${c.name}</span></div>
+                    <div class="msg-row"><div><span class="msg-name">${Nx._h(c.name)}</span></div>
                       <div class="msg-right">${conv.unread?'<span class="msg-unread-dot"></span>':''}<span class="msg-time">${conv.messages[conv.messages.length-1].time}</span></div></div>
-                    <div class="msg-txt">${conv.messages[conv.messages.length-1].text}</div>
+                    <div class="msg-txt">${Nx._h(conv.messages[conv.messages.length-1].text)}</div>
                     ${c.tag?`<span class="msg-tag ${c.tag}">${c.tag.toUpperCase()}</span>`:''}
                   </div>
                 </div>`;
@@ -5052,7 +5055,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
               <button class="icon-btn" onclick="Nx.translateConv(${activeClient.id})" title="Traduire FR ↔ ES">🌐</button>
             </div>
             <div class="chat-conv-body" id="chatBody">
-              ${activeConv.messages.map(m=>`<div class="bubble ${m.from}">${m.text}<div class="t">${m.time}</div></div>`).join('')}
+              ${activeConv.messages.map(m=>`<div class="bubble ${m.from}">${Nx._h(m.text)}<div class="t">${m.time}</div></div>`).join('')}
               ${activeConv.draft ? `<div class="chat-draft"><span class="chat-draft-label">🤖 Brouillon IA — </span><span>${activeConv.draft}</span><div class="chat-draft-actions"><button class="btn-g" onclick="Nx.sendDraft(${activeClient.id})">✓ Envoyer tel quel</button><button class="btn-g" onclick="Nx.editDraft(${activeClient.id})">✏️ Modifier</button><button class="btn-g" onclick="Nx.regenDraft(${activeClient.id})">🔄 Reformuler</button></div></div>` : ''}
             </div>
             <div style="padding:8px 14px;display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--line2);background:var(--bg2)">
@@ -5148,7 +5151,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       const data = await r.json();
       const translated = (data.translations && data.translations[0]) || lastMsg.text;
       const body = `
-        <div style="margin-bottom:14px"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">${flagOf(sourceLang)} (original)</div><div style="padding:12px 14px;background:var(--bg2);border-radius:8px;font-size:13.5px">${lastMsg.text}</div></div>
+        <div style="margin-bottom:14px"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">${flagOf(sourceLang)} (original)</div><div style="padding:12px 14px;background:var(--bg2);border-radius:8px;font-size:13.5px">${Nx._h(lastMsg.text)}</div></div>
         <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">${flagOf(targetLang)} (auto)</div><div style="padding:12px 14px;background:var(--blue-soft);border-radius:8px;font-size:13.5px;color:var(--blue-ink)">${translated}</div></div>
         <div style="margin-top:10px;font-size:10px;color:var(--muted);text-align:right">${data.model||''}</div>`;
       mc.innerHTML = renderShell(body);
@@ -5390,8 +5393,8 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         ${lastMsgs.map((m,i)=>`
           <div style="margin-bottom:14px;padding:12px 14px;border:1px solid var(--line);border-radius:10px">
             <div style="font-size:11px;color:var(--muted);margin-bottom:4px">${m.from==='client'?'👤 '+(cl.name||'Client'):'🥖 Toi'} · ${m.time||''}</div>
-            <div style="font-size:13px;margin-bottom:8px;color:var(--ink)">${m.text}</div>
-            <div style="font-size:13px;padding:8px 10px;background:var(--blue-soft);border-radius:6px;color:var(--blue-ink)"><b style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--blue);display:block;margin-bottom:3px">${flagOf(targetLang)}</b>${translations[i]||m.text}</div>
+            <div style="font-size:13px;margin-bottom:8px;color:var(--ink)">${Nx._h(m.text)}</div>
+            <div style="font-size:13px;padding:8px 10px;background:var(--blue-soft);border-radius:6px;color:var(--blue-ink)"><b style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--blue);display:block;margin-bottom:3px">${flagOf(targetLang)}</b>${Nx._h(translations[i]||m.text)}</div>
           </div>
         `).join('')}`;
       mc.innerHTML = renderShell(body);
