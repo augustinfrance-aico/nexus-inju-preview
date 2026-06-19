@@ -3407,10 +3407,12 @@ const Nx = {
       lang: v.lang||'auto',
       perm_orders: !!v.perm_orders, perm_prices: !!v.perm_prices, perm_calendar: !!v.perm_calendar,
       perm_escalate: !!v.perm_escalate, perm_promo: !!v.perm_promo,
-      topics: v.topics||[], stats: v.stats||{} };
+      topics: v.topics||[], stats: v.stats||{},
+      config: v };
   },
   _fromRowVacances(r){
-    return Object.assign(this.defaultVacances(), { active: r.active, startDate: r.start_date,
+    const _full = (r.config && typeof r.config==='object') ? r.config : {};
+    return Object.assign(this.defaultVacances(), _full, { active: r.active, startDate: r.start_date,
       endDate: r.end_date, msgShort: r.msg_short, msgLong: r.msg_long, msgUrgent: r.msg_urgent,
       lang: r.lang, perm_orders: r.perm_orders, perm_prices: r.perm_prices, perm_calendar: r.perm_calendar,
       perm_escalate: r.perm_escalate, perm_promo: r.perm_promo, topics: r.topics, stats: r.stats });
@@ -9354,8 +9356,8 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
               </div>
               ${isOn ? `
                 <div style="display:flex;gap:14px">
-                  <div style="text-align:center"><div style="font-size:22px;font-weight:900">${(this.state.vacanceStats?.received)||7}</div><div style="font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:.05em">Reçus</div></div>
-                  <div style="text-align:center"><div style="font-size:22px;font-weight:900">${(this.state.vacanceStats?.replied)||7}</div><div style="font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:.05em">Répondus IA</div></div>
+                  <div style="text-align:center"><div style="font-size:22px;font-weight:900">${(this.state.vacanceStats?.received)||0}</div><div style="font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:.05em">Reçus</div></div>
+                  <div style="text-align:center"><div style="font-size:22px;font-weight:900">${(this.state.vacanceStats?.replied)||0}</div><div style="font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:.05em">Répondus IA</div></div>
                   <div style="text-align:center"><div style="font-size:22px;font-weight:900">${(this.state.vacanceStats?.escalated)||0}</div><div style="font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:.05em">Escaladés</div></div>
                 </div>
               `:''}
@@ -9579,7 +9581,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     } catch(e){ return { ok:false, simulated:true, reason: String(e).slice(0,140) }; }
   },
   async triggerEscalation(client, message, reason){
-    if (!this.state.vacanceStats) this.state.vacanceStats = { received: 7, replied: 7, escalated: 0 };
+    if (!this.state.vacanceStats) this.state.vacanceStats = { received: 0, replied: 0, escalated: 0 };
     if (!this.state.escalationLog) this.state.escalationLog = [];
     this.state.vacanceStats.escalated = (this.state.vacanceStats.escalated || 0) + 1;
 
