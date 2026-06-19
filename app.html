@@ -9083,8 +9083,8 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
             <div class="form-row">
               <label class="form-lbl">📅 Quand répondre (créneau actif)</label>
               <div class="grid2" style="gap:8px">
-                <input type="datetime-local" class="form-ctrl" value="${v.cfg_when_start||''}" oninput="Nx.updateVac('cfg_when_start',this.value)">
-                <input type="datetime-local" class="form-ctrl" value="${v.cfg_when_end||''}" oninput="Nx.updateVac('cfg_when_end',this.value)">
+                <input type="datetime-local" class="form-ctrl" value="${v.cfg_when_start||''}" oninput="Nx.updateVac('cfg_when_start',this.value)" onchange="Nx.updateVac('cfg_when_start',this.value)">
+                <input type="datetime-local" class="form-ctrl" value="${v.cfg_when_end||''}" oninput="Nx.updateVac('cfg_when_end',this.value)" onchange="Nx.updateVac('cfg_when_end',this.value)">
               </div>
               <small style="color:var(--muted);font-size:11px;display:block;margin-top:4px">Début → Fin de la période où l'IA répond à ta place.</small>
             </div>
