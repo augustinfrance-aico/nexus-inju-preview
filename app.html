@@ -2436,11 +2436,11 @@ const Nx = {
     } else if (type === 'client' && data) {
       const c = data;
       html = `
-        <div class="modal-hd"><h3>Fiche client · ${c.name}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+        <div class="modal-hd"><h3>Fiche client · ${Nx._h(c.name)}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
         <div class="modal-body">
           <div style="display:flex;gap:16px;margin-bottom:20px;align-items:center">
             <div class="msg-av" style="width:56px;height:56px;font-size:18px;background:${c.color}">${c.avatar}</div>
-            <div style="flex:1"><div style="font-weight:700;font-size:16px">${c.name}</div><div style="color:var(--muted);font-size:13px">${c.phone} · ${c.lastSeen}</div>
+            <div style="flex:1"><div style="font-weight:700;font-size:16px">${Nx._h(c.name)}</div><div style="color:var(--muted);font-size:13px">${c.phone} · ${c.lastSeen}</div>
               <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">${c.tags.map(tg=>`<span class="chip blue">${tg}</span>`).join('')}</div></div>
             <div style="text-align:right"><div style="font-size:clamp(20px,4vw,28px);font-weight:800;color:var(--blue);font-family:'JetBrains Mono',monospace;line-height:1.15">${c.score}</div><div style="font-size:10px;color:var(--muted)">SCORE</div></div>
           </div>
@@ -2677,13 +2677,13 @@ const Nx = {
       // Synthèse auto
       const synth = `Client ${c.tags.join(', ')||'standard'}, score ${c.score}/100, ${c.orders} commandes (${(c.spent/1000).toFixed(0)}k CLP cumulés). Dernière interaction : ${c.lastSeen}. ${c.notes ? 'Note privée : ' + c.notes : ''}`;
       html = `
-        <div class="modal-hd"><h3>👤 Fiche client · ${c.name}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+        <div class="modal-hd"><h3>👤 Fiche client · ${Nx._h(c.name)}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
         <div class="modal-body">
           <!-- HEADER + EDIT -->
           <div style="display:flex;gap:16px;margin-bottom:16px;align-items:center">
             <div class="msg-av" style="width:60px;height:60px;font-size:20px;background:${c.color}">${c.avatar}</div>
             <div style="flex:1">
-              ${editing ? `<input class="form-ctrl" id="editName" value="${c.name}" style="font-weight:700;font-size:16px;margin-bottom:4px">` : `<div style="font-weight:700;font-size:16px">${c.name}</div>`}
+              ${editing ? `<input class="form-ctrl" id="editName" value="${Nx._h(c.name)}" style="font-weight:700;font-size:16px;margin-bottom:4px">` : `<div style="font-weight:700;font-size:16px">${Nx._h(c.name)}</div>`}
               <div style="font-size:12px;color:var(--muted)">${c.lastSeen}</div>
               <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">${c.tags.map(tg=>`<span class="chip blue">${tg}</span>`).join('')}</div>
             </div>
@@ -2963,12 +2963,12 @@ const Nx = {
       (c.instagram && norm(x.instagram)===norm(c.instagram))
     ));
     const body = dups.length
-      ? `<p style="font-size:13px;line-height:1.6;color:var(--ink2)"><b>${dups.length} fiche(s) en double</b> détectée(s) pour <b>${c.name}</b> (même téléphone, email ou Instagram) :</p>
+      ? `<p style="font-size:13px;line-height:1.6;color:var(--ink2)"><b>${dups.length} fiche(s) en double</b> détectée(s) pour <b>${Nx._h(c.name)}</b> (même téléphone, email ou Instagram) :</p>
          <ul style="font-size:12.5px;color:var(--ink2);margin:8px 0 0;padding-left:18px">${dups.map(d=>`<li>${d.name} · ${d.phone||d.email||d.instagram||''}</li>`).join('')}</ul>
          <p style="font-size:12px;color:var(--muted);margin-top:10px">La fusion définitive est irréversible — dis-le moi et on la fera proprement.</p>`
-      : `<p style="font-size:13px;line-height:1.6;color:var(--ink2)">✓ Aucun doublon détecté. Cette fiche regroupe déjà <b>tous les canaux</b> de ${c.name} au même endroit.</p>`;
+      : `<p style="font-size:13px;line-height:1.6;color:var(--ink2)">✓ Aucun doublon détecté. Cette fiche regroupe déjà <b>tous les canaux</b> de ${Nx._h(c.name)} au même endroit.</p>`;
     mc.innerHTML = `
-      <div class="modal-hd"><h3>🔗 Canaux du contact — ${c.name}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-hd"><h3>🔗 Canaux du contact — ${Nx._h(c.name)}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
       <div class="modal-body">
         ${body}
         <div style="margin-top:12px;padding:10px 12px;background:var(--bg2);border-radius:8px;font-size:12px;color:var(--ink2)">
@@ -3895,14 +3895,14 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
     let originList = '';
     if (route === 'crm') {
       const newClients = this.state.clients.slice(0,5);
-      originList = newClients.map(c=>`<div class="inv-row"><span style="width:30px;height:30px;border-radius:50%;background:${c.color};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px">${c.avatar}</span><div style="flex:1"><b style="font-size:13px">${c.name}</b><div style="font-size:11px;color:var(--muted)">${c.phone} · ${c.lastSeen}</div></div><span class="chip blue">Score ${c.score}</span></div>`).join('');
+      originList = newClients.map(c=>`<div class="inv-row"><span style="width:30px;height:30px;border-radius:50%;background:${c.color};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px">${c.avatar}</span><div style="flex:1"><b style="font-size:13px">${Nx._h(c.name)}</b><div style="font-size:11px;color:var(--muted)">${c.phone} · ${c.lastSeen}</div></div><span class="chip blue">Score ${c.score}</span></div>`).join('');
     } else if (route === 'inbox') {
       originList = this.state.conversations.slice(0,6).map(conv => {
         const c = this.state.clients.find(x=>x.id===conv.clientId);
-        return `<div class="inv-row"><span style="width:30px;height:30px;border-radius:50%;background:${c.color};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px">${c.avatar}</span><div style="flex:1"><b style="font-size:13px">${c.name}</b><div style="font-size:11px;color:var(--muted)">${Nx._h(conv.messages[conv.messages.length-1].text.slice(0,60))}…</div></div><span class="chip ${conv.unread?'blue':''}">${conv.unread?'Non lu':'Lu'}</span></div>`;
+        return `<div class="inv-row"><span style="width:30px;height:30px;border-radius:50%;background:${c.color};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px">${c.avatar}</span><div style="flex:1"><b style="font-size:13px">${Nx._h(c.name)}</b><div style="font-size:11px;color:var(--muted)">${Nx._h(conv.messages[conv.messages.length-1].text.slice(0,60))}…</div></div><span class="chip ${conv.unread?'blue':''}">${conv.unread?'Non lu':'Lu'}</span></div>`;
       }).join('');
     } else if (route === 'campaigns') {
-      originList = this.state.campaigns.map(c=>`<div class="inv-row"><span style="font-size:18px">📢</span><div style="flex:1"><b style="font-size:13px">${c.name}</b><div style="font-size:11px;color:var(--muted)">${c.audience} · ${c.date} · ${c.sent} envoyés</div></div><span class="chip ${c.status==='completed'?'green':'blue'}">${c.status==='completed'?'Terminée':'En cours'}</span></div>`).join('');
+      originList = this.state.campaigns.map(c=>`<div class="inv-row"><span style="font-size:18px">📢</span><div style="flex:1"><b style="font-size:13px">${Nx._h(c.name)}</b><div style="font-size:11px;color:var(--muted)">${c.audience} · ${c.date} · ${c.sent} envoyés</div></div><span class="chip ${c.status==='completed'?'green':'blue'}">${c.status==='completed'?'Terminée':'En cours'}</span></div>`).join('');
     } else {
       originList = '<div style="padding:20px;text-align:center;color:var(--muted)">Détails complets dans la section dédiée.</div>';
     }
@@ -4073,7 +4073,7 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
         ${clients.map(c=>`
           <div class="inv-row" style="cursor:pointer" onclick="Nx.confirmDeleteClient(${c.id})">
             <span style="width:30px;height:30px;border-radius:50%;background:${c.color};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px">${c.avatar}</span>
-            <div style="flex:1"><b style="font-size:13px">${c.name}</b><div style="font-size:11px;color:var(--muted)">${c.phone} · Score ${c.score}</div></div>
+            <div style="flex:1"><b style="font-size:13px">${Nx._h(c.name)}</b><div style="font-size:11px;color:var(--muted)">${c.phone} · Score ${c.score}</div></div>
             <button class="btn btn-danger" style="padding:4px 10px;font-size:11px" onclick="event.stopPropagation();Nx.confirmDeleteClient(${c.id})">Supprimer</button>
           </div>
         `).join('')}
@@ -4305,7 +4305,7 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
         const y = i * rowH + 8;
         const bw = (c.open/100) * innerW;
         return `<g transform="translate(0,${y})">
-          <text x="0" y="${rowH/2 + 4}" font-family="Inter,sans-serif" font-size="11.5" fill="#334155" font-weight="600">${c.name}</text>
+          <text x="0" y="${rowH/2 + 4}" font-family="Inter,sans-serif" font-size="11.5" fill="#334155" font-weight="600">${Nx._h(c.name)}</text>
           <rect x="160" y="${rowH/2 - 8}" width="${innerW}" height="16" fill="#F1F5F9" rx="8"/>
           <rect x="160" y="${rowH/2 - 8}" width="${bw}" height="16" fill="${c.color}" rx="8"/>
           <text x="${160 + bw + 6}" y="${rowH/2 + 4}" font-family="JetBrains Mono,monospace" font-size="11" fill="${c.color}" font-weight="700">${c.open}%</text>
@@ -5173,7 +5173,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     const mc = document.getElementById('modal-content');
     mc.style.maxWidth = '520px';
     mc.innerHTML = `
-      <div class="modal-hd"><h3>💳 Envoyer un lien Mercado Pago à ${c.name}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-hd"><h3>💳 Envoyer un lien Mercado Pago à ${Nx._h(c.name)}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
       <div class="modal-body">
         <div style="padding:12px 14px;background:linear-gradient(135deg,#E6F4FF,#D1E9FF);border-radius:10px;margin-bottom:14px;font-size:12.5px;color:#0369A1">
           💡 Tape un montant en pesos chiliens, Nexus génère un lien Mercado Pago cliquable que ${c.name.split(' ')[0]} reçoit dans le chat. Paiement en 1 clic, pas de carte étrangère.
@@ -5536,7 +5536,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
                 <div style="display:flex;gap:14px;align-items:center;margin-top:6px;margin-bottom:14px">
                   <div class="msg-av" style="width:54px;height:54px;background:${c.color};font-size:18px">${c.avatar}</div>
                   <div style="flex:1;min-width:0">
-                    <div style="font-weight:700;font-size:15px;letter-spacing:-.01em">${c.name}</div>
+                    <div style="font-weight:700;font-size:15px;letter-spacing:-.01em">${Nx._h(c.name)}</div>
                     <div style="font-size:11px;color:var(--muted);margin-top:2px">${c.phone}</div>
                   </div>
                 </div>
@@ -5566,7 +5566,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
             <div class="crm-row" style="padding:14px 20px;border-top:1px solid var(--line2);display:flex;gap:14px;align-items:center;position:relative">
               <div class="msg-av" style="background:${c.color};cursor:pointer" onclick="Nx.openClientCard(${c.id})">${c.avatar}</div>
               <div style="flex:1;min-width:0;cursor:pointer" onclick="Nx.openClientCard(${c.id})">
-                <div style="font-weight:600;display:flex;gap:6px;align-items:center;flex-wrap:wrap">${c.name}${c.tags.map(tg=>`<span class="chip blue" style="font-size:10px;padding:1px 6px">${tg}</span>`).join('')}</div>
+                <div style="font-weight:600;display:flex;gap:6px;align-items:center;flex-wrap:wrap">${Nx._h(c.name)}${c.tags.map(tg=>`<span class="chip blue" style="font-size:10px;padding:1px 6px">${Nx._h(tg)}</span>`).join('')}</div>
                 <div style="font-size:12px;color:var(--muted)">${c.phone} · ${c.lastSeen} · ${c.orders} commandes · ${c.spent.toLocaleString('es-CL')} CLP</div>
               </div>
               ${c.status==='lost' ? '<span class="chip red">⚠ Perdu</span>' : c.status==='prospect' ? '<span class="chip amber">Prospect</span>' : ''}
@@ -5592,7 +5592,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     ov.classList.remove('hidden');
     const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
     const dateStr = tomorrow.toISOString().slice(0,10);
-    const clientOpts = (this.state.clients||[]).map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+    const clientOpts = (this.state.clients||[]).map(c => `<option value="${Nx._h(c.name)}">${Nx._h(c.name)}</option>`).join('');
     mc.innerHTML = `
       <div class="modal-hd"><h3>📅 Ajouter une réunion</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
       <div class="modal-body">
@@ -6686,7 +6686,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         <div class="pdf-h2">👥 ${clientTitle}</div>
         <table class="pdf-table">
           <thead><tr><th>Nom</th><th>Téléphone</th><th>Score</th><th>Commandes</th><th>CA cumulé</th></tr></thead>
-          <tbody>${top.map(c=>`<tr><td>${c.name}</td><td>${c.phone}</td><td>${c.score}</td><td>${c.orders}</td><td>${c.spent.toLocaleString('es-CL')} CLP</td></tr>`).join('')}</tbody>
+          <tbody>${top.map(c=>`<tr><td>${Nx._h(c.name)}</td><td>${c.phone}</td><td>${c.score}</td><td>${c.orders}</td><td>${c.spent.toLocaleString('es-CL')} CLP</td></tr>`).join('')}</tbody>
         </table>`;
     }
     if (scope === 'campaigns' || scope === 'all') {
@@ -6700,7 +6700,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         <div class="pdf-h2">📢 ${campTitle}</div>
         <table class="pdf-table">
           <thead><tr><th>Campagne</th><th>Date</th><th>Cible</th><th>Envoyés</th><th>Ouverts</th><th>Réponses</th><th>Taux</th></tr></thead>
-          <tbody>${camps.length===0?`<tr><td colspan="7" style="text-align:center;color:#94A3B8">Aucune campagne sur cette période</td></tr>`:camps.map(c=>`<tr><td>${c.name}</td><td>${c.date}</td><td>${c.audience}</td><td>${c.sent}</td><td>${c.opened}</td><td>${c.replied}</td><td>${c.sent>0?Math.round(c.opened/c.sent*100):0}%</td></tr>`).join('')}</tbody>
+          <tbody>${camps.length===0?`<tr><td colspan="7" style="text-align:center;color:#94A3B8">Aucune campagne sur cette période</td></tr>`:camps.map(c=>`<tr><td>${Nx._h(c.name)}</td><td>${c.date}</td><td>${c.audience}</td><td>${c.sent}</td><td>${c.opened}</td><td>${c.replied}</td><td>${c.sent>0?Math.round(c.opened/c.sent*100):0}%</td></tr>`).join('')}</tbody>
         </table>`;
     }
     html += `<div style="margin-top:40px;color:#94A3B8;font-size:11px;text-align:center;border-top:1px solid #E2E8F0;padding-top:14px">Rapport généré par Nexus · ${b.name} · ${periodLabel} · nexus.app</div></div>`;
@@ -7317,7 +7317,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
               ${(this.state.campaigns.length ? this.state.campaigns : []).map(c=>`
                 <div style="padding:14px 0;border-bottom:1px solid var(--line2);display:flex;gap:14px;align-items:center">
                   <div style="flex:1">
-                    <div style="font-weight:600">${c.name}</div>
+                    <div style="font-weight:600">${Nx._h(c.name)}</div>
                     <div style="font-size:11.5px;color:var(--muted)">${c.audience} · ${c.date||''}</div>
                   </div>
                   <div style="text-align:center;min-width:60px"><div class="mono" style="font-weight:700">${c.sent||0}</div><div style="font-size:10px;color:var(--muted)">envoyés</div></div>
@@ -7499,7 +7499,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           ${this.state.campaigns.map(c=>`
             <div style="padding:14px 20px;border-top:1px solid var(--line2);display:flex;gap:14px;align-items:center">
               <div style="flex:1">
-                <div style="font-weight:600">${c.name}</div>
+                <div style="font-weight:600">${Nx._h(c.name)}</div>
                 <div style="font-size:12px;color:var(--muted)">${c.audience} · ${c.date}</div>
               </div>
               <div class="flex" style="gap:20px;font-family:'JetBrains Mono',monospace;font-size:12px">
@@ -7611,7 +7611,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
               <label class="seg-client-item" data-name="${c.name.toLowerCase()}" style="display:flex;align-items:center;gap:10px;padding:6px;border-radius:6px;cursor:pointer" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''">
                 <input type="checkbox" class="seg-client-check" data-id="${c.id}" onchange="Nx.updateSegSelectedPreview()">
                 <span class="seg-pastille seg-${this.segOf(c)}"></span>
-                <div style="flex:1"><div style="font-size:13px;font-weight:600">${c.name}</div><div style="font-size:11px;color:var(--muted)">Score ${c.score} · ${(c.tags||[]).join(', ')||'standard'}</div></div>
+                <div style="flex:1"><div style="font-size:13px;font-weight:600">${Nx._h(c.name)}</div><div style="font-size:11px;color:var(--muted)">Score ${c.score} · ${(c.tags||[]).join(', ')||'standard'}</div></div>
               </label>
             `).join('')}
           </div>
@@ -7651,7 +7651,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       const segCol = { vip:'#F5C45E', rec:'#1A56DB', biz:'#7A3CFF', new:'#22C55E', occ:'#F59E0B', lost:'#EF4444' }[this.segOf(c)] || '#94A3B8';
       return `<span style="display:inline-flex;align-items:center;gap:6px;padding:5px 10px 5px 8px;background:#fff;border:1px solid ${segCol}55;border-radius:999px;font-size:11.5px;color:var(--ink);font-weight:600">
         <span style="width:8px;height:8px;border-radius:50%;background:${segCol};flex-shrink:0"></span>
-        ${c.name}
+        ${Nx._h(c.name)}
         <button type="button" title="Retirer" style="background:transparent;border:0;cursor:pointer;color:var(--muted);font-size:12px;line-height:1;padding:0;margin-left:2px" onclick="Nx.toggleSegClient(${c.id})">✕</button>
       </span>`;
     }).join('');
@@ -7808,7 +7808,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           <div class="all-client-row">
             <div class="msg-av" style="width:38px;height:38px;background:${c.color||'#1A56DB'};font-size:13px;flex-shrink:0">${c.avatar||c.name[0]}</div>
             <div style="flex:1;min-width:0">
-              <div style="font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.name}</div>
+              <div style="font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${Nx._h(c.name)}</div>
               <div style="font-size:11px;color:var(--muted);margin-top:1px">${c.phone||''}</div>
             </div>
           </div>
@@ -7894,7 +7894,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     const openRate = c.sent>0?Math.round(c.opened/c.sent*100):0;
     const replyRate = c.sent>0?Math.round(c.replied/c.sent*100):0;
     mc.innerHTML = `
-      <div class="modal-hd"><h3>📊 Rapport campagne · ${c.name}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
+      <div class="modal-hd"><h3>📊 Rapport campagne · ${Nx._h(c.name)}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
       <div class="modal-body">
         <div style="padding:14px;background:var(--bg2);border-radius:8px;margin-bottom:14px;font-size:12.5px"><b>Cible :</b> ${c.audience} · <b>Envoyée :</b> ${c.date}</div>
         <div class="grid3" style="margin-bottom:14px">
@@ -7998,7 +7998,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
               <label class="camp-client-item" data-name="${c.name.toLowerCase()}" style="display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:4px;cursor:pointer;font-size:12px">
                 <input type="checkbox" class="camp-client-pick" data-id="${c.id}" onchange="Nx.updateCampSelectedPreview()">
                 <span class="seg-pastille seg-${this.segOf(c)}"></span>
-                ${c.name}
+                ${Nx._h(c.name)}
               </label>
             `).join('')}
             </div>
@@ -8140,7 +8140,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       const segCol = { vip:'#F5C45E', rec:'#1A56DB', biz:'#7A3CFF', new:'#22C55E', occ:'#F59E0B', lost:'#EF4444' }[this.segOf(c)] || '#94A3B8';
       return `<span style="display:inline-flex;align-items:center;gap:6px;padding:5px 10px 5px 8px;background:#fff;border:1px solid ${segCol}44;border-radius:999px;font-size:11.5px;color:var(--ink);font-weight:600">
         <span style="width:8px;height:8px;border-radius:50%;background:${segCol};flex-shrink:0"></span>
-        ${c.name}
+        ${Nx._h(c.name)}
         <button type="button" title="Retirer" style="background:transparent;border:0;cursor:pointer;color:var(--muted);font-size:12px;line-height:1;padding:0;margin-left:2px" onclick="Nx.toggleCampClient(${c.id})">✕</button>
       </span>`;
     }).join('');
