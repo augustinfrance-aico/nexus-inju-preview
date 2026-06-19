@@ -1167,7 +1167,7 @@ window.NexusDynTranslate = (function(){
 
   async function translateBatch(texts, target){
     try {
-      const res = await fetch('/api/translate', {
+      const res = await Nx._fetchT('/api/translate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ texts, target, source: 'fr' })
@@ -2018,6 +2018,14 @@ const Nx = {
 
   // ANTI-XSS (Sprint 1) : échappe le HTML d'un contenu contrôlé par les clients (texte de message, nom) avant injection innerHTML.
   _h(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); },
+
+  // Sprint 3 — anti-spinner infini : fetch avec délai d'attente. Réponse rapide = strictement identique à fetch ; blocage > ms = abort propre.
+  async _fetchT(url, opts, ms){
+    const _ctrl = new AbortController();
+    const _to = setTimeout(function(){ try{ _ctrl.abort(); }catch(e){} }, ms || 25000);
+    try { return await fetch(url, Object.assign({}, opts || {}, { signal: _ctrl.signal })); }
+    finally { clearTimeout(_to); }
+  },
 
   init(){
     // ⚡ FAILSAFE BOOT-HIDE (Augustin 19/05 : "loading en boucle")
@@ -3740,7 +3748,7 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
 [FIN PROFIL]`;
     const fullQuestion = q + ctx;
     try {
-      const r = await fetch('/api/claude', {
+      const r = await Nx._fetchT('/api/claude', {
         method:'POST',
         headers: { 'Content-Type':'application/json' },
         body: JSON.stringify({ question: fullQuestion, history: this._aiHistory.slice(-6) })
@@ -4694,7 +4702,7 @@ Réponds en espagnol (clients chiliens). Format STRICT JSON uniquement, pas de t
 
 Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton chaleureux.`;
     try {
-      const r = await fetch('/api/claude', {
+      const r = await Nx._fetchT('/api/claude', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ question: prompt })
       });
@@ -5089,7 +5097,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     const biz = this.state.business || {};
     const catalogStr = (biz.catalog||[]).map(p=>`${p.name} (${p.price} CLP/${p.unit||'un'})`).join(', ');
     const prompt = `Tu es l'assistant WhatsApp de "${biz.name||'ce commerce'}". ${instruction}\nDernier message du client${c?' ('+c.name+')':''} : "${lastMsg}".\nBase-toi UNIQUEMENT sur ces infos commerce — Catalogue : ${catalogStr||'non renseigné'} ; Livraison : ${biz.delivery||'—'} ; Paiement : ${biz.payment||'—'}.\nStyle : ${biz.tone||'chaleureux, naturel'}. Reponds dans la LANGUE du client. Donne UNIQUEMENT le message a envoyer, sans guillemets ni preambule.`;
-    const r = await fetch('/api/claude', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ question: prompt, history: [] }) });
+    const r = await Nx._fetchT('/api/claude', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ question: prompt, history: [] }) });
     const data = await r.json();
     return (data.answer||'').trim();
   },
@@ -5144,7 +5152,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       <div class="modal-foot"><button class="btn btn-p" onclick="Nx.closeModal()">OK</button></div>`;
     mc.innerHTML = renderShell(`<div style="text-align:center;padding:30px;color:var(--muted)"><div style="font-size:24px;margin-bottom:8px">⏳</div>Traduction en cours via Claude…</div>`);
     try {
-      const r = await fetch('/api/translate', {
+      const r = await Nx._fetchT('/api/translate', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ texts: [lastMsg.text], target: targetLang, source: sourceLang })
       });
@@ -5381,7 +5389,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       <div class="modal-foot"><button class="btn btn-s" onclick="Nx.closeModal()">Fermer</button></div>`;
     mc.innerHTML = renderShell(`<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:24px;margin-bottom:8px">⏳</div>Traduction en cours via Claude…</div>`);
     try {
-      const r = await fetch('/api/translate', {
+      const r = await Nx._fetchT('/api/translate', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ texts: lastMsgs.map(m=>m.text), target: targetLang, source: sourceLang })
       });
@@ -5968,7 +5976,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     const corrections = (this.state.crmCorrections || []).slice(-5);
     const ctx = `\n\n[CONTEXTE CRM RÉEL - utilise UNIQUEMENT ces données pour répondre]\n${JSON.stringify(summary, null, 2)}\n${corrections.length ? `\n[CORRECTIONS APPRISES de l'utilisateur, à respecter]\n${corrections.map(c=>`- Q: ${c.question} → Correction: ${c.userCorrection}`).join('\n')}` : ''}`;
     try {
-      const r = await fetch('/api/claude', {
+      const r = await Nx._fetchT('/api/claude', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ question: q + ctx, history: [] })
       });
@@ -8664,7 +8672,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     try {
       // V5.9 : vraie suggestion IA UNIQUE (via /api/claude, prio Groq), basee sur le VRAI profil — fini les 3 phrases en dur.
       const prompt = `Tu es l'assistant marketing de "${biz.name||'ce commerce'}" (${biz.industry||''}${biz.city?', '+biz.city:''}).\nRedige UN SEUL message de campagne WhatsApp court (2 phrases max), chaleureux, pret a envoyer.\nTheme de la campagne : "${campName||'promotion du moment'}".\nBase-toi sur le commerce — Catalogue : ${catalogStr||'non renseigne'} ; Livraison : ${biz.delivery||'—'} ; Paiement : ${biz.payment||'—'}.\nStyle : ${biz.tone||'chaleureux, naturel'}. Ecris dans la LANGUE du commerce. Donne UNIQUEMENT le message, sans guillemets ni preambule.`;
-      const r = await fetch('/api/claude', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ question: prompt, history: [] }) });
+      const r = await Nx._fetchT('/api/claude', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ question: prompt, history: [] }) });
       const data = await r.json();
       const txt = (data.answer||'').trim();
       if (txt) { el.value = txt; const _b=document.getElementById('campBodyPreview'); if(_b)_b.textContent=txt; this.toast('✨ Suggestion générée','success'); }
@@ -9404,7 +9412,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     const b = this.state.business || {};
     const ctx = `\n\n[PROFIL ENTREPRISE — utilise UNIQUEMENT ces données]\nNom: ${b.name}\nVille: ${b.city}\nHoraires: ${JSON.stringify(b.hours||{})}\nDescription: ${b.description||''}\nCatalogue: ${(b.catalog||[]).slice(0,10).map(p=>`${p.name} (${p.price} ${p.unit||'CLP'})`).join(', ')}\nFAQ: ${(b.faq||[]).slice(0,5).map(f=>`${f.q} → ${f.a}`).join(' | ')}\nLivraison: ${b.delivery||''}\nMode paiement: ${b.payment||''}\nCarlos est ACTUELLEMENT en vacances — tu réponds À SA PLACE en espagnol chilien, ton chaleureux. Si la question demande Carlos personnellement, dis qu'il revient bientôt mais que tu peux aider entre-temps.`;
     try {
-      const r = await fetch('/api/claude', {
+      const r = await Nx._fetchT('/api/claude', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ question: msg + ctx, history: [] })
       });
@@ -9729,7 +9737,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     const b = this.state.business || {};
     const prompt = `Tu es Nexus, IA assistante d'une PME LATAM. Rédige UN message d'absence court (max 3 phrases) en espagnol, chaleureux et professionnel, pour un client qui contacte la boutique pendant l'absence du propriétaire. Contexte : entreprise "${b.name||'PME'}", ville ${b.city||'Santiago'}, type ${b.description||'commerce local'}. Utilise les balises [DATE] et [TEL]. Mentionne que l'IA assistante peut répondre aux questions courantes. Réponds UNIQUEMENT avec le texte du message, rien d'autre.`;
     try {
-      const r = await fetch('/api/claude', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ question: prompt }) });
+      const r = await Nx._fetchT('/api/claude', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ question: prompt }) });
       const data = await r.json();
       const answer = (data.answer||'').trim().replace(/^["«]|["»]$/g,'');
       if (!answer) throw new Error('vide');

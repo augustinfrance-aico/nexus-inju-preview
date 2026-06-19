@@ -1622,11 +1622,14 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       const langPrompt = {fr:'français',es:'español',en:'english'}[curLang] || 'français';
       const prompt = `Tu es Nexus, IA business pour une PME LATAM (Pan de Maipo, panaderia familiale à Santiago Chile). Contexte du conseil actuel : "${ctxLabel}". Génère UN NOUVEAU conseil business court (max 2 phrases, en ${langPrompt}), différent du précédent, actionnable, avec 1 chiffre concret ou nom client si pertinent. Utilise <b>...</b> sur les mots-clés. Réponds UNIQUEMENT avec le texte du conseil, sans intro ni "voici" ni guillemets.`;
       try {
+        const _ctrl = new AbortController(); const _to = setTimeout(function(){try{_ctrl.abort();}catch(e){}}, 25000);
         const r = await fetch('/api/claude', {
           method:'POST',
           headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ question: prompt })
+          body: JSON.stringify({ question: prompt }),
+          signal: _ctrl.signal
         });
+        clearTimeout(_to);
         const data = await r.json();
         let answer = (data.answer||'').trim().replace(/^["«]|["»]$/g,'').replace(/<\/?p>/g,'').trim();
         if (!answer) throw new Error('vide');
@@ -2217,11 +2220,14 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
     }
     async function translateBatch(texts, target){
       try {
+        const _ctrl = new AbortController(); const _to = setTimeout(function(){try{_ctrl.abort();}catch(e){}}, 25000);
         const res = await fetch('/api/translate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ texts, target, source: 'fr' })
+          body: JSON.stringify({ texts, target, source: 'fr' }),
+          signal: _ctrl.signal
         });
+        clearTimeout(_to);
         if (!res.ok) { console.warn('DT API error', res.status); return null; }
         const data = await res.json();
         return Array.isArray(data.translations) && data.translations.length === texts.length
