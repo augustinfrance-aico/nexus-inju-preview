@@ -2510,7 +2510,7 @@ const Nx = {
             <div class="flex between" style="font-size:16px;font-weight:800;border-top:2px solid var(--line);padding-top:8px;margin-top:8px"><span>Total TTC</span><span style="color:var(--blue)">${data.amount}</span></div>
           </div>
           <div style="padding:12px 14px;background:${data.status==='paid'?'var(--green-soft)':'var(--amber-soft)'};border-radius:8px;margin-top:12px;font-size:12px;color:${data.status==='paid'?'var(--green)':'#B45309'}">
-            ${data.status==='paid' ? `✓ <b>Payée</b> par carte VISA •••• 4242 le ${data.date}` : `⏳ En attente de paiement`}
+            ${data.status==='paid' ? `🧪 <b>Démo</b> — document de démonstration, aucun paiement réel` : `⏳ En attente de paiement`}
           </div>
         </div>
         <div class="modal-foot">
@@ -2615,7 +2615,7 @@ const Nx = {
         </div>
         <div class="modal-foot">
           <button class="btn btn-s" onclick="Nx.closeModal()">Plus tard</button>
-          <button class="btn btn-p" onclick="Nx.toast('Upgrade simulé (démo)','success','30€/mois + Agent 01 activé');Nx.closeModal()">Passer en Full Suite →</button>
+          <button class="btn btn-p" onclick="Nx.toast('Changement de plan','info','Connexion Stripe en phase 2 — pour le moment tu peux explorer la démo.');Nx.closeModal()">Passer en Full Suite →</button>
         </div>`;
     } else if (type === 'share-data') {
       html = `
@@ -4616,12 +4616,12 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
               <div class="form-row">
                 <label class="form-lbl">💳 Stripe (paiement)</label>
                 <div style="padding:14px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;gap:10px">
-                  <span style="font-size:22px">${ak.stripe.connected?'✅':'⏸'}</span>
+                  <span style="font-size:22px">${ak.stripe.connected?(ak.stripe.mode==='test'?'⏳':'✅'):'⏸'}</span>
                   <div style="flex:1">
-                    <div style="font-weight:600;font-size:13px">${ak.stripe.connected?'Connecté · mode '+ak.stripe.mode:'Non connecté'}</div>
+                    <div style="font-weight:600;font-size:13px">${ak.stripe.connected?(ak.stripe.mode==='test'?'Mode démo (Stripe)':'Connecté'):'Non connecté'}</div>
                     <div style="font-size:11px;color:var(--muted)">Pour facturer ton abonnement Nexus</div>
                   </div>
-                  <button class="btn btn-s" onclick="Nx.toast('Stripe Portal (démo)','info','Redirection Stripe')">Portal</button>
+                  <button class="btn btn-s" onclick="Nx.toast('Stripe Portal','info','Intégration en phase 2 — bientôt tu pourras gérer tes paiements ici.')">Portal</button>
                 </div>
               </div>
               <div class="form-row" style="grid-column:span 2">
@@ -8414,9 +8414,10 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           <div style="display:flex;justify-content:space-between;font-family:monospace;margin-bottom:4px"><span>TVA 20%</span><span>${tva} €</span></div>
           <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:800;border-top:2px solid #1A56DB;padding-top:6px;margin-top:6px"><span>Total TTC</span><span style="color:#1A56DB">${inv.amount}</span></div>
         </div>
-        <div style="margin-top:24px;padding:12px;background:${inv.status==='paid'?'#ECFDF5':'#FFFBEB'};border-radius:8px;font-size:12px">
-          ${inv.status==='paid' ? '✓ Facture acquittée par carte VISA •••• 4242 le '+inv.date : '⏳ En attente de paiement'}
+        <div style="margin-top:24px;padding:12px;background:#FFFBEB;border-radius:8px;font-size:12px">
+          Document de démonstration — aucun paiement réel effectué.
         </div>
+        <div style="margin-top:10px;padding:12px;background:#FEF3C7;border-left:4px solid #F59E0B;border-radius:6px;font-size:11px;color:#78350F">⚠️ DOCUMENT DE DÉMONSTRATION · SIRET/TVA fictifs · aucun encaissement réel.</div>
         <div style="margin-top:40px;color:#94A3B8;font-size:11px;text-align:center;border-top:1px solid #E2E8F0;padding-top:14px">Document généré par Nexus · nexus.app · Conditions générales sur nexus.app/cgv</div>
       </div>`;
     area.style.display = 'block';
@@ -8775,11 +8776,11 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           <div class="card" style="padding:24px">
             <h3 style="margin-bottom:14px">💳 Moyen de paiement</h3>
             <div style="padding:14px;background:var(--bg2);border-radius:10px;display:flex;align-items:center;gap:12px;margin-bottom:10px">
-              <div style="width:40px;height:28px;background:linear-gradient(135deg,#1A1F71,#F59E0B);border-radius:4px;font-size:10px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">VISA</div>
-              <div style="flex:1"><div style="font-weight:600">•••• •••• •••• 4242</div><div style="font-size:11px;color:var(--muted)">Exp. 08/27 · Carlos Muñoz</div></div>
-              <span class="chip green">Actif</span>
+              <div style="width:40px;height:28px;background:var(--bg);border:1px solid var(--line);border-radius:4px;font-size:16px;display:flex;align-items:center;justify-content:center">💳</div>
+              <div style="flex:1"><div style="font-weight:600">Aucun moyen de paiement enregistré</div><div style="font-size:11px;color:var(--muted)">Intégration Stripe en phase 2</div></div>
+              <span class="chip">Démo</span>
             </div>
-            <button class="btn btn-s" style="width:100%" onclick="Nx.toast('Stripe Portal (démo)','info','Redirection Stripe')">+ Ajouter une carte</button>
+            <button class="btn btn-s" style="width:100%" onclick="Nx.toast('Moyen de paiement','info','Intégration Stripe en phase 2 — bientôt tu pourras ajouter ta carte ici.')">+ Ajouter une carte</button>
 
             <h3 style="margin:20px 0 14px">📋 Infos facturation</h3>
             <div class="form-row"><label class="form-lbl">Raison sociale</label><input class="form-ctrl" value="Panadería Don Carlos SpA"></div>
@@ -8870,6 +8871,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         <div class="card" style="margin-top:14px">
           <div class="card-hd"><h3>📄 Historique factures</h3>
             <div class="actions"><button class="btn-g" onclick="Nx.downloadAllInvoices()">⬇ Télécharger tout (ZIP)</button></div></div>
+          <div style="padding:10px 14px;margin:8px 0 12px;background:#FEF3C7;border-left:3px solid #F59E0B;border-radius:8px;font-size:12px;color:#78350F">🧪 Données de démonstration — tes vraies factures s'afficheront ici une fois la facturation Stripe activée.</div>
           ${this.state.invoices.map(inv=>`
             <div class="inv-row">
               <span class="mono inv-id">${inv.id}</span>
@@ -8886,15 +8888,8 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
 
   // POINT CAMPAGNES (f) — Acheter des crédits supplémentaires (Augustin 28/05/2026 : vraie MAJ state.credits + bump total)
   buyCredits(pack, price){
-    if (!confirm('Confirmer l\'achat du pack ' + pack + ' pour ' + price + ' ?')) return;
-    const m = String(pack).match(/(\d+)/);
-    const amount = m ? parseInt(m[1], 10) : 0;
-    if (!this.state.credits) this.state.credits = { remaining: 253, total: 500, resetLabel: 'dimanche 25 mai' };
-    this.state.credits.remaining += amount;
-    this.state.credits.total      += amount;
-    this.save();
-    this.renderView();
-    this.toast('✓ Pack ' + pack + ' acheté','success', '+' + amount + ' crédits ajoutés (' + price + '). Solde : ' + this.state.credits.remaining);
+    // Sprint 2 — honnêteté : aucun faux encaissement. Paiement réel = phase 2 (Stripe). On ne mute PAS state.credits.
+    this.toast('Achat de crédits','info','Paiement en phase 2 — intégration Stripe en cours. Aucun débit pour le moment.');
   },
 
   downloadAllInvoices(){
