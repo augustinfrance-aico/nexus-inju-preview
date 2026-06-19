@@ -171,7 +171,8 @@
       async listAll(tableName) {
         const user = this._user || await this.getUser();
         if (!user) return { ok: false, error: 'Pas connecté', data: [] };
-        const { data, error } = await client.from(tableName).select('*');
+        // ISOLATION (Sprint 1) : filtre tenant_id côté client en plus de la RLS (défense en profondeur).
+        const { data, error } = await client.from(tableName).select('*').eq('tenant_id', user.id);
         if (error) return { ok: false, error: error.message, data: [] };
         return { ok: true, data: data || [] };
       },
@@ -197,7 +198,8 @@
       async deleteOne(tableName, idField, idValue) {
         const user = this._user || await this.getUser();
         if (!user) return { ok: false, error: 'Pas connecté' };
-        const { error } = await client.from(tableName).delete().eq(idField, idValue);
+        // ISOLATION (Sprint 1) : on ne supprime QUE dans son propre tenant (jamais le row d'une autre PME).
+        const { error } = await client.from(tableName).delete().eq(idField, idValue).eq('tenant_id', user.id);
         if (error) return { ok: false, error: error.message };
         return { ok: true };
       },
