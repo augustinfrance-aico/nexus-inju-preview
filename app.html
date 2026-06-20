@@ -2132,6 +2132,21 @@ const Nx = {
     }
     // Welcome toast — après le boot
     setTimeout(() => this.toast('Bienvenue sur Nexus, Carlos ☀️', 'success', 'Ton agent IA veille sur tes conversations.'), 2200);
+
+    // Retour de la connexion Google (OAuth self-serve) : ?google=connected | ?google=error
+    try {
+      const gp = new URLSearchParams(location.search).get('google');
+      if (gp) {
+        history.replaceState(null, '', location.pathname + location.hash); // retire ?google=... de l'URL
+        const ok = gp === 'connected';
+        setTimeout(() => {
+          this.toast(ok ? '✅ Google Calendar relié' : 'Connexion Google non aboutie',
+                     ok ? 'success' : 'error',
+                     ok ? 'Tes rendez-vous arriveront dans ton agenda Google.' : 'La connexion n\'a pas abouti. Réessaie quand tu veux.');
+          this.navigate('onboarding-integrations');
+        }, 700);
+      }
+    } catch(e){}
     } catch(err) {
       console.error('[init] CRASH:', err);
       // Force-hide le boot même si init plante en route
@@ -9847,31 +9862,32 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   // Augustin 28/05/2026 : Intégrations sortent des Paramètres et deviennent partie intégrante de l'onboarding
   // Update 28/05 : Google Calendar retiré (déjà retiré de la vue Pilotage côté Augustin)
   viewOnboardingIntegrations(){
-    if (!this.state.integrations) {
-      // V5.7 : statuts HONNETES — rien n'est connecte tant que les vraies cles API (OAuth) ne sont pas branchees.
-      this.state.integrations = [
-        {k:'whatsapp', n:'WhatsApp Business API', ic:'📱', s:'available', critical:true,  desc:'Canal principal pour répondre aux clients.'},
-        {k:'gmail',    n:'Gmail',                ic:'✉️',  s:'available', critical:true,  desc:'Inbox unifiée avec les messages WhatsApp.'},
-        {k:'instagram',n:'Instagram DM',         ic:'📸', s:'available', critical:true,  desc:'Recevoir les DM Instagram dans la même inbox.'},
-        {k:'stripe',   n:'Stripe',               ic:'💳', s:'available', critical:true,  desc:'Encaisser ton abonnement Nexus + paiements clients.'},
-        {k:'mercado',  n:'Mercado Pago',         ic:'🇨🇱', s:'available', critical:false, desc:'Encaisser en pesos chiliens (très utilisé LATAM).'},
-        {k:'analytics',n:'Google Analytics',     ic:'📊', s:'available', critical:false, desc:'Lier les ventes à tes campagnes Nexus.'}
-      ];
-      this.save();
-    }
-    // Cleanup auto pour les users qui avaient déjà chargé la version avec Google Calendar
-    if (Array.isArray(this.state.integrations) && this.state.integrations.some(i => i.k === 'gcal')) {
-      this.state.integrations = this.state.integrations.filter(i => i.k !== 'gcal');
-      this.save();
-    }
-    const items = this.state.integrations;
-    const critical = items.filter(i => i.critical);
+    // Catalogue canonique : métadonnées TOUJOURS à jour (recalculé à chaque rendu, jamais figé dans le state).
+    // real:true = connexion réelle dispo (WhatsApp, Google Calendar). real:false = bientôt -> bouton "Indisponible" honnête.
+    const CATALOG = [
+      {k:'whatsapp', n:'WhatsApp Business', ic:'📱', critical:true,  real:true,  desc:'Canal principal pour répondre à tes clients.'},
+      {k:'gcal',     n:'Google Calendar',   ic:'📅', critical:true,  real:true,  desc:'Tes rendez-vous Nexus arrivent dans ton agenda Google.'},
+      {k:'gmail',    n:'Gmail',             ic:'✉️',  critical:false, real:false, desc:'Inbox unifiée avec WhatsApp.'},
+      {k:'instagram',n:'Instagram DM',      ic:'📸', critical:false, real:false, desc:'Recevoir les DM Instagram dans la même inbox.'},
+      {k:'stripe',   n:'Stripe',            ic:'💳', critical:false, real:false, desc:'Encaisser abonnement + paiements clients.'},
+      {k:'mercado',  n:'Mercado Pago',      ic:'🇨🇱', critical:false, real:false, desc:'Encaisser en pesos chiliens (LATAM).'},
+      {k:'analytics',n:'Google Analytics',  ic:'📊', critical:false, real:false, desc:'Lier les ventes à tes campagnes.'}
+    ];
+    // On préserve UNIQUEMENT le statut "connected" déjà enregistré (jamais les métadonnées, jamais pour les non-réels).
+    const savedStatus = {};
+    if (Array.isArray(this.state.integrations)) this.state.integrations.forEach(i => { if (i && i.k) savedStatus[i.k] = i.s; });
+    const items = CATALOG.map(c => ({ ...c, s: (c.real && savedStatus[c.k] === 'connected') ? 'connected' : 'available' }));
+    this.state.integrations = items;
+    this.save();
+    // Après le rendu : va chercher le vrai statut (Google réellement connecté pour ce compte ?)
+    setTimeout(() => { try { this.refreshIntegrationStatuses(); } catch(e){} }, 60);
+    const realCount = items.filter(i => i.real).length || 1;
     const connected = items.filter(i => i.s === 'connected').length;
-    const pct = Math.round((connected / items.length) * 100);
+    const pct = Math.round((connected / realCount) * 100);
     return `
       <div class="view">
         <div class="page-hd">
-          <div><h1>🔌 Connecter mes intégrations</h1><div class="sub">Étape de l'onboarding · ${connected}/${items.length} connectées · plus tu connectes, plus Nexus est précis.</div></div>
+          <div><h1>🔌 Connecter mes intégrations</h1><div class="sub">Étape de l'onboarding · ${connected}/${realCount} connectées · plus tu connectes, plus Nexus est précis.</div></div>
           <div class="flex"><button class="btn btn-s" onclick="Nx.navigate('tutorial')">← Retour au tutoriel</button></div>
         </div>
 
@@ -9881,23 +9897,33 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
             <span class="mono" style="color:var(--blue-ink);font-weight:800">${pct}%</span>
           </div>
           <div style="height:10px;background:#fff;border-radius:999px;overflow:hidden"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--blue),var(--violet,#7A3CFF));border-radius:999px"></div></div>
-          <div style="font-size:11.5px;color:var(--blue-ink);margin-top:8px">Les 5 intégrations critiques (badge 🔴) sont indispensables pour activer toutes les automatisations.</div>
+          <div style="font-size:11.5px;color:var(--blue-ink);margin-top:8px">Les intégrations clés (badge 🔴) — WhatsApp et Google Calendar — sont celles qui activent les automatisations. Les autres arrivent bientôt.</div>
         </div>
 
         <div class="card" style="padding:0;overflow:hidden">
           ${items.map(i => {
-            const statusColor = i.s==='connected' ? '#22C55E' : i.s==='pending' ? '#F59E0B' : '#94A3B8';
-            const statusLbl   = i.s==='connected' ? 'Connecté' : i.s==='pending' ? 'En attente' : 'À connecter';
-            const btnLbl      = i.s==='connected' ? 'Déconnecter' : 'Connecter maintenant';
-            const btnClass    = i.s==='connected' ? 'btn-s' : 'btn-p';
+            const isConn = i.s === 'connected';
+            let statusColor, statusLbl, btnHtml;
+            if (!i.real) {
+              // Honnête : pas de faux bouton tant que la connexion réelle n'existe pas
+              statusColor = '#94A3B8'; statusLbl = 'Bientôt';
+              btnHtml = `<button class="btn btn-s" style="white-space:nowrap;opacity:.5;cursor:not-allowed" disabled>Indisponible pour le moment</button>`;
+            } else if (isConn) {
+              statusColor = '#22C55E'; statusLbl = 'Connecté';
+              btnHtml = `<button class="btn btn-s" style="white-space:nowrap" onclick="Nx.disconnectIntegration('${i.k}')">Déconnecter</button>`;
+            } else {
+              statusColor = '#F59E0B'; statusLbl = 'À connecter';
+              const fn = i.k==='gcal' ? 'Nx.connectGoogle()' : i.k==='whatsapp' ? 'Nx.connectWhatsApp()' : `Nx.toggleIntegration('${i.k}')`;
+              btnHtml = `<button class="btn btn-p" style="white-space:nowrap" onclick="${fn}">Connecter</button>`;
+            }
             return `<div style="padding:16px 18px;display:flex;gap:14px;align-items:center;border-bottom:1px solid var(--line2)">
               <div style="width:44px;height:44px;border-radius:12px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">${i.ic}</div>
               <div style="flex:1;min-width:0">
-                <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px"><b style="font-size:14px">${i.n}</b>${i.critical?'<span title="Intégration critique pour Nexus" style="font-size:10px">🔴</span>':''}</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px"><b style="font-size:14px">${i.n}</b>${i.critical?'<span title="Intégration clé" style="font-size:10px">🔴</span>':''}</div>
                 <div style="font-size:12px;color:var(--muted)">${i.desc}</div>
               </div>
               <span class="chip" style="background:${statusColor}1A;color:${statusColor};border:1px solid ${statusColor}55;font-weight:700">${statusLbl}</span>
-              <button class="btn ${btnClass}" style="white-space:nowrap" onclick="Nx.toggleIntegration('${i.k}')">${btnLbl}</button>
+              ${btnHtml}
             </div>`;
           }).join('')}
         </div>
@@ -9913,13 +9939,59 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     if (!this.state.integrations) return;
     const it = this.state.integrations.find(x => x.k === k);
     if (!it) return;
-    // V5.7 : pas de fausse connexion. La vraie connexion (OAuth + cles API client) se branche avant le lancement beta.
+    // Intégrations non encore réelles : honnête, pas de fausse connexion.
     if (it.s === 'connected') {
       it.s = 'available'; this.save(); this.renderView();
       this.toast(it.n + ' déconnecté', 'info');
     } else {
-      this.toast('🔜 Connexion sécurisée bientôt', 'info', it.n + ' — les accès se branchent avant le lancement de la beta');
+      this.toast('Bientôt disponible', 'info', it.n + ' arrive très vite.');
     }
+  },
+
+  // ===== CONNEXIONS RÉELLES (self-serve, comme un utilisateur classique) =====
+  async _supaToken(){
+    try {
+      if (!window.NxCloud || !NxCloud.client) return null;
+      const { data } = await NxCloud.client.auth.getSession();
+      return (data && data.session && data.session.access_token) || null;
+    } catch(e){ return null; }
+  },
+  // Google Calendar : l'utilisateur clique -> il autorise SON Google -> son agenda est relié.
+  async connectGoogle(){
+    const token = await this._supaToken();
+    if (!token) { this.toast('Connexion requise', 'error', 'Connecte-toi à ton compte Nexus avant de relier Google.'); return; }
+    this.toast('Redirection vers Google…', 'info');
+    try {
+      const r = await fetch('/api/oauth/google?action=start', { method:'POST', headers:{ Authorization:'Bearer '+token } });
+      const j = await r.json().catch(()=>({}));
+      if (r.ok && j.url) { window.location.href = j.url; }
+      else { this.toast('Connexion Google indisponible', 'error', j.error || 'Réessaie dans un instant.'); }
+    } catch(e){ this.toast('Connexion Google indisponible', 'error', String(e).slice(0,80)); }
+  },
+  async connectWhatsApp(){
+    this.toast('WhatsApp', 'info', 'Connexion WhatsApp par QR — finalisation en cours, dispo très vite.');
+  },
+  async disconnectIntegration(k){
+    if (k === 'gcal') {
+      const token = await this._supaToken();
+      if (token) { try { await fetch('/api/oauth/google?action=disconnect', { method:'POST', headers:{ Authorization:'Bearer '+token } }); } catch(e){} }
+    }
+    const it = (this.state.integrations||[]).find(x => x.k === k);
+    if (it) { it.s = 'available'; this.save(); this.renderView(); this.toast((it.n||'Intégration') + ' déconnecté', 'info'); }
+  },
+  // Va chercher le vrai statut côté serveur (Google réellement relié pour CE compte ?)
+  async refreshIntegrationStatuses(){
+    const token = await this._supaToken();
+    if (!token) return;
+    try {
+      const r = await fetch('/api/oauth/google?action=status', { headers:{ Authorization:'Bearer '+token } });
+      const j = await r.json().catch(()=>({}));
+      const gcal = (this.state.integrations||[]).find(i => i.k === 'gcal');
+      if (gcal) {
+        const newS = j.connected ? 'connected' : 'available';
+        if (gcal.s !== newS) { gcal.s = newS; this.save(); this.renderView(); }
+      }
+    } catch(e){}
   },
 
   viewSettings(){
