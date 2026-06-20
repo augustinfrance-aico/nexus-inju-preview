@@ -7024,7 +7024,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
               <div class="pn-cal-items">
                 ${visible.map(it => {
                   const meta = cats[it.category] || { color:'#7A3CFF', ic:'🎯' };
-                  return `<div class="pn-cal-pill" style="background:${meta.color}1A;border-color:${meta.color}66;color:${meta.color}" title="${(it.title||'').replace(/"/g,'&quot;')}" onclick="Nx.openAgendaDetail('${it.id}')">${meta.ic} ${it.title.length>22?it.title.slice(0,22)+'…':it.title}</div>`;
+                  return `<div class="pn-cal-pill" style="background:${meta.color}1A;border-color:${meta.color}66;color:${meta.color}" title="${Nx._h(it.title)}" onclick="Nx.openAgendaDetail('${it.id}')">${meta.ic} ${Nx._h(it.title.length>22?it.title.slice(0,22)+'…':it.title)}</div>`;
                 }).join('')}
                 ${overflow > 0 ? `<div class="pn-cal-more" onclick="Nx.openDayPopup(${c.d.getTime()})">+ ${overflow} autre${overflow>1?'s':''}</div>` : ''}
               </div>
@@ -9625,24 +9625,24 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     if (!ov || !mc) return;
     ov.classList.remove('hidden');
     const isSimulated = entry.status === 'simulated';
-    const bodyHtml = payload.body.replace(/\n/g,'<br>').replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:#1A56DB">$1</a>');
+    const bodyHtml = Nx._h(payload.body).replace(/\n/g,'<br>').replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:#1A56DB">$1</a>');
     mc.innerHTML = `
       <div class="modal-hd"><h3>🚨 Escalade d'urgence ${isSimulated?'<span style="font-size:10px;font-weight:700;background:#F59E0B;color:#fff;padding:3px 8px;border-radius:999px;margin-left:8px">🧪 SIMULATION</span>':'<span style="font-size:10px;font-weight:700;background:#10B981;color:#fff;padding:3px 8px;border-radius:999px;margin-left:8px">✓ ENVOYÉ</span>'}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
       <div class="modal-body" style="max-height:75vh;overflow-y:auto">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;font-size:12px">
           <div style="padding:10px 12px;background:var(--bg2);border-radius:8px">
             <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700">Client à l'origine</div>
-            <div style="font-weight:700;margin-top:3px">${entry.client}</div>
-            ${entry.clientPhone?`<div style="color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace">${entry.clientPhone}</div>`:''}
+            <div style="font-weight:700;margin-top:3px">${Nx._h(entry.client)}</div>
+            ${entry.clientPhone?`<div style="color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace">${Nx._h(entry.clientPhone)}</div>`:''}
           </div>
           <div style="padding:10px 12px;background:var(--bg2);border-radius:8px">
             <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700">Destinataire (patron)</div>
-            <div style="font-weight:700;margin-top:3px">${payload.ownerName}</div>
+            <div style="font-weight:700;margin-top:3px">${Nx._h(payload.ownerName)}</div>
             <div style="color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace">${payload.to}</div>
           </div>
           <div style="padding:10px 12px;background:var(--bg2);border-radius:8px">
             <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700">Raison de l'escalade</div>
-            <div style="font-weight:700;margin-top:3px">${entry.reason}</div>
+            <div style="font-weight:700;margin-top:3px">${Nx._h(entry.reason)}</div>
           </div>
           <div style="padding:10px 12px;background:var(--bg2);border-radius:8px">
             <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700">Canal d'envoi</div>
