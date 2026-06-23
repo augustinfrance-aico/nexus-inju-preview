@@ -909,8 +909,8 @@ html[data-theme="dark"] .chat-input textarea::placeholder{color:#8A94A6}
       <div class="p-card">
         <div class="p-avatar" id="bizLogo">🥖</div>
         <div class="p-who">
-          <div class="n" id="bizName">Panadería Don Carlos</div>
-          <div class="b" id="bizOwner">Carlos · Santiago</div>
+          <div class="n" id="bizName">Mon commerce</div>
+          <div class="b" id="bizOwner">Profil à compléter</div>
         </div>
         <button class="p-switch" title="Changer d'entreprise" onclick="Nx.toast('Profil unique en démo','info')">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
@@ -2131,7 +2131,7 @@ const Nx = {
       }
     }
     // Welcome toast — après le boot
-    setTimeout(() => this.toast('Bienvenue sur Nexus, Carlos ☀️', 'success', 'Ton agent IA veille sur tes conversations.'), 2200);
+    setTimeout(() => this.toast('Bienvenue sur Nexus 👋', 'success', 'Ton agent IA veille sur tes conversations.'), 2200);
 
     // Retour de la connexion Google (OAuth self-serve) : ?google=connected | ?google=error
     try {
@@ -2447,8 +2447,8 @@ const Nx = {
         <div class="modal-hd"><h3>Mon compte</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
         <div class="modal-body">
           <div style="display:flex;gap:16px;align-items:center;margin-bottom:20px">
-            <div class="avatar" style="width:64px;height:64px;font-size:22px">CM</div>
-            <div><div style="font-weight:700;font-size:16px">Carlos Muñoz</div><div style="color:var(--muted);font-size:13px">carlos@panaderiadoncarlos.cl</div></div>
+            <div class="avatar" style="width:64px;height:64px;font-size:22px">${this._accountIdentity().initials}</div>
+            <div><div style="font-weight:700;font-size:16px">${Nx._h(this._accountIdentity().owner || this._accountIdentity().name || 'Mon compte')}</div><div style="color:var(--muted);font-size:13px">${Nx._h(this._accountIdentity().email || '')}</div></div>
           </div>
           <button class="btn btn-s" style="width:100%;margin-bottom:8px;justify-content:flex-start" onclick="Nx.navigate('profile');Nx.closeModal()">👤 Paramètres du profil</button>
           <button class="btn btn-s" style="width:100%;margin-bottom:8px;justify-content:flex-start" onclick="Nx.navigate('payments');Nx.closeModal()">💳 Plan & facturation</button>
@@ -2917,7 +2917,7 @@ const Nx = {
             <section class="ai-chat-panel">
               <div id="aiMessages" class="ai-chat-msgs">
                 <div class="bubble them">
-                  <b>Hola Carlos 👋</b><br>
+                  <b>Hola ${this._accountIdentity().firstName ? Nx._h(this._accountIdentity().firstName)+' ' : ''}👋</b><br>
                   Je suis ton coach Nexus, connecté à toutes tes données (ventes, clients, conversations).<br>
                   Demande-moi <b>ce que tu veux</b> — analyse, idée, action concrète. Ou clique un conseil à gauche 👈
                 </div>
@@ -3232,26 +3232,58 @@ const Nx = {
   async loadProfileFromCloud(){
     if (!window.NxCloud || !window.NxCloud.isAuthed()) return;
     const cloudProfile = await window.NxCloud.getProfile();
-    if (cloudProfile && Object.keys(cloudProfile).length) {
-      // Merge non-destructif : on conserve les défauts du state sur les champs vides côté cloud
-      const merged = Object.assign({}, this.state.business, cloudProfile);
-      // Si le profil cloud existe mais est vide (1er login), on push le profil démo en cloud
-      const isEmptyCloud = !cloudProfile.name && !cloudProfile.description;
-      this.state.business = merged;
+    // Un profil "réel" = au moins un nom ou une description renseignés par l'utilisateur
+    const hasReal = cloudProfile && (cloudProfile.name || cloudProfile.description);
+    if (hasReal) {
+      // Profil réel existant → on le charge
+      this.state.business = Object.assign({}, this.state.business, cloudProfile);
       this.save();
-      if (isEmptyCloud) {
-        // Premier login : on seed avec le profil démo Carlos pour que Nexus marche immédiatement
-        await window.NxCloud.upsertProfile(this.state.business);
-        this.toast('☁️ Profil démo synchronisé en cloud', 'info', 'Tu peux modifier, ça sauvegarde auto');
-      } else {
-        this.toast('☁️ Profil chargé depuis le cloud', 'success', cloudProfile.name || '');
-      }
-      if (this.state.view === 'profile' || this.state.view === 'dashboard') this.renderView();
+      this.toast('☁️ Profil chargé depuis le cloud', 'success', cloudProfile.name || '');
     } else {
-      // Pas de profil en BDD → on seed avec le profil actuel (démo Carlos)
-      const res = await window.NxCloud.upsertProfile(this.state.business);
-      if (res.ok) this.toast('☁️ Profil créé en cloud', 'success');
+      // NOUVEAU compte (pas de profil, ou profil vide) → profil VIERGE. JAMAIS de seed démo (Carlos).
+      // Règle Augustin : un compte neuf est vide, l'utilisateur remplit le sien.
+      this.state.business = this._blankBusiness();
+      this.state.clients = [];
+      this.state.conversations = [];
+      this.state.campaigns = [];
+      this.state.invoices = [];
+      this.state.notifications = [];
+      if (this.state.preferences) this.state.preferences.signature = '';
+      this.save();
     }
+    try { this._syncChrome(); } catch(e){}
+    if (this.state.view === 'profile' || this.state.view === 'dashboard') this.renderView();
+  },
+  // Profil entreprise VIERGE (même structure que la démo, mais vide) — pour un nouveau compte
+  _blankBusiness(){
+    return {
+      name:'', owner:'', ownerPhone:'', mercadoPagoHandle:'', city:'', country:'🇨🇱',
+      logo:'🏪', logoType:'emoji', industry:'', description:'', dataArchives:'', composition:'',
+      webPage:'', catalogUrl:'',
+      hours:{mon:'',tue:'',wed:'',thu:'',fri:'',sat:'',sun:''},
+      tone:'', faq:[], catalog:[], payment:'', delivery:'', tagline:''
+    };
+  },
+  // Identité du compte connecté (jamais "Carlos" en dur) — pour sidebar, menu, accueil
+  _accountIdentity(){
+    const b = this.state.business || {};
+    const email = (window.NxCloud && NxCloud._user && NxCloud._user.email) || '';
+    const owner = (b.owner || '').trim();
+    const name = (b.name || '').trim();
+    const firstName = owner ? owner.split(/\s+/)[0] : (email ? email.split('@')[0] : '');
+    const initials = (owner ? owner.split(/\s+/).map(x=>x[0]||'').join('').slice(0,2)
+                     : (email ? email.slice(0,2) : 'NX')).toUpperCase();
+    return { name, owner, email, firstName, initials, city:(b.city||'').trim() };
+  },
+  // Met à jour les libellés d'identité dans la sidebar (compte courant)
+  _syncChrome(){
+    try {
+      const id = this._accountIdentity();
+      const nameEl = document.getElementById('bizName');
+      const ownerEl = document.getElementById('bizOwner');
+      if (nameEl) nameEl.textContent = id.name || 'Mon commerce';
+      if (ownerEl) ownerEl.textContent = [id.owner, id.city].filter(Boolean).join(' · ') || 'Profil à compléter';
+    } catch(e){}
   },
   async pushProfileToCloud(){
     if (!window.NxCloud || !window.NxCloud.isAuthed()) return;
@@ -3788,6 +3820,7 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
     const vc = document.getElementById('viewContainer');
     const v = this.state.view;
     let html = '';
+    try { this._syncChrome(); } catch(e){}
     // try/catch défensif : si une vue plante, on affiche une page d'erreur au lieu de crasher (Augus 19/05 : "loading en boucle")
     try {
       if (v === 'dashboard') html = this.viewDashboard();
@@ -3851,7 +3884,7 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
               <span class="ncd-live"><span class="dot"></span>Live</span>
             </div>
             <div class="ncd-eyebrow">${t('ncd.eyebrow')}</div>
-            <h1 class="ncd-greet">${greet}, <em>Carlos</em></h1>
+            <h1 class="ncd-greet">${greet}${this._accountIdentity().firstName ? ', <em>'+Nx._h(this._accountIdentity().firstName)+'</em>' : ''}</h1>
             <p class="ncd-sub">${t('ncd.sub')}</p>
           </div>
         </div>
@@ -4390,7 +4423,7 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
           </div>
           <div class="form-row">
             <label class="form-lbl">👥 Composition — équipe, employés, collaborateurs</label>
-            <textarea class="form-ctrl" rows="3" placeholder="Ex : Carlos (gérant), Mariana (caisse), Diego (panadero junior)…" oninput="Nx.updateBiz('composition',this.value)">${b.composition||''}</textarea>
+            <textarea class="form-ctrl" rows="3" placeholder="Ex : Marie (gérante), Paul (caisse), Léa (vente)…" oninput="Nx.updateBiz('composition',this.value)">${b.composition||''}</textarea>
           </div>
           <div class="form-row">
             <label class="form-lbl">🌐 Page web — l'IA peut la lire/scraper pour s'auto-enrichir</label>
@@ -5210,7 +5243,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         </div>
         <div class="form-row">
           <label class="form-lbl">Libellé (visible par ${c.name.split(' ')[0]})</label>
-          <input class="form-ctrl" id="mpDesc" placeholder="Pedido Don Carlos" value="Pedido Don Carlos" oninput="Nx.refreshMercadoPagoPreview('${handle}')">
+          <input class="form-ctrl" id="mpDesc" placeholder="Libellé du paiement (ex : 3kg pan amasado)" value="" oninput="Nx.refreshMercadoPagoPreview('${handle}')">
         </div>
         <div class="form-row">
           <label class="form-lbl">Aperçu lien Mercado Pago</label>
@@ -5943,7 +5976,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         <div id="crmAiMessages" class="crmai-msgs">
           ${corrections.length > 0 ? `<div class="crmai-corr-banner">📝 ${corrections.length} correction(s) mémorisée(s) · L'IA s'en souvient pour mieux te répondre</div>` : ''}
           <div class="crmai-bubble them">
-            <b>Hola Carlos 👋</b><br>
+            <b>Hola ${this._accountIdentity().firstName ? Nx._h(this._accountIdentity().firstName)+' ' : ''}👋</b><br>
             Je vois ta base CRM en entier (${clients.length} clients, leurs scores, historiques, segments). Demande-moi <b>n'importe quoi</b> — analyse, génération de message, action concrète.
             <br><br>
             <b>Astuce :</b> si je me trompe, clique sur <b>✏️ Corriger</b> et je m'en souviendrai pour les prochaines questions.
@@ -8111,13 +8144,13 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           </div>
           <div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;font-family:Inter,sans-serif">
             <div style="font-size:11px;color:#94A3B8;display:flex;justify-content:space-between;border-bottom:1px solid #F1F5F9;padding-bottom:8px;margin-bottom:10px">
-              <span><b style="color:#334155">De :</b> Panadería Don Carlos &lt;hola@doncarlos.cl&gt;</span>
+              <span><b style="color:#334155">De :</b> ${Nx._h(this.state.business.name||'Ton commerce')}</span>
               <span>19:00</span>
             </div>
             <div style="font-size:13px;color:#0F172A;font-weight:700;margin-bottom:8px">Objet : <span id="campSubjectPreview" style="font-weight:600;color:#334155">${document.getElementById('campName')?.value || 'Promo pan amasado week-end'}</span></div>
             <div style="font-size:13px;color:#1E293B;line-height:1.55;white-space:pre-wrap" id="campBodyPreview">${presetMessage!=null?String(presetMessage).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):'Hola 👋 Este fin de semana en Don Carlos: 3kg de pan amasado por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! 🥖'}</div>
             <div style="margin-top:14px;padding-top:10px;border-top:1px solid #F1F5F9;font-size:11px;color:#94A3B8">
-              ✂️ Si tu ne souhaites plus recevoir ces emails, <a style="color:#1A56DB">se désinscrire</a> · Panadería Don Carlos · Las Condes, Santiago
+              ✂️ Si tu ne souhaites plus recevoir ces emails, <a style="color:#1A56DB">se désinscrire</a> · ${Nx._h(this.state.business.name||'Ton commerce')}${this.state.business.city?' · '+Nx._h(this.state.business.city):''}
             </div>
           </div>
         </div>
@@ -8806,8 +8839,8 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
             <button class="btn btn-s" style="width:100%" onclick="Nx.toast('Moyen de paiement','info','Intégration Stripe en phase 2 — bientôt tu pourras ajouter ta carte ici.')">+ Ajouter une carte</button>
 
             <h3 style="margin:20px 0 14px">📋 Infos facturation</h3>
-            <div class="form-row"><label class="form-lbl">Raison sociale</label><input class="form-ctrl" value="Panadería Don Carlos SpA"></div>
-            <div class="form-row"><label class="form-lbl">RUT</label><input class="form-ctrl" value="76.123.456-7"></div>
+            <div class="form-row"><label class="form-lbl">Raison sociale</label><input class="form-ctrl" value="${Nx._h(this.state.business.name||'')}" placeholder="Nom légal de ton entreprise"></div>
+            <div class="form-row"><label class="form-lbl">RUT</label><input class="form-ctrl" value="" placeholder="Ton RUT / numéro fiscal"></div>
           </div>
         </div>
 
@@ -9367,9 +9400,9 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
               </div>
               <div id="vacancePreview" style="display:flex;flex-direction:column;gap:10px">
                 ${[
-                  {client:'María González', q:'Hola Carlos, ¿están abiertos mañana?', a:'Hola María 👋 Sí, abrimos mañana de 8h a 19h. Carlos est en vacances jusqu\'au [DATE] mais Nexus est là pour t\'aider !', time:'Il y a 12 min'},
+                  {client:'María González', q:'Hola, ¿están abiertos mañana?', a:'Hola María 👋 Sí, abrimos mañana de 8h a 19h. L\'équipe est en vacances jusqu\'au [DATE] mais Nexus est là pour t\'aider !', time:'Il y a 12 min'},
                   {client:'Diego Salazar', q:'¿Tienen pan amasado para esta tarde?', a:'¡Sí Diego! Pan amasado disponible toute la journée. Tu peux passer après 14h pour les fournées de l\'après-midi 🥖', time:'Il y a 1h'},
-                  {client:'Ana Castillo', q:'¿Hacen entregas en Las Condes?', a:'Oui Ana, livraison gratuite Las Condes pour commandes > 15.000 CLP. WhatsApp-moi ta commande, je préviens Carlos à son retour pour la confirmer 💛', time:'Hier · 18h22'}
+                  {client:'Ana Castillo', q:'¿Hacen entregas en Las Condes?', a:'Oui Ana, livraison gratuite Las Condes pour commandes > 15.000 CLP. WhatsApp-moi ta commande, je préviens l\'équipe à son retour pour la confirmer 💛', time:'Hier · 18h22'}
                 ].map(m=>`
                   <div style="padding:12px 14px;background:var(--bg2);border-radius:10px;border-left:3px solid #10B981">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
@@ -9409,7 +9442,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         </div>
         <div class="form-row">
           <label class="form-lbl">Message client à simuler</label>
-          <textarea class="form-ctrl" id="vacTestMsg" rows="3" placeholder="Ex : Hola, ¿están abiertos el domingo?">Hola Carlos, ¿están abiertos mañana? Y tienen pan amasado disponible?</textarea>
+          <textarea class="form-ctrl" id="vacTestMsg" rows="3" placeholder="Ex : Hola, ¿están abiertos el domingo?">Hola, ¿están abiertos mañana? Y tienen pan amasado disponible?</textarea>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
           ${['¿Están abiertos mañana?','¿Tienen entrega a domicilio?','¿Cuánto cuesta el pan amasado?','¿Hacen tortas por encargo?'].map(p=>`<button class="btn-g" style="font-size:11px" onclick="document.getElementById('vacTestMsg').value='${p}'">${p}</button>`).join('')}
