@@ -3191,6 +3191,15 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       if (hero)  hero.innerHTML = '<b>Bienvenue sur Nexus 👋</b> Connecte-toi à ton compte pour voir tes vraies données.';
       if (gainA) gainA.textContent = '$0 CLP';
       if (gainB) gainB.style.display = 'none';
+      // Tout le reste : générique (stats, récap, messages) — jamais les chiffres de Carlos.
+      // On retire le data-i18n pour que la langue ne réinjecte pas la démo.
+      const clr = (el)=>{ if(el){ el.removeAttribute('data-i18n'); el.removeAttribute('data-i18n-html'); } };
+      document.querySelectorAll('.stat-headline').forEach(el=>{ clr(el); el.innerHTML='<b>—</b> Tes statistiques apparaîtront ici.'; });
+      document.querySelectorAll('.stat-detail').forEach(el=>{ clr(el); el.textContent='Connecte-toi pour voir tes données.'; });
+      document.querySelectorAll('.text-content').forEach(el=>{ clr(el); el.innerHTML='<p><b>Aperçu de démonstration.</b> Une fois connecté, Nexus génère ici un vrai récap de ton activité.</p>'; });
+      document.querySelectorAll('.msg-name').forEach((el,i)=>{ const star=el.querySelector('.star'); clr(el); el.textContent='Exemple '+(i+1)+' '; if(star) el.appendChild(star); });
+      document.querySelectorAll('.msg-text').forEach(el=>{ clr(el); el.textContent='Tes conversations apparaîtront ici.'; });
+      document.querySelectorAll('.msg-avatar').forEach(el=>{ el.textContent='—'; });
       return;
     }
     try {
