@@ -10184,6 +10184,35 @@ window.addEventListener('DOMContentLoaded', () => Nx.init());
   });
   bindCloudUi();
 
+  // Bannière d'auth VISIBLE (Augustin 24/06) : se connecter / se déconnecter clairs, partout.
+  function nxAuthBanner(){
+    let bar = document.getElementById('nxAuthBar');
+    if (!bar){
+      bar = document.createElement('div');
+      bar.id = 'nxAuthBar';
+      bar.style.cssText = 'position:sticky;top:0;z-index:1500;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:9px 14px;font-size:13px;font-weight:600;font-family:inherit;box-shadow:0 2px 10px rgba(0,0,0,.15)';
+      document.body.insertBefore(bar, document.body.firstChild);
+    }
+    const authed = (window.NxCloud && window.NxCloud.isAuthed && window.NxCloud.isAuthed());
+    const email = (window.NxCloud && window.NxCloud._user && window.NxCloud._user.email) || '';
+    if (authed){
+      bar.style.background = 'linear-gradient(135deg,#10B981,#059669)'; bar.style.color = '#fff';
+      bar.innerHTML = '<span>✅ Connecté : '+ (email||'ton compte') +'</span>'
+        + '<button id="nxBarLogout" style="background:transparent;border:1px solid rgba(255,255,255,.65);color:#fff;padding:6px 12px;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit">🚪 Se déconnecter</button>';
+      const lo = document.getElementById('nxBarLogout');
+      if (lo) lo.onclick = () => { try{ Nx.logoutCloud(); }catch(e){} };
+    } else {
+      bar.style.background = 'linear-gradient(135deg,#1F6FFF,#7A3CFF)'; bar.style.color = '#fff';
+      bar.innerHTML = '<span>👋 Tu vois une <b>démo</b>. Connecte-toi à <b>ton compte</b> pour voir tes données.</span>'
+        + '<button id="nxBarLogin" style="background:#fff;border:0;color:#1F6FFF;padding:6px 14px;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit">🔓 Se connecter</button>';
+      const li = document.getElementById('nxBarLogin');
+      if (li) li.onclick = () => { try{ Nx.openLogin(); }catch(e){} };
+    }
+  }
+  document.addEventListener('nx-cloud-ready', nxAuthBanner);
+  document.addEventListener('nx-cloud-auth', nxAuthBanner);
+  setTimeout(nxAuthBanner, 500);
+
   // V4.2 : filet de securite — re-sync silencieux toutes les 30 min (pas de spam).
   // L'actualisation a la demande se fait via le bouton "Actualiser" du CRM (Nx.refreshFromCloud).
   let _nxSyncing = false;
