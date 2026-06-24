@@ -50,7 +50,23 @@ export default async function handler(req, res) {
 
   try {
     if (action === 'status') {
-      return res.status(200).json(await getStatus());
+      const st = await getStatus();
+      // Connecté + numéro -> on l'enregistre dans le profil du compte.
+      // INDISPENSABLE : le robot Inbound résout le tenant via business_profiles.phone = numéro du commerce.
+      // Sans ça, l'IA WhatsApp ne sait pas à quel compte appartient le message (TENANT_NOT_FOUND).
+      if (st.status === 'WORKING' && st.number) {
+        const digits = String(st.number).replace(/[^0-9]/g, '');
+        if (digits.length >= 8) {
+          try {
+            await fetch(SUPA + '/rest/v1/business_profiles?tenant_id=eq.' + encodeURIComponent(user.id), {
+              method: 'PATCH',
+              headers: { apikey: SR, Authorization: 'Bearer ' + SR, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+              body: JSON.stringify({ phone: digits })
+            });
+          } catch (e) { /* non bloquant */ }
+        }
+      }
+      return res.status(200).json(st);
     }
 
     if (action === 'start') {
