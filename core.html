@@ -3207,6 +3207,9 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       document.querySelectorAll('.msg-name').forEach((el,i)=>{ const star=el.querySelector('.star'); clr(el); el.textContent='Exemple '+(i+1)+' '; if(star) el.appendChild(star); });
       document.querySelectorAll('.msg-text').forEach(el=>{ clr(el); el.textContent='Tes conversations apparaîtront ici.'; });
       document.querySelectorAll('.msg-avatar').forEach(el=>{ el.textContent='—'; });
+      document.querySelectorAll('.advice-text').forEach(el=>{ clr(el); el.textContent='Tes conseils Nexus apparaîtront ici une fois connecté.'; });
+      const _nb=document.querySelector('.notif .badge'); if(_nb) _nb.style.display='none';
+      document.querySelectorAll('.drawer-item-meta').forEach(el=>{ el.textContent=''; });
       return;
     }
     try {
@@ -3224,8 +3227,28 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
   function nxRefreshAuthUI(){ try{ nxAuthBanner(); }catch(e){} try{ nxApplyAuthIdentity(); }catch(e){} }
   document.addEventListener('nx-cloud-ready', nxRefreshAuthUI);
   document.addEventListener('nx-cloud-auth', nxRefreshAuthUI);
+  setTimeout(nxRefreshAuthUI, 150);   // tôt = anti-flash
   setTimeout(nxRefreshAuthUI, 500);
   setTimeout(nxApplyAuthIdentity, 950);
+
+  // ===== PORTAIL D'AUTH UNIQUE (Cooper 24/06) =====
+  // Déconnecté : toute navigation/action vers un compte est bloquée -> on ouvre le login.
+  // Connecté : la fonction sort immédiatement, ZÉRO interférence (le cas connecté n'est pas touché).
+  function nxIsAuthed(){ return !!(window.NxCloud && window.NxCloud.isAuthed && window.NxCloud.isAuthed()); }
+  function nxOpenLogin(){ const b=document.getElementById('nxBarLogin')||document.getElementById('cloudBtn'); if(b) b.click(); }
+  const NX_GATE_SEL = '#profileBtn, #settingsBtn, #menuBtn, #notifBtn, #gainBanner, .stat, .drawer-item, .advice-card, .share-fab, a[href^="app.html"]';
+  document.addEventListener('click', function(e){
+    if (nxIsAuthed()) return; // connecté : tout marche normalement
+    // toujours autorisés (déconnecté) : login, cloud, langue, thème, le modal lui-même
+    if (e.target.closest('#cloudBtn, #nxBarLogin, #nxAuthBar, #cloudOverlay, #langDropdown, #langDdBtn, #themeToggle')) return;
+    if (e.target.closest(NX_GATE_SEL)) { e.preventDefault(); e.stopPropagation(); nxOpenLogin(); }
+  }, true);
+  document.addEventListener('keydown', function(e){
+    if (nxIsAuthed()) return;
+    const tag=((e.target&&e.target.tagName)||'').toLowerCase();
+    if (tag==='input'||tag==='textarea'||tag==='select') return;
+    if ((e.key||'').toLowerCase()==='i') { e.preventDefault(); e.stopPropagation(); nxOpenLogin(); }
+  }, true);
   document.addEventListener('nx-cloud-ready', refreshCloudDot);
   document.addEventListener('nx-cloud-auth', (e) => {
     refreshCloudDot();
