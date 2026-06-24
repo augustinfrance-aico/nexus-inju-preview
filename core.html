@@ -3031,12 +3031,12 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
   const renderLoginForm = () => {
     cloudCardBody.innerHTML = `
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <h2 style="margin:0;font-size:18px;font-weight:800">☁️ Connexion Nexus Cloud</h2>
+        <h2 style="margin:0;font-size:18px;font-weight:800">${({fr:'☁️ Connexion Nexus',es:'☁️ Conexión Nexus',en:'☁️ Nexus Login'})[curLang]||'☁️ Connexion Nexus'}</h2>
         <button id="cloudClose" style="background:none;border:0;color:var(--ink2);font-size:22px;cursor:pointer">✕</button>
       </div>
       <div style="display:flex;gap:4px;margin-bottom:14px;padding:4px;background:var(--bg2);border-radius:10px">
-        <button id="modeMagic" style="flex:1;padding:8px;border-radius:8px;border:0;background:linear-gradient(135deg,#1F6FFF,#7A3CFF);color:#fff;cursor:pointer;font-weight:700;font-size:12px;font-family:inherit">📨 Magic Link</button>
-        <button id="modePwd" style="flex:1;padding:8px;border-radius:8px;border:0;background:transparent;color:var(--ink2);cursor:pointer;font-weight:600;font-size:12px;font-family:inherit">🔑 Mot de passe</button>
+        <button id="modeMagic" style="flex:1;padding:8px;border-radius:8px;border:0;background:linear-gradient(135deg,#1F6FFF,#7A3CFF);color:#fff;cursor:pointer;font-weight:700;font-size:12px;font-family:inherit">${({fr:'🔓 Se connecter',es:'🔓 Iniciar sesión',en:'🔓 Log in'})[curLang]||'🔓 Se connecter'}</button>
+        <button id="modePwd" style="flex:1;padding:8px;border-radius:8px;border:0;background:transparent;color:var(--ink2);cursor:pointer;font-weight:600;font-size:12px;font-family:inherit">${({fr:'✨ Créer un compte',es:'✨ Crear cuenta',en:'✨ Sign up'})[curLang]||'✨ Créer un compte'}</button>
       </div>
       <div id="cloudFormArea"></div>`;
     document.getElementById('cloudClose').onclick = closeCloudOverlay;
@@ -3044,16 +3044,23 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
     const btnMagic = document.getElementById('modeMagic');
     const btnPwd   = document.getElementById('modePwd');
 
-    const renderMagic = () => {
-      btnMagic.style.background = 'linear-gradient(135deg,#1F6FFF,#7A3CFF)'; btnMagic.style.color = '#fff';
-      btnPwd.style.background = 'transparent'; btnPwd.style.color = 'var(--ink2)';
+    const renderMagic = (isSignup) => {
+      const t = (f,e,n)=>({fr:f,es:e,en:n}[curLang]||f);
+      (isSignup ? btnPwd : btnMagic).style.background = 'linear-gradient(135deg,#1F6FFF,#7A3CFF)';
+      (isSignup ? btnPwd : btnMagic).style.color = '#fff';
+      (isSignup ? btnMagic : btnPwd).style.background = 'transparent';
+      (isSignup ? btnMagic : btnPwd).style.color = 'var(--ink2)';
+      const intro = isSignup
+        ? t('✨ Première fois ? Entre ton email, on crée ton compte (lien par mail).','✨ ¿Primera vez? Pon tu correo y creamos tu cuenta (enlace por correo).','✨ First time? Enter your email, we create your account (link by email).')
+        : t('🔐 Connecte-toi : entre ton email, reçois un lien de connexion.','🔐 Inicia sesión: pon tu correo y recibe un enlace.','🔐 Log in: enter your email, get a sign-in link.');
+      const btnLbl = isSignup ? t('✨ Créer mon compte','✨ Crear mi cuenta','✨ Create my account') : t('🔓 Se connecter','🔓 Iniciar sesión','🔓 Log in');
       formArea.innerHTML = `
-        <div style="padding:10px 12px;background:var(--bg2);border-radius:8px;margin-bottom:10px;font-size:11.5px;color:var(--ink2)">🔐 Email seul · lien magique · retour connecté.</div>
-        <input id="cloudEmailCore" type="email" placeholder="ton@email.com" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px;font-family:inherit;margin-bottom:10px">
+        <div style="padding:10px 12px;background:var(--bg2);border-radius:8px;margin-bottom:10px;font-size:11.5px;color:var(--ink2)">${intro}</div>
+        <input id="cloudEmailCore" type="email" placeholder="${t('ton@email.com','tu@correo.com','you@email.com')}" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px;font-family:inherit;margin-bottom:10px">
         <div id="cloudStatusCore" style="min-height:24px;margin-bottom:10px;font-size:12.5px"></div>
         <div style="display:flex;gap:8px;justify-content:flex-end">
-          <button id="cloudCancelCore" style="padding:10px 16px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink2);cursor:pointer;font-weight:600;font-family:inherit">Annuler</button>
-          <button id="cloudSubmitCore" style="padding:10px 16px;border-radius:10px;border:0;background:linear-gradient(135deg,#1F6FFF,#7A3CFF);color:#fff;cursor:pointer;font-weight:700;font-family:inherit">📨 Recevoir le lien</button>
+          <button id="cloudCancelCore" style="padding:10px 16px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink2);cursor:pointer;font-weight:600;font-family:inherit">${t('Annuler','Cancelar','Cancel')}</button>
+          <button id="cloudSubmitCore" style="padding:10px 16px;border-radius:10px;border:0;background:linear-gradient(135deg,#1F6FFF,#7A3CFF);color:#fff;cursor:pointer;font-weight:700;font-family:inherit">${btnLbl}</button>
         </div>`;
       document.getElementById('cloudCancelCore').onclick = closeCloudOverlay;
       const emailEl = document.getElementById('cloudEmailCore');
@@ -3062,13 +3069,13 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       const submit = async () => {
         const email = emailEl.value.trim();
         if (!email) { emailEl.focus(); return; }
-        if (!window.NxCloud) { statusEl.innerHTML = '<span style="color:#EF4444">⏳ Cloud pas prêt</span>'; return; }
-        btnSubmit.disabled = true; btnSubmit.textContent = 'Envoi…';
+        if (!window.NxCloud) { statusEl.innerHTML = '<span style="color:#EF4444">⏳ Cloud…</span>'; return; }
+        btnSubmit.disabled = true; btnSubmit.textContent = t('Envoi…','Enviando…','Sending…');
         const res = await window.NxCloud.signInWithMagicLink(email);
-        btnSubmit.disabled = false; btnSubmit.textContent = '📨 Recevoir le lien';
+        btnSubmit.disabled = false; btnSubmit.textContent = btnLbl;
         if (!res.ok) { statusEl.innerHTML = '<span style="color:#EF4444">❌ '+res.error+'</span>'; return; }
-        statusEl.innerHTML = '<div style="padding:10px 12px;background:rgba(16,185,129,.15);border-left:3px solid #10B981;border-radius:6px;color:#065F46"><b>✅ Email envoyé</b><br>Clique le lien dans ta boîte mail.</div>';
-        showToast('📨 Lien magique envoyé');
+        statusEl.innerHTML = '<div style="padding:10px 12px;background:rgba(16,185,129,.15);border-left:3px solid #10B981;border-radius:6px;color:#065F46"><b>'+t('✅ Email envoyé','✅ Correo enviado','✅ Email sent')+'</b><br>'+t('Clique le lien dans ta boîte mail.','Haz clic en el enlace de tu correo.','Click the link in your inbox.')+'</div>';
+        showToast(t('📨 Lien envoyé','📨 Enlace enviado','📨 Link sent'));
       };
       btnSubmit.onclick = submit;
       emailEl.onkeypress = (e) => { if (e.key === 'Enter') submit(); };
@@ -3111,9 +3118,9 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       setTimeout(() => emailEl.focus(), 100);
     };
 
-    btnMagic.onclick = renderMagic;
-    btnPwd.onclick   = renderPwd;
-    renderMagic();
+    btnMagic.onclick = () => renderMagic(false);
+    btnPwd.onclick   = () => renderMagic(true);
+    renderMagic(false);
   };
   const renderAccount = () => {
     const user = (window.NxCloud && window.NxCloud._user) || {};
