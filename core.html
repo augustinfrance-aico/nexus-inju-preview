@@ -3175,9 +3175,41 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       if (li) li.onclick = () => { renderLoginForm(); openCloudOverlay(); };
     }
   }
-  document.addEventListener('nx-cloud-ready', nxAuthBanner);
-  document.addEventListener('nx-cloud-auth', nxAuthBanner);
-  setTimeout(nxAuthBanner, 400);
+  // Déconnecté -> visuel générique / données à 0 (jamais Carlos). Connecté -> identité du compte. (Augustin 24/06)
+  async function nxApplyAuthIdentity(){
+    const authed = (window.NxCloud && window.NxCloud.isAuthed && window.NxCloud.isAuthed());
+    const cName = document.querySelector('.company-info b');
+    const cLoc  = document.querySelector('.company-info small');
+    const avatar= document.querySelector('.profile-avatar');
+    const hero  = document.querySelector('.hero-banner-text');
+    const gainA = document.getElementById('gainAmount');
+    const gainB = document.getElementById('gainBanner');
+    if (!authed){
+      if (cName) cName.textContent = 'Mon commerce';
+      if (cLoc)  cLoc.textContent  = 'Connecte-toi pour voir tes données';
+      if (avatar) avatar.textContent = '👤';
+      if (hero)  hero.innerHTML = '<b>Bienvenue sur Nexus 👋</b> Connecte-toi à ton compte pour voir tes vraies données.';
+      if (gainA) gainA.textContent = '$0 CLP';
+      if (gainB) gainB.style.display = 'none';
+      return;
+    }
+    try {
+      const prof = await window.NxCloud.getProfile();
+      const email = (window.NxCloud._user && window.NxCloud._user.email) || '';
+      const name = (prof && prof.name) ? prof.name : (email ? email.split('@')[0] : 'Mon commerce');
+      const city = (prof && prof.city) ? prof.city : email;
+      const esc = (s)=>String(s).replace(/[<>&]/g,'');
+      if (cName) cName.textContent = name;
+      if (cLoc)  cLoc.textContent  = city || '';
+      if (avatar) avatar.textContent = (name||'NX').replace(/[^A-Za-z0-9 ]/g,' ').trim().split(/\s+/).map(x=>x[0]||'').join('').slice(0,2).toUpperCase() || 'NX';
+      if (hero)  hero.innerHTML = '<b>Bonjour '+ esc(name) +' 👋</b> Bienvenue sur ton espace Nexus. Ouvre tes modules pour gérer ton activité.';
+    } catch(e){}
+  }
+  function nxRefreshAuthUI(){ try{ nxAuthBanner(); }catch(e){} try{ nxApplyAuthIdentity(); }catch(e){} }
+  document.addEventListener('nx-cloud-ready', nxRefreshAuthUI);
+  document.addEventListener('nx-cloud-auth', nxRefreshAuthUI);
+  setTimeout(nxRefreshAuthUI, 500);
+  setTimeout(nxApplyAuthIdentity, 950);
   document.addEventListener('nx-cloud-ready', refreshCloudDot);
   document.addEventListener('nx-cloud-auth', (e) => {
     refreshCloudDot();
