@@ -3235,8 +3235,9 @@ const Nx = {
     // Un profil "réel" = au moins un nom ou une description renseignés par l'utilisateur
     const hasReal = cloudProfile && (cloudProfile.name || cloudProfile.description);
     if (hasReal) {
-      // Profil réel existant → on le charge
-      this.state.business = Object.assign({}, this.state.business, cloudProfile);
+      // Profil réel existant → on le charge SUR UNE BASE VIERGE (jamais par-dessus la démo Carlos,
+      // sinon les champs absents du profil cloud gardent les valeurs de Carlos : "Bonsoir Carlos", etc.)
+      this.state.business = Object.assign(this._blankBusiness(), cloudProfile);
       this.save();
       this.toast('☁️ Profil chargé depuis le cloud', 'success', cloudProfile.name || '');
     } else {
@@ -3252,7 +3253,8 @@ const Nx = {
       this.save();
     }
     try { this._syncChrome(); } catch(e){}
-    if (this.state.view === 'profile' || this.state.view === 'dashboard') this.renderView();
+    // TOUJOURS re-render après chargement du profil (sinon la salutation/avatar restent sur la démo Carlos)
+    try { this.renderView(); } catch(e){}
   },
   // Profil entreprise VIERGE (même structure que la démo, mais vide) — pour un nouveau compte
   _blankBusiness(){
