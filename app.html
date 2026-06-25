@@ -2007,7 +2007,7 @@ const DEFAULT_STATE = {
     ]
   },
   preferences: {
-    soundNotif:true, desktopNotif:false, autoDraft:true, signature:'Carlos 🥖', dataSharingOptIn:true
+    soundNotif:true, desktopNotif:false, autoDraft:true, signature:'', dataSharingOptIn:true
   }
 };
 
@@ -3593,7 +3593,8 @@ const Nx = {
     try {
       const tasks = [];
       // Profil entreprise (1:1) — JAMAIS la démo Carlos ni un profil vide (sinon pollution cross-compte)
-      if (!this._businessIsSeed()) tasks.push(NC.upsertProfile(this.state.business));
+      if (this._businessIsSeed()) return; // demo/vide -> ne rien pousser (isolation: aucune table polluee)
+      tasks.push(NC.upsertProfile(this.state.business));
       // Clients (bulk upsert avec UUID déterministe)
       if (this.state.clients?.length) {
         tasks.push(NC.bulkUpsert('clients', this.state.clients.map(c => this._toRowClient(c)), 'id'));
@@ -5258,8 +5259,8 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           <div id="mpPreview" style="padding:12px 14px;background:var(--bg2);border-radius:10px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
             <div style="width:54px;height:54px;border-radius:12px;background:linear-gradient(135deg,#00B0FF,#0070B8);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">💳</div>
             <div style="flex:1;min-width:0">
-              <div style="font-weight:700;font-size:13px;color:var(--blue-ink)" id="mpLinkLabel">Pago Don Carlos · $14 500 CLP</div>
-              <div style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;word-break:break-all" id="mpLinkUrl">https://mpago.la/${handle}?amount=14500&desc=Pedido%20Don%20Carlos</div>
+              <div style="font-weight:700;font-size:13px;color:var(--blue-ink)" id="mpLinkLabel">Pago de ejemplo · $14 500 CLP</div>
+              <div style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;word-break:break-all" id="mpLinkUrl">https://mpago.la/${handle}?amount=14500&desc=Pedido</div>
             </div>
             <a id="mpLinkOpen" target="_blank" rel="noopener" class="btn btn-s" style="white-space:nowrap">Tester ↗</a>
           </div>
@@ -8079,7 +8080,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           </div>
         </div>
         <div class="form-row"><label class="form-lbl">Message</label>
-          <textarea class="form-ctrl" id="campMsg" rows="4" oninput="var _b=document.getElementById('campBodyPreview'); if(_b)_b.textContent=this.value;">${presetMessage!=null?String(presetMessage).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):'Hola 👋 Este fin de semana en Don Carlos: 3kg de pan amasado por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! 🥖'}</textarea>
+          <textarea class="form-ctrl" id="campMsg" rows="4" oninput="var _b=document.getElementById('campBodyPreview'); if(_b)_b.textContent=this.value;">${presetMessage!=null?String(presetMessage).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):'Hola 👋 Este fin de semana con nosotros: 3kg de pan amasado por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! 🥖'}</textarea>
           <div class="flex mt8"><button class="btn-g" onclick="Nx.generateCampMsg()">✨ Générer une suggestion IA</button></div></div>
         <!-- POINT CAMPAGNES (g) — Warning anti-BAN WhatsApp -->
         <div style="padding:10px 14px;background:var(--amber-soft);border-left:3px solid #F59E0B;border-radius:6px;font-size:12px;color:#B45309;margin-bottom:14px">
@@ -8156,7 +8157,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
               <span>19:00</span>
             </div>
             <div style="font-size:13px;color:#0F172A;font-weight:700;margin-bottom:8px">Objet : <span id="campSubjectPreview" style="font-weight:600;color:#334155">${document.getElementById('campName')?.value || 'Promo pan amasado week-end'}</span></div>
-            <div style="font-size:13px;color:#1E293B;line-height:1.55;white-space:pre-wrap" id="campBodyPreview">${presetMessage!=null?String(presetMessage).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):'Hola 👋 Este fin de semana en Don Carlos: 3kg de pan amasado por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! 🥖'}</div>
+            <div style="font-size:13px;color:#1E293B;line-height:1.55;white-space:pre-wrap" id="campBodyPreview">${presetMessage!=null?String(presetMessage).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):'Hola 👋 Este fin de semana con nosotros: 3kg de pan amasado por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! 🥖'}</div>
             <div style="margin-top:14px;padding-top:10px;border-top:1px solid #F1F5F9;font-size:11px;color:#94A3B8">
               ✂️ Si tu ne souhaites plus recevoir ces emails, <a style="color:#1A56DB">se désinscrire</a> · ${Nx._h(this.state.business.name||'Ton commerce')}${this.state.business.city?' · '+Nx._h(this.state.business.city):''}
             </div>
@@ -8492,9 +8493,9 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   // Defaults par auto-campagne (utilisés si pas encore édités)
   _autoCampDefaults: {
     'cart-abandoned': { name:'Récupération panier abandonné −10 %', trigger:'silence', target:'all', message:'Hola {prenom} 👋 Vi que preguntaste por nuestros productos hace poco y no pudiste cerrar tu pedido. Te dejo un −10% con el código {promo} para finalizarlo cuando quieras. ¡Te esperamos!', cfg:{silenceDays:1, promoCode:'CARRITO-10', detectKeywords:'precio,cuánto,cuesta,disponible,delivery,horario'}, antiAbusWeek:true, antiAbusCredits:true },
-    'promo-fin-mois': { name:'Promo fin de mois −15 %', trigger:'monthly', target:'rec', message:"Hola {prenom} 👋 Petit clin d'œil de Don Carlos : −15 % sur ta prochaine commande jusqu'au 30. À très vite !", cfg:{day:28, time:'09:00'}, antiAbusWeek:true, antiAbusCredits:true },
+    'promo-fin-mois': { name:'Promo fin de mois −15 %', trigger:'monthly', target:'rec', message:"Hola {prenom} 👋 Petit clin d'œil de tu negocio : −15 % sur ta prochaine commande jusqu'au 30. À très vite !", cfg:{day:28, time:'09:00'}, antiAbusWeek:true, antiAbusCredits:true },
     'anniv-clients':  { name:'Anniversaires clients', trigger:'birthday', target:'all', message:'¡Feliz cumpleaños {prenom}! 🎂 Te regalamos un {promo} para tu pedido de la semana. Disfruta!', cfg:{time:'09:00', promoCode:'HBD-{NOM}-15'}, antiAbusWeek:false, antiAbusCredits:true },
-    'recovery-lost':  { name:'Récupération clients perdus −10 %', trigger:'silence', target:'lost', message:'Hola {prenom}, hace tiempo que no nos vemos 😊 Don Carlos te extraña — −10 % en tu próxima compra, código {promo}.', cfg:{silenceDays:45, promoCode:'MISS-YOU-10'}, antiAbusWeek:true, antiAbusCredits:true }
+    'recovery-lost':  { name:'Récupération clients perdus −10 %', trigger:'silence', target:'lost', message:'Hola {prenom}, hace tiempo que no nos vemos 😊 Nuestro negocio te extraña — −10 % en tu próxima compra, código {promo}.', cfg:{silenceDays:45, promoCode:'MISS-YOU-10'}, antiAbusWeek:true, antiAbusCredits:true }
   },
 
   // 🛒 PANIER ABANDONNÉ — détection + lancement (Augustin 04/06/2026)
@@ -8679,8 +8680,8 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
 
   suggestAutoMessage(){
     const opts = [
-      "Hola {prenom} 👋 Petit clin d'œil de Don Carlos : −15 % sur ta prochaine commande jusqu'au 30. À très vite !",
-      "¿Cómo estás {prenom}? Don Carlos te invita con −15 % sobre tu próxima compra. Válido hasta fin de mes 🥖",
+      "Hola {prenom} 👋 Petit clin d'œil de tu negocio : −15 % sur ta prochaine commande jusqu'au 30. À très vite !",
+      "¿Cómo estás {prenom}? Nuestro negocio te invita con −15 % sobre tu próxima compra. Válido hasta fin de mes 🥖",
       "Hey {prenom}! Te dejamos un −15 % de regalo pour cette semaine. Pasa cuando quieras, te esperamos 💛"
     ];
     const ta = document.getElementById('autoMessage');
@@ -9597,7 +9598,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   buildEscalationPayload(client, message, reason){
     const b = this.state.business || {};
     const ownerPhone = b.ownerPhone || b.phone || '+56 9 0000 0000';
-    const ownerName = b.owner || 'Carlos';
+    const ownerName = b.owner || 'mi negocio';
     const ts = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
     const body = `🚨 NEXUS · Message urgent\n\nClient : ${client.name}${client.phone ? ' (' + client.phone + ')' : ''}\nRaison : ${reason}\nReçu à : ${ts}\n\n« ${message} »\n\nRépondre direct ▸ https://wa.me/${(client.phone||'').replace(/[^\d]/g,'')}`;
     return { to: ownerPhone, ownerName, body, channel: 'whatsapp' };
