@@ -85,12 +85,11 @@ export default async function handler(req, res) {
       // (Une session FAILED/STOPPED ne redonne pas toujours un QR via un simple /start -> on supprime + recrée.)
       if (st.status !== 'WORKING') {
         if (st.exists) { await fetch(WAHA + '/api/sessions/' + SESSION, { method: 'DELETE', headers: H }).catch(() => {}); }
-        await fetch(WAHA + '/api/sessions', { method: 'POST', headers: H, body: JSON.stringify({
-          name: SESSION, start: true,
-          // Webhook -> robot n8n Inbound : un message reçu déclenche l'IA (sinon le numéro se connecte mais ne répond jamais = décor).
-          // Le robot route vers le bon compte via business_profiles.phone (numéro = SON commerce).
-          config: { webhooks: [{ url: 'https://augustin-aico.app.n8n.cloud/webhook/nexus-waha-inbound', events: ['message'] }] }
-        }) }).catch(() => {});
+        // PAS de webhook ici, VOLONTAIREMENT (choix Augustin 25/06) : aucune auto-réponse de l'IA.
+        // Connecter un numéro = JUSTE lier le numéro. Personne ne reçoit de réponse automatique.
+        // Pour activer l'IA plus tard (sur un numéro DÉDIÉ aux clients, pas perso) :
+        //   ajouter config:{webhooks:[{url:'.../webhook/nexus-waha-inbound',events:['message']}]} + allumer le robot n8n.
+        await fetch(WAHA + '/api/sessions', { method: 'POST', headers: H, body: JSON.stringify({ name: SESSION, start: true }) }).catch(() => {});
       }
       return res.status(200).json(await getStatus());
     }
