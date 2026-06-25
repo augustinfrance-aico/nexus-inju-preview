@@ -10190,10 +10190,25 @@ window.addEventListener('DOMContentLoaded', () => Nx.init());
       try { if (!localStorage.getItem('nexus_onboarding_seen')) { localStorage.setItem('nexus_onboarding_seen','1'); setTimeout(()=>{ try{ Nx.navigate('tutorial'); }catch(_){} }, 900); } } catch(_){}
     }
     if (e.detail && e.detail.event === 'SIGNED_OUT' && window.Nx) {
+      Nx._cloudLoaded = false; // permettre le rechargement au prochain login
       try { Nx.renderView(); } catch(_) {}
     }
   });
   bindCloudUi();
+
+  // Filet anti-"Bonsoir Carlos" : dès que la session est reconnue (même TARD après nx-cloud-ready,
+  // ex. rechargement de page), charger le profil du compte UNE fois -> salutation/données passent
+  // de la démo (Carlos) au compte réel. Sans ça, une session restaurée reste bloquée sur la démo.
+  function nxEnsureLoaded(){
+    if (!(window.Nx && window.NxCloud && window.NxCloud.isAuthed && window.NxCloud.isAuthed())) return;
+    if (Nx._cloudLoaded) return;
+    Nx._cloudLoaded = true;
+    try { Nx.loadProfileFromCloud && Nx.loadProfileFromCloud(); } catch(_){}
+    try { Nx.syncFromCloud      && Nx.syncFromCloud(); } catch(_){}
+  }
+  document.addEventListener('nx-cloud-ready', nxEnsureLoaded);
+  document.addEventListener('nx-cloud-auth', nxEnsureLoaded);
+  [400, 1200, 2500, 4500].forEach(function(ms){ setTimeout(nxEnsureLoaded, ms); });
 
   // Bannière d'auth VISIBLE (Augustin 24/06) : se connecter / se déconnecter clairs, partout.
   function nxAuthBanner(){
