@@ -1,8 +1,9 @@
 // Vercel serverless — Proxy WAHA pour connecter WhatsApp en SELF-SERVE (QR affiché dans l'app).
 // La clé WAHA reste côté serveur, jamais exposée au navigateur.
 //
-// WAHA Core = 1 seule session ("default"). Pour plusieurs numéros (multi-client) :
-//   -> WAHA Plus + utiliser le nom de session = id du compte (uid). Le code est prêt (voir SESSION).
+// ISOLATION : une session WAHA PAR COMPTE (nom = uid du compte). Chaque commerce a SON numéro,
+//   indépendant des autres. WAHA 2026.6.1+ autorise les sessions illimitées gratuitement
+//   -> le numéro d'un compte n'écrase JAMAIS celui d'un autre, même connectés en même temps.
 //
 // Actions (en-tête Authorization: Bearer <jwt supabase> requis) :
 //   POST /api/waha?action=start   -> démarre/assure la session, renvoie { status, number }
@@ -10,7 +11,7 @@
 //   GET  /api/waha?action=qr      -> { qr: "data:image/png;base64,..." } ou { qr:null }
 //   POST /api/waha?action=logout  -> déconnecte le numéro
 
-const SESSION = 'default'; // Core : une seule session nommée "default". Plus : remplacer par l'uid du compte.
+// SESSION est calculé PAR REQUÊTE dans le handler = uid du compte connecté (voir ci-dessous) -> isolation par compte.
 
 async function getUser(token, SUPA, SR) {
   if (!token) return null;
@@ -40,6 +41,10 @@ export default async function handler(req, res) {
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
   const user = await getUser(token, SUPA, SR);
   if (!user || !user.id) return res.status(401).json({ error: 'Connexion à ton compte Nexus requise.' });
+
+  // Session WAHA PROPRE à ce compte (isolation) : nom = uid nettoyé.
+  // -> le numéro WhatsApp d'un compte n'écrase jamais celui d'un autre, même connectés en même temps.
+  const SESSION = 'u' + String(user.id).replace(/[^a-zA-Z0-9]/g, '');
 
   const action = req.query.action;
   const H = { 'X-Api-Key': KEY, 'Content-Type': 'application/json' };

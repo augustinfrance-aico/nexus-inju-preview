@@ -3285,8 +3285,16 @@ const Nx = {
       if (ownerEl) ownerEl.textContent = [id.owner, id.city].filter(Boolean).join(' · ') || 'Profil à compléter';
     } catch(e){}
   },
+  // Vrai si le profil courant = la démo Carlos OU est vide -> on ne l'écrit JAMAIS dans le cloud d'un compte
+  // (sinon un nouveau compte se fait polluer par Carlos via l'auto-sync avant le chargement de son vrai profil)
+  _businessIsSeed(){
+    const b = this.state.business || {};
+    const n = (b.name || '').trim();
+    return n === '' || n === 'Panadería Don Carlos';
+  },
   async pushProfileToCloud(){
     if (!window.NxCloud || !window.NxCloud.isAuthed()) return;
+    if (this._businessIsSeed()) return; // garde-fou anti-pollution Carlos
     const res = await window.NxCloud.upsertProfile(this.state.business);
     if (!res.ok) console.warn('[Cloud] upsertProfile', res.error);
     return res;
@@ -3584,8 +3592,8 @@ const Nx = {
     if (!user) return;
     try {
       const tasks = [];
-      // Profil entreprise (1:1)
-      tasks.push(NC.upsertProfile(this.state.business));
+      // Profil entreprise (1:1) — JAMAIS la démo Carlos ni un profil vide (sinon pollution cross-compte)
+      if (!this._businessIsSeed()) tasks.push(NC.upsertProfile(this.state.business));
       // Clients (bulk upsert avec UUID déterministe)
       if (this.state.clients?.length) {
         tasks.push(NC.bulkUpsert('clients', this.state.clients.map(c => this._toRowClient(c)), 'id'));
