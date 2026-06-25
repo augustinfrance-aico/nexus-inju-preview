@@ -130,10 +130,13 @@ export default async function handler(req, res) {
     }
   }
 
-  // --- START : rediriger vers le consentement Google ---
+  // --- START : renvoyer l'URL de consentement Google en JSON ---
+  // (Surtout PAS un res.redirect 302 : l'app fait un fetch() qui suivrait la redirection
+  //  vers accounts.google.com -> Google bloque le cross-origin -> "Failed to fetch".
+  //  On renvoie { url } et c'est l'app qui navigue via window.location.href.)
   if (action === 'start') {
     const user = await getUser(token, SUPA, SR);
-    if (!user || !user.id) return res.status(401).send('Connexion à ton compte Nexus requise avant de connecter Google.');
+    if (!user || !user.id) return res.status(401).json({ error: 'Connexion à ton compte Nexus requise avant de connecter Google.' });
     const url = 'https://accounts.google.com/o/oauth2/v2/auth?' + new URLSearchParams({
       client_id: CLIENT_ID,
       redirect_uri: REDIRECT_URI,
@@ -144,7 +147,7 @@ export default async function handler(req, res) {
       include_granted_scopes: 'true',
       state: signState(user.id, SR)
     }).toString();
-    return res.redirect(302, url);
+    return res.status(200).json({ url });
   }
 
   // --- STATUS : l'app demande si CE compte est connecté ---
