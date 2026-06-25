@@ -24,6 +24,11 @@ async function getUser(token, SUPA, SR) {
 }
 
 export default async function handler(req, res) {
+  // CORS — sinon le navigateur bloque le POST (Authorization) avec "Failed to fetch"
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') return res.status(200).end();
   const WAHA = (process.env.WAHA_URL || '').replace(/\/$/, '');
   const KEY = process.env.WAHA_API_KEY;
   const SUPA = (process.env.SUPABASE_URL || '').replace(/\/$/, '');

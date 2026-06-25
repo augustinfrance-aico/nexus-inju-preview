@@ -50,6 +50,11 @@ async function getUser(token, SUPA, SR) {
 }
 
 export default async function handler(req, res) {
+  // CORS — sinon le navigateur bloque le POST (Authorization) avec "Failed to fetch"
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') return res.status(200).end();
   const CLIENT_ID = process.env.GOOGLE_OAUTH_CLIENT_ID;
   const CLIENT_SECRET = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
   const SUPA = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
