@@ -76,10 +76,11 @@ export default async function handler(req, res) {
 
     if (action === 'start') {
       const st = await getStatus();
-      if (!st.exists) {
-        await fetch(WAHA + '/api/sessions', { method: 'POST', headers: H, body: JSON.stringify({ name: SESSION, start: true }) });
-      } else if (st.status === 'STOPPED' || st.status === 'FAILED') {
-        await fetch(WAHA + '/api/sessions/' + SESSION + '/start', { method: 'POST', headers: H }).catch(() => {});
+      // Pas connecté -> on (re)crée une session propre pour obtenir un QR frais.
+      // (Une session FAILED/STOPPED ne redonne pas toujours un QR via un simple /start -> on supprime + recrée.)
+      if (st.status !== 'WORKING') {
+        if (st.exists) { await fetch(WAHA + '/api/sessions/' + SESSION, { method: 'DELETE', headers: H }).catch(() => {}); }
+        await fetch(WAHA + '/api/sessions', { method: 'POST', headers: H, body: JSON.stringify({ name: SESSION, start: true }) }).catch(() => {});
       }
       return res.status(200).json(await getStatus());
     }
