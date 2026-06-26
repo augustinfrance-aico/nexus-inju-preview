@@ -10161,6 +10161,11 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   }
 };
 
+// IMPORTANT : Nx est un `const` (non attaché à window). Tout le câblage cloud teste `window.Nx` :
+// sans cette ligne, loadProfileFromCloud/syncFromCloud ne se déclenchent JAMAIS au login
+// -> tout compte connecté reste bloqué sur la démo Carlos (messages, templates, "Bonsoir Carlos").
+window.Nx = Nx;
+
 // Boot
 window.addEventListener('DOMContentLoaded', () => Nx.init());
 
