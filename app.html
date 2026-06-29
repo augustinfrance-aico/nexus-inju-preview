@@ -3270,6 +3270,10 @@ const Nx = {
   _accountIdentity(){
     const b = this.state.business || {};
     const email = (window.NxCloud && NxCloud._user && NxCloud._user.email) || '';
+    // Démo Carlos OU profil vide -> identité NEUTRE (jamais "Carlos"). Le vrai nom arrive au chargement du profil.
+    if (this._businessIsSeed && this._businessIsSeed()) {
+      return { name:'', owner:'', email, firstName:(email?email.split('@')[0]:''), initials:(email?email.slice(0,2):'NX').toUpperCase(), city:'' };
+    }
     const owner = (b.owner || '').trim();
     const name = (b.name || '').trim();
     const firstName = owner ? owner.split(/\s+/)[0] : (email ? email.split('@')[0] : '');
