@@ -2131,7 +2131,7 @@ const Nx = {
       }
     }
     // Welcome toast — après le boot
-    setTimeout(() => this.toast('Bienvenue sur Nexus 👋', 'success', 'Ton agent IA veille sur tes conversations.'), 2200);
+    /* toast bienvenue retire (trop de notifs au login - Augustin 29/06) */
 
     // Retour de la connexion Google (OAuth self-serve) : ?google=connected | ?google=error
     try {
@@ -3234,24 +3234,27 @@ const Nx = {
     const cloudProfile = await window.NxCloud.getProfile();
     // Un profil "réel" = au moins un nom ou une description renseignés par l'utilisateur
     const hasReal = cloudProfile && (cloudProfile.name || cloudProfile.description);
+    // TOUJOURS repartir de données VIERGES (jamais la démo Carlos), pour TOUT compte connecté.
+    // Les vraies données (clients, messages, escalades…) arrivent ensuite via syncFromCloud.
+    // Sans ça, un compte au profil "réel" garde les clients/escalades/campagnes de la démo et les re-pousse.
+    this.state.clients = [];
+    this.state.conversations = [];
+    this.state.campaigns = [];
+    this.state.invoices = [];
+    this.state.notifications = [];
+    this.state.escalationLog = [];
+    this.state.autoCampaignDetails = {};
+    this.state.autoCampaignStatus = {};
+    this.state.messages = [];
     if (hasReal) {
-      // Profil réel existant → on le charge SUR UNE BASE VIERGE (jamais par-dessus la démo Carlos,
-      // sinon les champs absents du profil cloud gardent les valeurs de Carlos : "Bonsoir Carlos", etc.)
+      // Profil réel → chargé SUR UNE BASE VIERGE (jamais par-dessus la démo Carlos).
       this.state.business = Object.assign(this._blankBusiness(), cloudProfile);
-      this.save();
-      this.toast('☁️ Profil chargé depuis le cloud', 'success', cloudProfile.name || '');
     } else {
-      // NOUVEAU compte (pas de profil, ou profil vide) → profil VIERGE. JAMAIS de seed démo (Carlos).
-      // Règle Augustin : un compte neuf est vide, l'utilisateur remplit le sien.
+      // Nouveau compte / profil vide → profil VIERGE.
       this.state.business = this._blankBusiness();
-      this.state.clients = [];
-      this.state.conversations = [];
-      this.state.campaigns = [];
-      this.state.invoices = [];
-      this.state.notifications = [];
       if (this.state.preferences) this.state.preferences.signature = '';
-      this.save();
     }
+    this.save();
     try { this._syncChrome(); } catch(e){}
     // TOUJOURS re-render après chargement du profil (sinon la salutation/avatar restent sur la démo Carlos)
     try { this.renderView(); } catch(e){}
@@ -10186,7 +10189,7 @@ window.addEventListener('DOMContentLoaded', () => Nx.init());
     // Si user déjà connecté (session persistée), charger profil + toutes les tables
     if (e.detail && e.detail.user && window.Nx) {
       Nx.loadProfileFromCloud && Nx.loadProfileFromCloud();
-      Nx.syncFromCloud      && Nx.syncFromCloud();
+      Nx.syncFromCloud      && Nx.syncFromCloud(true);
     }
   });
   document.addEventListener('nx-cloud-auth', (e) => {
@@ -10194,7 +10197,7 @@ window.addEventListener('DOMContentLoaded', () => Nx.init());
     // Quand l'utilisateur se connecte (magic link OU password), on charge profil + tables
     if (e.detail && e.detail.event === 'SIGNED_IN' && window.Nx) {
       Nx.loadProfileFromCloud && Nx.loadProfileFromCloud();
-      Nx.syncFromCloud      && Nx.syncFromCloud();
+      Nx.syncFromCloud      && Nx.syncFromCloud(true);
       // V5.7 : onboarding mis en avant a la 1ere connexion (une seule fois, non bloquant)
       try { if (!localStorage.getItem('nexus_onboarding_seen')) { localStorage.setItem('nexus_onboarding_seen','1'); setTimeout(()=>{ try{ Nx.navigate('tutorial'); }catch(_){} }, 900); } } catch(_){}
     }
@@ -10213,7 +10216,7 @@ window.addEventListener('DOMContentLoaded', () => Nx.init());
     if (Nx._cloudLoaded) return;
     Nx._cloudLoaded = true;
     try { Nx.loadProfileFromCloud && Nx.loadProfileFromCloud(); } catch(_){}
-    try { Nx.syncFromCloud      && Nx.syncFromCloud(); } catch(_){}
+    try { Nx.syncFromCloud      && Nx.syncFromCloud(true); } catch(_){}
   }
   document.addEventListener('nx-cloud-ready', nxEnsureLoaded);
   document.addEventListener('nx-cloud-auth', nxEnsureLoaded);
