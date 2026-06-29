@@ -907,7 +907,7 @@ html[data-theme="dark"] .chat-input textarea::placeholder{color:#8A94A6}
         <div class="brand-name">Ne<span>xus</span></div>
       </div>
       <div class="p-card">
-        <div class="p-avatar" id="bizLogo">🥖</div>
+        <div class="p-avatar" id="bizLogo"></div>
         <div class="p-who">
           <div class="n" id="bizName">Mon commerce</div>
           <div class="b" id="bizOwner">Profil à compléter</div>
@@ -1031,7 +1031,7 @@ window.NexusDynTranslate = (function(){
   /* Augustin 20/05 : retiré 'svg' du skip pour que les <text> graphiques Stats soient traduits */
   const SKIP_TEXT = /^(\s*[\d.,%€$£+\-×\/]+\s*[mhskg]?\w{0,3}\s*)$/i;
   const ONLY_EMOJI = /^[\s\p{Extended_Pictographic}‍️\d:.]+$/u;
-  const PRESERVE = /^(Nexus|María|Maria|Diego|Ana|Javier|Raviella|WhatsApp|Gmail|Calendar|Google|Claude|Stripe|Loom|Vercel|VIP|CRM|SOS|FAQ|API|PDF|CSV|empanadas|pan amasado|bolos|panadería|Providencia|Las Condes|Santiago|Pro|Business|Enterprise|Free|Chile|Chili)$/i;
+  const PRESERVE = /^(Nexus|María|Maria|Diego|Ana|Javier|Raviella|WhatsApp|Gmail|Calendar|Google|Claude|Stripe|Loom|Vercel|VIP|CRM|SOS|FAQ|API|PDF|CSV|productos|producto estrella|bolos|comercio|Providencia|Las Condes|Santiago|Pro|Business|Enterprise|Free|Chile|Chili)$/i;
   // Map global pour stocker les TextNode originaux (pas d'attribut possible sur TextNode)
   const textNodeOrigs = new Map();  // Node -> original string
 
@@ -1847,12 +1847,12 @@ window.Nt = t;
 
 // -------- MOCK DATA --------
 const MOCK_CLIENTS = [
-  {id:1,name:'María González',phone:'+56 9 8765 4321',avatar:'MG',color:'#1A56DB',score:94,orders:12,spent:184000,lastSeen:'Hace 4 min',channel:'whatsapp',tag:'vip',tags:['VIP','Amiga'],notes:'Cumpleaños 14 agosto. Le encanta pan amasado.',status:'active'},
+  {id:1,name:'María González',phone:'+56 9 8765 4321',avatar:'MG',color:'#1A56DB',score:94,orders:12,spent:184000,lastSeen:'Hace 4 min',channel:'whatsapp',tag:'vip',tags:['VIP','Amiga'],notes:'Cumpleaños 14 agosto. Le encanta producto estrella.',status:'active'},
   {id:2,name:'Diego Ramírez',phone:'+56 9 8888 1122',avatar:'DR',color:'#22C55E',score:87,orders:9,spent:142000,lastSeen:'Hace 18 min',channel:'whatsapp',tag:'rec',tags:['Récurrent'],notes:'Paga siempre por transferencia.',status:'active'},
   {id:3,name:'Ana Silva',phone:'+56 9 4532 7799',avatar:'AS',color:'#7A3CFF',score:82,orders:7,spent:98000,lastSeen:'Hace 2 h',channel:'whatsapp',tag:'rec',tags:['Récurrent'],notes:'Prefiere delivery después de las 18h.',status:'active'},
   {id:4,name:'Pablo Herrera',phone:'+56 9 1234 5678',avatar:'PH',color:'#F59E0B',score:75,orders:6,spent:78000,lastSeen:'Ayer',channel:'instagram',instagram:'@pablo_herrera_cl',instagramFollowers:1840,tag:'',tags:['Instagram'],notes:'',status:'active'},
   {id:5,name:'Valentina Rojas',phone:'+56 9 7777 3333',avatar:'VR',color:'#EF4444',score:71,orders:5,spent:64000,lastSeen:'Hace 3 días',channel:'whatsapp',tag:'',tags:[],notes:'',status:'active'},
-  {id:6,name:'Isabel Torres',phone:'+56 9 9988 7766',avatar:'IT',color:'#F59E0B',score:48,orders:1,spent:12000,lastSeen:'Hace 1 h',channel:'whatsapp',tag:'new',tags:['Nuevo'],notes:'Interesada en tortas de cumpleaños.',status:'prospect'},
+  {id:6,name:'Isabel Torres',phone:'+56 9 9988 7766',avatar:'IT',color:'#F59E0B',score:48,orders:1,spent:12000,lastSeen:'Hace 1 h',channel:'whatsapp',tag:'new',tags:['Nuevo'],notes:'Interesada en productos de cumpleaños.',status:'prospect'},
   {id:7,name:'Luis Martínez',phone:'+56 9 5544 2211',avatar:'LM',color:'#EF4444',score:62,orders:2,spent:34000,lastSeen:'Hace 3 h',channel:'email',tag:'biz',tags:['Empresa'],notes:'Evento corporativo 25/04.',status:'prospect'},
   {id:8,name:'Sofía Pinto',phone:'+56 9 6633 8811',avatar:'SP',color:'#06B6D4',score:54,orders:3,spent:28000,lastSeen:'Hace 45 días',channel:'whatsapp',tag:'alert',tags:['Perdida'],notes:'No responde hace 45 días.',status:'lost'},
   {id:9,name:'Rodrigo Vega',phone:'+56 9 3344 5566',avatar:'RV',color:'#1A56DB',score:68,orders:4,spent:52000,lastSeen:'Hace 50 días',channel:'whatsapp',tag:'alert',tags:['Perdida'],notes:'Cliente fiel perdido.',status:'lost'},
@@ -1863,13 +1863,13 @@ const MOCK_CLIENTS = [
 
 const MOCK_CONVERSATIONS = [
   {clientId:1,channel:'whatsapp',messages:[
-    {from:'them',text:'Hola, ¿tienes pan amasado disponible para mañana? Necesito 3 kilos para una reunión familiar 😊',time:'Hace 4 min',voice:false},
-  ],unread:true,draft:'Hola María! Claro que sí, te guardo 3 kilos de pan amasado para mañana. ¿A qué hora te viene mejor pasar a buscarlo? 🥖'},
+    {from:'them',text:'Hola, ¿tienes producto estrella disponible para mañana? Necesito 3 kilos para una reunión familiar 😊',time:'Hace 4 min',voice:false},
+  ],unread:true,draft:'Hola María! Claro que sí, te guardo 3 kilos de producto estrella para mañana. ¿A qué hora te viene mejor pasar a buscarlo? '},
   {clientId:2,channel:'whatsapp',messages:[
     {from:'them',text:'Gracias por la factura. ¿Aceptan transferencia bancaria?',time:'Hace 18 min'},
   ],unread:true,draft:'Sí Diego, te paso los datos bancarios.'},
   {clientId:6,channel:'whatsapp',messages:[
-    {from:'them',text:'Buenos días, me podrías mandar los precios de las tortas de cumpleaños porfa',time:'Hace 1 h'},
+    {from:'them',text:'Buenos días, me podrías mandar los precios de las productos de cumpleaños porfa',time:'Hace 1 h'},
   ],unread:false,draft:null},
   {clientId:3,channel:'whatsapp',messages:[
     {from:'them',text:'¿El delivery sigue gratis sobre 15 lucas?',time:'Hace 2 h'},
@@ -1878,20 +1878,20 @@ const MOCK_CONVERSATIONS = [
     {from:'them',text:'Cotización para evento corporativo 80 personas el 25 de abril',time:'Hace 3 h'},
   ],unread:false,draft:null},
   {clientId:4,channel:'instagram',messages:[
-    {from:'them',text:'Vi tus fotos en Insta, hermosas tortas! ¿Hacen delivery a Providencia?',time:'Ayer'},
+    {from:'them',text:'Vi tus fotos en Insta, hermosas productos! ¿Hacen delivery a Providencia?',time:'Ayer'},
   ],unread:false,draft:null}
 ];
 
 const MOCK_CATALOG = [
-  {id:1,name:'Pan amasado',price:3500,unit:'kg',emoji:'🥖',photo:'',miniDesc:'Pan tradicional chileno, masa madre, horneado a leña cada mañana.',nutriScore:'A',ingredients:'Harina, agua, sal, masa madre natural, manteca vegetal.',allergens:'Gluten'},
-  {id:2,name:'Empanada de pino',price:2200,unit:'un',emoji:'🥟',photo:'',miniDesc:'Receta familiar : carne, cebolla, aceitunas, huevo. La auténtica.',nutriScore:'C',ingredients:'Carne de vacuno, cebolla, aceituna, huevo, comino, harina.',allergens:'Gluten, Huevo'},
-  {id:3,name:'Torta de cumpleaños 20p',price:28000,unit:'un',emoji:'🎂',photo:'',miniDesc:'Bizcocho casero, manjar y crema chantilly. Personalizable.',nutriScore:'D',ingredients:'Huevo, harina, azúcar, manjar, crema, frutas según temporada.',allergens:'Gluten, Huevo, Lácteos'},
+  {id:1,name:'Producto estrella',price:3500,unit:'kg',emoji:'',photo:'',miniDesc:'Pan tradicional chileno, receta propia, horneado a leña cada mañana.',nutriScore:'A',ingredients:'Harina, agua, sal, receta propia natural, manteca vegetal.',allergens:'Gluten'},
+  {id:2,name:'Producto destacado',price:2200,unit:'un',emoji:'',photo:'',miniDesc:'Receta familiar : carne, cebolla, aceitunas, huevo. La auténtica.',nutriScore:'C',ingredients:'Carne de vacuno, cebolla, aceituna, huevo, comino, harina.',allergens:'Gluten, Huevo'},
+  {id:3,name:'Torta de cumpleaños 20p',price:28000,unit:'un',emoji:'',photo:'',miniDesc:'Bizcocho casero, manjar y crema chantilly. Personalizable.',nutriScore:'D',ingredients:'Huevo, harina, azúcar, manjar, crema, frutas según temporada.',allergens:'Gluten, Huevo, Lácteos'},
   {id:4,name:'Dulces chilenos',price:1500,unit:'un',emoji:'🍬',photo:'',miniDesc:'Calugas, alfajores y palmeras al estilo de la abuela.',nutriScore:'D',ingredients:'Harina, azúcar, manjar, mantequilla.',allergens:'Gluten, Lácteos'},
   {id:5,name:'Café con leche',price:2500,unit:'un',emoji:'☕',photo:'',miniDesc:'Café 100% arábica colombiano + leche entera espumosa.',nutriScore:'B',ingredients:'Café, leche entera.',allergens:'Lácteos'},
 ];
 
 const MOCK_CAMPAIGNS = [
-  {id:1,name:'Promo Pan Amasado Fin de Semana',sent:120,opened:98,replied:24,status:'completed',date:'12 abr',audience:'Todos'},
+  {id:1,name:'Promo Producto estrella Fin de Semana',sent:120,opened:98,replied:24,status:'completed',date:'12 abr',audience:'Todos'},
   {id:2,name:'Recuperación clientes perdidos -15%',sent:38,opened:22,replied:8,status:'running',date:'20 abr',audience:'Clientes perdidos'},
 ];
 
@@ -1906,15 +1906,15 @@ const FAQ_DEFAULT = [
   {q:'¿Hacen delivery?',a:'Sí, delivery gratis sobre 15 000 CLP en Santiago centro y Providencia.'},
   {q:'¿Cuáles son los horarios?',a:'Lunes a sábado, 7:00 a 20:00. Domingo cerrado.'},
   {q:'¿Aceptan tarjeta?',a:'Sí, aceptamos efectivo, transferencia, Webpay y tarjetas de crédito/débito.'},
-  {q:'¿Hacen tortas por encargo?',a:'Sí, con 48 horas de anticipación. Consulta el catálogo.'},
+  {q:'¿Hacen productos por encargo?',a:'Sí, con 48 horas de anticipación. Consulta el catálogo.'},
 ];
 
 const TIPS_ROTATION = [
   {icon:'💡',type:'recover',body:'<b>3 clientes fieles</b> no han pedido nada desde hace <b>45 días</b> : María, Diego y Ana. Representan en promedio <b>28 000 CLP / mes</b>. ¿Enviamos una promo personalizada -15% para recuperarlos?',actions:[{label:'Crear campaña →',action:'createRecoveryCampaign',primary:true},{label:'Ver los 3 clientes',action:'showLostClients'},{label:'Más tarde',action:'dismissTip'}]},
   {icon:'☀️',type:'weather',body:'Mañana llueve en Santiago. <b>Ofrece delivery gratis a tus clientes del barrio</b> — suelen aumentar un 40% sus pedidos cuando llueve.',actions:[{label:'Crear promo lluvia',action:'createWeatherCampaign',primary:true},{label:'Ignorar',action:'dismissTip'}]},
-  {icon:'💰',type:'pricing',body:'Tu <b>ticket promedio es 20% por debajo</b> del mercado de panaderías premium Santiago. <b>Subir 10%</b> generaría ~280 000 CLP / mes adicionales sin impacto en recurrencia.',actions:[{label:'Ver análisis precios',action:'showPricingAnalysis',primary:true},{label:'Más tarde',action:'dismissTip'}]},
+  {icon:'💰',type:'pricing',body:'Tu <b>ticket promedio es 20% por debajo</b> del mercado de comercios premium Santiago. <b>Subir 10%</b> generaría ~280 000 CLP / mes adicionales sin impacto en recurrencia.',actions:[{label:'Ver análisis precios',action:'showPricingAnalysis',primary:true},{label:'Más tarde',action:'dismissTip'}]},
   {icon:'📅',type:'reminder',body:'Cumpleaños de <b>María González</b> (VIP Top 1) en <b>3 días</b>. Últimos 2 años le regalaste un cake personalizado. ¿Preparo un mensaje?',actions:[{label:'Preparar mensaje',action:'prepareBirthday',primary:true},{label:'Ignorar',action:'dismissTip'}]},
-  {icon:'🎯',type:'pattern',body:'<b>60% de tus ventas</b> ocurren entre <b>viernes 17h y sábado 12h</b>. Considera reforzar el stock de pan amasado (tu producto estrella) esos días.',actions:[{label:'Ver heatmap',action:'showHeatmap',primary:true},{label:'Entendido',action:'dismissTip'}]},
+  {icon:'🎯',type:'pattern',body:'<b>60% de tus ventas</b> ocurren entre <b>viernes 17h y sábado 12h</b>. Considera reforzar el stock de producto estrella (tu producto estrella) esos días.',actions:[{label:'Ver heatmap',action:'showHeatmap',primary:true},{label:'Entendido',action:'dismissTip'}]},
 ];
 
 // -------- STATE + STORE --------
@@ -1963,12 +1963,12 @@ const DEFAULT_STATE = {
   credits: { remaining: 253, total: 500, resetLabel: 'dimanche 25 mai' },
   business: {
     name:'Panadería Don Carlos', owner:'Daniel Muñoz', ownerPhone:'+56 9 7777 1234', mercadoPagoHandle:'mi-comercio-cl', city:'Santiago', country:'🇨🇱',
-    logo:'🥖', logoType:'emoji',
-    industry:'Panadería / Boulangerie artisanale',
-    description:'Panadería familiar en el corazón de Providencia. Heredamos la receta de mi abuelo italiano que llegó a Chile en 1952. Especialidad : pan amasado al estilo chileno tradicional + dulces chilenos + tortas para eventos. Ambiente caluroso, clientela fiel del barrio.',
-    dataArchives:'Fundada en 1998 por Daniel Muñoz · 27 años de actividad · 3 generaciones de panaderos · Reconocida "Mejor pan amasado de Providencia 2022" por Revista Sabores · 4500+ clientes únicos en historial.',
-    composition:'Equipo de 6 personas : Daniel (gerente, panadero jefe), Mariana (esposa, gestión + caja), Diego (panadero junior, sobrino), 2 vendedoras (Paula y Sofía), 1 delivery part-time (Andrés).',
-    webPage:'https://panaderiadoncarlos.cl',
+    logo:'', logoType:'emoji',
+    industry:'Comercio / Commerce artisanale',
+    description:'Comercio familiar en el corazón de Providencia. Heredamos la receta de mi abuelo italiano que llegó a Chile en 1952. Especialidad : producto estrella al estilo chileno tradicional + dulces chilenos + productos para eventos. Ambiente caluroso, clientela fiel del barrio.',
+    dataArchives:'Fundada en 1998 por Daniel Muñoz · 27 años de actividad · 3 generaciones de artesanos · Reconocida "Mejor producto estrella de Providencia 2022" por Revista Sabores · 4500+ clientes únicos en historial.',
+    composition:'Equipo de 6 personas : Daniel (gerente, artesano jefe), Mariana (esposa, gestión + caja), Diego (artesano junior, sobrino), 2 vendedoras (Paula y Sofía), 1 delivery part-time (Andrés).',
+    webPage:'https://comerciodoncarlos.cl',
     catalogUrl:'',
     hours:{mon:'7:00-20:00',tue:'7:00-20:00',wed:'7:00-20:00',thu:'7:00-20:00',fri:'7:00-20:00',sat:'7:00-19:00',sun:'Cerrado'},
     tone:'Amical et chaleureux, tutoiement, petit emoji, jamais robotique',
@@ -1997,7 +1997,7 @@ const DEFAULT_STATE = {
   ],
   analytics: {
     weekComparisons: {conversations:{now:284,prev:241,delta:18},clients:{now:342,prev:321,delta:6},revenue:{now:2840000,prev:2535000,delta:12}},
-    topQuestions:['¿Hacen delivery?','¿Cuáles son los horarios?','¿Aceptan transferencia?','¿Tienen pan amasado?','¿Hacen tortas por encargo?'],
+    topQuestions:['¿Hacen delivery?','¿Cuáles son los horarios?','¿Aceptan transferencia?','¿Tienen producto estrella?','¿Hacen productos por encargo?'],
     avgResponseTime:2.3,
     heatmap: [
       // lines = hours (6-21), cols = Mon-Sun; values 0-4
@@ -2655,10 +2655,10 @@ const Nx = {
       html = `
         <div class="modal-hd"><h3>💰 Analyse de prix — Benchmark Santiago</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
         <div class="modal-body">
-          <p style="color:var(--muted);margin-bottom:18px">Comparaison avec 12 panaderías premium Santiago centro (source : Nexus Market Data).</p>
+          <p style="color:var(--muted);margin-bottom:18px">Comparaison avec 12 comercios premium Santiago centro (source : Nexus Market Data).</p>
           ${[
-            {p:'Pan amasado (1kg)',you:3500,mkt:4200,delta:-17},
-            {p:'Empanada de pino',you:2200,mkt:2800,delta:-21},
+            {p:'Producto estrella (1kg)',you:3500,mkt:4200,delta:-17},
+            {p:'Producto destacado',you:2200,mkt:2800,delta:-21},
             {p:'Torta cumpleaños 20p',you:28000,mkt:35000,delta:-20},
             {p:'Dulces chilenos',you:1500,mkt:1800,delta:-17}
           ].map(x=>`
@@ -2779,7 +2779,7 @@ const Nx = {
           </div>
           ${(c.birthday||c.preferences||c.address) ? `
           <div style="padding:10px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:8px;margin-bottom:10px;font-size:12.5px;line-height:1.7">
-            ${c.birthday?`<div>🎂 <b>Anniversaire :</b> ${(()=>{try{const d=new Date(c.birthday);return isNaN(d.getTime())?c.birthday:d.toLocaleDateString('fr-FR',{day:'numeric',month:'long'});}catch(e){return c.birthday;}})()}</div>`:''}
+            ${c.birthday?`<div><b>Anniversaire :</b> ${(()=>{try{const d=new Date(c.birthday);return isNaN(d.getTime())?c.birthday:d.toLocaleDateString('fr-FR',{day:'numeric',month:'long'});}catch(e){return c.birthday;}})()}</div>`:''}
             ${c.preferences?`<div>🎯 <b>Préférences :</b> ${c.preferences}</div>`:''}
             ${c.address?`<div>📍 <b>Adresse :</b> ${c.address}</div>`:''}
           </div>` : ''}
@@ -2837,7 +2837,7 @@ const Nx = {
       }] : [];
       const tips = [
         ...fiestaTip,
-        { ic:'🎂', accent:'#F59E0B', ctx:'Demain · Anniversaire client', text:'<b>Raviella Mendoza</b> fête ses 35 ans demain. Veux-tu envoyer un message avec un <b>code -15%</b> sur ses cookies préférés ?', actions:[
+        { ic:'', accent:'#F59E0B', ctx:'Demain · Anniversaire client', text:'<b>Raviella Mendoza</b> fête ses 35 ans demain. Veux-tu envoyer un message avec un <b>code -15%</b> sur ses cookies préférés ?', actions:[
             { lbl:'💌 Programmer', cmd:`Nx.askAi('Programme un message anniversaire pour Raviella Mendoza avec -15% sur ses cookies préférés')` },
             { lbl:'Pas maintenant', cmd:`Nx.toast('Conseil mis de côté','info')` }
           ]},
@@ -2865,7 +2865,7 @@ const Nx = {
         '🔥 Quel est mon top produit + tendance ?',
         '💡 Donne-moi 3 idées pour augmenter mon panier moyen',
         '📅 Quand est le meilleur moment pour poster sur Instagram ?',
-        '🥖 Suggère une nouveauté basée sur mes ventes',
+        'Suggère une nouveauté basée sur mes ventes',
         '💰 Combien je dois vendre cette semaine pour atteindre mon objectif ?',
         '🤖 Rédige un message d\'absence en 3 langues',
         '📈 Comment réduire mon temps de réponse ?'
@@ -3413,7 +3413,7 @@ const Nx = {
   // Map client_id (UUID cloud) -> id local via le meme _uuidToLocalId que les clients => le clientId matche.
   _fromRowMessage(r){
     // V4.3 : alignement chat du point de vue du patron.
-    // Client (them) = GAUCHE. Tout ce que la boulangerie envoie (IA OU manuel) = DROITE (vert) = 'me'.
+    // Client (them) = GAUCHE. Tout ce que la commerce envoie (IA OU manuel) = DROITE (vert) = 'me'.
     const from = (r.from_role === 'them') ? 'them' : 'me';
     // champ 'time' formate (HH:MM) attendu par le rendu — sinon affichage "undefined"
     let time = '';
@@ -4513,7 +4513,7 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
               <div style="display:flex;gap:10px;align-items:center">
                 <div style="font-size:40px">${b.logo}</div>
                 <input class="form-ctrl" style="max-width:100px;font-size:22px;text-align:center" value="${b.logo}" oninput="Nx.updateBiz('logo',this.value)">
-                <button class="btn btn-s" onclick="Nx.toast('🔜 Import du logo bientôt','info','En attendant, mets un emoji en logo (ex 🥖 🏪 ☕) — ça marche déjà.')">📎 Importer PNG</button>
+                <button class="btn btn-s" onclick="Nx.toast('🔜 Import du logo bientôt','info','En attendant, mets un emoji en logo (ex 🏪 ☕) — ça marche déjà.')">📎 Importer PNG</button>
               </div></div>
             <div class="form-row"><label class="form-lbl">Nom commercial</label>
               <input class="form-ctrl" value="${b.name}" oninput="Nx.updateBiz('name',this.value)"></div>
@@ -4568,7 +4568,7 @@ FAQ existante : ${(b.faq||[]).slice(0,8).map(f=>`Q: ${f.q} → R: ${f.a}`).join(
             <div id="faqSuggestionsList">
               ${(this.state.faqSuggestions || [
                 {id:'s1', q:'¿Puedo hacer un pedido grande para una empresa?', a:'¡Por supuesto! Hacemos catering corporativo. Cuéntanos cuántas personas y la fecha, te preparamos un presupuesto.'},
-                {id:'s2', q:'¿Tienen opciones sin gluten?', a:'Sí, tenemos pan y empanadas sin gluten bajo pedido (24h de antelación).'},
+                {id:'s2', q:'¿Tienen opciones sin gluten?', a:'Sí, tenemos pan y productos sin gluten bajo pedido (24h de antelación).'},
                 {id:'s3', q:'¿Hacen entregas el domingo?', a:'Solo entregamos los sábados. El domingo estamos cerrados, pero puedes recoger el sábado en la tarde.'}
               ]).map(s => `
                 <div style="padding:10px 12px;background:var(--violet-soft);border:1px solid var(--violet);border-radius:8px;margin-bottom:6px">
@@ -4821,7 +4821,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   adoptFaqSuggestion(id){
     const list = this.state.faqSuggestions || [
       {id:'s1', q:'¿Puedo hacer un pedido grande para una empresa?', a:'¡Por supuesto! Hacemos catering corporativo. Cuéntanos cuántas personas y la fecha, te preparamos un presupuesto.'},
-      {id:'s2', q:'¿Tienen opciones sin gluten?', a:'Sí, tenemos pan y empanadas sin gluten bajo pedido (24h de antelación).'},
+      {id:'s2', q:'¿Tienen opciones sin gluten?', a:'Sí, tenemos pan y productos sin gluten bajo pedido (24h de antelación).'},
       {id:'s3', q:'¿Hacen entregas el domingo?', a:'Solo entregamos los sábados. El domingo estamos cerrados, pero puedes recoger el sábado en la tarde.'}
     ];
     const s = list.find(x => x.id === id);
@@ -5263,7 +5263,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         </div>
         <div class="form-row">
           <label class="form-lbl">Libellé (visible par ${c.name.split(' ')[0]})</label>
-          <input class="form-ctrl" id="mpDesc" placeholder="Libellé du paiement (ex : 3kg pan amasado)" value="" oninput="Nx.refreshMercadoPagoPreview('${handle}')">
+          <input class="form-ctrl" id="mpDesc" placeholder="Libellé du paiement (ex : 3kg producto estrella)" value="" oninput="Nx.refreshMercadoPagoPreview('${handle}')">
         </div>
         <div class="form-row">
           <label class="form-lbl">Aperçu lien Mercado Pago</label>
@@ -5468,7 +5468,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         <div style="font-size:11px;color:var(--muted);margin-bottom:12px">${flagOf(sourceLang)} → ${flagOf(targetLang)} · ${data.model||''}</div>
         ${lastMsgs.map((m,i)=>`
           <div style="margin-bottom:14px;padding:12px 14px;border:1px solid var(--line);border-radius:10px">
-            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">${m.from==='client'?'👤 '+(cl.name||'Client'):'🥖 Toi'} · ${m.time||''}</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">${m.from==='client'?'👤 '+(cl.name||'Client'):'Toi'} · ${m.time||''}</div>
             <div style="font-size:13px;margin-bottom:8px;color:var(--ink)">${Nx._h(m.text)}</div>
             <div style="font-size:13px;padding:8px 10px;background:var(--blue-soft);border-radius:6px;color:var(--blue-ink)"><b style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--blue);display:block;margin-bottom:3px">${flagOf(targetLang)}</b>${Nx._h(translations[i]||m.text)}</div>
           </div>
@@ -5948,7 +5948,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       { ic:'🎯', q:'Quels clients ont le potentiel de devenir VIP s\'ils étaient mieux engagés ?' },
       { ic:'📉', q:'Y a-t-il des clients dont le panier moyen baisse ces derniers mois ?' },
       { ic:'🌱', q:'Propose-moi 5 idées concrètes pour fidéliser mes Nouveaux clients' },
-      { ic:'📊', q:'Quelle est la durée de vie moyenne d\'un client (LTV) sur ma boulangerie ?' },
+      { ic:'📊', q:'Quelle est la durée de vie moyenne d\'un client (LTV) sur ma commerce ?' },
       { ic:'✍️', q:'Rédige un message WhatsApp personnalisé pour réactiver María Rodríguez' },
       { ic:'🎁', q:'Quel cadeau ou geste suggérerais-tu pour mes 3 meilleurs clients ?' },
       { ic:'🔄', q:'Compare mes clients VIP vs Récurrents : qu\'est-ce qui les différencie ?' },
@@ -6837,20 +6837,20 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       { date:'2026-07-16', name:'Virgen del Carmen',               emoji:'🙏', pitch:'Patronne du Chili, jour férié national.', suggestPromo:'Pack famille -15%' },
       { date:'2026-08-02', name:'Día del Niño',                   emoji:'🧒', pitch:"Très commercial au Chili, parents achètent pour leurs enfants.", suggestPromo:'Pack dulces enfants 2+1 gratuit' },
       { date:'2026-08-15', name:'Asunción de la Virgen',          emoji:'🙏', pitch:'Jour férié, week-end prolongé probable.', suggestPromo:'Pack week-end famille' },
-      { date:'2026-09-18', name:'Fiestas Patrias 🇨🇱',             emoji:'🇨🇱', pitch:"LA fête nationale chilienne. Pic de ventes massif (empanadas, asado, dulces). 10 jours à l'avance c'est le bon moment.", suggestPromo:'Pack Fiestas Patrias (empanadas + chicha) -20%' },
+      { date:'2026-09-18', name:'Fiestas Patrias 🇨🇱',             emoji:'🇨🇱', pitch:"LA fête nationale chilienne. Pic de ventes massif (productos, asado, dulces). 10 jours à l'avance c'est le bon moment.", suggestPromo:'Pack Fiestas Patrias (productos + chicha) -20%' },
       { date:'2026-09-19', name:'Glorias del Ejército',            emoji:'🎖', pitch:"Suite des Fiestas Patrias, ambiance fête continue.", suggestPromo:'Continuation pack Fiestas Patrias' },
       { date:'2026-10-12', name:'Encuentro de Dos Mundos',         emoji:'🌎', pitch:'Jour férié national.', suggestPromo:'Promo journée prolongée' },
       { date:'2026-10-31', name:'Día de las Iglesias Evangélicas', emoji:'⛪', pitch:'Jour férié religieux.', suggestPromo:'Promo simple -10%' },
       { date:'2026-11-01', name:'Día de Todos los Santos',         emoji:'🕯', pitch:'Jour férié, beaucoup de famille en visite.', suggestPromo:'Pack pour visites famille' },
       { date:'2026-12-08', name:'Inmaculada Concepción',           emoji:'🙏', pitch:'Jour férié religieux.', suggestPromo:'Promo douceurs -10%' },
-      { date:'2026-12-25', name:'Navidad 🎄',                       emoji:'🎄', pitch:"Pic commercial majeur. Tortas, panettone, dulces. À anticiper 2 semaines avant.", suggestPromo:'Pack Navidad (torta + dulces) -15%' },
+      { date:'2026-12-25', name:'Navidad 🎄',                       emoji:'🎄', pitch:"Pic commercial majeur. Productos, panettone, dulces. À anticiper 2 semaines avant.", suggestPromo:'Pack Navidad (torta + dulces) -15%' },
       { date:'2026-12-31', name:'Año Nuevo',                       emoji:'🎆', pitch:'Soirées famille, plats à emporter prisés.', suggestPromo:'Pack Año Nuevo' },
       // 2027 (pour la continuité après janvier 2027)
       { date:'2027-01-01', name:'Año Nuevo',                       emoji:'🎆', pitch:'Premier jour de l\'année, jour férié.', suggestPromo:'Café + dulces du lendemain' },
       { date:'2027-02-14', name:'San Valentín',                    emoji:'❤️', pitch:'Saint-Valentin, très commercial au Chili (couples + autoachat).', suggestPromo:'Pack couple (torta para 2) -15%' },
       { date:'2027-03-29', name:'Viernes Santo',                   emoji:'✝️', pitch:"Vendredi saint, jour férié. Pas de viande pour les pratiquants.", suggestPromo:'Promo pan + pescado' },
       { date:'2027-05-01', name:'Día del Trabajo',                 emoji:'⚒', pitch:'Jour férié, week-end prolongé.', suggestPromo:'Pack famille -10%' },
-      { date:'2027-05-09', name:'Día de la Madre',                 emoji:'💐', pitch:"La plus grosse fête commerciale du Chili. Tortas, fleurs, dulces. À préparer 2 semaines avant.", suggestPromo:'Pack Día de la Madre (torta personalizada) -10%' }
+      { date:'2027-05-09', name:'Día de la Madre',                 emoji:'💐', pitch:"La plus grosse fête commerciale du Chili. Productos, fleurs, dulces. À préparer 2 semaines avant.", suggestPromo:'Pack Día de la Madre (torta personalizada) -10%' }
     ];
   },
   getNextChileanHoliday(maxDaysAhead = 30){
@@ -7501,7 +7501,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           <div class="card-body">
             ${this.renderAutoCampaign('cart-abandoned','🛒','#F97316','Récupération panier abandonné','Quand client a demandé prix puis silence > 24h · cible prospects chauds · remise -10% personnalisée', this.state.cartRecoveryStatus || 'active')}
             ${this.renderAutoCampaign('promo-fin-mois','📅','#22C55E','Promo fin de mois — −15 %','Déclenchée le 28 de chaque mois · cible Récurrents · 2 derniers jours','active')}
-            ${this.renderAutoCampaign('anniv-clients','🎂','#F59E0B','Anniversaires clients','La veille à 9h · cible chaque client · code promo personnalisé','active')}
+            ${this.renderAutoCampaign('anniv-clients','','#F59E0B','Anniversaires clients','La veille à 9h · cible chaque client · code promo personnalisé','active')}
             ${this.renderAutoCampaign('recovery-lost','💔','#EF4444','Récupération clients perdus','Quand silence > 45 j · cible Perdus · message chaleureux + −10 %', this.state.recoveryStatus || 'paused')}
             ${(() => {
               // Render les campagnes auto custom créées par l'utilisateur via '+ Nouvelle auto'
@@ -7513,7 +7513,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
               const triggerStyle = {
                 monthly:  { ic:'📆', col:'#2E7BFF' },
                 weekly:   { ic:'🗓️', col:'#7A3CFF' },
-                birthday: { ic:'🎂', col:'#F59E0B' },
+                birthday: { ic:'', col:'#F59E0B' },
                 silence:  { ic:'💤', col:'#EF4444' },
                 weather:  { ic:'☔', col:'#06B6D4' },
                 stat:     { ic:'📊', col:'#EC4899' }
@@ -7553,10 +7553,10 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           <div class="card-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
             ${[
               {e:'🌹',n:'Saint-Valentin',d:'-20% sur les cœurs'},
-              {e:'🇨🇱',n:'Fiestas Patrias',d:'Pack empanadas + dulces'},
+              {e:'🇨🇱',n:'Fiestas Patrias',d:'Pack productos + dulces'},
               {e:'🎄',n:'Noël LATAM',d:'Panetón + pan de pascua'},
               {e:'🌞',n:'Promo été',d:'Rafraîchissant week-end'},
-              {e:'🎂',n:'Anniversaire VIP',d:'Torte offerte au top 5'},
+              {e:'',n:'Anniversaire VIP',d:'Torte offerte au top 5'},
               {e:'💚',n:'Récupération client',d:'-15% après 45j silence'},
               {e:'☔',n:'Jour de pluie',d:'Delivery gratis'},
               {e:'🎉',n:'Annonce nouveauté',d:'Nouveau produit au catalogue'},
@@ -8017,7 +8017,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
             <option>💔 Récupération</option>
             <option>⭐ Fidélisation</option>
             <option>🆕 Lancement produit</option>
-            <option>🎂 Anniversaire</option>
+            <option>Anniversaire</option>
           </select></div>
         <div style="padding:12px;background:var(--blue-soft);border-radius:8px;font-size:11.5px;color:var(--blue-ink)">
           💡 Tu peux aussi importer un fichier CSV avec colonnes <code>name,subject,message</code> via "Glisser-déposer" (à venir).
@@ -8061,7 +8061,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       <div class="modal-hd"><h3>📢 Nouvelle campagne ${templateName?`— ${templateName}`:''}</h3><button class="modal-close" onclick="Nx.closeModal()">✕</button></div>
       <div class="modal-body">
         <div class="form-row"><label class="form-lbl">Nom de la campagne</label>
-          <input class="form-ctrl" id="campName" value="${templateName||'Promo pan amasado week-end'}" oninput="var _s=document.getElementById('campSubjectPreview'); if(_s)_s.textContent=this.value;"></div>
+          <input class="form-ctrl" id="campName" value="${templateName||'Promo producto estrella week-end'}" oninput="var _s=document.getElementById('campSubjectPreview'); if(_s)_s.textContent=this.value;"></div>
         <div class="form-row"><label class="form-lbl">Cibler par segment <span style="color:var(--muted);font-weight:400">· cohérent avec ton CRM</span></label>
           <select class="form-ctrl" id="campTarget" onchange="Nx.onCampTargetChange(this.value)">
             ${segOpts.map((s,i)=>`<option value="${s.k}" style="color:${s.col};font-weight:600" ${i===(presetIdx>=0?presetIdx:1)?'selected':''}>● ${s.n} ${s.c!=='sélection'?'('+s.c+')':''}</option>`).join('')}
@@ -8091,7 +8091,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           </div>
         </div>
         <div class="form-row"><label class="form-lbl">Message</label>
-          <textarea class="form-ctrl" id="campMsg" rows="4" oninput="var _b=document.getElementById('campBodyPreview'); if(_b)_b.textContent=this.value;">${presetMessage!=null?String(presetMessage).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):'Hola 👋 Este fin de semana con nosotros: 3kg de pan amasado por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! 🥖'}</textarea>
+          <textarea class="form-ctrl" id="campMsg" rows="4" oninput="var _b=document.getElementById('campBodyPreview'); if(_b)_b.textContent=this.value;">${presetMessage!=null?String(presetMessage).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):'Hola 👋 Este fin de semana con nosotros: 3kg de producto estrella por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! '}</textarea>
           <div class="flex mt8"><button class="btn-g" onclick="Nx.generateCampMsg()">✨ Générer une suggestion IA</button></div></div>
         <!-- POINT CAMPAGNES (g) — Warning anti-BAN WhatsApp -->
         <div style="padding:10px 14px;background:var(--amber-soft);border-left:3px solid #F59E0B;border-radius:6px;font-size:12px;color:#B45309;margin-bottom:14px">
@@ -8167,8 +8167,8 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
               <span><b style="color:#334155">De :</b> ${Nx._h(this.state.business.name||'Ton commerce')}</span>
               <span>19:00</span>
             </div>
-            <div style="font-size:13px;color:#0F172A;font-weight:700;margin-bottom:8px">Objet : <span id="campSubjectPreview" style="font-weight:600;color:#334155">${document.getElementById('campName')?.value || 'Promo pan amasado week-end'}</span></div>
-            <div style="font-size:13px;color:#1E293B;line-height:1.55;white-space:pre-wrap" id="campBodyPreview">${presetMessage!=null?String(presetMessage).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):'Hola 👋 Este fin de semana con nosotros: 3kg de pan amasado por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! 🥖'}</div>
+            <div style="font-size:13px;color:#0F172A;font-weight:700;margin-bottom:8px">Objet : <span id="campSubjectPreview" style="font-weight:600;color:#334155">${document.getElementById('campName')?.value || 'Promo producto estrella week-end'}</span></div>
+            <div style="font-size:13px;color:#1E293B;line-height:1.55;white-space:pre-wrap" id="campBodyPreview">${presetMessage!=null?String(presetMessage).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):'Hola 👋 Este fin de semana con nosotros: 3kg de producto estrella por 10 000 CLP (en vez de 12 000). ¡Reserva por este mismo chat! '}</div>
             <div style="margin-top:14px;padding-top:10px;border-top:1px solid #F1F5F9;font-size:11px;color:#94A3B8">
               ✂️ Si tu ne souhaites plus recevoir ces emails, <a style="color:#1A56DB">se désinscrire</a> · ${Nx._h(this.state.business.name||'Ton commerce')}${this.state.business.city?' · '+Nx._h(this.state.business.city):''}
             </div>
@@ -8505,7 +8505,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   _autoCampDefaults: {
     'cart-abandoned': { name:'Récupération panier abandonné −10 %', trigger:'silence', target:'all', message:'Hola {prenom} 👋 Vi que preguntaste por nuestros productos hace poco y no pudiste cerrar tu pedido. Te dejo un −10% con el código {promo} para finalizarlo cuando quieras. ¡Te esperamos!', cfg:{silenceDays:1, promoCode:'CARRITO-10', detectKeywords:'precio,cuánto,cuesta,disponible,delivery,horario'}, antiAbusWeek:true, antiAbusCredits:true },
     'promo-fin-mois': { name:'Promo fin de mois −15 %', trigger:'monthly', target:'rec', message:"Hola {prenom} 👋 Petit clin d'œil de tu negocio : −15 % sur ta prochaine commande jusqu'au 30. À très vite !", cfg:{day:28, time:'09:00'}, antiAbusWeek:true, antiAbusCredits:true },
-    'anniv-clients':  { name:'Anniversaires clients', trigger:'birthday', target:'all', message:'¡Feliz cumpleaños {prenom}! 🎂 Te regalamos un {promo} para tu pedido de la semana. Disfruta!', cfg:{time:'09:00', promoCode:'HBD-{NOM}-15'}, antiAbusWeek:false, antiAbusCredits:true },
+    'anniv-clients':  { name:'Anniversaires clients', trigger:'birthday', target:'all', message:'¡Feliz cumpleaños {prenom}! Te regalamos un {promo} para tu pedido de la semana. Disfruta!', cfg:{time:'09:00', promoCode:'HBD-{NOM}-15'}, antiAbusWeek:false, antiAbusCredits:true },
     'recovery-lost':  { name:'Récupération clients perdus −10 %', trigger:'silence', target:'lost', message:'Hola {prenom}, hace tiempo que no nos vemos 😊 Nuestro negocio te extraña — −10 % en tu próxima compra, código {promo}.', cfg:{silenceDays:45, promoCode:'MISS-YOU-10'}, antiAbusWeek:true, antiAbusCredits:true }
   },
 
@@ -8599,7 +8599,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     const triggerOptions = [
       {k:'monthly',  l:'📅 Le X de chaque mois (ex : 28)'},
       {k:'weekly',   l:'🔁 Tous les Y (ex : tous les vendredis 17h)'},
-      {k:'birthday', l:'🎂 La veille de chaque anniversaire client'},
+      {k:'birthday', l:'La veille de chaque anniversaire client'},
       {k:'silence',  l:"💔 Quand un client n'a pas commandé depuis N jours"},
       {k:'weather',  l:'☔ Selon météo (ex : pluie → promo soupe)'},
       {k:'stat',     l:'📈 Selon stat (ex : si CA semaine < seuil)'}
@@ -8692,7 +8692,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
   suggestAutoMessage(){
     const opts = [
       "Hola {prenom} 👋 Petit clin d'œil de tu negocio : −15 % sur ta prochaine commande jusqu'au 30. À très vite !",
-      "¿Cómo estás {prenom}? Nuestro negocio te invita con −15 % sobre tu próxima compra. Válido hasta fin de mes 🥖",
+      "¿Cómo estás {prenom}? Nuestro negocio te invita con −15 % sobre tu próxima compra. Válido hasta fin de mes ",
       "Hey {prenom}! Te dejamos un −15 % de regalo pour cette semaine. Pasa cuando quieras, te esperamos 💛"
     ];
     const ta = document.getElementById('autoMessage');
@@ -8715,7 +8715,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       const sel = c.weekday || 'Vendredi';
       fields.innerHTML = `<div><label style="font-size:11px;color:var(--muted)">Jour de la semaine</label><select class="form-ctrl" data-cfg-key="weekday">${days.map(d=>`<option ${d===sel?'selected':''}>${d}</option>`).join('')}</select></div><div><label style="font-size:11px;color:var(--muted)">Heure</label><input class="form-ctrl" data-cfg-key="time" type="time" value="${esc(c.time||'17:00')}"></div>`;
     } else if (trigger === 'birthday') {
-      fields.innerHTML = `<div style="grid-column:span 2;padding:10px;background:var(--blue-soft);border-radius:8px;font-size:12px;color:var(--blue-ink)">🎂 Sera envoyée automatiquement la veille de chaque anniversaire client.</div><div><label style="font-size:11px;color:var(--muted)">Heure d'envoi</label><input class="form-ctrl" data-cfg-key="time" type="time" value="${esc(c.time||'09:00')}"></div><div><label style="font-size:11px;color:var(--muted)">Code promo personnalisé</label><input class="form-ctrl" data-cfg-key="promoCode" placeholder="BIRTHDAY-{NOM}" value="${esc(c.promoCode||'HBD-{NOM}-15')}"></div>`;
+      fields.innerHTML = `<div style="grid-column:span 2;padding:10px;background:var(--blue-soft);border-radius:8px;font-size:12px;color:var(--blue-ink)">Sera envoyée automatiquement la veille de chaque anniversaire client.</div><div><label style="font-size:11px;color:var(--muted)">Heure d'envoi</label><input class="form-ctrl" data-cfg-key="time" type="time" value="${esc(c.time||'09:00')}"></div><div><label style="font-size:11px;color:var(--muted)">Code promo personnalisé</label><input class="form-ctrl" data-cfg-key="promoCode" placeholder="BIRTHDAY-{NOM}" value="${esc(c.promoCode||'HBD-{NOM}-15')}"></div>`;
     } else if (trigger === 'silence') {
       fields.innerHTML = `<div><label style="font-size:11px;color:var(--muted)">Silence depuis (jours)</label><input class="form-ctrl" data-cfg-key="silenceDays" type="number" min="1" max="365" value="${esc(c.silenceDays||45)}"></div><div><label style="font-size:11px;color:var(--muted)">Code promo</label><input class="form-ctrl" data-cfg-key="promoCode" placeholder="WELCOME-BACK-15" value="${esc(c.promoCode||'MISS-YOU-10')}"></div>`;
     } else if (trigger === 'weather') {
@@ -9319,7 +9319,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
               <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px">✨ Suggestions — clique pour utiliser</div>
               <div style="display:flex;flex-wrap:wrap;gap:6px">
                 ${[
-                  {lbl:'🥖 Chaleureux LATAM (ES)', txt:'¡Hola [NOM]! 🥖 Estoy fuera unos días, vuelvo el [DATE]. Mientras tanto, mi asistente Nexus puede ayudarte con horarios, precios, productos disponibles y pedidos simples. Para urgencias: [TEL]. ¡Gracias por tu paciencia! 🙏'},
+                  {lbl:'Chaleureux LATAM (ES)', txt:'¡Hola [NOM]! Estoy fuera unos días, vuelvo el [DATE]. Mientras tanto, mi asistente Nexus puede ayudarte con horarios, precios, productos disponibles y pedidos simples. Para urgencias: [TEL]. ¡Gracias por tu paciencia! 🙏'},
                   {lbl:'⚡ Court & pro (ES)', txt:'¡Hola! Fuera del 21/05 al [DATE]. Nexus IA responde por mí: horarios, catálogo, disponibilidad. Urgencias: [TEL]. ¡Te respondo a mi vuelta!'},
                   {lbl:'🌍 Multilingue auto (ES+EN)', txt:'¡Hola! 👋 Estoy fuera hasta el [DATE]. Mi asistente Nexus responde en español, inglés y francés. Para urgencias: [TEL].\\n\\nHi! Away until [DATE]. My Nexus assistant replies in Spanish, English and French. Emergencies: [TEL].'},
                   {lbl:'🎉 Pro événements (ES)', txt:'¡Hola [NOM]! Estoy fuera hasta el [DATE], pero Nexus puede confirmar disponibilidad, precios y armar tu pre-cotización para eventos. Para confirmar y firmar el presupuesto, te contacto apenas vuelva. Urgencias: [TEL].'},
@@ -9421,7 +9421,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
               <div id="vacancePreview" style="display:flex;flex-direction:column;gap:10px">
                 ${[
                   {client:'María González', q:'Hola, ¿están abiertos mañana?', a:'Hola María 👋 Sí, abrimos mañana de 8h a 19h. L\'équipe est en vacances jusqu\'au [DATE] mais Nexus est là pour t\'aider !', time:'Il y a 12 min'},
-                  {client:'Diego Salazar', q:'¿Tienen pan amasado para esta tarde?', a:'¡Sí Diego! Pan amasado disponible toute la journée. Tu peux passer après 14h pour les fournées de l\'après-midi 🥖', time:'Il y a 1h'},
+                  {client:'Diego Salazar', q:'¿Tienen producto estrella para esta tarde?', a:'¡Sí Diego! Producto estrella disponible toute la journée. Tu peux passer après 14h pour les fournées de l\'après-midi ', time:'Il y a 1h'},
                   {client:'Ana Castillo', q:'¿Hacen entregas en Las Condes?', a:'Oui Ana, livraison gratuite Las Condes pour commandes > 15.000 CLP. WhatsApp-moi ta commande, je préviens l\'équipe à son retour pour la confirmer 💛', time:'Hier · 18h22'}
                 ].map(m=>`
                   <div style="padding:12px 14px;background:var(--bg2);border-radius:10px;border-left:3px solid #10B981">
@@ -9462,10 +9462,10 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
         </div>
         <div class="form-row">
           <label class="form-lbl">Message client à simuler</label>
-          <textarea class="form-ctrl" id="vacTestMsg" rows="3" placeholder="Ex : Hola, ¿están abiertos el domingo?">Hola, ¿están abiertos mañana? Y tienen pan amasado disponible?</textarea>
+          <textarea class="form-ctrl" id="vacTestMsg" rows="3" placeholder="Ex : Hola, ¿están abiertos el domingo?">Hola, ¿están abiertos mañana? Y tienen producto estrella disponible?</textarea>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
-          ${['¿Están abiertos mañana?','¿Tienen entrega a domicilio?','¿Cuánto cuesta el pan amasado?','¿Hacen tortas por encargo?'].map(p=>`<button class="btn-g" style="font-size:11px" onclick="document.getElementById('vacTestMsg').value='${p}'">${p}</button>`).join('')}
+          ${['¿Están abiertos mañana?','¿Tienen entrega a domicilio?','¿Cuánto cuesta el producto estrella?','¿Hacen productos por encargo?'].map(p=>`<button class="btn-g" style="font-size:11px" onclick="document.getElementById('vacTestMsg').value='${p}'">${p}</button>`).join('')}
         </div>
         <button class="btn btn-p" style="width:100%" onclick="Nx.runVacanceTest()">🤖 Voir la réponse de l'IA</button>
         <div id="vacTestResult" style="margin-top:14px"></div>
@@ -9535,7 +9535,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
       <div class="modal-body">
         <div style="display:grid;gap:12px">
           <div><label style="font-size:12px;font-weight:700;color:var(--muted)">Titre *</label>
-            <input class="form-ctrl" id="rdvTitle" placeholder="Ex : Dégustation tortas — Sra. Pérez" maxlength="200"></div>
+            <input class="form-ctrl" id="rdvTitle" placeholder="Ex : Dégustation productos — Sra. Pérez" maxlength="200"></div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
             <div><label style="font-size:12px;font-weight:700;color:var(--muted)">Date *</label>
               <input class="form-ctrl" type="date" id="rdvDate" min="${today}" value="${today}"></div>
@@ -9748,8 +9748,8 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     const clients = this.state.clients || [];
     const vip = clients.find(c => (c.tags||[]).includes('VIP') || c.tag === 'vip') || clients.find(c => c.tag === 'biz') || clients[0];
     const scenarios = [
-      { msg: '¡URGENTE! Necesito 50 empanadas para esta noche, evento importante 🙏', reason: 'mot-clé "urgente" + client VIP' },
-      { msg: 'Ayuda, mi pedido de tortas no llegó y es para una boda hoy a las 18h', reason: 'mot-clé "ayuda" + livraison du jour' },
+      { msg: '¡URGENTE! Necesito 50 productos para esta noche, evento importante 🙏', reason: 'mot-clé "urgente" + client VIP' },
+      { msg: 'Ayuda, mi pedido de productos no llegó y es para una boda hoy a las 18h', reason: 'mot-clé "ayuda" + livraison du jour' },
       { msg: 'Hola, necesito hablar contigo ahora, es importante para nuestro evento corporativo', reason: 'mot-clé "ahora" + client Business' }
     ];
     const sc = scenarios[Math.floor(Math.random() * scenarios.length)];
