@@ -3174,6 +3174,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
     const authed = (window.NxCloud && window.NxCloud.isAuthed && window.NxCloud.isAuthed());
     const email = (window.NxCloud && window.NxCloud._user && window.NxCloud._user.email) || '';
     if (authed){
+      if (bar) bar.style.display = 'none'; return; // connecte -> bandeau masque (deconnexion via menu compte)
       bar.style.background = 'linear-gradient(135deg,#10B981,#059669)'; bar.style.color = '#fff';
       bar.innerHTML = '<span>✅ Connecté : '+ (email||'ton compte') +'</span>'
         + '<a href="app.html" style="background:rgba(255,255,255,.22);color:#fff;text-decoration:none;padding:6px 12px;border-radius:8px;font-weight:800">Ouvrir mon Nexus →</a>'
@@ -3181,6 +3182,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       const lo = document.getElementById('nxBarLogout');
       if (lo) lo.onclick = async () => { if(!confirm('Se déconnecter ?'))return; await window.NxCloud.signOut(); try{showToast('✓ Déconnecté');}catch(e){} nxAuthBanner(); };
     } else {
+      if (bar) bar.style.display = '';
       bar.style.background = 'linear-gradient(135deg,#1F6FFF,#7A3CFF)'; bar.style.color = '#fff';
       bar.innerHTML = '<span>👋 Tu vois une <b>démo</b>. Connecte-toi à <b>ton compte</b> pour voir tes données.</span>'
         + '<button id="nxBarLogin" style="background:#fff;border:0;color:#1F6FFF;padding:6px 14px;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit">🔓 Se connecter</button>';

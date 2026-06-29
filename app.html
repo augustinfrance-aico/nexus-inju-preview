@@ -2408,13 +2408,15 @@ const Nx = {
     const d = document.createElement('div');
     d.className = 'toast ' + type;
     d.innerHTML = `<span class="i">${icons[type]||'💡'}</span><div class="toast-body"><b>${msg}</b>${body?`<small>${body}</small>`:''}</div>`;
-    document.getElementById('toast-container').appendChild(d);
+    const _tc = document.getElementById('toast-container');
+    while (_tc.children.length >= 2) _tc.removeChild(_tc.firstChild); // max 2 toasts affichés -> pas d'empilement visuel
+    _tc.appendChild(d);
     // Fix Augustin 20/05 : traduit auto le toast si lang ≠ fr (Groq gratuit)
     const lang = (this.state && this.state.lang) || localStorage.getItem('nexus_core_lang') || 'fr';
     if (lang !== 'fr' && window.NexusDynTranslate) {
       setTimeout(() => { try { window.NexusDynTranslate.apply(lang); } catch(e){} }, 50);
     }
-    setTimeout(() => { d.style.opacity = '0'; d.style.transform = 'translateX(20px)'; setTimeout(()=>d.remove(), 300); }, 5000);
+    setTimeout(() => { d.style.opacity = '0'; d.style.transform = 'translateX(20px)'; setTimeout(()=>d.remove(), 300); }, 3500);
   },
 
   openModal(type, data){
@@ -10234,12 +10236,14 @@ window.addEventListener('DOMContentLoaded', () => Nx.init());
     const authed = (window.NxCloud && window.NxCloud.isAuthed && window.NxCloud.isAuthed());
     const email = (window.NxCloud && window.NxCloud._user && window.NxCloud._user.email) || '';
     if (authed){
+      if (bar) bar.style.display = 'none'; return; // connecte -> bandeau masque (deconnexion via menu compte)
       bar.style.background = 'linear-gradient(135deg,#10B981,#059669)'; bar.style.color = '#fff';
       bar.innerHTML = '<span>✅ Connecté : '+ (email||'ton compte') +'</span>'
         + '<button id="nxBarLogout" style="background:transparent;border:1px solid rgba(255,255,255,.65);color:#fff;padding:6px 12px;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit">🚪 Se déconnecter</button>';
       const lo = document.getElementById('nxBarLogout');
       if (lo) lo.onclick = () => { try{ Nx.logoutCloud(); }catch(e){} };
     } else {
+      if (bar) bar.style.display = '';
       bar.style.background = 'linear-gradient(135deg,#1F6FFF,#7A3CFF)'; bar.style.color = '#fff';
       bar.innerHTML = '<span>👋 Tu vois une <b>démo</b>. Connecte-toi à <b>ton compte</b> pour voir tes données.</span>'
         + '<button id="nxBarLogin" style="background:#fff;border:0;color:#1F6FFF;padding:6px 14px;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit">🔓 Se connecter</button>';
