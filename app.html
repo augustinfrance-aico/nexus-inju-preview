@@ -3539,6 +3539,8 @@ const Nx = {
       const esc = await NC.listAll('escalation_log');
       if (esc.ok && esc.data.length) {
         this.state.escalationLog = esc.data.map(r => this._fromRowEscalation(r));
+      } else if (esc.ok) {
+        this.state.escalationLog = []; // cloud vide -> on vide aussi en local (pas d'escalade démo qui traîne)
       }
       // Vacances
       const vac = await NC.listAll('vacances_config');
