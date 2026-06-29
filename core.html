@@ -854,7 +854,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
     <div class="company">
       <div class="company-logo">🥖</div>
       <div class="company-info">
-        <b>Panadería Don Carlos</b>
+        <b>Panadería del Barrio</b>
         <small>Las Condes · Santiago, CL</small>
       </div>
     </div>
@@ -921,7 +921,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
     </div>
     <div class="hero-banner-text">
-      <b>Bonne journée, Carlos.</b> <span class="hl">Grâce à Nexus</span>, tu as <b>+28 % de ventes</b> cette semaine et <b>2 clients perdus récupérés</b>. Continue, ça marche.
+      <b>Bonne journée.</b> <span class="hl">Grâce à Nexus</span>, tu as <b>+28 % de ventes</b> cette semaine et <b>2 clients perdus récupérés</b>. Continue, ça marche.
     </div>
   </div>
 
@@ -1171,14 +1171,14 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       </div>
       <div class="text-body" id="textBody">
         <div class="text-content" data-mode="day" data-i18n-html="text.day.html" style="display:block">
-          <p><b>Bonjour Carlos,</b> voici ton récap du jour.</p>
+          <p><b>Bonjour,</b> voici ton récap du jour.</p>
           <p>Tu as fait <b>10 ventes</b> aujourd'hui — meilleur lundi du mois. Ton top produit reste les empanadas (5 ventes, +12 % vs hier).</p>
           <p>L'IA a répondu à <b>21 messages</b>, dont 19 sans ton intervention. <b>3 nouveaux clients</b> sont arrivés via WhatsApp et 2 d'entre eux ont déjà passé commande.</p>
           <p>Demain c'est l'anniversaire de Raviella Mendoza — Nexus suggère un code promo. Et il va pleuvoir samedi : ta promo soupe maison est prête à être activée.</p>
           <p><b>Bonne soirée. Tu peux fermer la boutique tranquille.</b></p>
         </div>
         <div class="text-content" data-mode="week" data-i18n-html="text.week.html" style="display:none">
-          <p><b>Récap de ta semaine, Carlos.</b></p>
+          <p><b>Récap de ta semaine.</b></p>
           <p>Cette semaine tu as fait <b>+28 % de ventes</b> vs la semaine dernière, et <b>récupéré 5 clients perdus</b> grâce aux rappels Nexus. Excellent.</p>
           <p>Côté agenda : 3 RDV livraison cette semaine (mardi 14 h, jeudi 11 h, samedi 17 h) et anniversaire de Raviella demain.</p>
           <p>L'IA a géré <b>147 conversations</b>, 94 % sans intervention. Tu as économisé environ 6 h de travail commercial.</p>
@@ -1211,7 +1211,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
         <div class="msg-avatar" style="--av:linear-gradient(135deg,#FF6B9D,#F5C45E)">MR</div>
         <div class="msg-meta">
           <div class="msg-name">María Rodríguez <span class="star">★</span></div>
-          <div class="msg-text" data-i18n="msg.preview.1">Hola Carlos ! Je veux confirmer ma commande de 12 empanadas pour samedi…</div>
+          <div class="msg-text" data-i18n="msg.preview.1">Hola ! Je veux confirmer ma commande de 12 empanadas pour samedi…</div>
         </div>
         <div class="msg-time">14:32</div>
         <div class="msg-unread"></div>
@@ -1401,7 +1401,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
 
         <div class="field">
           <label>Que doit dire l'IA aux clients ?</label>
-          <textarea id="vacMsg" placeholder="Ex : Hola ! La boulangerie est en pause jusqu'au 17 mai. Pour les commandes urgentes, l'IA peut prendre votre numéro et nous rappellerons à notre retour. Gracias !">Hola ! La boulangerie est en pause jusqu'au 17 mai. Pour les commandes urgentes, je note ta demande et Carlos te recontacte dès le retour. Gracias por tu paciencia 🥖</textarea>
+          <textarea id="vacMsg" placeholder="Ex : Hola ! La boulangerie est en pause jusqu'au 17 mai. Pour les commandes urgentes, l'IA peut prendre votre numéro et nous rappellerons à notre retour. Gracias !">Hola ! La boulangerie est en pause jusqu'au 17 mai. Pour les commandes urgentes, je note ta demande et on te recontacte dès le retour. Gracias por tu paciencia 🥖</textarea>
         </div>
 
         <div class="field">
@@ -1842,7 +1842,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
   // =========== POPUP "Voir les 5 chats" — propositions IA + accept/refuse + envoyer (Augustin 21/05/2026)
   const PENDING_CHATS = [
     { id:1, name:'María González', initials:'MG', color:'#FF6B6B', channel:'WhatsApp', time:'Hace 4 min',
-      message:'Hola Carlos, ¿tienes pan amasado disponible para mañana? Necesito 3 kilos para una reunión familiar 😊',
+      message:'Hola, ¿tienes pan amasado disponible para mañana? Necesito 3 kilos para una reunión familiar 😊',
       draft:'¡Hola María! Claro que sí, te guardo 3 kilos de pan amasado para mañana. ¿A qué hora te viene mejor pasar a buscarlo? 🥖' },
     { id:2, name:'Diego Ramírez', initials:'DR', color:'#3B82F6', channel:'WhatsApp', time:'Hace 18 min',
       message:'Gracias por la factura. ¿Aceptan transferencia bancaria?',
@@ -2117,7 +2117,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
     const SKIP_PARENT_SELECTOR = SKIP_SELECTOR + ',script,style,code,pre,svg';
     const SKIP_TEXT = /^(\s*[\d.,%€$£+\-×\/]+\s*[mhskg]?\w{0,3}\s*)$/i;
     const ONLY_EMOJI = /^[\s\p{Extended_Pictographic}‍️\d:.]+$/u;
-    const PRESERVE = /^(Nexus|Carlos|María|Maria|Diego|Ana|Javier|Raviella|WhatsApp|Gmail|Calendar|Google|Claude|Stripe|Loom|Vercel|VIP|CRM|SOS|FAQ|API|PDF|CSV|empanadas|pan amasado|bolos|panadería|Providencia|Las Condes|Santiago|Pro|Business|Enterprise|Free|Chile|Chili)$/i;
+    const PRESERVE = /^(Nexus|María|Maria|Diego|Ana|Javier|Raviella|WhatsApp|Gmail|Calendar|Google|Claude|Stripe|Loom|Vercel|VIP|CRM|SOS|FAQ|API|PDF|CSV|empanadas|pan amasado|bolos|panadería|Providencia|Las Condes|Santiago|Pro|Business|Enterprise|Free|Chile|Chili)$/i;
     const textNodeOrigs = new Map();
     let cache = {};
     try { cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch(e){ cache = {}; }
@@ -2301,7 +2301,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       'gain.eye':'Cette semaine', 'gain.prefix':'Grâce à Nexus, tu as gagné', 'gain.sub':'ventes détectées + clients récupérés + temps économisé', 'gain.cta':'Voir le détail',
       'top.lang.tooltip':'Changer de langue', 'top.theme':'Basculer thème clair/sombre',
       // Hero banner
-      'hero.greeting':'Bonne journée, Carlos.',
+      'hero.greeting':'Bonne journée.',
       'hero.text':'Grâce à Nexus, tu as +28 % de ventes cette semaine et 2 clients perdus récupérés. Continue, ça marche.',
       // Stats du jour (4 cards dans le carousel)
       'stat.tag':'★ Exemple', 'stat.bonus':'★ Exemple',
@@ -2348,14 +2348,14 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       // Brief écrit (FR par défaut)
       'brief.text.title':'Brief écrit',
       'text.expand':'Lire en entier', 'text.collapse':'Réduire',
-      'text.day.html':'<p><b>Bonjour Carlos,</b> voici ton récap du jour.</p><p>Tu as fait <b>10 ventes</b> aujourd\'hui — meilleur lundi du mois. Ton top produit reste les empanadas (5 ventes, +12 % vs hier).</p><p>L\'IA a répondu à <b>21 messages</b>, dont 19 sans ton intervention. <b>3 nouveaux clients</b> sont arrivés via WhatsApp et 2 d\'entre eux ont déjà passé commande.</p><p>Demain c\'est l\'anniversaire de Raviella Mendoza — Nexus suggère un code promo. Et il va pleuvoir samedi : ta promo soupe maison est prête à être activée.</p><p><b>Bonne soirée. Tu peux fermer la boutique tranquille.</b></p>',
-      'text.week.html':'<p><b>Récap de ta semaine, Carlos.</b></p><p>Cette semaine tu as fait <b>+28 % de ventes</b> vs la semaine dernière, et <b>récupéré 5 clients perdus</b> grâce aux rappels Nexus. Excellent.</p><p>Côté agenda : 3 RDV livraison cette semaine (mardi 14 h, jeudi 11 h, samedi 17 h) et anniversaire de Raviella demain.</p><p>L\'IA a géré <b>147 conversations</b>, 94 % sans intervention. Tu as économisé environ 6 h de travail commercial.</p><p>Conseils pour la semaine : pousser les empanadas vendredi soir, activer la promo soupe samedi (pluie), et compléter le profil sur les livraisons Providencia.</p><p><b>Bon début de semaine. On garde le rythme.</b></p>',
+      'text.day.html':'<p><b>Bonjour,</b> voici ton récap du jour.</p><p>Tu as fait <b>10 ventes</b> aujourd\'hui — meilleur lundi du mois. Ton top produit reste les empanadas (5 ventes, +12 % vs hier).</p><p>L\'IA a répondu à <b>21 messages</b>, dont 19 sans ton intervention. <b>3 nouveaux clients</b> sont arrivés via WhatsApp et 2 d\'entre eux ont déjà passé commande.</p><p>Demain c\'est l\'anniversaire de Raviella Mendoza — Nexus suggère un code promo. Et il va pleuvoir samedi : ta promo soupe maison est prête à être activée.</p><p><b>Bonne soirée. Tu peux fermer la boutique tranquille.</b></p>',
+      'text.week.html':'<p><b>Récap de ta semaine.</b></p><p>Cette semaine tu as fait <b>+28 % de ventes</b> vs la semaine dernière, et <b>récupéré 5 clients perdus</b> grâce aux rappels Nexus. Excellent.</p><p>Côté agenda : 3 RDV livraison cette semaine (mardi 14 h, jeudi 11 h, samedi 17 h) et anniversaire de Raviella demain.</p><p>L\'IA a géré <b>147 conversations</b>, 94 % sans intervention. Tu as économisé environ 6 h de travail commercial.</p><p>Conseils pour la semaine : pousser les empanadas vendredi soir, activer la promo soupe samedi (pluie), et compléter le profil sur les livraisons Providencia.</p><p><b>Bon début de semaine. On garde le rythme.</b></p>',
       // Messages les plus importants
       'msgs.title':'Messages les plus importants',
       'msgs.subtitle':'Les 5 conversations qui demandent ton attention',
       'msgs.see_all':'Voir toute la messagerie',
       'msgs.see_all_btn':'Voir tous les messages',
-      'msg.preview.1':'Hola Carlos ! Je veux confirmer ma commande de 12 empanadas pour samedi…',
+      'msg.preview.1':'Hola ! Je veux confirmer ma commande de 12 empanadas pour samedi…',
       'msg.preview.2':'Tu fais des livraisons à Providencia ? Je voudrais commander pour samedi…',
       'msg.preview.3':'Merci pour les bolos d\'anniversaire, ils étaient parfaits 🎂',
       'msg.preview.4':'Possible de réserver le pavé entier pour 25 personnes mercredi prochain ?',
@@ -2392,7 +2392,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       'top.notif':'Notificaciones', 'top.settings':'Ajustes', 'top.menus':'Menús', 'top.share':'Compartir en 1 clic', 'top.cloud':'Nube',
       'gain.eye':'Esta semana', 'gain.prefix':'Gracias a Nexus, has ganado', 'gain.sub':'ventas detectadas + clientes recuperados + tiempo ahorrado', 'gain.cta':'Ver el detalle',
       'top.lang.tooltip':'Cambiar idioma', 'top.theme':'Cambiar tema claro/oscuro',
-      'hero.greeting':'Buen día, Carlos.',
+      'hero.greeting':'Buen día.',
       'hero.text':'Gracias a Nexus, tienes +28 % de ventas esta semana y 2 clientes perdidos recuperados. Sigue así, funciona.',
       'stat.tag':'★ Ejemplo',
       'stat.bonus':'★ Ejemplo',
@@ -2431,13 +2431,13 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       'audio.ready':'listo para escuchar',
       'brief.text.title':'Brief escrito',
       'text.expand':'Leer todo', 'text.collapse':'Reducir',
-      'text.day.html':'<p><b>Buen día, Carlos,</b> aquí tu resumen del día.</p><p>Hiciste <b>10 ventas</b> hoy — mejor lunes del mes. Tu top producto sigue siendo las empanadas (5 ventas, +12 % vs ayer).</p><p>La IA respondió a <b>21 mensajes</b>, 19 sin tu intervención. <b>3 nuevos clientes</b> llegaron por WhatsApp y 2 ya hicieron un pedido.</p><p>Mañana es el cumpleaños de Raviella Mendoza — Nexus sugiere un código promo. Y va a llover el sábado: tu promo sopa casera está lista para activar.</p><p><b>Buenas noches. Puedes cerrar tranquilo.</b></p>',
-      'text.week.html':'<p><b>Resumen de tu semana, Carlos.</b></p><p>Esta semana hiciste <b>+28 % de ventas</b> vs la semana pasada, y <b>recuperaste 5 clientes perdidos</b> gracias a los recordatorios Nexus. Excelente.</p><p>Agenda: 3 citas de entrega esta semana (martes 14 h, jueves 11 h, sábado 17 h) y cumpleaños de Raviella mañana.</p><p>La IA gestionó <b>147 conversaciones</b>, 94 % sin intervención. Ahorraste unas 6 h de trabajo comercial.</p><p>Consejos de la semana: empujar las empanadas viernes noche, activar la promo sopa sábado (lluvia), y completar el perfil sobre las entregas a Providencia.</p><p><b>Buen comienzo de semana. Mantenemos el ritmo.</b></p>',
+      'text.day.html':'<p><b>Buen día,</b> aquí tu resumen del día.</p><p>Hiciste <b>10 ventas</b> hoy — mejor lunes del mes. Tu top producto sigue siendo las empanadas (5 ventas, +12 % vs ayer).</p><p>La IA respondió a <b>21 mensajes</b>, 19 sin tu intervención. <b>3 nuevos clientes</b> llegaron por WhatsApp y 2 ya hicieron un pedido.</p><p>Mañana es el cumpleaños de Raviella Mendoza — Nexus sugiere un código promo. Y va a llover el sábado: tu promo sopa casera está lista para activar.</p><p><b>Buenas noches. Puedes cerrar tranquilo.</b></p>',
+      'text.week.html':'<p><b>Resumen de tu semana.</b></p><p>Esta semana hiciste <b>+28 % de ventas</b> vs la semana pasada, y <b>recuperaste 5 clientes perdidos</b> gracias a los recordatorios Nexus. Excelente.</p><p>Agenda: 3 citas de entrega esta semana (martes 14 h, jueves 11 h, sábado 17 h) y cumpleaños de Raviella mañana.</p><p>La IA gestionó <b>147 conversaciones</b>, 94 % sin intervención. Ahorraste unas 6 h de trabajo comercial.</p><p>Consejos de la semana: empujar las empanadas viernes noche, activar la promo sopa sábado (lluvia), y completar el perfil sobre las entregas a Providencia.</p><p><b>Buen comienzo de semana. Mantenemos el ritmo.</b></p>',
       'msgs.title':'Mensajes más importantes',
       'msgs.subtitle':'Las 5 conversaciones que requieren tu atención',
       'msgs.see_all':'Ver toda la mensajería',
       'msgs.see_all_btn':'Ver todos los mensajes',
-      'msg.preview.1':'¡Hola Carlos! Quiero confirmar mi pedido de 12 empanadas para el sábado…',
+      'msg.preview.1':'¡Hola! Quiero confirmar mi pedido de 12 empanadas para el sábado…',
       'msg.preview.2':'¿Haces entregas en Providencia? Quisiera pedir para el sábado…',
       'msg.preview.3':'Gracias por los bolos de cumpleaños, estuvieron perfectos 🎂',
       'msg.preview.4':'¿Posible reservar el local entero para 25 personas el próximo miércoles?',
@@ -2470,7 +2470,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       'top.notif':'Notifications', 'top.settings':'Settings', 'top.menus':'Menus', 'top.share':'1-click share', 'top.cloud':'Cloud',
       'gain.eye':'This week', 'gain.prefix':'Thanks to Nexus, you earned', 'gain.sub':'detected sales + recovered clients + saved time', 'gain.cta':'See details',
       'top.lang.tooltip':'Change language', 'top.theme':'Toggle light/dark theme',
-      'hero.greeting':'Good day, Carlos.',
+      'hero.greeting':'Good day.',
       'hero.text':'Thanks to Nexus, you have +28% sales this week and 2 lost clients recovered. Keep going, it works.',
       'stat.tag':'★ Example',
       'stat.bonus':'★ Example',
@@ -2509,13 +2509,13 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       'audio.ready':'ready to listen',
       'brief.text.title':'Written brief',
       'text.expand':'Read all', 'text.collapse':'Collapse',
-      'text.day.html':'<p><b>Hi Carlos,</b> here\'s your daily recap.</p><p>You made <b>10 sales</b> today — best Monday of the month. Your top product is still empanadas (5 sales, +12% vs yesterday).</p><p>AI replied to <b>21 messages</b>, 19 without your intervention. <b>3 new clients</b> came via WhatsApp and 2 already placed an order.</p><p>Tomorrow is Raviella Mendoza\'s birthday — Nexus suggests a promo code. And it\'s going to rain Saturday: your homemade soup promo is ready to enable.</p><p><b>Good evening. You can close the shop quietly.</b></p>',
-      'text.week.html':'<p><b>Your weekly recap, Carlos.</b></p><p>This week you made <b>+28% sales</b> vs last week, and <b>recovered 5 lost clients</b> thanks to Nexus reminders. Excellent.</p><p>Agenda: 3 delivery appointments this week (Tuesday 2 pm, Thursday 11 am, Saturday 5 pm) and Raviella\'s birthday tomorrow.</p><p>AI handled <b>147 conversations</b>, 94% without intervention. You saved about 6 h of sales work.</p><p>Tips for the week: push empanadas Friday night, enable soup promo Saturday (rain), and complete profile about Providencia deliveries.</p><p><b>Good start of the week. Keep the rhythm.</b></p>',
+      'text.day.html':'<p><b>Hi,</b> here\'s your daily recap.</p><p>You made <b>10 sales</b> today — best Monday of the month. Your top product is still empanadas (5 sales, +12% vs yesterday).</p><p>AI replied to <b>21 messages</b>, 19 without your intervention. <b>3 new clients</b> came via WhatsApp and 2 already placed an order.</p><p>Tomorrow is Raviella Mendoza\'s birthday — Nexus suggests a promo code. And it\'s going to rain Saturday: your homemade soup promo is ready to enable.</p><p><b>Good evening. You can close the shop quietly.</b></p>',
+      'text.week.html':'<p><b>Your weekly recap.</b></p><p>This week you made <b>+28% sales</b> vs last week, and <b>recovered 5 lost clients</b> thanks to Nexus reminders. Excellent.</p><p>Agenda: 3 delivery appointments this week (Tuesday 2 pm, Thursday 11 am, Saturday 5 pm) and Raviella\'s birthday tomorrow.</p><p>AI handled <b>147 conversations</b>, 94% without intervention. You saved about 6 h of sales work.</p><p>Tips for the week: push empanadas Friday night, enable soup promo Saturday (rain), and complete profile about Providencia deliveries.</p><p><b>Good start of the week. Keep the rhythm.</b></p>',
       'msgs.title':'Most important messages',
       'msgs.subtitle':'The 5 conversations that need your attention',
       'msgs.see_all':'See all messaging',
       'msgs.see_all_btn':'See all messages',
-      'msg.preview.1':'Hi Carlos! I\'d like to confirm my order of 12 empanadas for Saturday…',
+      'msg.preview.1':'Hi! I\'d like to confirm my order of 12 empanadas for Saturday…',
       'msg.preview.2':'Do you deliver to Providencia? I\'d like to order for Saturday…',
       'msg.preview.3':'Thanks for the birthday bolos, they were perfect 🎂',
       'msg.preview.4':'Possible to book the whole place for 25 people next Wednesday?',
@@ -2718,7 +2718,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
   if (shareFab) {
     shareFab.addEventListener('click', async () => {
       const shareData = {
-        title: 'Nexus · Panadería Don Carlos',
+        title: 'Nexus · Panadería del Barrio',
         text: 'Voici ma fiche pro pilotée par Nexus.',
         url: location.href
       };
@@ -2968,7 +2968,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
     document.querySelector('#openVacances .drawer-item-meta').textContent = 'Actif';
     document.querySelector('#openVacances .drawer-item-meta').style.color = '#1EFF8E';
     vacModal.classList.remove('show');
-    alert('Mode vacances activé. Bonnes vacances Carlos 🌴');
+    alert('Mode vacances activé. Bonnes vacances 🌴');
   });
 
   // =========== Tutoriel button → re-open onboarding
@@ -3162,7 +3162,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
   }
 
   // Bannière d'auth VISIBLE (Augustin 24/06) : claire pour se connecter / se déconnecter,
-  // et pour ne plus croire qu'on est "sur le compte de Carlos" (= la démo non connectée).
+  // et pour ne plus croire qu'on est "sur le compte de Daniel" (= la démo non connectée).
   function nxAuthBanner(){
     let bar = document.getElementById('nxAuthBar');
     if (!bar){
@@ -3206,7 +3206,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       if (hero)  hero.innerHTML = '<b>Bienvenue sur Nexus 👋</b> Connecte-toi à ton compte pour voir tes vraies données.';
       if (gainA) gainA.textContent = '$0 CLP';
       if (gainB) gainB.style.display = 'none';
-      // Tout le reste : générique (stats, récap, messages) — jamais les chiffres de Carlos.
+      // Tout le reste : générique (stats, récap, messages) — jamais les chiffres de Daniel.
       // On retire le data-i18n pour que la langue ne réinjecte pas la démo.
       const clr = (el)=>{ if(el){ el.removeAttribute('data-i18n'); el.removeAttribute('data-i18n-html'); } };
       document.querySelectorAll('.stat-headline').forEach(el=>{ clr(el); el.innerHTML='<b>—</b> Tes statistiques apparaîtront ici.'; });

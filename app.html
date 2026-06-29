@@ -1031,7 +1031,7 @@ window.NexusDynTranslate = (function(){
   /* Augustin 20/05 : retiré 'svg' du skip pour que les <text> graphiques Stats soient traduits */
   const SKIP_TEXT = /^(\s*[\d.,%€$£+\-×\/]+\s*[mhskg]?\w{0,3}\s*)$/i;
   const ONLY_EMOJI = /^[\s\p{Extended_Pictographic}‍️\d:.]+$/u;
-  const PRESERVE = /^(Nexus|Carlos|María|Maria|Diego|Ana|Javier|Raviella|WhatsApp|Gmail|Calendar|Google|Claude|Stripe|Loom|Vercel|VIP|CRM|SOS|FAQ|API|PDF|CSV|empanadas|pan amasado|bolos|panadería|Providencia|Las Condes|Santiago|Pro|Business|Enterprise|Free|Chile|Chili)$/i;
+  const PRESERVE = /^(Nexus|María|Maria|Diego|Ana|Javier|Raviella|WhatsApp|Gmail|Calendar|Google|Claude|Stripe|Loom|Vercel|VIP|CRM|SOS|FAQ|API|PDF|CSV|empanadas|pan amasado|bolos|panadería|Providencia|Las Condes|Santiago|Pro|Business|Enterprise|Free|Chile|Chili)$/i;
   // Map global pour stocker les TextNode originaux (pas d'attribut possible sur TextNode)
   const textNodeOrigs = new Map();  // Node -> original string
 
@@ -1863,7 +1863,7 @@ const MOCK_CLIENTS = [
 
 const MOCK_CONVERSATIONS = [
   {clientId:1,channel:'whatsapp',messages:[
-    {from:'them',text:'Hola Carlos, ¿tienes pan amasado disponible para mañana? Necesito 3 kilos para una reunión familiar 😊',time:'Hace 4 min',voice:false},
+    {from:'them',text:'Hola, ¿tienes pan amasado disponible para mañana? Necesito 3 kilos para una reunión familiar 😊',time:'Hace 4 min',voice:false},
   ],unread:true,draft:'Hola María! Claro que sí, te guardo 3 kilos de pan amasado para mañana. ¿A qué hora te viene mejor pasar a buscarlo? 🥖'},
   {clientId:2,channel:'whatsapp',messages:[
     {from:'them',text:'Gracias por la factura. ¿Aceptan transferencia bancaria?',time:'Hace 18 min'},
@@ -1962,12 +1962,12 @@ const DEFAULT_STATE = {
   // Augustin 28/05/2026 : crédits dynamiques (avant : "253" hardcodé partout, incohérence avec achats)
   credits: { remaining: 253, total: 500, resetLabel: 'dimanche 25 mai' },
   business: {
-    name:'Panadería Don Carlos', owner:'Carlos Muñoz', ownerPhone:'+56 9 7777 1234', mercadoPagoHandle:'don-carlos-cl', city:'Santiago', country:'🇨🇱',
+    name:'Panadería Don Carlos', owner:'Daniel Muñoz', ownerPhone:'+56 9 7777 1234', mercadoPagoHandle:'mi-comercio-cl', city:'Santiago', country:'🇨🇱',
     logo:'🥖', logoType:'emoji',
     industry:'Panadería / Boulangerie artisanale',
     description:'Panadería familiar en el corazón de Providencia. Heredamos la receta de mi abuelo italiano que llegó a Chile en 1952. Especialidad : pan amasado al estilo chileno tradicional + dulces chilenos + tortas para eventos. Ambiente caluroso, clientela fiel del barrio.',
-    dataArchives:'Fundada en 1998 por Carlos Muñoz · 27 años de actividad · 3 generaciones de panaderos · Reconocida "Mejor pan amasado de Providencia 2022" por Revista Sabores · 4500+ clientes únicos en historial.',
-    composition:'Equipo de 6 personas : Carlos (gerente, panadero jefe), Mariana (esposa, gestión + caja), Diego (panadero junior, sobrino), 2 vendedoras (Paula y Sofía), 1 delivery part-time (Andrés).',
+    dataArchives:'Fundada en 1998 por Daniel Muñoz · 27 años de actividad · 3 generaciones de panaderos · Reconocida "Mejor pan amasado de Providencia 2022" por Revista Sabores · 4500+ clientes únicos en historial.',
+    composition:'Equipo de 6 personas : Daniel (gerente, panadero jefe), Mariana (esposa, gestión + caja), Diego (panadero junior, sobrino), 2 vendedoras (Paula y Sofía), 1 delivery part-time (Andrés).',
     webPage:'https://panaderiadoncarlos.cl',
     catalogUrl:'',
     hours:{mon:'7:00-20:00',tue:'7:00-20:00',wed:'7:00-20:00',thu:'7:00-20:00',fri:'7:00-20:00',sat:'7:00-19:00',sun:'Cerrado'},
@@ -5277,7 +5277,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
           </div>
         </div>
         <div style="padding:10px 12px;background:#FEF3C7;border-left:3px solid #F59E0B;border-radius:6px;font-size:11.5px;color:#78350F">
-          🧪 <b>Mode démo</b> : le lien utilise le format public Mercado Pago. Pour activer l'encaissement réel, brancher l'API <code>/v1/checkout/preferences</code> avec le token vendeur de Carlos.
+          🧪 <b>Mode démo</b> : le lien utilise le format public Mercado Pago. Pour activer l'encaissement réel, brancher l'API <code>/v1/checkout/preferences</code> avec le token vendeur du commerce.
         </div>
       </div>
       <div class="modal-foot">
@@ -9478,7 +9478,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     const resDiv = document.getElementById('vacTestResult');
     resDiv.innerHTML = `<div style="padding:14px;background:var(--bg2);border-radius:10px;text-align:center;color:var(--muted)"><div style="font-size:24px;margin-bottom:6px">⏳</div>L'IA réfléchit en s'appuyant sur ton profil…</div>`;
     const b = this.state.business || {};
-    const ctx = `\n\n[PROFIL ENTREPRISE — utilise UNIQUEMENT ces données]\nNom: ${b.name}\nVille: ${b.city}\nHoraires: ${JSON.stringify(b.hours||{})}\nDescription: ${b.description||''}\nCatalogue: ${(b.catalog||[]).slice(0,10).map(p=>`${p.name} (${p.price} ${p.unit||'CLP'})`).join(', ')}\nFAQ: ${(b.faq||[]).slice(0,5).map(f=>`${f.q} → ${f.a}`).join(' | ')}\nLivraison: ${b.delivery||''}\nMode paiement: ${b.payment||''}\nCarlos est ACTUELLEMENT en vacances — tu réponds À SA PLACE en espagnol chilien, ton chaleureux. Si la question demande Carlos personnellement, dis qu'il revient bientôt mais que tu peux aider entre-temps.`;
+    const ctx = `\n\n[PROFIL ENTREPRISE — utilise UNIQUEMENT ces données]\nNom: ${b.name}\nVille: ${b.city}\nHoraires: ${JSON.stringify(b.hours||{})}\nDescription: ${b.description||''}\nCatalogue: ${(b.catalog||[]).slice(0,10).map(p=>`${p.name} (${p.price} ${p.unit||'CLP'})`).join(', ')}\nFAQ: ${(b.faq||[]).slice(0,5).map(f=>`${f.q} → ${f.a}`).join(' | ')}\nLivraison: ${b.delivery||''}\nMode paiement: ${b.payment||''}\n${b.owner||'Le responsable'} est ACTUELLEMENT en vacances — tu réponds À SA PLACE en espagnol chilien, ton chaleureux. Si la question demande le responsable personnellement, dis qu'il revient bientôt mais que tu peux aider entre-temps.`;
     try {
       const r = await Nx._fetchT('/api/claude', {
         method:'POST', headers:{'Content-Type':'application/json'},
@@ -9748,7 +9748,7 @@ Génère 5 suggestions variées et utiles. Réponses courtes, naturelles, ton ch
     const clients = this.state.clients || [];
     const vip = clients.find(c => (c.tags||[]).includes('VIP') || c.tag === 'vip') || clients.find(c => c.tag === 'biz') || clients[0];
     const scenarios = [
-      { msg: '¡URGENTE Carlos! Necesito 50 empanadas para esta noche, evento importante 🙏', reason: 'mot-clé "urgente" + client VIP' },
+      { msg: '¡URGENTE! Necesito 50 empanadas para esta noche, evento importante 🙏', reason: 'mot-clé "urgente" + client VIP' },
       { msg: 'Ayuda, mi pedido de tortas no llegó y es para una boda hoy a las 18h', reason: 'mot-clé "ayuda" + livraison du jour' },
       { msg: 'Hola, necesito hablar contigo ahora, es importante para nuestro evento corporativo', reason: 'mot-clé "ahora" + client Business' }
     ];
