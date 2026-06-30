@@ -85,11 +85,17 @@ export default async function handler(req, res) {
       // (Une session FAILED/STOPPED ne redonne pas toujours un QR via un simple /start -> on supprime + recrée.)
       if (st.status !== 'WORKING') {
         if (st.exists) { await fetch(WAHA + '/api/sessions/' + SESSION, { method: 'DELETE', headers: H }).catch(() => {}); }
-        // PAS de webhook ici, VOLONTAIREMENT (choix Augustin 25/06) : aucune auto-réponse de l'IA.
-        // Connecter un numéro = JUSTE lier le numéro. Personne ne reçoit de réponse automatique.
-        // Pour activer l'IA plus tard (sur un numéro DÉDIÉ aux clients, pas perso) :
-        //   ajouter config:{webhooks:[{url:'.../webhook/nexus-waha-inbound',events:['message']}]} + allumer le robot n8n.
-        await fetch(WAHA + '/api/sessions', { method: 'POST', headers: H, body: JSON.stringify({ name: SESSION, start: true }) }).catch(() => {});
+        // AUTO-RÉPONSE IA (activé 30/06) : CHAQUE session porte AUTOMATIQUEMENT le webhook + le secret.
+        //   -> dès qu'un compte connecte son numéro, le robot Inbound répond seul. ZÉRO réglage manuel à l'avenir.
+        //   X-Waha-Secret authentifie l'appel : sans lui, le robot refuse (anti-DoS sur quotas Groq/Supabase).
+        //   Isolation : le robot résout le tenant via business_profiles.phone -> chaque compte = SON IA, SON numéro.
+        // ⚠️ Tout numéro connecté répond en auto -> ne connecter qu'un numéro DÉDIÉ clients, jamais un numéro PERSO.
+        const HOOK_URL = 'https://augustin-aico.app.n8n.cloud/webhook/nexus-waha-inbound';
+        const HOOK_SECRET = process.env.WAHA_WEBHOOK_SECRET || ''; // jamais en dur : vient de l'env Vercel
+        const sessionCfg = HOOK_SECRET
+          ? { webhooks: [{ url: HOOK_URL, events: ['message'], customHeaders: [{ name: 'X-Waha-Secret', value: HOOK_SECRET }] }] }
+          : undefined; // secret absent -> pas de webhook (le robot refuserait de toute façon) : on ne casse rien
+        await fetch(WAHA + '/api/sessions', { method: 'POST', headers: H, body: JSON.stringify({ name: SESSION, start: true, config: sessionCfg }) }).catch(() => {});
       }
       return res.status(200).json(await getStatus());
     }
