@@ -3230,6 +3230,38 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       if (cLoc)  cLoc.textContent  = city || '';
       if (avatar) avatar.textContent = (name||'NX').replace(/[^A-Za-z0-9 ]/g,' ').trim().split(/\s+/).map(x=>x[0]||'').join('').slice(0,2).toUpperCase() || 'NX';
       if (hero)  hero.innerHTML = '<b>Bonjour '+ esc(name) +' 👋</b> Bienvenue sur ton espace Nexus. Ouvre tes modules pour gérer ton activité.';
+      // --- Cartes du hub = VRAIES données du compte (RLS -> uniquement les siennes). 0 donnée = état vide, JAMAIS de démo. (Augustin 30/06)
+      const clr2 = (el)=>{ if(el){ el.removeAttribute('data-i18n'); el.removeAttribute('data-i18n-html'); } };
+      document.querySelectorAll('.demo-note-banner').forEach(el=>{ el.style.display='none'; }); // plus de "démonstration" une fois connecté
+      const _arr = (r)=> Array.isArray(r) ? r : (r && Array.isArray(r.data) ? r.data : []);
+      let nC=0, nV=0;
+      try {
+        const [cl, cv] = await Promise.all([
+          window.NxCloud.listAll('clients').catch(()=>[]),
+          window.NxCloud.listAll('conversations').catch(()=>[])
+        ]);
+        nC = _arr(cl).length; nV = _arr(cv).length;
+      } catch(_e){}
+      const heads=[...document.querySelectorAll('.stat-headline')];
+      const dets =[...document.querySelectorAll('.stat-detail')];
+      document.querySelectorAll('.stat-tag').forEach(el=>{ clr2(el); el.textContent='★ Ton activité'; });
+      if (nC===0 && nV===0){
+        heads.forEach(el=>{ clr2(el); el.innerHTML='<b>—</b> Pas encore de données.'; });
+        dets.forEach(el=>{ clr2(el); el.textContent='Tes stats apparaissent dès tes premiers clients et messages.'; });
+        if (gainA) gainA.textContent='$0 CLP';
+      } else {
+        const card=(i,h,d)=>{ if(heads[i]){clr2(heads[i]); heads[i].innerHTML=h;} if(dets[i]){clr2(dets[i]); dets[i].textContent=d;} };
+        card(0, 'Tu as <b>'+nC+' client'+(nC>1?'s':'')+'</b> dans ton CRM.', 'Gère-les depuis tes modules.');
+        card(1, '<b>'+nV+' conversation'+(nV>1?'s':'')+'</b> WhatsApp.', nV ? 'Réponds depuis la messagerie.' : 'Connecte WhatsApp pour démarrer.');
+        for(let i=2;i<heads.length;i++){ clr2(heads[i]); heads[i].innerHTML='<b>—</b> Bientôt.'; if(dets[i]){clr2(dets[i]); dets[i].textContent='Plus de stats au fil de ton usage.';} }
+      }
+      // conseils + récap + messages : neutre, jamais la démo (Raviella, etc.)
+      document.querySelectorAll('.advice-text').forEach(el=>{ clr2(el); el.textContent='Tes conseils Nexus apparaîtront au fil de ton activité.'; });
+      document.querySelectorAll('.text-content').forEach(el=>{ clr2(el); el.innerHTML='<p>Ton récap d\'activité s\'affichera ici avec l\'usage.</p>'; });
+      document.querySelectorAll('.msg-name').forEach((el)=>{ const st=el.querySelector('.star'); clr2(el); el.textContent='—'; if(st) el.appendChild(st); });
+      document.querySelectorAll('.msg-text').forEach(el=>{ clr2(el); el.textContent = nV ? 'Ouvre la messagerie pour voir tes conversations.' : 'Tes conversations apparaîtront ici.'; });
+      document.querySelectorAll('.msg-avatar').forEach(el=>{ el.textContent='—'; });
+      const _nb2=document.querySelector('.notif .badge'); if(_nb2 && nV===0) _nb2.style.display='none';
     } catch(e){}
   }
   function nxRefreshAuthUI(){ try{ nxAuthBanner(); }catch(e){} try{ nxApplyAuthIdentity(); }catch(e){} }
