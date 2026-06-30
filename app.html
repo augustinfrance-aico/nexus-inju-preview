@@ -248,7 +248,7 @@ html[data-theme="dark"] .bubble.me{background:#056162;color:#E8ECF3}
 
 /* TOAST */
 #toast-container{position:fixed;top:20px;right:20px;z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none}
-.toast{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--blue);padding:12px 16px;border-radius:var(--radius-sm);box-shadow:var(--shadow-xl);min-width:280px;font-size:13px;display:flex;align-items:flex-start;gap:10px;animation:slideIn .3s ease;pointer-events:auto}
+.toast{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--blue);padding:12px 16px;border-radius:var(--radius-sm);box-shadow:var(--shadow-xl);min-width:280px;font-size:13px;display:flex;align-items:flex-start;gap:10px;animation:slideIn .3s ease;pointer-events:none}
 .toast.success{border-left-color:var(--green)}
 .toast.warn{border-left-color:var(--amber)}
 .toast.error{border-left-color:var(--red)}
@@ -2404,6 +2404,10 @@ const Nx = {
   },
 
   toast(msg, type='info', body=''){
+    // Augustin 30/06 : on n'affiche QUE les erreurs + les notifs de CONNEXION (connecteurs Google/WhatsApp/Calendar/compte).
+    // Le reste (sync, sauvegardes, confirmations) est supprimé : trop de notifs, et ça gênait les clics.
+    const _blob = (msg||'') + ' ' + (body||'');
+    if (type !== 'error' && !/google|whatsapp|calendar|agenda|connect|reli|autoris|QR/i.test(_blob)) return;
     const icons = {success:'✅',info:'💡',warn:'⚠️',error:'❌'};
     const d = document.createElement('div');
     d.className = 'toast ' + type;
