@@ -10274,6 +10274,15 @@ window.addEventListener('DOMContentLoaded', () => Nx.init());
       await Nx.syncFromCloud(true); // silent
     } catch(_) {} finally { _nxSyncing = false; }
   }, 1800000); // 30 min
+  // Auto-refresh messagerie (Augustin 01/07) : pull léger toutes les 20s -> nouveaux messages/conversations SANS refresh manuel. Skip si l'utilisateur tape (ne pas casser la saisie).
+  setInterval(function(){
+    try {
+      if (!window.Nx || !window.NxCloud || !window.NxCloud.isAuthed()) return;
+      var ae = document.activeElement;
+      if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.isContentEditable)) return;
+      Nx.syncFromCloud(true);
+    } catch(_){}
+  }, 20000);
 })();
 </script>
 </body>
