@@ -1570,7 +1570,16 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
     let d = STAT_DATA[key]; if (!d) return;
     // Augustin 01/07 : compte CONNECTÉ = ZÉRO donnée démo. Le détail reste honnête tant qu'il n'y a pas de vraie stat calculée par compte.
     if (window.NxCloud && NxCloud.isAuthed && NxCloud.isAuthed()) {
-      d = { title: d.title, value: '—', desc: 'Le détail (graphiques, tendances) s\'affiche dès que tu as assez d\'activité sur ton compte.', delta: '', chart: [], footL: '', footR: '', tip: 'Ajoute des clients et échange des messages : tes vraies stats apparaîtront ici.', acc: d.acc, ic: d.ic };
+      // Augustin 01/07 : pop-up = VRAIES valeurs du compte (cohérent avec les cartes), jamais vide/démo.
+      const _ct = window._nxCounts || { clients:0, convs:0 };
+      const _map = {
+        recovered:  { t:'Clients',          v:String(_ct.clients), dsc:_ct.clients ? (_ct.clients+' client(s) dans ton CRM.') : 'Aucun client pour l\'instant — ajoute-les dans le module Clients.' },
+        newclients: { t:'Conversations',    v:String(_ct.convs),   dsc:_ct.convs ? (_ct.convs+' conversation(s) WhatsApp.') : 'Aucune conversation — connecte WhatsApp pour démarrer.' },
+        sales:      { t:'Ventes',           v:'0',                 dsc:'Aucune vente enregistrée pour le moment.' },
+        response:   { t:'Temps de réponse', v:'—',                 dsc:'Disponible avec plus d\'activité.' }
+      };
+      const _m = _map[key] || { t:'Détail', v:'—', dsc:'Disponible avec plus d\'activité.' };
+      d = { title: '<b>'+_m.t+'</b>', value: _m.v, desc: _m.dsc, delta: '', chart: [], footL: _m.v+' · '+_m.t.toLowerCase(), footR: '', tip: '', acc: d.acc, ic: d.ic };
     }
     setVar(smIc, '--accent', d.acc[0]); setVar(smIc, '--accent2', d.acc[1]);
     smIc.style.background = `linear-gradient(135deg,${d.acc[0]},${d.acc[1]})`;
@@ -3256,6 +3265,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
         ]);
         nC = _arr(cl).length; nV = _arr(cv).length;
       } catch(_e){}
+      window._nxCounts = { clients: nC, convs: nV }; // vraies valeurs par compte (pour le pop-up détail)
       if (gainB) gainB.style.display = ''; // Augustin 01/07 : on GARDE le bandeau (idée valide) — on RESET à la vraie valeur ($0 tant qu'aucune vente réelle), jamais un faux chiffre
       if (gainA) gainA.textContent = '$0 CLP';
       { const _gs = document.getElementById('gainSub'); if (_gs) _gs.textContent = 'Tes gains s\'afficheront ici dès tes premières ventes.'; }
