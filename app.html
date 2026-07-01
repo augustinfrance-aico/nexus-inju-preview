@@ -2407,7 +2407,7 @@ const Nx = {
     // Augustin 30/06 : on n'affiche QUE les erreurs + les notifs de CONNEXION (connecteurs Google/WhatsApp/Calendar/compte).
     // Le reste (sync, sauvegardes, confirmations) est supprimé : trop de notifs, et ça gênait les clics.
     const _blob = (msg||'') + ' ' + (body||'');
-    if (type !== 'error' && !/google|whatsapp|calendar|agenda|connect|reli|autoris|QR/i.test(_blob)) return;
+    if (type !== 'error' && !/google|whatsapp|calendar|agenda|connect|reli|autoris|QR|envoi|envoy|échou|echou|échec|echec|robot|signature|réseau|reseau|lancement|campagne/i.test(_blob)) return;
     const icons = {success:'✅',info:'💡',warn:'⚠️',error:'❌'};
     const d = document.createElement('div');
     d.className = 'toast ' + type;
