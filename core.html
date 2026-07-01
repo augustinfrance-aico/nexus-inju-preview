@@ -1567,7 +1567,11 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
   const setVar = (el, n, v) => el.style.setProperty(n, v);
 
   const openStat = (key) => {
-    const d = STAT_DATA[key]; if (!d) return;
+    let d = STAT_DATA[key]; if (!d) return;
+    // Augustin 01/07 : compte CONNECTÉ = ZÉRO donnée démo. Le détail reste honnête tant qu'il n'y a pas de vraie stat calculée par compte.
+    if (window.NxCloud && NxCloud.isAuthed && NxCloud.isAuthed()) {
+      d = { title: d.title, value: '—', desc: 'Le détail (graphiques, tendances) s\'affiche dès que tu as assez d\'activité sur ton compte.', delta: '', chart: [], footL: '', footR: '', tip: 'Ajoute des clients et échange des messages : tes vraies stats apparaîtront ici.', acc: d.acc, ic: d.ic };
+    }
     setVar(smIc, '--accent', d.acc[0]); setVar(smIc, '--accent2', d.acc[1]);
     smIc.style.background = `linear-gradient(135deg,${d.acc[0]},${d.acc[1]})`;
     smIc.innerHTML = d.ic;
@@ -3242,6 +3246,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
         ]);
         nC = _arr(cl).length; nV = _arr(cv).length;
       } catch(_e){}
+      if (gainB) gainB.style.display = 'none'; // Augustin 01/07 : pas de vrai gain Supabase calculé -> pas de bandeau (jamais le mock démo Carlos)
       const heads=[...document.querySelectorAll('.stat-headline')];
       const dets =[...document.querySelectorAll('.stat-detail')];
       document.querySelectorAll('.stat-tag').forEach(el=>{ clr2(el); el.textContent='★ Ton activité'; });
@@ -3358,11 +3363,11 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
   const gainAmount = document.getElementById('gainAmount');
   const gainSub    = document.getElementById('gainSub');
   if (gainBanner && gainAmount) {
+    const _authed = !!(window.NxCloud && NxCloud.isAuthed && NxCloud.isAuthed());
     const g = computeWeeklyGain();
-    // Compte vierge / pas encore d'activité : on masque le bandeau plutôt que d'afficher un faux gain
-    if (!g.hasReal || g.total <= 0) { gainBanner.style.display = 'none'; }
-    else { gainBanner.style.display = ''; }
-    gainAmount.textContent = formatCLP(g.total);
+    // Augustin 01/07 : compte connecté = ZÉRO mock localStorage (risque données Carlos). Pas de vrai gain Supabase -> masquer plutôt qu'un faux chiffre.
+    if (_authed || !g.hasReal || g.total <= 0) { gainBanner.style.display = 'none'; gainAmount.textContent = '$0 CLP'; }
+    else { gainBanner.style.display = ''; gainAmount.textContent = formatCLP(g.total); }
     if (gainSub) {
       const breakdown = curLang === 'es'
         ? `${formatCLP(g.sales)} ventas IA · ${formatCLP(g.winback)} clientes recuperados · ${formatCLP(g.timeSaved)} tiempo ahorrado`
