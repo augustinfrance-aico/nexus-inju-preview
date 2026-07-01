@@ -3256,7 +3256,9 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
         ]);
         nC = _arr(cl).length; nV = _arr(cv).length;
       } catch(_e){}
-      if (gainB) gainB.style.display = 'none'; // Augustin 01/07 : pas de vrai gain Supabase calculé -> pas de bandeau (jamais le mock démo Carlos)
+      if (gainB) gainB.style.display = ''; // Augustin 01/07 : on GARDE le bandeau (idée valide) — on RESET à la vraie valeur ($0 tant qu'aucune vente réelle), jamais un faux chiffre
+      if (gainA) gainA.textContent = '$0 CLP';
+      { const _gs = document.getElementById('gainSub'); if (_gs) _gs.textContent = 'Tes gains s\'afficheront ici dès tes premières ventes.'; }
       const heads=[...document.querySelectorAll('.stat-headline')];
       const dets =[...document.querySelectorAll('.stat-detail')];
       document.querySelectorAll('.stat-tag').forEach(el=>{ clr2(el); el.textContent='★ Ton activité'; });
@@ -3380,7 +3382,8 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
     const _authed = !!(window.NxCloud && NxCloud.isAuthed && NxCloud.isAuthed());
     const g = computeWeeklyGain();
     // Augustin 01/07 : compte connecté = ZÉRO mock localStorage (risque données Carlos). Pas de vrai gain Supabase -> masquer plutôt qu'un faux chiffre.
-    if (_authed || !g.hasReal || g.total <= 0) { gainBanner.style.display = 'none'; gainAmount.textContent = '$0 CLP'; }
+    if (_authed) { gainBanner.style.display = ''; gainAmount.textContent = '$0 CLP'; if (gainSub) gainSub.textContent = 'Tes gains s\'afficheront ici dès tes premières ventes.'; }
+    else if (!g.hasReal || g.total <= 0) { gainBanner.style.display = 'none'; gainAmount.textContent = '$0 CLP'; }
     else { gainBanner.style.display = ''; gainAmount.textContent = formatCLP(g.total); }
     if (gainSub) {
       const breakdown = curLang === 'es'
