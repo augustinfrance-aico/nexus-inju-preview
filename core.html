@@ -5,7 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0B0F1A">
 <title>Nexus Core</title>
+<script>
+/* Augustin 01/07 : ANTI-FLASH démo. Si une session existe déjà (utilisateur connecté), on masque le décor démo AVANT le 1er rendu ; révélé quand les vraies données sont posées (nxApplyAuthIdentity) + filet 4.5s. Corrige la course async (root cause des fuites Carlos au chargement). */
+(function(){
+  try { var raw=localStorage.getItem('sb-rehyeczydjimvkauuast-auth-token');
+    if(raw){ var s=JSON.parse(raw), e=s&&(s.expires_at||(s.currentSession&&s.currentSession.expires_at)); if(!e||(e*1000)>Date.now()) document.documentElement.classList.add('nx-preauth'); }
+  } catch(_e){}
+  window._nxReveal=function(){ try{ document.documentElement.classList.remove('nx-preauth'); }catch(_e){} };
+  setTimeout(window._nxReveal, 4500);
+})();
+</script>
 <style>
+html.nx-preauth .hero-banner,html.nx-preauth .gain-banner,html.nx-preauth .stats-section,html.nx-preauth .advice-card,html.nx-preauth .preview-section,html.nx-preauth .demo-note-banner,html.nx-preauth .company-info{visibility:hidden !important}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
   --bg:#0B0F1A; --bg2:#11172A;
@@ -3241,6 +3252,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       document.querySelectorAll('.advice-text').forEach(el=>{ clr(el); el.textContent='Tes conseils Nexus apparaîtront ici une fois connecté.'; });
       const _nb=document.querySelector('.notif .badge'); if(_nb) _nb.style.display='none';
       document.querySelectorAll('.drawer-item-meta').forEach(el=>{ el.textContent=''; });
+      if (window._nxReveal) window._nxReveal();
       return;
     }
     try {
@@ -3294,6 +3306,7 @@ html[data-theme="light"] .gain-banner{box-shadow:0 18px 36px -16px rgba(16,185,1
       const _adu=document.getElementById('audioDuration'); if(_adu){ clr2(_adu); _adu.removeAttribute('data-dur'); _adu.textContent='Disponible avec ton activité'; }
       document.querySelectorAll('.advice-context').forEach(el=>{ clr2(el); el.textContent=''; });
     } catch(e){}
+    if (window._nxReveal) window._nxReveal();
   }
   function nxRefreshAuthUI(){ try{ nxAuthBanner(); }catch(e){} try{ nxApplyAuthIdentity(); }catch(e){} }
   document.addEventListener('nx-cloud-ready', nxRefreshAuthUI);
